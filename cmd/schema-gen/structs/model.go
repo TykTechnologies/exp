@@ -21,7 +21,7 @@ func (x *StructList) append(newInfo *StructInfo) int {
 // StructInfo holds ast field information for the docs generator.
 type StructInfo struct {
 	// Name is struct go name.
-	Name string
+	Name string `json:"name"`
 
 	// Fields holds information of the fields, if this object is a struct.
 	Fields []*FieldInfo `json:"fields,omitempty"`

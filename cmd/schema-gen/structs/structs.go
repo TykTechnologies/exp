@@ -6,12 +6,6 @@ import (
 	"os"
 )
 
-type Request struct {
-	rootName    string
-	pkgPath     string
-	ignoreFiles []string
-}
-
 func Dump() (err error) {
 	var (
 		outputFile = "schema.json"

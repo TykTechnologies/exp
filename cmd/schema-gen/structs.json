@@ -1,9 +1,9 @@
 [
   {
-    "Name": "FieldDocError"
+    "name": "FieldDocError"
   },
   {
-    "Name": "FieldInfo",
+    "name": "FieldInfo",
     "fields": [
       {
         "doc": "Doc is field docs. comments that are not part of docs are excluded.\n",
@@ -80,18 +80,15 @@
     ]
   },
   {
-    "Name": "Request"
-  },
-  {
-    "Name": "StructInfo",
+    "name": "StructInfo",
     "fields": [
       {
         "doc": "Name is struct go name.\n",
         "go_name": "Name",
         "go_type": "string",
         "go_path": "StructInfo.Name",
-        "tag": "",
-        "json_name": "Name",
+        "tag": "json:\"name\"",
+        "json_name": "name",
         "is_array": false
       },
       {
