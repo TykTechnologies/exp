@@ -82,9 +82,6 @@ func newObjParser(fileset *token.FileSet, pkg *ast.Package) *objParser {
 
 func (p *objParser) fillGlobalTypes() {
 	for _, fileObj := range p.pkg.Files {
-		if fileObj.Scope == nil {
-			continue
-		}
 		for objName, obj := range fileObj.Scope.Objects {
 			if decl, ok := obj.Decl.(*ast.TypeSpec); ok && ast.IsExported(objName) {
 				p.globals[objName] = decl
@@ -96,24 +93,19 @@ func (p *objParser) fillGlobalTypes() {
 func (p *objParser) parseGlobalStructs() {
 	// Every global is an *ast.TypeSpec
 	for rootName, g := range p.globals {
+		info := &StructInfo{
+			fileSet: p.fileset,
+			Name:    rootName,
+			Doc:     TrimSpace(g.Doc),
+			Comment: TrimSpace(g.Comment),
+		}
+
 		switch obj := g.Type.(type) {
 		case *ast.StructType:
-			rootStructInfo := &StructInfo{
-				Name:      rootName,
-				Doc:       TrimSpace(g.Doc),
-				Comment:   TrimSpace(g.Comment),
-				fileSet:   p.fileset,
-				structObj: obj,
-			}
-			p.parse(rootName, rootName, rootStructInfo)
+			info.structObj = obj
+			p.parse(rootName, rootName, info)
 		default:
-			info := &StructInfo{
-				Name:    rootName,
-				Doc:     TrimSpace(g.Doc),
-				Comment: TrimSpace(g.Comment),
-				Type:    TypeName(g),
-				fileSet: p.fileset,
-			}
+			info.Type = TypeName(g)
 			p.visited[rootName] = info
 			p.info.append(info)
 		}
