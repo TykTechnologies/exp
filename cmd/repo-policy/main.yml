@@ -1,0 +1,46 @@
+---
+version: "1"
+
+defaults:
+  convos: "false"
+
+targets:
+  - name: "Development branch"
+    defaults:
+      reviewers: "2"
+    branch:
+      - master
+    required_tests:
+      - "1.19-bullseye"
+      - "test (1.19.x, ubuntu-latest, amd64, 15.x)"
+      - "postgres"
+      - "sqlite"
+      - "mongo"
+
+  - name: "Active support branch"
+    branch:
+      - release-5.0
+      - release-5.0(.*)
+    required_tests:
+      - "1.16-bullseye"
+      - "test (1.16.x, ubuntu-latest, amd64, 15.x)"
+      - "sqlite"
+      - "mongo"
+
+  - name: "Active LTS release"
+    branch:
+      - release-5-lts
+    required_tests:
+      - "1.16-bullseye"
+      - "test (1.16.x, ubuntu-latest, amd64, 15.x)"
+      - "sqlite"
+      - "mongo"
+
+  - name: "Legacy LTS release (EOL 2024)"
+    branch:
+      - release-4-lts
+    required_tests:
+      - "1.16-bullseye"
+      - "test (1.16.x, ubuntu-latest, amd64, 15.x)"
+      - "sqlite"
+      - "mongo"
