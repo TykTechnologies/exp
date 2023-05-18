@@ -1,0 +1,108 @@
+[
+  {
+    "Name": "FieldDocError"
+  },
+  {
+    "Name": "FieldInfo",
+    "fields": [
+      {
+        "doc": "Doc is field docs. comments that are not part of docs are excluded.\n",
+        "go_name": "Doc",
+        "go_type": "string",
+        "go_path": "FieldInfo.Doc",
+        "tag": "json:\"doc\"",
+        "json_name": "doc",
+        "is_array": false
+      },
+      {
+        "doc": "GoName is the name of the field in Go ",
+        "go_name": "GoName",
+        "go_type": "string",
+        "go_path": "FieldInfo.GoName",
+        "tag": "json:\"go_name\"",
+        "json_name": "go_name",
+        "is_array": false
+      },
+      {
+        "doc": "GoType is the literal type of the Go field ",
+        "go_name": "GoType",
+        "go_type": "string",
+        "go_path": "FieldInfo.GoType",
+        "tag": "json:\"go_type\"",
+        "json_name": "go_type",
+        "is_array": false
+      },
+      {
+        "doc": "GoPath is the go path of this field starting from root object ",
+        "go_name": "GoPath",
+        "go_type": "string",
+        "go_path": "FieldInfo.GoPath",
+        "tag": "json:\"go_path\"",
+        "json_name": "go_path",
+        "is_array": false
+      },
+      {
+        "doc": "Tag is the go tag, unmodified ",
+        "go_name": "Tag",
+        "go_type": "string",
+        "go_path": "FieldInfo.Tag",
+        "tag": "json:\"tag\"",
+        "json_name": "tag",
+        "is_array": false
+      },
+      {
+        "doc": "JSONName is the corresponding json name of the field.\n",
+        "go_name": "JSONName",
+        "go_type": "string",
+        "go_path": "FieldInfo.JSONName",
+        "tag": "json:\"json_name\"",
+        "json_name": "json_name",
+        "is_array": false
+      },
+      {
+        "doc": "MapKey is the map key type, if this field is a map ",
+        "go_name": "MapKey",
+        "go_type": "string",
+        "go_path": "FieldInfo.MapKey",
+        "tag": "json:\"map_key,omitempty\"",
+        "json_name": "map_key,omitempty",
+        "is_array": false
+      },
+      {
+        "doc": "IsArray reports if this field is an array.\n",
+        "go_name": "IsArray",
+        "go_type": "bool",
+        "go_path": "FieldInfo.IsArray",
+        "tag": "json:\"is_array\"",
+        "json_name": "is_array",
+        "is_array": false
+      }
+    ]
+  },
+  {
+    "Name": "Request"
+  },
+  {
+    "Name": "StructInfo",
+    "fields": [
+      {
+        "doc": "Name is struct go name.\n",
+        "go_name": "Name",
+        "go_type": "string",
+        "go_path": "StructInfo.Name",
+        "tag": "",
+        "json_name": "Name",
+        "is_array": false
+      },
+      {
+        "doc": "Fields holds information of the fields, if this object is a struct.\n",
+        "go_name": "Fields",
+        "go_type": "FieldInfo",
+        "go_path": "StructInfo.Fields",
+        "tag": "json:\"fields,omitempty\"",
+        "json_name": "fields,omitempty",
+        "is_array": true
+      }
+    ]
+  }
+]

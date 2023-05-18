@@ -3,9 +3,10 @@ version: "3"
 
 tasks:
   default:
-    desc: "Build, test and install schema-gen"
+    desc: "Build, test, install and run schema-gen"
     cmds:
       - go fmt ./...
       - go build .
       - go test -race -count=100 ./...
       - go install .
+      - schema-gen -i structs/ -o structs.json
