@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-const lintDocs = false
-
 // Extract package structs
 func Extract(filepath string, ignoreFiles ...string) (StructList, error) {
 	ignoreList := make(map[string]bool)
@@ -64,8 +62,8 @@ type objParser struct {
 	fileset *token.FileSet
 
 	info    StructList
-	globals map[string]ast.Expr    // exported global types
-	visited map[string]*StructInfo // avoid re-visiting struct type
+	globals map[string]*ast.TypeSpec // exported global types
+	visited map[string]*StructInfo   // avoid re-visiting struct type
 	pkg     *ast.Package
 	errList *FieldDocError
 }
@@ -75,40 +73,51 @@ func newObjParser(fileset *token.FileSet, pkg *ast.Package) *objParser {
 		fileset: fileset,
 		info:    StructList{},
 		visited: map[string]*StructInfo{},
+		globals: map[string]*ast.TypeSpec{},
 		errList: &FieldDocError{},
 		pkg:     pkg,
 	}
-	p.parseGlobalExpr()
+	p.fillGlobalTypes()
 	return p
 }
 
-func (p *objParser) parseGlobalExpr() {
-	p.globals = map[string]ast.Expr{}
+func (p *objParser) fillGlobalTypes() {
 	for _, fileObj := range p.pkg.Files {
 		if fileObj.Scope == nil {
 			continue
 		}
 		for objName, obj := range fileObj.Scope.Objects {
 			if decl, ok := obj.Decl.(*ast.TypeSpec); ok && ast.IsExported(objName) {
-				switch objType := decl.Type.(type) {
-				case *ast.StructType, *ast.ArrayType, *ast.MapType:
-					p.globals[objName] = objType
-				}
+				p.globals[objName] = decl
 			}
 		}
 	}
 }
 
 func (p *objParser) parseGlobalStructs() {
+	// Every global is an *ast.TypeSpec
 	for rootName, g := range p.globals {
-		switch obj := g.(type) {
+		switch obj := g.Type.(type) {
 		case *ast.StructType:
 			rootStructInfo := &StructInfo{
 				Name:      rootName,
+				Doc:       TrimSpace(g.Doc),
+				Comment:   TrimSpace(g.Comment),
 				fileSet:   p.fileset,
-				structObj: obj, // p.globals[rootName].(*ast.StructType),
+				structObj: obj,
 			}
 			p.parse(rootName, rootName, rootStructInfo)
+		default:
+			ident := extractIdentFromExpr(g.Type)
+			info := &StructInfo{
+				Name:    rootName,
+				Doc:     TrimSpace(g.Doc),
+				Comment: TrimSpace(g.Comment),
+				Type:    ident.String(),
+				fileSet: p.fileset,
+			}
+			p.visited[rootName] = info
+			p.info.append(info)
 		}
 	}
 }
@@ -135,7 +144,7 @@ func (p *objParser) parse(goPath, name string, structInfo *StructInfo) {
 			continue
 		}
 		// unexposed field.
-		if goName[0:1] == strings.ToLower(goName[0:1]) {
+		if !ast.IsExported(goName) {
 			continue
 		}
 
@@ -169,26 +178,14 @@ func (p *objParser) parse(goPath, name string, structInfo *StructInfo) {
 			jsonName = goName
 		}
 
-		docs := cleanDocs(field.Doc)
-
-		if lintDocs {
-			if docs == "" {
-				p.errList.WriteError(fmt.Sprintf("[%s] %s.%s is missing documentation", filePos, goPath, goName))
-			}
-
-			if len(docs) <= len(goName) || !strings.HasPrefix(docs, goName+" ") {
-				p.errList.WriteError(fmt.Sprintf("[%s] %s.%s has invalid documentation, should start with field name", filePos, goPath, goName))
-			}
-		}
-
 		fieldInfo := &FieldInfo{
-			Doc: docs,
+			Doc:     TrimSpace(field.Doc),
+			Comment: TrimSpace(field.Comment),
 
-			GoName: goName,
-			GoPath: goPath + "." + goName,
-			GoType: ident.String(),
-
-			Tag: tagValue,
+			Name: goName,
+			Path: goPath + "." + goName,
+			Type: ident.String(),
+			Tag:  tagValue,
 
 			JSONName: jsonName,
 
@@ -204,7 +201,7 @@ func (p *objParser) parse(goPath, name string, structInfo *StructInfo) {
 
 func (p *objParser) parseNestedObj(name string, field *FieldInfo) {
 	if p.globals[name] != nil {
-		switch obj := p.globals[name].(type) {
+		switch obj := p.globals[name].Type.(type) {
 		case *ast.StructType:
 			newInfo := &StructInfo{
 				structObj: obj,
@@ -215,9 +212,9 @@ func (p *objParser) parseNestedObj(name string, field *FieldInfo) {
 
 		case *ast.ArrayType:
 			typeName := extractIdentFromExpr(obj).Name
-			field.GoType = "[]" + typeName
+			field.Type = "[]" + typeName
 			field.IsArray = true
-			if structObj, ok := p.globals[typeName].(*ast.StructType); ok {
+			if structObj, ok := p.globals[typeName].Type.(*ast.StructType); ok {
 				newInfo := &StructInfo{
 					structObj: structObj,
 					fileSet:   field.fileSet,
@@ -229,9 +226,9 @@ func (p *objParser) parseNestedObj(name string, field *FieldInfo) {
 		case *ast.MapType:
 			typeName := extractIdentFromExpr(obj).Name
 			field.MapKey = extractIdentFromExpr(obj.Key).Name
-			field.GoType = fmt.Sprintf("map[%s]%s", typeName, field.MapKey)
+			field.Type = fmt.Sprintf("map[%s]%s", typeName, field.MapKey)
 
-			if structObj, ok := p.globals[typeName].(*ast.StructType); ok {
+			if structObj, ok := p.globals[typeName].Type.(*ast.StructType); ok {
 				newInfo := &StructInfo{
 					structObj: structObj,
 					fileSet:   field.fileSet,
@@ -243,107 +240,7 @@ func (p *objParser) parseNestedObj(name string, field *FieldInfo) {
 	}
 }
 
-func cleanDocs(docs ...*ast.CommentGroup) string {
-	s := strings.Builder{}
-	for _, doc := range docs {
-		if doc == nil {
-			continue
-		}
-		docText := doc.Text()
-
-		var (
-			codeBlock      bool
-			openBulletList bool
-			lastCh         string
-		)
-
-		for _, lineComment := range strings.Split(docText, "\n") {
-			lineComment = strings.TrimLeft(lineComment, "/")
-			lineComment = strings.TrimLeft(lineComment, "/*")
-			lineComment = strings.TrimLeft(lineComment, "*\\")
-
-			if !codeBlock {
-				lineComment = strings.TrimSpace(lineComment)
-			}
-
-			// Handle codeblock leading/trailing space
-			if lineComment == "```" {
-				codeBlock = !codeBlock
-				s.WriteByte('\n')
-				if codeBlock {
-					s.WriteByte('\n')
-					s.WriteString(lineComment)
-				} else {
-					s.WriteString(lineComment)
-					s.WriteByte('\n')
-				}
-				s.WriteByte('\n')
-				continue
-			}
-
-			// Handle bullet lists formatting
-			if lineComment != "" && lineComment[0] == '-' {
-				if !openBulletList {
-					s.WriteString("\n")
-				}
-				s.WriteString(lineComment + "\n")
-				openBulletList = true
-				continue
-			}
-
-			if openBulletList {
-				openBulletList = false
-				s.WriteString("\n")
-			}
-
-			// Prepend empty line if line starts with `Tyk classic API definition`
-			if strings.HasPrefix(lineComment, "Tyk classic API definition") {
-				s.WriteString("\n")
-			}
-
-			// Append dot after Tyk classic API definition, consistency.
-			if lineComment == "" && lastCh == "`" {
-				s.WriteString(".\n")
-				lastCh = ""
-				continue
-			}
-
-			if lineComment != "" {
-				s.WriteString(lineComment)
-
-				// Each codeblock line needs a trailing \n
-				if codeBlock {
-					s.WriteByte('\n')
-					continue
-				}
-
-				// Group other text as sentences with trailing dot.
-				length := len(lineComment)
-				lastCh = lineComment[length-1 : length]
-
-				// Line ends with code block, next line determines
-				// which trailing space goes after
-				if lastCh == "`" {
-					continue
-				}
-
-				// Group sentences into individual lines in markdown
-				// or join them together with a space if split.
-				if lastCh == "." || lastCh == ":" {
-					s.WriteByte('\n')
-					continue
-				}
-
-				s.WriteByte(' ')
-				continue
-			}
-		}
-	}
-
-	return s.String()
-}
-
-func extractIdentFromExpr(expr ast.Expr) *ast.Ident {
+func extractIdentFromExpr(expr any) *ast.Ident {
 	switch objType := expr.(type) {
 	case *ast.StarExpr:
 		return extractIdentFromExpr(objType.X)

@@ -6,73 +6,82 @@
     "name": "FieldInfo",
     "fields": [
       {
-        "doc": "Doc is field docs. comments that are not part of docs are excluded.\n",
-        "go_name": "Doc",
-        "go_type": "string",
-        "go_path": "FieldInfo.Doc",
-        "tag": "json:\"doc\"",
-        "json_name": "doc",
+        "name": "Name",
+        "type": "string",
+        "path": "FieldInfo.Name",
+        "doc": "Name is the name of the field.",
+        "tag": "json:\"name\"",
+        "json_name": "name",
         "is_array": false
       },
       {
-        "doc": "GoName is the name of the field in Go ",
-        "go_name": "GoName",
-        "go_type": "string",
-        "go_path": "FieldInfo.GoName",
-        "tag": "json:\"go_name\"",
-        "json_name": "go_name",
+        "name": "Type",
+        "type": "string",
+        "path": "FieldInfo.Type",
+        "doc": "Type is the literal type of the Go field.",
+        "tag": "json:\"type\"",
+        "json_name": "type",
         "is_array": false
       },
       {
-        "doc": "GoType is the literal type of the Go field ",
-        "go_name": "GoType",
-        "go_type": "string",
-        "go_path": "FieldInfo.GoType",
-        "tag": "json:\"go_type\"",
-        "json_name": "go_type",
+        "name": "Path",
+        "type": "string",
+        "path": "FieldInfo.Path",
+        "doc": "Path is the go path of this field starting from root object.",
+        "tag": "json:\"path\"",
+        "json_name": "path",
         "is_array": false
       },
       {
-        "doc": "GoPath is the go path of this field starting from root object ",
-        "go_name": "GoPath",
-        "go_type": "string",
-        "go_path": "FieldInfo.GoPath",
-        "tag": "json:\"go_path\"",
-        "json_name": "go_path",
+        "name": "Doc",
+        "type": "string",
+        "path": "FieldInfo.Doc",
+        "doc": "Doc holds the field doc.",
+        "tag": "json:\"doc,omitempty\"",
+        "json_name": "doc,omitempty",
         "is_array": false
       },
       {
-        "doc": "Tag is the go tag, unmodified ",
-        "go_name": "Tag",
-        "go_type": "string",
-        "go_path": "FieldInfo.Tag",
+        "name": "Comment",
+        "type": "string",
+        "path": "FieldInfo.Comment",
+        "doc": "Comment holds the field comment text.",
+        "tag": "json:\"comment,omitempty\"",
+        "json_name": "comment,omitempty",
+        "is_array": false
+      },
+      {
+        "name": "Tag",
+        "type": "string",
+        "path": "FieldInfo.Tag",
+        "doc": "Tag is the go tag, unmodified.",
         "tag": "json:\"tag\"",
         "json_name": "tag",
         "is_array": false
       },
       {
-        "doc": "JSONName is the corresponding json name of the field.\n",
-        "go_name": "JSONName",
-        "go_type": "string",
-        "go_path": "FieldInfo.JSONName",
+        "name": "JSONName",
+        "type": "string",
+        "path": "FieldInfo.JSONName",
+        "doc": "JSONName is the corresponding json name of the field.",
         "tag": "json:\"json_name\"",
         "json_name": "json_name",
         "is_array": false
       },
       {
-        "doc": "MapKey is the map key type, if this field is a map ",
-        "go_name": "MapKey",
-        "go_type": "string",
-        "go_path": "FieldInfo.MapKey",
+        "name": "MapKey",
+        "type": "string",
+        "path": "FieldInfo.MapKey",
+        "doc": "MapKey is the map key type, if this field is a map.",
         "tag": "json:\"map_key,omitempty\"",
         "json_name": "map_key,omitempty",
         "is_array": false
       },
       {
-        "doc": "IsArray reports if this field is an array.\n",
-        "go_name": "IsArray",
-        "go_type": "bool",
-        "go_path": "FieldInfo.IsArray",
+        "name": "IsArray",
+        "type": "bool",
+        "path": "FieldInfo.IsArray",
+        "doc": "IsArray reports if this field is an array.",
         "tag": "json:\"is_array\"",
         "json_name": "is_array",
         "is_array": false
@@ -83,23 +92,54 @@
     "name": "StructInfo",
     "fields": [
       {
-        "doc": "Name is struct go name.\n",
-        "go_name": "Name",
-        "go_type": "string",
-        "go_path": "StructInfo.Name",
+        "name": "Name",
+        "type": "string",
+        "path": "StructInfo.Name",
+        "doc": "Name is struct go name.",
         "tag": "json:\"name\"",
         "json_name": "name",
         "is_array": false
       },
       {
-        "doc": "Fields holds information of the fields, if this object is a struct.\n",
-        "go_name": "Fields",
-        "go_type": "FieldInfo",
-        "go_path": "StructInfo.Fields",
+        "name": "Doc",
+        "type": "string",
+        "path": "StructInfo.Doc",
+        "doc": "Doc is the struct doc.",
+        "tag": "json:\"doc,omitempty\"",
+        "json_name": "doc,omitempty",
+        "is_array": false
+      },
+      {
+        "name": "Comment",
+        "type": "string",
+        "path": "StructInfo.Comment",
+        "doc": "Comment is the struct comment.",
+        "tag": "json:\"comment,omitempty\"",
+        "json_name": "comment,omitempty",
+        "is_array": false
+      },
+      {
+        "name": "Type",
+        "type": "string",
+        "path": "StructInfo.Type",
+        "doc": "Type is an optional type if the declaration is a type alias or similar.",
+        "tag": "json:\"type,omitempty\"",
+        "json_name": "type,omitempty",
+        "is_array": false
+      },
+      {
+        "name": "Fields",
+        "type": "FieldInfo",
+        "path": "StructInfo.Fields",
+        "doc": "Fields holds information of the fields, if this object is a struct.",
         "tag": "json:\"fields,omitempty\"",
         "json_name": "fields,omitempty",
         "is_array": true
       }
     ]
+  },
+  {
+    "name": "StructList",
+    "type": "StructInfo"
   }
 ]
