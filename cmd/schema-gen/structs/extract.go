@@ -7,7 +7,6 @@ import (
 	"go/token"
 	"os"
 	"path"
-	"reflect"
 	"sort"
 	"strings"
 )
@@ -108,12 +107,11 @@ func (p *objParser) parseGlobalStructs() {
 			}
 			p.parse(rootName, rootName, rootStructInfo)
 		default:
-			ident := extractIdentFromExpr(g.Type)
 			info := &StructInfo{
 				Name:    rootName,
 				Doc:     TrimSpace(g.Doc),
 				Comment: TrimSpace(g.Comment),
-				Type:    ident.String(),
+				Type:    TypeName(g),
 				fileSet: p.fileset,
 			}
 			p.visited[rootName] = info
@@ -155,17 +153,6 @@ func (p *objParser) parse(goPath, name string, structInfo *StructInfo) {
 
 		// fmt.Println("goName", goName)
 
-		ident := extractIdentFromExpr(field.Type)
-		if ident == nil {
-			if len(field.Names) > 0 {
-				// inline fields
-				ident = extractIdentFromExpr(p.globals[goName])
-			}
-		}
-		if ident == nil {
-			ident = ast.NewIdent("any")
-		}
-
 		tagValue := ""
 		if field.Tag != nil {
 			tagValue = string(field.Tag.Value)
@@ -184,90 +171,14 @@ func (p *objParser) parse(goPath, name string, structInfo *StructInfo) {
 
 			Name: goName,
 			Path: goPath + "." + goName,
-			Type: ident.String(),
+			Type: getTypeDeclarationsForExpr(field.Type),
 			Tag:  tagValue,
 
 			JSONName: jsonName,
 
-			IsArray: isExprArray(field.Type),
-
 			fileSet: structInfo.fileSet,
 		}
-		// p.parseNestedObj(ident.Name, fieldInfo)
 
 		structInfo.Fields = append(structInfo.Fields, fieldInfo)
 	}
-}
-
-func (p *objParser) parseNestedObj(name string, field *FieldInfo) {
-	if p.globals[name] != nil {
-		switch obj := p.globals[name].Type.(type) {
-		case *ast.StructType:
-			newInfo := &StructInfo{
-				structObj: obj,
-				fileSet:   field.fileSet,
-				Name:      name,
-			}
-			p.parse(name, name, newInfo)
-
-		case *ast.ArrayType:
-			typeName := extractIdentFromExpr(obj).Name
-			field.Type = "[]" + typeName
-			field.IsArray = true
-			if structObj, ok := p.globals[typeName].Type.(*ast.StructType); ok {
-				newInfo := &StructInfo{
-					structObj: structObj,
-					fileSet:   field.fileSet,
-					Name:      typeName,
-				}
-				p.parse(typeName, typeName, newInfo)
-			}
-
-		case *ast.MapType:
-			typeName := extractIdentFromExpr(obj).Name
-			field.MapKey = extractIdentFromExpr(obj.Key).Name
-			field.Type = fmt.Sprintf("map[%s]%s", typeName, field.MapKey)
-
-			if structObj, ok := p.globals[typeName].Type.(*ast.StructType); ok {
-				newInfo := &StructInfo{
-					structObj: structObj,
-					fileSet:   field.fileSet,
-					Name:      typeName,
-				}
-				p.parse(typeName, typeName, newInfo)
-			}
-		}
-	}
-}
-
-func extractIdentFromExpr(expr any) *ast.Ident {
-	switch objType := expr.(type) {
-	case *ast.StarExpr:
-		return extractIdentFromExpr(objType.X)
-
-	case *ast.Ident:
-		return objType
-
-	case *ast.MapType:
-		return extractIdentFromExpr(objType.Value)
-
-	case *ast.ArrayType:
-		return extractIdentFromExpr(objType.Elt)
-
-	case *ast.InterfaceType:
-		return ast.NewIdent("any")
-
-	case *ast.SelectorExpr:
-		return ast.NewIdent("object")
-	}
-	return nil
-}
-
-func isExprArray(expr ast.Expr) bool {
-	_, ok := expr.(*ast.ArrayType)
-	return ok
-}
-
-func jsonTag(tag string) string {
-	return reflect.StructTag(tag).Get("json")
 }

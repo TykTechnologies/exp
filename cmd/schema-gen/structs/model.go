@@ -70,9 +70,6 @@ type FieldInfo struct {
 	// MapKey is the map key type, if this field is a map.
 	MapKey string `json:"map_key,omitempty"`
 
-	// IsArray reports if this field is an array.
-	IsArray bool `json:"is_array"`
-
 	// fileSet holds a token.FileSet, used to resolve symbols to file:line.
 	fileSet *token.FileSet
 }

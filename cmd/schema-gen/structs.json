@@ -11,8 +11,7 @@
         "path": "FieldInfo.Name",
         "doc": "Name is the name of the field.",
         "tag": "json:\"name\"",
-        "json_name": "name",
-        "is_array": false
+        "json_name": "name"
       },
       {
         "name": "Type",
@@ -20,8 +19,7 @@
         "path": "FieldInfo.Type",
         "doc": "Type is the literal type of the Go field.",
         "tag": "json:\"type\"",
-        "json_name": "type",
-        "is_array": false
+        "json_name": "type"
       },
       {
         "name": "Path",
@@ -29,8 +27,7 @@
         "path": "FieldInfo.Path",
         "doc": "Path is the go path of this field starting from root object.",
         "tag": "json:\"path\"",
-        "json_name": "path",
-        "is_array": false
+        "json_name": "path"
       },
       {
         "name": "Doc",
@@ -38,8 +35,7 @@
         "path": "FieldInfo.Doc",
         "doc": "Doc holds the field doc.",
         "tag": "json:\"doc,omitempty\"",
-        "json_name": "doc,omitempty",
-        "is_array": false
+        "json_name": "doc,omitempty"
       },
       {
         "name": "Comment",
@@ -47,8 +43,7 @@
         "path": "FieldInfo.Comment",
         "doc": "Comment holds the field comment text.",
         "tag": "json:\"comment,omitempty\"",
-        "json_name": "comment,omitempty",
-        "is_array": false
+        "json_name": "comment,omitempty"
       },
       {
         "name": "Tag",
@@ -56,8 +51,7 @@
         "path": "FieldInfo.Tag",
         "doc": "Tag is the go tag, unmodified.",
         "tag": "json:\"tag\"",
-        "json_name": "tag",
-        "is_array": false
+        "json_name": "tag"
       },
       {
         "name": "JSONName",
@@ -65,8 +59,7 @@
         "path": "FieldInfo.JSONName",
         "doc": "JSONName is the corresponding json name of the field.",
         "tag": "json:\"json_name\"",
-        "json_name": "json_name",
-        "is_array": false
+        "json_name": "json_name"
       },
       {
         "name": "MapKey",
@@ -74,17 +67,7 @@
         "path": "FieldInfo.MapKey",
         "doc": "MapKey is the map key type, if this field is a map.",
         "tag": "json:\"map_key,omitempty\"",
-        "json_name": "map_key,omitempty",
-        "is_array": false
-      },
-      {
-        "name": "IsArray",
-        "type": "bool",
-        "path": "FieldInfo.IsArray",
-        "doc": "IsArray reports if this field is an array.",
-        "tag": "json:\"is_array\"",
-        "json_name": "is_array",
-        "is_array": false
+        "json_name": "map_key,omitempty"
       }
     ]
   },
@@ -97,8 +80,7 @@
         "path": "StructInfo.Name",
         "doc": "Name is struct go name.",
         "tag": "json:\"name\"",
-        "json_name": "name",
-        "is_array": false
+        "json_name": "name"
       },
       {
         "name": "Doc",
@@ -106,8 +88,7 @@
         "path": "StructInfo.Doc",
         "doc": "Doc is the struct doc.",
         "tag": "json:\"doc,omitempty\"",
-        "json_name": "doc,omitempty",
-        "is_array": false
+        "json_name": "doc,omitempty"
       },
       {
         "name": "Comment",
@@ -115,8 +96,7 @@
         "path": "StructInfo.Comment",
         "doc": "Comment is the struct comment.",
         "tag": "json:\"comment,omitempty\"",
-        "json_name": "comment,omitempty",
-        "is_array": false
+        "json_name": "comment,omitempty"
       },
       {
         "name": "Type",
@@ -124,22 +104,20 @@
         "path": "StructInfo.Type",
         "doc": "Type is an optional type if the declaration is a type alias or similar.",
         "tag": "json:\"type,omitempty\"",
-        "json_name": "type,omitempty",
-        "is_array": false
+        "json_name": "type,omitempty"
       },
       {
         "name": "Fields",
-        "type": "FieldInfo",
+        "type": "[]*FieldInfo",
         "path": "StructInfo.Fields",
         "doc": "Fields holds information of the fields, if this object is a struct.",
         "tag": "json:\"fields,omitempty\"",
-        "json_name": "fields,omitempty",
-        "is_array": true
+        "json_name": "fields,omitempty"
       }
     ]
   },
   {
     "name": "StructList",
-    "type": "StructInfo"
+    "type": "[]*StructInfo"
   }
 ]
