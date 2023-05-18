@@ -7,8 +7,11 @@ import (
 	"strings"
 )
 
-func TrimSpace(in interface{ Text() string }) string {
-	return strings.TrimSpace(in.Text())
+func TrimSpace(in *ast.CommentGroup) string {
+	if in != nil {
+		return strings.TrimSpace(in.Text())
+	}
+	return ""
 }
 
 var TypeName = getTypeDeclarations
@@ -54,6 +57,8 @@ func getTypeDeclarationsForMapType(mapType *ast.MapType) string {
 
 func getTypeDeclarationsForExpr(expr ast.Expr) string {
 	switch expr := expr.(type) {
+	case *ast.SelectorExpr:
+		return getTypeDeclarationsForExpr(expr.X) + "." + getTypeDeclaration(expr.Sel)
 	case *ast.Ident:
 		return getTypeDeclaration(expr)
 	case *ast.ArrayType:
