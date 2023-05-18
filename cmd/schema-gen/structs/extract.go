@@ -134,6 +134,11 @@ func (p *objParser) parse(goPath, name string, structInfo *StructInfo) {
 		if goName == "_" {
 			continue
 		}
+		// unexposed field.
+		if goName[0:1] == strings.ToLower(goName[0:1]) {
+			continue
+		}
+
 		if goName == "" {
 			p.errList.WriteError(fmt.Sprintf("[%s] unidentified field in %s", filePos, goPath))
 			continue
