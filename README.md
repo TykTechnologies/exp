@@ -5,25 +5,39 @@ This repository mimics a subset of
 
 - `/cmd` - various development tooling and experiments
 
-The focus area for this repository is to provide a scratch space for
-tooling aimed at supporting development at Tyk. Individual projects must
-be self-contained within `/cmd`, and may provide their own go.mod to
-decrease scope if a shared dependency tree becomes a problem.
+## Aim of the repository
 
-In general, the tooling, regardless of the experimental nature of the
-development, needs to pass a build and a test check. There isn't a
+The aim of the repository is to provide a space for the development of tooling
+that aids common CI and data flows at Tyk. Common tools that fall in this area are:
+
+- Code generation tooling,
+- Code inspection / analysis to surface schema,
+- Converters between schema formats,
+- Generates documentation from schema,
+- Static code analysis,
+- Go Reflection and AST tooling,
+- Refactoring tooling,
+- Large scale change tooling,
+- Toy example projects,
+- Full scale test suites,
+- Linters, etc...
+
+Individual projects must be self-contained within `/cmd`, and may provide
+their own go.mod to decrease scope if a shared dependency tree becomes a
+problem. Each tool needs to pass a build and a test check. There isn't a
 requirement for code coverage, but this will eventually become the only
-planned merge check. Each cmd package will be tested individually.
+planned merge check.
 
 Common files that a command is encouraged to provide:
 
 1. README.md
     - explain why this exists,
     - who is it for,
-    - document stability, if it's enabled in CI, link github actions,
+    - document stability,
+    - list usage if it's enabled in CI, link github actions,
     - list ownership / point of contact,
     - document ANY users that want to be contacted if a breaking change happens
-2. Taskfile.yml - a collection of commands for the project, required: `build`, `test`.
+2. Taskfile.yml or Makefile? - collection of targets for the project, required: `build`, `test`.
     - We can auto default to `go build` and `go test -race -count=100 ./...`.
       This seems strict, but we have 0 legacy to care. And you really have to
       think which test you're going to write. Code coverage is NOT a requirement,
@@ -31,10 +45,17 @@ Common files that a command is encouraged to provide:
 3. `main.go`, `internal` package, `go.mod` (no metaversion, we're v0 all the way)
 4. `Dockerfile`, `docker-compose.yml`
 
-I'd say look around and figure out which of these apply to you.
+Take a look around and figure out which of these apply to you.
 
 Any added github workflows are expected to run against the last two Go
 versions released. At the time of writing, this would mean 1.19 and 1.20.
+
+## Issues
+
+You own a cmd/, you maintain the cmd to your own standards. You don't
+need to consider github issues or accept PRs, but this is an open source
+shop, sir. Make it clear in your README what kind of issues and contact
+you are willing to accept, if any. Nothing wrong with saying no.
 
 ## Compatibility promises
 
