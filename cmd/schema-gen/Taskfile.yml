@@ -9,5 +9,6 @@ tasks:
       - go build .
       - go test -race -count=100 ./...
       - go install .
-      - schema-gen -i structs/ -o structs.json
+
+      - schema-gen -i model/ -o model/model.json
       - schema-gen -i example/ -o example/example.json

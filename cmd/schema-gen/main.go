@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/TykTechnologies/exp/cmd/schema-gen/structs"
+	"github.com/TykTechnologies/exp/cmd/schema-gen/extract"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 
 func start() (err error) {
 	generators := []func() error{
-		structs.Dump,
+		extract.Dump,
 	}
 	for _, generator := range generators {
 		if err := generator(); err != nil {

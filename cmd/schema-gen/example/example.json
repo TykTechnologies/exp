@@ -1,6 +1,53 @@
-[
-  {
-    "name": "File",
-    "type": "os.File"
-  }
-]
+{
+  "declarations": [
+    {
+      "doc": "Declaration doc.",
+      "types": [
+        {
+          "name": "KeyRequest",
+          "doc": "KeyRequest doc.",
+          "fields": [
+            {
+              "name": "SessionID",
+              "type": "string",
+              "path": "SessionID",
+              "doc": "SessionID doc",
+              "comment": "SessionID comment",
+              "tag": "json:\"session_id\"",
+              "json_name": "session_id"
+            }
+          ]
+        },
+        {
+          "name": "KeyResponse",
+          "doc": "KeyResponse doc.",
+          "fields": [
+            {
+              "name": "Status",
+              "type": "string",
+              "path": "Status",
+              "tag": "json:\"status\"",
+              "json_name": "status"
+            },
+            {
+              "name": "Message",
+              "type": "string",
+              "path": "Message",
+              "tag": "json:\"message\"",
+              "json_name": "message"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc": "Type declaration doc, File is an alias of os.File.",
+      "types": [
+        {
+          "name": "File",
+          "type": "os.File"
+        }
+      ]
+    }
+  ]
+}

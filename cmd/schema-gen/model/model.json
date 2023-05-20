@@ -1,0 +1,201 @@
+{
+  "declarations": [
+    {
+      "doc": "DeclarationInfo holds *ast.GenDecl docs and declarations.",
+      "types": [
+        {
+          "name": "DeclarationInfo",
+          "fields": [
+            {
+              "name": "Doc",
+              "type": "string",
+              "path": "Doc",
+              "doc": "Doc is the declaration doc comment. It usually\noccurs just before a *ast.TypeDecl, but may be\napplied to multiple ones.",
+              "tag": "json:\"doc,omitempty\"",
+              "json_name": "doc,omitempty"
+            },
+            {
+              "name": "FileDoc",
+              "type": "string",
+              "path": "FileDoc",
+              "doc": "FileDoc is the doc comment for a file which\ncontains the definitions here.",
+              "tag": "json:\"file_doc,omitempty\"",
+              "json_name": "file_doc,omitempty"
+            },
+            {
+              "name": "Types",
+              "type": "StructList",
+              "path": "Types",
+              "doc": "Types are all the type declarations in the block.",
+              "tag": "json:\"types,omitempty\"",
+              "json_name": "types,omitempty"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc": "DeclarationList implements list operations over a *DeclarationInfo slice.",
+      "types": [
+        {
+          "name": "DeclarationList",
+          "type": "[]*DeclarationInfo"
+        }
+      ]
+    },
+    {
+      "doc": "ErrUnexported exists to handle/skip unexported types."
+    },
+    {
+      "doc": "FieldInfo holds details about a field.",
+      "types": [
+        {
+          "name": "FieldInfo",
+          "fields": [
+            {
+              "name": "Name",
+              "type": "string",
+              "path": "Name",
+              "doc": "Name is the name of the field.",
+              "tag": "json:\"name\"",
+              "json_name": "name"
+            },
+            {
+              "name": "Type",
+              "type": "string",
+              "path": "Type",
+              "doc": "Type is the literal type of the Go field.",
+              "tag": "json:\"type\"",
+              "json_name": "type"
+            },
+            {
+              "name": "Path",
+              "type": "string",
+              "path": "Path",
+              "doc": "Path is the go path of this field starting from root object.",
+              "tag": "json:\"path\"",
+              "json_name": "path"
+            },
+            {
+              "name": "Doc",
+              "type": "string",
+              "path": "Doc",
+              "doc": "Doc holds the field doc.",
+              "tag": "json:\"doc,omitempty\"",
+              "json_name": "doc,omitempty"
+            },
+            {
+              "name": "Comment",
+              "type": "string",
+              "path": "Comment",
+              "doc": "Comment holds the field comment text.",
+              "tag": "json:\"comment,omitempty\"",
+              "json_name": "comment,omitempty"
+            },
+            {
+              "name": "Tag",
+              "type": "string",
+              "path": "Tag",
+              "doc": "Tag is the go tag, unmodified.",
+              "tag": "json:\"tag\"",
+              "json_name": "tag"
+            },
+            {
+              "name": "JSONName",
+              "type": "string",
+              "path": "JSONName",
+              "doc": "JSONName is the corresponding json name of the field.",
+              "tag": "json:\"json_name\"",
+              "json_name": "json_name"
+            },
+            {
+              "name": "MapKey",
+              "type": "string",
+              "path": "MapKey",
+              "doc": "MapKey is the map key type, if this field is a map.",
+              "tag": "json:\"map_key,omitempty\"",
+              "json_name": "map_key,omitempty"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc": "PackageInfo holds all the declarations.",
+      "types": [
+        {
+          "name": "PackageInfo",
+          "fields": [
+            {
+              "name": "Declarations",
+              "type": "DeclarationList",
+              "path": "Declarations",
+              "doc": "Declarations within the package.",
+              "tag": "json:\"declarations\"",
+              "json_name": "declarations"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc": "StructInfo holds ast field information for the docs generator.",
+      "types": [
+        {
+          "name": "StructInfo",
+          "fields": [
+            {
+              "name": "Name",
+              "type": "string",
+              "path": "Name",
+              "doc": "Name is struct go name.",
+              "tag": "json:\"name\"",
+              "json_name": "name"
+            },
+            {
+              "name": "Doc",
+              "type": "string",
+              "path": "Doc",
+              "doc": "Doc is the struct doc.",
+              "tag": "json:\"doc,omitempty\"",
+              "json_name": "doc,omitempty"
+            },
+            {
+              "name": "Comment",
+              "type": "string",
+              "path": "Comment",
+              "doc": "Comment is the struct comment.",
+              "tag": "json:\"comment,omitempty\"",
+              "json_name": "comment,omitempty"
+            },
+            {
+              "name": "Type",
+              "type": "string",
+              "path": "Type",
+              "doc": "Type is an optional type if the declaration is a type alias or similar.",
+              "tag": "json:\"type,omitempty\"",
+              "json_name": "type,omitempty"
+            },
+            {
+              "name": "Fields",
+              "type": "[]*FieldInfo",
+              "path": "Fields",
+              "doc": "Fields holds information of the fields, if this object is a struct.",
+              "tag": "json:\"fields,omitempty\"",
+              "json_name": "fields,omitempty"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc": "StructList implements list operations over a *StructInfo slice.",
+      "types": [
+        {
+          "name": "StructList",
+          "type": "[]*StructInfo"
+        }
+      ]
+    }
+  ]
+}

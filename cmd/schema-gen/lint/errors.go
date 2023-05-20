@@ -1,4 +1,4 @@
-package structs
+package lint
 
 import (
 	"strings"
@@ -14,8 +14,8 @@ func (err *FieldDocError) Error() string {
 	return strings.Join(err.errs, "\n")
 }
 
-// WriteError appends an error message to the error list.
-func (err *FieldDocError) WriteError(errMsg string) {
+// Append appends an error message to the error list.
+func (err *FieldDocError) Append(errMsg string) {
 	err.errs = append(err.errs, errMsg)
 }
 
