@@ -80,6 +80,7 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 
 			output.WriteString("type ")
 			printStruct(&output, typeDecl)
+			output.WriteString("\n\n")
 		} else {
 			output.WriteString("type (")
 			for idx, typeDecl := range decl.Types {
@@ -96,6 +97,7 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 				}
 
 				printStruct(&output, typeDecl)
+				output.WriteString("\n\n")
 			}
 			output.WriteString(")\n")
 		}
@@ -126,7 +128,7 @@ func printStruct(output *bytes.Buffer, typeDecl *model.StructInfo) {
 		}
 		output.WriteString("\n")
 	}
-	output.WriteString("}\n")
+	output.WriteString("}")
 }
 
 func printDoc(output *bytes.Buffer, comment string) {
