@@ -48,34 +48,57 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 	// Dump out filedocs
 	for _, decl := range pkgInfo.Declarations {
 		if decl.FileDoc != "" {
-			output.WriteString("/*\n" + decl.FileDoc + "\n*/")
+			output.WriteString("/*\n" + decl.FileDoc + "\n*/\n\n")
 		}
 	}
 
 	// Dump out declarations
 	for _, decl := range pkgInfo.Declarations {
-		printDoc(&output, decl.Doc)
-		output.WriteString("\ntype (")
-		for _, typeDecl := range decl.Types {
-			printDoc(&output, typeDecl.Doc)
+		if decl.Doc != "" {
+			printDoc(&output, decl.Doc)
+		}
 
-			// Generic type declaration
+		if len(decl.Types) == 1 && decl.Types[0].Doc == "" {
+			typeDecl := decl.Types[0]
 			if typeDecl.Type != "" {
-				// Type declaration
-				output.WriteString(fmt.Sprintf("\n%s = %s\n", typeDecl.Name, typeDecl.Type))
+				output.WriteString("type " + typeDecl.Name)
+
+				// This is likely wrong, but also an edge case.
+				// We should not import third party data models.
+				if strings.Contains(typeDecl.Type, ".") {
+					output.WriteString(fmt.Sprintf(" = %s", typeDecl.Type))
+				} else {
+					output.WriteString(" " + typeDecl.Type)
+				}
+
+				if typeDecl.Comment != "" {
+					output.WriteString(fmt.Sprintf(" // %s", typeDecl.Comment))
+				}
+				output.WriteString("\n")
 				continue
 			}
 
-			// Struct type declaration
-			output.WriteString(fmt.Sprintf("\n%s struct {", typeDecl.Name))
-			for _, fieldDecl := range typeDecl.Fields {
-				printDoc(&output, fieldDecl.Doc)
-				// Field declaration
-				output.WriteString(fmt.Sprintf("\n%s %s `%s`\n", fieldDecl.Name, fieldDecl.Type, fieldDecl.Tag))
+			output.WriteString("type ")
+			printStruct(&output, typeDecl)
+		} else {
+			output.WriteString("type (")
+			for idx, typeDecl := range decl.Types {
+				printDoc(&output, typeDecl.Doc)
+
+				// Generic type declaration
+				if typeDecl.Type != "" {
+					// Type declaration
+					output.WriteString(fmt.Sprintf("\n%s = %s", typeDecl.Name, typeDecl.Type))
+					if idx+1 < len(decl.Types) {
+						output.WriteString("\n")
+					}
+					continue
+				}
+
+				printStruct(&output, typeDecl)
 			}
-			output.WriteString("\n}\n")
+			output.WriteString(")\n")
 		}
-		output.WriteString(")\n")
 	}
 
 	contents, err := format.Source(output.Bytes())
@@ -86,8 +109,29 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 	return contents, nil
 }
 
+func printStruct(output *bytes.Buffer, typeDecl *model.StructInfo) {
+	// Struct type declaration
+	output.WriteString(fmt.Sprintf("%s struct {", typeDecl.Name))
+	for _, fieldDecl := range typeDecl.Fields {
+		// Field doc
+		printDoc(output, fieldDecl.Doc)
+
+		// Field declaration
+		output.WriteString(fmt.Sprintf("%s %s", fieldDecl.Name, fieldDecl.Type))
+		if fieldDecl.Tag != "" {
+			output.WriteString(fmt.Sprintf(" `%s`", fieldDecl.Tag))
+		}
+		if fieldDecl.Comment != "" {
+			output.WriteString(fmt.Sprintf(" // %s", fieldDecl.Comment))
+		}
+		output.WriteString("\n")
+	}
+	output.WriteString("}\n")
+}
+
 func printDoc(output *bytes.Buffer, comment string) {
 	if comment == "" {
+		output.WriteString("\n")
 		return
 	}
 
@@ -96,4 +140,5 @@ func printDoc(output *bytes.Buffer, comment string) {
 		line = " " + strings.TrimSpace(line)
 		output.WriteString("\n//" + line)
 	}
+	output.WriteString("\n")
 }
