@@ -6,8 +6,15 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
+	"strings"
+
+	"golang.org/x/exp/maps"
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/extract"
+	"github.com/TykTechnologies/exp/cmd/schema-gen/lint"
+	"github.com/TykTechnologies/exp/cmd/schema-gen/render"
+	"github.com/TykTechnologies/exp/cmd/schema-gen/restore"
 )
 
 func main() {
@@ -18,13 +25,25 @@ func main() {
 }
 
 func start() (err error) {
-	generators := []func() error{
-		extract.Dump,
+	commands := map[string]func() error{
+		"extract": extract.Run,
+		"restore": restore.Run,
+		"render":  render.Run,
+		"lint":    lint.Run,
 	}
-	for _, generator := range generators {
-		if err := generator(); err != nil {
-			return err
-		}
+	commandList := maps.Keys(commands)
+	sort.Strings(commandList)
+
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: schema-gen <command> help")
+		fmt.Printf("Available commands: %s\n", strings.Join(commandList, ", "))
+		return nil
 	}
-	return nil
+
+	commandFn, ok := commands[os.Args[1]]
+	if ok {
+		return commandFn()
+	}
+
+	return fmt.Errorf("Unknown command: %q", os.Args[1])
 }

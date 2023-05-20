@@ -1,0 +1,26 @@
+package example
+
+import (
+	"errors"
+	"os"
+)
+
+// Declaration doc.
+type (
+	// KeyRequest doc.
+	KeyRequest struct {
+		// SessionID doc
+		SessionID string `json:"session_id"`
+	}
+
+	// KeyResponse doc.
+	KeyResponse struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+	}
+)
+
+// Type declaration doc, File is an alias of os.File.
+type (
+	File = os.File
+)

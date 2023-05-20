@@ -1,4 +1,8 @@
 {
+  "imports": [
+    "\"errors\"",
+    "\"os\""
+  ],
   "declarations": [
     {
       "doc": "Declaration doc.",

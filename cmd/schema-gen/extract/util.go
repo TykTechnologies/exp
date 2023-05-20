@@ -1,8 +1,10 @@
 package extract
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/ast"
+	"os"
 	"reflect"
 	"strings"
 )
@@ -70,6 +72,43 @@ func getTypeDeclarationsForExpr(expr ast.Expr) string {
 	}
 }
 
+func deduplicate(input []string) []string {
+	seen := make(map[string]bool)
+	result := make([]string, 0, len(input))
+
+	// Iterate over the input slice
+	for _, str := range input {
+		// Check if the element has been seen before
+		if _, ok := seen[str]; !ok {
+			// Add the element to the result slice
+			result = append(result, str)
+			// Mark the element as seen
+			seen[str] = true
+		}
+	}
+
+	return result
+}
+
 func jsonTag(tag string) string {
 	return reflect.StructTag(tag).Get("json")
+}
+
+func write(filename string, inputPackage string) error {
+	sts, err := Extract(inputPackage)
+	if err != nil {
+		return err
+	}
+
+	return dump(filename, sts)
+}
+
+func dump(filename string, data interface{}) error {
+	println(filename)
+
+	dataBytes, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filename, dataBytes, 0644) //nolint:gosec
 }

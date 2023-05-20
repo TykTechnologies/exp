@@ -5,10 +5,19 @@ tasks:
   default:
     desc: "Build, test, install and run schema-gen"
     cmds:
+      - goimports -w .
       - go fmt ./...
       - go build .
       - go test -race -count=100 ./...
       - go install .
 
-      - schema-gen -i model/ -o model/model.json
-      - schema-gen -i example/ -o example/example.json
+      - schema-gen extract -i model/ -o model/model.json
+      - schema-gen extract -i _example/ -o _example/example.json
+      - schema-gen restore -i _example/example.json -o _example/example.go.txt -p example
+
+  help:
+    desc: "Run schema gen to print usage/help"
+    cmds:
+      - schema-gen
+      - schema-gen extract help
+      - schema-gen restore help

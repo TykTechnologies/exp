@@ -12,17 +12,18 @@ To install:
 
 `go install github.com/TykTechnologies/exp/cmd/schema-gen@main`
 
-Arguments:
-
-- `-i` - input folder of go package, defaults to `.`, needs trailing `/`,
-- `-o` - output file, defaults to `schema.json`.
+Invoke `schema-gen` without arguments to print usage help.
 
 Usage:
 
-- `schema`
-- `schema-gen -i structs/ -o structs.json`
+- `schema-gen`
+- `schema-gen extract help`
+- `schema-gen extract -i model/ -o model/model.json`
+- ...
 
-The structs.json example is commited to the repo.
+Example:
+
+See the `example/` subfolder.
 
 ## Random facts
 

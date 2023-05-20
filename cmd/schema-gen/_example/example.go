@@ -1,6 +1,7 @@
 package example
 
 import (
+	"errors"
 	"os"
 )
 
@@ -21,3 +22,9 @@ type (
 		Message string `json:"message"`
 	}
 )
+
+func (t *KeyRequest) Validate() error {
+	if t.SessionID == "" {
+		return errors.New("invalid KeyRequest, empty session")
+	}
+}

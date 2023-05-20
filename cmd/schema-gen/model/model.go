@@ -1,41 +1,28 @@
 package model
 
 import (
-	"errors"
+	"encoding/json"
 	"go/ast"
+	"os"
 )
-
-// ErrUnexported exists to handle/skip unexported types.
-var ErrUnexported = errors.New("expected: unexported type")
-
-// StructList implements list operations over a *StructInfo slice.
-type StructList []*StructInfo
-
-func (x StructList) Len() int           { return len(x) }
-func (x StructList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
-func (x StructList) Less(i, j int) bool { return x[i].Name < x[j].Name }
-
-func (x *StructList) Append(newInfo *StructInfo) int {
-	*x = append(*x, newInfo)
-	return len(*x)
-}
-
-// DeclarationList implements list operations over a *DeclarationInfo slice.
-type DeclarationList []*DeclarationInfo
-
-func (x DeclarationList) Len() int           { return len(x) }
-func (x DeclarationList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
-func (x DeclarationList) Less(i, j int) bool { return x[i].Doc < x[j].Doc }
-
-func (x *DeclarationList) Append(newInfo *DeclarationInfo) int {
-	*x = append(*x, newInfo)
-	return len(*x)
-}
 
 // PackageInfo holds all the declarations.
 type PackageInfo struct {
+	// Imports holds a list of imported packages.
+	Imports []string `json:"imports"`
+
 	// Declarations within the package.
 	Declarations DeclarationList `json:"declarations"`
+}
+
+func LoadPackageInfo(filename string) (*PackageInfo, error) {
+	body, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &PackageInfo{}
+	return result, json.Unmarshal(body, result)
 }
 
 // DeclarationInfo holds *ast.GenDecl docs and declarations.
@@ -51,6 +38,18 @@ type DeclarationInfo struct {
 
 	// Types are all the type declarations in the block.
 	Types StructList `json:"types,omitempty"`
+}
+
+// DeclarationList implements list operations over a *DeclarationInfo slice.
+type DeclarationList []*DeclarationInfo
+
+func (x DeclarationList) Len() int           { return len(x) }
+func (x DeclarationList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
+func (x DeclarationList) Less(i, j int) bool { return x[i].Doc < x[j].Doc }
+
+func (x *DeclarationList) Append(newInfo *DeclarationInfo) int {
+	*x = append(*x, newInfo)
+	return len(*x)
 }
 
 func (d DeclarationInfo) Valid() bool {
@@ -85,6 +84,18 @@ type StructInfo struct {
 
 	// StructObj is the (optionally present) raw ast.StructType value
 	StructObj *ast.StructType `json:"-"`
+}
+
+// StructList implements list operations over a *StructInfo slice.
+type StructList []*StructInfo
+
+func (x StructList) Len() int           { return len(x) }
+func (x StructList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
+func (x StructList) Less(i, j int) bool { return x[i].Name < x[j].Name }
+
+func (x *StructList) Append(newInfo *StructInfo) int {
+	*x = append(*x, newInfo)
+	return len(*x)
 }
 
 // FieldInfo holds details about a field.

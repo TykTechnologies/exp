@@ -1,4 +1,10 @@
 {
+  "imports": [
+    "\"errors\"",
+    "\"encoding/json\"",
+    "\"go/ast\"",
+    "\"os\""
+  ],
   "declarations": [
     {
       "doc": "DeclarationInfo holds *ast.GenDecl docs and declarations.",
@@ -45,6 +51,9 @@
     },
     {
       "doc": "ErrUnexported exists to handle/skip unexported types."
+    },
+    {
+      "doc": "ErrUnimplemented is a helper for commands in development"
     },
     {
       "doc": "FieldInfo holds details about a field.",
@@ -126,6 +135,14 @@
         {
           "name": "PackageInfo",
           "fields": [
+            {
+              "name": "Imports",
+              "type": "[]string",
+              "path": "Imports",
+              "doc": "Imports holds a list of imported packages.",
+              "tag": "json:\"imports\"",
+              "json_name": "imports"
+            },
             {
               "name": "Declarations",
               "type": "DeclarationList",

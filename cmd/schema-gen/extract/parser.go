@@ -75,10 +75,25 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 	var err error
 	result := &PackageInfo{
 		Declarations: DeclarationList{},
+		Imports:      []string{},
 	}
 
 	for _, fileObj := range p.pkg.Files {
 		// https://pkg.go.dev/go/ast#File
+
+		// Collect imports
+		for _, imported := range fileObj.Imports {
+			importLiteral := imported.Path.Value
+			if imported.Name != nil {
+				alias := getTypeDeclaration(imported.Name)
+				fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
+				importLiteral = alias + " " + importLiteral
+			}
+
+			result.Imports = append(result.Imports, importLiteral)
+		}
+
+		// Collect declarations
 		for _, obj := range fileObj.Decls {
 			genDecl, ok := obj.(*ast.GenDecl)
 			if !ok {
@@ -114,6 +129,8 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 			}
 		}
 	}
+
+	deduplicate(result.Imports)
 
 	sort.Stable(result.Declarations)
 
