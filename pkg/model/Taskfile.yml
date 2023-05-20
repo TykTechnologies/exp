@@ -1,0 +1,30 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: "Extract data model from apidef as go code"
+    deps: [ install, tyk ]
+    cmds:
+      - schema-gen extract -i tyk/apidef/ -o model.json
+      - schema-gen restore -i model.json -o model.go -p model
+      - goimports -w -local github.com/TykTechnologies .
+
+  tyk:
+    internal: true
+    status:
+      - test -d tyk
+    cmds:
+      - git clone --depth=1 git@github.com:TykTechnologies/tyk.git
+
+  install:
+    desc: 'Install dependencies'
+    deps:
+      - install:schema-gen
+
+  install:schema-gen:
+    desc: 'Install schema-gen'
+    status:
+      - type schema-gen
+    cmds:
+      - go install github.com/TykTechnologies/exp/cmd/schema-gen@latest
