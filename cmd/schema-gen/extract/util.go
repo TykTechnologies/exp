@@ -41,6 +41,8 @@ func getTypeDeclarationsForArrayType(arrayType *ast.ArrayType) string {
 		declaration = getTypeDeclarationsForMapType(obj)
 	case *ast.StarExpr:
 		declaration = getTypeDeclarationsForPointerType(obj)
+	case *ast.SelectorExpr:
+		declaration = getTypeDeclarationsForExpr(obj.X) + "." + getTypeDeclaration(obj.Sel)
 	default:
 		declaration = fmt.Sprintf("%#v", arrayType.Elt)
 	}
@@ -49,12 +51,20 @@ func getTypeDeclarationsForArrayType(arrayType *ast.ArrayType) string {
 }
 
 func getTypeDeclarationsForMapType(mapType *ast.MapType) string {
-	var sb strings.Builder
-	sb.WriteString("map[")
-	sb.WriteString(getTypeDeclaration(mapType.Key.(*ast.Ident)))
-	sb.WriteString("]")
-	sb.WriteString(getTypeDeclaration(mapType.Value.(*ast.Ident)))
-	return sb.String()
+	keyIdent, ok := mapType.Key.(*ast.Ident)
+	if !ok {
+		fmt.Println("WARN: unsupported key type in map")
+		return "any"
+	}
+	keyType := getTypeDeclaration(keyIdent)
+
+	valueIdent, ok := mapType.Value.(*ast.Ident)
+	if !ok {
+		return fmt.Sprintf("map[%s]interface{}", keyType)
+	}
+	valueType := getTypeDeclaration(valueIdent)
+
+	return fmt.Sprintf("map[%s]%s", keyType, valueType)
 }
 
 func getTypeDeclarationsForExpr(expr ast.Expr) string {
@@ -67,6 +77,12 @@ func getTypeDeclarationsForExpr(expr ast.Expr) string {
 		return getTypeDeclarationsForArrayType(expr)
 	case *ast.MapType:
 		return getTypeDeclarationsForMapType(expr)
+	case *ast.InterfaceType:
+		return ""
+	case *ast.StructType:
+		return "struct{}"
+	case *ast.StarExpr:
+		return getTypeDeclarationsForExpr(expr.X)
 	default:
 		return fmt.Sprintf("%#v", expr)
 	}
