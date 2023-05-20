@@ -90,7 +90,9 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 				importLiteral = alias + " " + importLiteral
 			}
 
-			result.Imports = append(result.Imports, importLiteral)
+			if !strings.Contains(importLiteral, "/internal") {
+				result.Imports = append(result.Imports, importLiteral)
+			}
 		}
 
 		// Collect declarations
