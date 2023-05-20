@@ -18,7 +18,8 @@ Usage:
 
 - `schema-gen`
 - `schema-gen extract help`
-- `schema-gen extract -i model/ -o model/model.json`
+- `schema-gen extract -i _example/ -o _example/model.json`
+- `schema-gen restore -i _example/model.json -o _example/model.go.txt`
 - ...
 
 Example:

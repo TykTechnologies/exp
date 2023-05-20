@@ -50,12 +50,6 @@
       ]
     },
     {
-      "doc": "ErrUnexported exists to handle/skip unexported types."
-    },
-    {
-      "doc": "ErrUnimplemented is a helper for commands in development"
-    },
-    {
       "doc": "FieldInfo holds details about a field.",
       "types": [
         {

@@ -52,17 +52,8 @@ func (x *DeclarationList) Append(newInfo *DeclarationInfo) int {
 	return len(*x)
 }
 
-func (d DeclarationInfo) Valid() bool {
-	if d.Doc != "" {
-		return true
-	}
-	if d.FileDoc != "" {
-		return true
-	}
-	if len(d.Types) > 0 {
-		return true
-	}
-	return false
+func (d *DeclarationInfo) Valid() bool {
+	return len(d.Types) > 0
 }
 
 // StructInfo holds ast field information for the docs generator.
