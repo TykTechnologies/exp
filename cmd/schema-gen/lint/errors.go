@@ -21,9 +21,13 @@ func (err *FieldDocError) Error() string {
 }
 
 // Append appends an error message to the error list.
-func (err *FieldDocError) Append(errMsg string) {
-	if errMsg != "" {
-		err.errs = append(err.errs, errMsg)
+func (err *FieldDocError) Append(errMsg ...string) {
+	if len(errMsg) > 0 {
+		for _, errText := range errMsg {
+			if errText != "" {
+				err.errs = append(err.errs, errText)
+			}
+		}
 	}
 }
 

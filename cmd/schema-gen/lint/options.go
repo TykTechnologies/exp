@@ -13,10 +13,15 @@ type options struct {
 func NewOptions() *options {
 	cfg := &options{
 		inputFile: "schema.json",
-		rules:     []string{"godoc-fields"},
-		verbose:   false,
+		rules: []string{
+			"require-field-comment",
+			"require-dot-or-backtick",
+			"require-field-prefix",
+		},
+		verbose: false,
 	}
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
+	flag.StringSliceVarP(&cfg.rules, "rules", "", cfg.rules, "linter rules to run")
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
 	return cfg
 }
