@@ -21,7 +21,7 @@ type DeclarationInfo struct {
 	FileDoc string `json:"file_doc,omitempty"`
 
 	// Types are all the type declarations in the block.
-	Types StructList `json:"types,omitempty"`
+	Types TypeList `json:"types,omitempty"`
 }
 
 // DeclarationList implements list operations over a *DeclarationInfo slice.
@@ -63,8 +63,8 @@ type PackageInfo struct {
 	Declarations DeclarationList `json:"declarations"`
 }
 
-// StructInfo holds ast field information for the docs generator.
-type StructInfo struct {
+// TypeInfo holds ast field information for the docs generator.
+type TypeInfo struct {
 	// Name is struct go name.
 	Name string `json:"name"`
 
@@ -81,5 +81,5 @@ type StructInfo struct {
 	Fields []*FieldInfo `json:"fields,omitempty"`
 }
 
-// StructList implements list operations over a *StructInfo slice.
-type StructList []*StructInfo
+// TypeList implements list operations over a *TypeInfo slice.
+type TypeList []*TypeInfo

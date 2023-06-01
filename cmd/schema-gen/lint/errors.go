@@ -9,6 +9,12 @@ type FieldDocError struct {
 	errs []string
 }
 
+// NewFieldDocError constructs a *FieldDocError.
+// The internal errs field does not need initialization.
+func NewFieldDocError() *FieldDocError {
+	return &FieldDocError{}
+}
+
 // Error implements the error interface.
 func (err *FieldDocError) Error() string {
 	return strings.Join(err.errs, "\n")
@@ -16,7 +22,9 @@ func (err *FieldDocError) Error() string {
 
 // Append appends an error message to the error list.
 func (err *FieldDocError) Append(errMsg string) {
-	err.errs = append(err.errs, errMsg)
+	if errMsg != "" {
+		err.errs = append(err.errs, errMsg)
+	}
 }
 
 // Empty returns true if there are no errors in the list.

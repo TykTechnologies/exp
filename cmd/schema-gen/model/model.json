@@ -15,7 +15,7 @@
             {
               "name": "Doc",
               "type": "string",
-              "path": "Doc",
+              "path": "DeclarationInfo.Doc",
               "doc": "Doc is the declaration doc comment. It usually\noccurs just before a *ast.TypeDecl, but may be\napplied to multiple ones.",
               "tag": "json:\"doc,omitempty\"",
               "json_name": "doc,omitempty"
@@ -23,15 +23,15 @@
             {
               "name": "FileDoc",
               "type": "string",
-              "path": "FileDoc",
+              "path": "DeclarationInfo.FileDoc",
               "doc": "FileDoc is the doc comment for a file which\ncontains the definitions here.",
               "tag": "json:\"file_doc,omitempty\"",
               "json_name": "file_doc,omitempty"
             },
             {
               "name": "Types",
-              "type": "StructList",
-              "path": "Types",
+              "type": "TypeList",
+              "path": "DeclarationInfo.Types",
               "doc": "Types are all the type declarations in the block.",
               "tag": "json:\"types,omitempty\"",
               "json_name": "types,omitempty"
@@ -58,7 +58,7 @@
             {
               "name": "Name",
               "type": "string",
-              "path": "Name",
+              "path": "FieldInfo.Name",
               "doc": "Name is the name of the field.",
               "tag": "json:\"name\"",
               "json_name": "name"
@@ -66,7 +66,7 @@
             {
               "name": "Type",
               "type": "string",
-              "path": "Type",
+              "path": "FieldInfo.Type",
               "doc": "Type is the literal type of the Go field.",
               "tag": "json:\"type\"",
               "json_name": "type"
@@ -74,7 +74,7 @@
             {
               "name": "Path",
               "type": "string",
-              "path": "Path",
+              "path": "FieldInfo.Path",
               "doc": "Path is the go path of this field starting from root object.",
               "tag": "json:\"path\"",
               "json_name": "path"
@@ -82,7 +82,7 @@
             {
               "name": "Doc",
               "type": "string",
-              "path": "Doc",
+              "path": "FieldInfo.Doc",
               "doc": "Doc holds the field doc.",
               "tag": "json:\"doc,omitempty\"",
               "json_name": "doc,omitempty"
@@ -90,7 +90,7 @@
             {
               "name": "Comment",
               "type": "string",
-              "path": "Comment",
+              "path": "FieldInfo.Comment",
               "doc": "Comment holds the field comment text.",
               "tag": "json:\"comment,omitempty\"",
               "json_name": "comment,omitempty"
@@ -98,7 +98,7 @@
             {
               "name": "Tag",
               "type": "string",
-              "path": "Tag",
+              "path": "FieldInfo.Tag",
               "doc": "Tag is the go tag, unmodified.",
               "tag": "json:\"tag\"",
               "json_name": "tag"
@@ -106,7 +106,7 @@
             {
               "name": "JSONName",
               "type": "string",
-              "path": "JSONName",
+              "path": "FieldInfo.JSONName",
               "doc": "JSONName is the corresponding json name of the field.",
               "tag": "json:\"json_name\"",
               "json_name": "json_name"
@@ -114,7 +114,7 @@
             {
               "name": "MapKey",
               "type": "string",
-              "path": "MapKey",
+              "path": "FieldInfo.MapKey",
               "doc": "MapKey is the map key type, if this field is a map.",
               "tag": "json:\"map_key,omitempty\"",
               "json_name": "map_key,omitempty"
@@ -132,7 +132,7 @@
             {
               "name": "Imports",
               "type": "[]string",
-              "path": "Imports",
+              "path": "PackageInfo.Imports",
               "doc": "Imports holds a list of imported packages.",
               "tag": "json:\"imports\"",
               "json_name": "imports"
@@ -140,7 +140,7 @@
             {
               "name": "Declarations",
               "type": "DeclarationList",
-              "path": "Declarations",
+              "path": "PackageInfo.Declarations",
               "doc": "Declarations within the package.",
               "tag": "json:\"declarations\"",
               "json_name": "declarations"
@@ -150,15 +150,15 @@
       ]
     },
     {
-      "doc": "StructInfo holds ast field information for the docs generator.",
+      "doc": "TypeInfo holds ast field information for the docs generator.",
       "types": [
         {
-          "name": "StructInfo",
+          "name": "TypeInfo",
           "fields": [
             {
               "name": "Name",
               "type": "string",
-              "path": "Name",
+              "path": "TypeInfo.Name",
               "doc": "Name is struct go name.",
               "tag": "json:\"name\"",
               "json_name": "name"
@@ -166,7 +166,7 @@
             {
               "name": "Doc",
               "type": "string",
-              "path": "Doc",
+              "path": "TypeInfo.Doc",
               "doc": "Doc is the struct doc.",
               "tag": "json:\"doc,omitempty\"",
               "json_name": "doc,omitempty"
@@ -174,7 +174,7 @@
             {
               "name": "Comment",
               "type": "string",
-              "path": "Comment",
+              "path": "TypeInfo.Comment",
               "doc": "Comment is the struct comment.",
               "tag": "json:\"comment,omitempty\"",
               "json_name": "comment,omitempty"
@@ -182,7 +182,7 @@
             {
               "name": "Type",
               "type": "string",
-              "path": "Type",
+              "path": "TypeInfo.Type",
               "doc": "Type is an optional type if the declaration is a type alias or similar.",
               "tag": "json:\"type,omitempty\"",
               "json_name": "type,omitempty"
@@ -190,7 +190,7 @@
             {
               "name": "Fields",
               "type": "[]*FieldInfo",
-              "path": "Fields",
+              "path": "TypeInfo.Fields",
               "doc": "Fields holds information of the fields, if this object is a struct.",
               "tag": "json:\"fields,omitempty\"",
               "json_name": "fields,omitempty"
@@ -200,11 +200,11 @@
       ]
     },
     {
-      "doc": "StructList implements list operations over a *StructInfo slice.",
+      "doc": "TypeList implements list operations over a *TypeInfo slice.",
       "types": [
         {
-          "name": "StructList",
-          "type": "[]*StructInfo"
+          "name": "TypeList",
+          "type": "[]*TypeInfo"
         }
       ]
     }

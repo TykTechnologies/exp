@@ -37,7 +37,7 @@ type DeclarationInfo struct {
 	FileDoc string `json:"file_doc,omitempty"`
 
 	// Types are all the type declarations in the block.
-	Types StructList `json:"types,omitempty"`
+	Types TypeList `json:"types,omitempty"`
 }
 
 // DeclarationList implements list operations over a *DeclarationInfo slice.
@@ -56,8 +56,8 @@ func (d *DeclarationInfo) Valid() bool {
 	return len(d.Types) > 0
 }
 
-// StructInfo holds ast field information for the docs generator.
-type StructInfo struct {
+// TypeInfo holds ast field information for the docs generator.
+type TypeInfo struct {
 	// Name is struct go name.
 	Name string `json:"name"`
 
@@ -77,14 +77,14 @@ type StructInfo struct {
 	StructObj *ast.StructType `json:"-"`
 }
 
-// StructList implements list operations over a *StructInfo slice.
-type StructList []*StructInfo
+// TypeList implements list operations over a *TypeInfo slice.
+type TypeList []*TypeInfo
 
-func (x StructList) Len() int           { return len(x) }
-func (x StructList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
-func (x StructList) Less(i, j int) bool { return x[i].Name < x[j].Name }
+func (x TypeList) Len() int           { return len(x) }
+func (x TypeList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
+func (x TypeList) Less(i, j int) bool { return x[i].Name < x[j].Name }
 
-func (x *StructList) Append(newInfo *StructInfo) int {
+func (x *TypeList) Append(newInfo *TypeInfo) int {
 	*x = append(*x, newInfo)
 	return len(*x)
 }

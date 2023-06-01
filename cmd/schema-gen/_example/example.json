@@ -14,7 +14,7 @@
             {
               "name": "SessionID",
               "type": "string",
-              "path": "SessionID",
+              "path": "KeyRequest.SessionID",
               "doc": "SessionID doc",
               "comment": "SessionID comment",
               "tag": "json:\"session_id\"",
@@ -29,14 +29,14 @@
             {
               "name": "Status",
               "type": "string",
-              "path": "Status",
+              "path": "KeyResponse.Status",
               "tag": "json:\"status\"",
               "json_name": "status"
             },
             {
               "name": "Message",
               "type": "string",
-              "path": "Message",
+              "path": "KeyResponse.Message",
               "tag": "json:\"message\"",
               "json_name": "message"
             }

@@ -1,4 +1,4 @@
-package restore
+package lint
 
 import (
 	"fmt"
@@ -14,11 +14,11 @@ func Run() (err error) {
 	flag.Parse()
 
 	if slices.Contains(os.Args, "help") {
-		fmt.Println("Usage: schema-gen restore <options>:")
+		fmt.Println("Usage: schema-gen lint <options>:")
 		fmt.Println()
 		flag.PrintDefaults()
 		return nil
 	}
 
-	return restore(cfg)
+	return lint(cfg)
 }

@@ -111,7 +111,7 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 	return contents, nil
 }
 
-func printStruct(output *bytes.Buffer, typeDecl *model.StructInfo) {
+func printStruct(output *bytes.Buffer, typeDecl *model.TypeInfo) {
 	// Struct type declaration
 	output.WriteString(fmt.Sprintf("%s struct {", typeDecl.Name))
 	for _, fieldDecl := range typeDecl.Fields {

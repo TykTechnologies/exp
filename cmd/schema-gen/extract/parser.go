@@ -105,7 +105,7 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 			info := &DeclarationInfo{
 				Doc:     TrimSpace(genDecl.Doc),
 				FileDoc: TrimSpace(fileObj.Doc),
-				Types:   StructList{},
+				Types:   TypeList{},
 			}
 
 			for _, spec := range genDecl.Specs {
@@ -118,7 +118,7 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 						}
 						continue
 					}
-					p.parseStruct("", typeInfo.Name, typeInfo)
+					p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo)
 
 					info.Types.Append(typeInfo)
 				}
@@ -139,12 +139,12 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 	return result, err
 }
 
-// NewTypeSpecInfo allocates a StructInfo from a TypeSpec node.
+// NewTypeSpecInfo allocates a TypeInfo from a TypeSpec node.
 // The function returns the struct info and ErrUnexported if
 // the struct is not exported. This error is handled outside
 // to skip documenting unexported types.
-func NewTypeSpecInfo(from *ast.TypeSpec) (*StructInfo, error) {
-	info := &StructInfo{
+func NewTypeSpecInfo(from *ast.TypeSpec) (*TypeInfo, error) {
+	info := &TypeInfo{
 		Name:    getTypeDeclaration(from.Name),
 		Doc:     TrimSpace(from.Doc),
 		Comment: TrimSpace(from.Comment),
@@ -163,7 +163,7 @@ func NewTypeSpecInfo(from *ast.TypeSpec) (*StructInfo, error) {
 	return info, nil
 }
 
-func (p *objParser) parseStruct(goPath, name string, structInfo *StructInfo) {
+func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo) {
 	if structInfo.StructObj == nil {
 		return
 	}

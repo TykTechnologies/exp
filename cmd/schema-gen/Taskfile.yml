@@ -3,14 +3,27 @@ version: "3"
 
 tasks:
   default:
-    desc: "Build, test, install and run schema-gen"
+    desc: "Build, run tests, build examples"
+    deps: [ build ]
+    cmds:
+      - go test -race -count=100 ./...
+      - task: examples
+
+  build:
+    desc: "Build and install schema-gen"
     cmds:
       - goimports -w .
       - go fmt ./...
+      - go clean -cache
       - go build .
-      - go test -race -count=100 ./...
       - go install .
-      - task: examples
+
+  lint:
+    desc: "Run linter tests against schema-gen model"
+    deps: [ build ]
+    cmds:
+      - schema-gen extract -i model/ -o model/model.json
+      - schema-gen lint -i model/model.json
 
   examples:
     desc: "Build examples"
