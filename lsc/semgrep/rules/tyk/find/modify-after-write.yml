@@ -1,0 +1,19 @@
+---
+
+rules:
+  - id: tyk.find.modify-after-write
+    patterns:
+      - pattern-either:
+        - pattern: |
+            $T.Update()
+            ...
+            $T.$K = $V
+    languages:
+      - go
+    message: |
+      Current database models trigger a write to
+      the database with the Update() function. It
+      is a code smell if the data model is updated
+      immediately afterwards. It hints that some
+      field was modified for write in a wrong place.
+    severity: WARNING

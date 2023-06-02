@@ -1,0 +1,14 @@
+---
+
+rules:
+  - id: tyk.fix.repeated.error.log
+    patterns:
+      - pattern: |
+          log.Error($T1)
+          log.Error(err)
+    fix: |
+      log.WithError(err).Error($T1)
+    languages:
+      - go
+    message: Simplify repeated error log pattern, use log.WithError.
+    severity: WARNING

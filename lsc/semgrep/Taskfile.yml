@@ -1,0 +1,54 @@
+---
+version: '3'
+
+tasks:
+  default:
+    desc: "Run semgrep"
+    vars:
+      absPath:
+        sh: readlink -f .
+    deps:
+      - returntocorp
+      - semgrep-go
+    cmds:
+      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan --verbose --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json
+      - jq . reports/semgrep.tyk.json
+
+  pull:
+    desc: "Pull latest returntocorp/semgrep"
+    cmds:
+      - docker pull returntocorp/semgrep
+
+  scan:
+    desc: Scan with upstream rules
+    vars:
+      absPath:
+        sh: readlink -f .
+    cmds:
+      - |
+        docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan \
+              --config /host/rules/ext-dgryski-semgrep-go/ \
+              --autofix --json -o /host/reports/ext-dgryski-semgrep-go.json
+      - |
+        docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan \
+              --config /host/rules/ext-returntocorp-semgrep-rules/go/ \
+               --autofix --json -o /host/reports/ext-returntocorp-semgrep-rules.json
+
+  returntocorp:
+    internal: true
+    vars:
+      output: rules/ext-returntocorp-semgrep-rules
+    status:
+      - test -d {{.output}}
+    cmds:
+      - git clone --depth=1 https://github.com/returntocorp/semgrep-rules {{.output}}
+
+  semgrep-go:
+    internal: true
+    vars:
+      output: rules/ext-dgryski-semgrep-go
+    status:
+      - test -d {{.output}}
+    cmds:
+      - git clone --depth=1 https://github.com/dgryski/semgrep-go {{.output}}
+      - rm {{.output}}/ioutil.yml {{.output}}/oserrors.yml

@@ -1,0 +1,39 @@
+---
+
+rules:
+  - id: tyk.fix.portal.model.stutter
+    patterns:
+      - pattern-either:
+        - pattern-regex: PortalModelPortalConfig
+    fix: PortalConfig
+    languages:
+      - go
+    message: Rename struct
+    severity: WARNING
+
+  - id: tyk.fix.oop.constructors
+    patterns:
+      - pattern-either:
+        - pattern: func ($K $VAR) New() *$VAR
+    fix: |
+      func New$VAR() *$VAR
+    languages:
+      - go
+    message: |
+      Move away from type receiver allocators.
+      (generics support New[T]() *T or whatever).
+    severity: WARNING
+
+  - id: tyk.fix.oop.constructors.usage
+    patterns:
+      - pattern-either:
+        - pattern: $T{}.New()
+    fix: |
+      New$T()
+    languages:
+      - go
+    message: |
+      Move away from type receiver allocators.
+      (generics support New[T]() *T or whatever).
+    severity: WARNING
+

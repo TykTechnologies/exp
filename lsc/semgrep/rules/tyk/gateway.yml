@@ -1,0 +1,14 @@
+---
+rules:
+  - id: find-structs-with-gateway-field
+    patterns:
+      - pattern: |
+          type $S struct {
+            ...
+            $F *Gateway
+            ...
+          }
+    languages:
+      - go
+    message: Find structs with a field of type *Gateway in the same package
+    severity: WARNING

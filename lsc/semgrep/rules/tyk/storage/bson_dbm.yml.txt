@@ -1,0 +1,47 @@
+---
+
+rules:
+  - id: tyk.replace.bson.m.with.dbm
+    patterns:
+      - pattern-inside: |
+          import "gopkg.in/mgo.v2/bson"
+          ...
+      - pattern-regex: 'bson\.M'
+    fix: DBM
+    languages:
+      - go
+    message: Use DBM instead of bson.M types
+    severity: WARNING
+
+  - id: tyk.replace.bson.NewObjectId.wildcard
+    patterns:
+      - pattern-either:
+        - pattern-regex: 'bson.NewObjectId(.*)'
+        - pattern-regex: 'apidef.NewObjectId(.*)'
+    fix: 'NewObjectId$1'
+    languages:
+      - go
+    message: Use local NewObjectId* instead of apidef/bson.NewObjectId*
+    severity: WARNING
+
+  - id: tyk.replace.apidef.ObjectId
+    patterns:
+      - pattern-either:
+        - pattern-regex: 'bson\.ObjectId'
+        - pattern-regex: 'apidef\.ObjectId'
+    fix: ObjectId
+    languages:
+      - go
+    message: Use local ObjectId instead of apidef/bson.ObjectId
+    severity: WARNING
+
+  - id: tyk.fix.object.ID
+    patterns:
+      - pattern-either:
+        - pattern: 'ObjectId'
+    fix: ObjectID
+    languages:
+      - go
+    message: Use local ObjectId instead of apidef/bson.ObjectId
+    severity: WARNING
+
