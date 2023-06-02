@@ -12,3 +12,16 @@ rules:
       - go
     message: Find structs with a field of type *Gateway in the same package
     severity: WARNING
+
+  - id: find-functions-invoked-from-gw-field
+    patterns:
+      - pattern: |
+          func ($K $T) $V(...) {
+            ...
+            $K.Gw.$F(...)
+            ...
+          }
+    languages:
+      - go
+    message: Find structs with a field of type *Gateway in the same package
+    severity: WARNING
