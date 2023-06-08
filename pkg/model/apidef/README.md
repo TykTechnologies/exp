@@ -4,453 +4,453 @@ APIDefinition represents the configuration for a single proxied API and it's ver
 
 swagger:model
 
-**Id** (JSON: `id`)
+**Field: `id`** (Id, `model.ObjectID`)
 
 
 
-**Name** (JSON: `name`)
+**Field: `name`** (Name, `string`)
 
 
 
-**Expiration** (JSON: `expiration`)
+**Field: `expiration`** (Expiration, `string`)
 
 
 
-**Slug** (JSON: `slug`)
+**Field: `slug`** (Slug, `string`)
 
 
 
-**ListenPort** (JSON: `listen_port`)
+**Field: `listen_port`** (ListenPort, `int`)
 
 
 
-**Protocol** (JSON: `protocol`)
+**Field: `protocol`** (Protocol, `string`)
 
 
 
-**EnableProxyProtocol** (JSON: `enable_proxy_protocol`)
+**Field: `enable_proxy_protocol`** (EnableProxyProtocol, `bool`)
 
 
 
-**APIID** (JSON: `api_id`)
+**Field: `api_id`** (APIID, `string`)
 
 
 
-**OrgID** (JSON: `org_id`)
+**Field: `org_id`** (OrgID, `string`)
 
 
 
-**UseKeylessAccess** (JSON: `use_keyless`)
+**Field: `use_keyless`** (UseKeylessAccess, `bool`)
 
 
 
-**UseOauth2** (JSON: `use_oauth2`)
+**Field: `use_oauth2`** (UseOauth2, `bool`)
 
 
 
-**ExternalOAuth** (JSON: `external_oauth`)
+**Field: `external_oauth`** (ExternalOAuth, [ExternalOAuth](#ExternalOAuth))
 
 
 
-**UseOpenID** (JSON: `use_openid`)
+**Field: `use_openid`** (UseOpenID, `bool`)
 
 
 
-**OpenIDOptions** (JSON: `openid_options`)
+**Field: `openid_options`** (OpenIDOptions, [OpenIDOptions](#OpenIDOptions))
 
 
 
-**Oauth2Meta** (JSON: `oauth_meta`)
+**Field: `oauth_meta`** (Oauth2Meta, `struct{}`)
 
 
 
-**Auth** (JSON: `auth`)
+**Field: `auth`** (Auth, [AuthConfig](#AuthConfig))
 
 
 
 > Deprecated: Use AuthConfigs instead.
 
-**AuthConfigs** (JSON: `auth_configs`)
+**Field: `auth_configs`** (AuthConfigs, `map[string]AuthConfig`)
 
 
 
-**UseBasicAuth** (JSON: `use_basic_auth`)
+**Field: `use_basic_auth`** (UseBasicAuth, `bool`)
 
 
 
-**BasicAuth** (JSON: `basic_auth`)
+**Field: `basic_auth`** (BasicAuth, `struct{}`)
 
 
 
-**UseMutualTLSAuth** (JSON: `use_mutual_tls_auth`)
+**Field: `use_mutual_tls_auth`** (UseMutualTLSAuth, `bool`)
 
 
 
-**ClientCertificates** (JSON: `client_certificates`)
+**Field: `client_certificates`** (ClientCertificates, `[]string`)
 
 
 
-**UpstreamCertificates** (JSON: `upstream_certificates`)
+**Field: `upstream_certificates`** (UpstreamCertificates, `map[string]string`)
 
 UpstreamCertificates stores the domain to certificate mapping for upstream mutualTLS
 
-**UpstreamCertificatesDisabled** (JSON: `upstream_certificates_disabled`)
+**Field: `upstream_certificates_disabled`** (UpstreamCertificatesDisabled, `bool`)
 
 UpstreamCertificatesDisabled disables upstream mutualTLS on the API
 
-**PinnedPublicKeys** (JSON: `pinned_public_keys`)
+**Field: `pinned_public_keys`** (PinnedPublicKeys, `map[string]string`)
 
 PinnedPublicKeys stores the public key pinning details
 
-**CertificatePinningDisabled** (JSON: `certificate_pinning_disabled`)
+**Field: `certificate_pinning_disabled`** (CertificatePinningDisabled, `bool`)
 
 CertificatePinningDisabled disables public key pinning
 
-**EnableJWT** (JSON: `enable_jwt`)
+**Field: `enable_jwt`** (EnableJWT, `bool`)
 
 
 
-**UseStandardAuth** (JSON: `use_standard_auth`)
+**Field: `use_standard_auth`** (UseStandardAuth, `bool`)
 
 
 
-**UseGoPluginAuth** (JSON: `use_go_plugin_auth`)
-
-
-
-> Deprecated. Use CustomPluginAuthEnabled instead.
-
-**EnableCoProcessAuth** (JSON: `enable_coprocess_auth`)
+**Field: `use_go_plugin_auth`** (UseGoPluginAuth, `bool`)
 
 
 
 > Deprecated. Use CustomPluginAuthEnabled instead.
 
-**CustomPluginAuthEnabled** (JSON: `custom_plugin_auth_enabled`)
+**Field: `enable_coprocess_auth`** (EnableCoProcessAuth, `bool`)
 
 
 
-**JWTSigningMethod** (JSON: `jwt_signing_method`)
+> Deprecated. Use CustomPluginAuthEnabled instead.
+
+**Field: `custom_plugin_auth_enabled`** (CustomPluginAuthEnabled, `bool`)
 
 
 
-**JWTSource** (JSON: `jwt_source`)
+**Field: `jwt_signing_method`** (JWTSigningMethod, `string`)
 
 
 
-**JWTIdentityBaseField** (JSON: `jwt_identity_base_field`)
+**Field: `jwt_source`** (JWTSource, `string`)
 
 
 
-**JWTClientIDBaseField** (JSON: `jwt_client_base_field`)
+**Field: `jwt_identity_base_field`** (JWTIdentityBaseField, `string`)
 
 
 
-**JWTPolicyFieldName** (JSON: `jwt_policy_field_name`)
+**Field: `jwt_client_base_field`** (JWTClientIDBaseField, `string`)
 
 
 
-**JWTDefaultPolicies** (JSON: `jwt_default_policies`)
+**Field: `jwt_policy_field_name`** (JWTPolicyFieldName, `string`)
 
 
 
-**JWTIssuedAtValidationSkew** (JSON: `jwt_issued_at_validation_skew`)
+**Field: `jwt_default_policies`** (JWTDefaultPolicies, `[]string`)
 
 
 
-**JWTExpiresAtValidationSkew** (JSON: `jwt_expires_at_validation_skew`)
+**Field: `jwt_issued_at_validation_skew`** (JWTIssuedAtValidationSkew, `uint64`)
 
 
 
-**JWTNotBeforeValidationSkew** (JSON: `jwt_not_before_validation_skew`)
+**Field: `jwt_expires_at_validation_skew`** (JWTExpiresAtValidationSkew, `uint64`)
 
 
 
-**JWTSkipKid** (JSON: `jwt_skip_kid`)
+**Field: `jwt_not_before_validation_skew`** (JWTNotBeforeValidationSkew, `uint64`)
 
 
 
-**Scopes** (JSON: `scopes`)
+**Field: `jwt_skip_kid`** (JWTSkipKid, `bool`)
 
 
 
-**JWTScopeToPolicyMapping** (JSON: `jwt_scope_to_policy_mapping`)
+**Field: `scopes`** (Scopes, [Scopes](#Scopes))
+
+
+
+**Field: `jwt_scope_to_policy_mapping`** (JWTScopeToPolicyMapping, `map[string]string`)
 
 
 
 > Deprecated: use Scopes.JWT.ScopeToPolicy or Scopes.OIDC.ScopeToPolicy
 
-**JWTScopeClaimName** (JSON: `jwt_scope_claim_name`)
+**Field: `jwt_scope_claim_name`** (JWTScopeClaimName, `string`)
 
 
 
 > Deprecated: use Scopes.JWT.ScopeClaimName or Scopes.OIDC.ScopeClaimName
 
-**NotificationsDetails** (JSON: `notifications`)
+**Field: `notifications`** (NotificationsDetails, [NotificationsManager](#NotificationsManager))
 
 
 
-**EnableSignatureChecking** (JSON: `enable_signature_checking`)
+**Field: `enable_signature_checking`** (EnableSignatureChecking, `bool`)
 
 
 
-**HmacAllowedClockSkew** (JSON: `hmac_allowed_clock_skew`)
+**Field: `hmac_allowed_clock_skew`** (HmacAllowedClockSkew, `float64`)
 
 
 
-**HmacAllowedAlgorithms** (JSON: `hmac_allowed_algorithms`)
+**Field: `hmac_allowed_algorithms`** (HmacAllowedAlgorithms, `[]string`)
 
 
 
-**RequestSigning** (JSON: `request_signing`)
+**Field: `request_signing`** (RequestSigning, [RequestSigningMeta](#RequestSigningMeta))
 
 
 
-**BaseIdentityProvidedBy** (JSON: `base_identity_provided_by`)
+**Field: `base_identity_provided_by`** (BaseIdentityProvidedBy, [AuthTypeEnum](#AuthTypeEnum))
 
 
 
-**VersionDefinition** (JSON: `definition`)
+**Field: `definition`** (VersionDefinition, [VersionDefinition](#VersionDefinition))
 
 
 
-**VersionData** (JSON: `version_data`)
+**Field: `version_data`** (VersionData, [VersionData](#VersionData))
 
 
 
 > Deprecated. Use VersionDefinition instead.
 
-**UptimeTests** (JSON: `uptime_tests`)
+**Field: `uptime_tests`** (UptimeTests, [UptimeTests](#UptimeTests))
 
 
 
-**Proxy** (JSON: `proxy`)
+**Field: `proxy`** (Proxy, [ProxyConfig](#ProxyConfig))
 
 
 
-**DisableRateLimit** (JSON: `disable_rate_limit`)
+**Field: `disable_rate_limit`** (DisableRateLimit, `bool`)
 
 
 
-**DisableQuota** (JSON: `disable_quota`)
+**Field: `disable_quota`** (DisableQuota, `bool`)
 
 
 
-**CustomMiddleware** (JSON: `custom_middleware`)
+**Field: `custom_middleware`** (CustomMiddleware, [MiddlewareSection](#MiddlewareSection))
 
 
 
-**CustomMiddlewareBundle** (JSON: `custom_middleware_bundle`)
+**Field: `custom_middleware_bundle`** (CustomMiddlewareBundle, `string`)
 
 
 
-**CustomMiddlewareBundleDisabled** (JSON: `custom_middleware_bundle_disabled`)
+**Field: `custom_middleware_bundle_disabled`** (CustomMiddlewareBundleDisabled, `bool`)
 
 
 
-**CacheOptions** (JSON: `cache_options`)
+**Field: `cache_options`** (CacheOptions, [CacheOptions](#CacheOptions))
 
 
 
-**SessionLifetimeRespectsKeyExpiration** (JSON: `session_lifetime_respects_key_expiration`)
+**Field: `session_lifetime_respects_key_expiration`** (SessionLifetimeRespectsKeyExpiration, `bool`)
 
 
 
-**SessionLifetime** (JSON: `session_lifetime`)
+**Field: `session_lifetime`** (SessionLifetime, `int64`)
 
 
 
-**Active** (JSON: `active`)
+**Field: `active`** (Active, `bool`)
 
 
 
-**Internal** (JSON: `internal`)
+**Field: `internal`** (Internal, `bool`)
 
 
 
-**AuthProvider** (JSON: `auth_provider`)
+**Field: `auth_provider`** (AuthProvider, [AuthProviderMeta](#AuthProviderMeta))
 
 
 
-**SessionProvider** (JSON: `session_provider`)
+**Field: `session_provider`** (SessionProvider, [SessionProviderMeta](#SessionProviderMeta))
 
 
 
-**EventHandlers** (JSON: `event_handlers`)
+**Field: `event_handlers`** (EventHandlers, [EventHandlerMetaConfig](#EventHandlerMetaConfig))
 
 
 
-**EnableBatchRequestSupport** (JSON: `enable_batch_request_support`)
+**Field: `enable_batch_request_support`** (EnableBatchRequestSupport, `bool`)
 
 
 
-**EnableIpWhiteListing** (JSON: `enable_ip_whitelisting`)
+**Field: `enable_ip_whitelisting`** (EnableIpWhiteListing, `bool`)
 
 
 
-**AllowedIPs** (JSON: `allowed_ips`)
+**Field: `allowed_ips`** (AllowedIPs, `[]string`)
 
 
 
-**EnableIpBlacklisting** (JSON: `enable_ip_blacklisting`)
+**Field: `enable_ip_blacklisting`** (EnableIpBlacklisting, `bool`)
 
 
 
-**BlacklistedIPs** (JSON: `blacklisted_ips`)
+**Field: `blacklisted_ips`** (BlacklistedIPs, `[]string`)
 
 
 
-**DontSetQuotasOnCreate** (JSON: `dont_set_quota_on_create`)
+**Field: `dont_set_quota_on_create`** (DontSetQuotasOnCreate, `bool`)
 
 
 
-**ExpireAnalyticsAfter** (JSON: `expire_analytics_after`)
+**Field: `expire_analytics_after`** (ExpireAnalyticsAfter, `int64`)
 
 
 
 > must have an expireAt TTL index set (http://docs.mongodb.org/manual/tutorial/expire-data/)
 
-**ResponseProcessors** (JSON: `response_processors`)
+**Field: `response_processors`** (ResponseProcessors, [[]ResponseProcessor](#ResponseProcessor))
 
 
 
-**CORS** (JSON: `CORS`)
+**Field: `CORS`** (CORS, [CORSConfig](#CORSConfig))
 
 
 
-**Domain** (JSON: `domain`)
+**Field: `domain`** (Domain, `string`)
 
 
 
-**DomainDisabled** (JSON: `domain_disabled`)
+**Field: `domain_disabled`** (DomainDisabled, `bool`)
 
 
 
-**Certificates** (JSON: `certificates`)
+**Field: `certificates`** (Certificates, `[]string`)
 
 
 
-**DoNotTrack** (JSON: `do_not_track`)
+**Field: `do_not_track`** (DoNotTrack, `bool`)
 
 
 
-**EnableContextVars** (JSON: `enable_context_vars`)
+**Field: `enable_context_vars`** (EnableContextVars, `bool`)
 
 
 
-**ConfigData** (JSON: `config_data`)
+**Field: `config_data`** (ConfigData, `map[string]interface{}`)
 
 
 
-**ConfigDataDisabled** (JSON: `config_data_disabled`)
+**Field: `config_data_disabled`** (ConfigDataDisabled, `bool`)
 
 
 
-**TagHeaders** (JSON: `tag_headers`)
+**Field: `tag_headers`** (TagHeaders, `[]string`)
 
 
 
-**GlobalRateLimit** (JSON: `global_rate_limit`)
+**Field: `global_rate_limit`** (GlobalRateLimit, [GlobalRateLimit](#GlobalRateLimit))
 
 
 
-**StripAuthData** (JSON: `strip_auth_data`)
+**Field: `strip_auth_data`** (StripAuthData, `bool`)
 
 
 
-**EnableDetailedRecording** (JSON: `enable_detailed_recording`)
+**Field: `enable_detailed_recording`** (EnableDetailedRecording, `bool`)
 
 
 
-**GraphQL** (JSON: `graphql`)
+**Field: `graphql`** (GraphQL, [GraphQLConfig](#GraphQLConfig))
 
 
 
-**AnalyticsPlugin** (JSON: `analytics_plugin`)
+**Field: `analytics_plugin`** (AnalyticsPlugin, [AnalyticsPluginConfig](#AnalyticsPluginConfig))
 
 
 
-**TagsDisabled** (JSON: `tags_disabled`)
+**Field: `tags_disabled`** (TagsDisabled, `bool`)
 
 Gateway segment tags
 
-**Tags** (JSON: `tags`)
+**Field: `tags`** (Tags, `[]string`)
 
 
 
-**IsOAS** (JSON: `is_oas`)
+**Field: `is_oas`** (IsOAS, `bool`)
 
 IsOAS is set to true when API has an OAS definition (created in OAS or migrated to OAS)
 
 # ExternalOAuth
 
-**Enabled** (JSON: `enabled`)
+**Field: `enabled`** (Enabled, `bool`)
 
 
 
-**Providers** (JSON: `providers`)
+**Field: `providers`** (Providers, [[]Provider](#Provider))
 
 
 
 # OpenIDOptions
 
-**Providers** (JSON: `providers`)
+**Field: `providers`** (Providers, [[]OIDProviderConfig](#OIDProviderConfig))
 
 
 
-**SegregateByClient** (JSON: `segregate_by_client`)
+**Field: `segregate_by_client`** (SegregateByClient, `bool`)
 
 
 
 # AuthConfig
 
-**Name** (JSON: `name`)
+**Field: `name`** (Name, `string`)
 
 
 
-**UseParam** (JSON: `use_param`)
+**Field: `use_param`** (UseParam, `bool`)
 
 
 
-**ParamName** (JSON: `param_name`)
+**Field: `param_name`** (ParamName, `string`)
 
 
 
-**UseCookie** (JSON: `use_cookie`)
+**Field: `use_cookie`** (UseCookie, `bool`)
 
 
 
-**CookieName** (JSON: `cookie_name`)
+**Field: `cookie_name`** (CookieName, `string`)
 
 
 
-**DisableHeader** (JSON: `disable_header`)
+**Field: `disable_header`** (DisableHeader, `bool`)
 
 
 
-**AuthHeaderName** (JSON: `auth_header_name`)
+**Field: `auth_header_name`** (AuthHeaderName, `string`)
 
 
 
-**UseCertificate** (JSON: `use_certificate`)
+**Field: `use_certificate`** (UseCertificate, `bool`)
 
 
 
-**ValidateSignature** (JSON: `validate_signature`)
+**Field: `validate_signature`** (ValidateSignature, `bool`)
 
 
 
-**Signature** (JSON: `signature`)
+**Field: `signature`** (Signature, [SignatureConfig](#SignatureConfig))
 
 
 
 # Scopes
 
-**JWT** (JSON: `jwt`)
+**Field: `jwt`** (JWT, [ScopeClaim](#ScopeClaim))
 
 
 
-**OIDC** (JSON: `oidc`)
+**Field: `oidc`** (OIDC, [ScopeClaim](#ScopeClaim))
 
 
 
@@ -459,289 +459,299 @@ IsOAS is set to true when API has an OAS definition (created in OAS or migrated 
 NotificationsManager handles sending notifications to OAuth endpoints to notify the provider of key changes.
 TODO: Make this more generic
 
-**SharedSecret** (JSON: `shared_secret`)
+**Field: `shared_secret`** (SharedSecret, `string`)
 
 
 
-**OAuthKeyChangeURL** (JSON: `oauth_on_keychange_url`)
+**Field: `oauth_on_keychange_url`** (OAuthKeyChangeURL, `string`)
 
 
 
 # RequestSigningMeta
 
-**IsEnabled** (JSON: `is_enabled`)
+**Field: `is_enabled`** (IsEnabled, `bool`)
 
 
 
-**Secret** (JSON: `secret`)
+**Field: `secret`** (Secret, `string`)
 
 
 
-**KeyId** (JSON: `key_id`)
+**Field: `key_id`** (KeyId, `string`)
 
 
 
-**Algorithm** (JSON: `algorithm`)
+**Field: `algorithm`** (Algorithm, `string`)
 
 
 
-**HeaderList** (JSON: `header_list`)
+**Field: `header_list`** (HeaderList, `[]string`)
 
 
 
-**CertificateId** (JSON: `certificate_id`)
+**Field: `certificate_id`** (CertificateId, `string`)
 
 
 
-**SignatureHeader** (JSON: `signature_header`)
+**Field: `signature_header`** (SignatureHeader, `string`)
 
 
 
 # AuthTypeEnum
 
-No exposed fields available.
+Type defined as `string`, see [string](string) definition.
 
 # VersionDefinition
 
-**Enabled** (JSON: `enabled`)
+**Field: `enabled`** (Enabled, `bool`)
 
 
 
-**Name** (JSON: `name`)
+**Field: `name`** (Name, `string`)
 
 
 
-**Default** (JSON: `default`)
+**Field: `default`** (Default, `string`)
 
 
 
-**Location** (JSON: `location`)
+**Field: `location`** (Location, `string`)
 
 
 
-**Key** (JSON: `key`)
+**Field: `key`** (Key, `string`)
 
 
 
-**StripPath** (JSON: `strip_path`)
+**Field: `strip_path`** (StripPath, `bool`)
 
 
 
 > Deprecated. Use StripVersioningData instead.
 
-**StripVersioningData** (JSON: `strip_versioning_data`)
+**Field: `strip_versioning_data`** (StripVersioningData, `bool`)
 
 
 
-**Versions** (JSON: `versions`)
+**Field: `versions`** (Versions, `map[string]string`)
 
 
 
 # VersionData
 
-**NotVersioned** (JSON: `not_versioned`)
+**Field: `not_versioned`** (NotVersioned, `bool`)
 
 
 
-**DefaultVersion** (JSON: `default_version`)
+**Field: `default_version`** (DefaultVersion, `string`)
 
 
 
-**Versions** (JSON: `versions`)
+**Field: `versions`** (Versions, `map[string]VersionInfo`)
 
 
 
 # UptimeTests
 
-**CheckList** (JSON: `check_list`)
+**Field: `check_list`** (CheckList, [[]HostCheckObject](#HostCheckObject))
 
 
 
-**Config** (JSON: `config`)
+**Field: `config`** (Config, [UptimeTestsConfig](#UptimeTestsConfig))
 
 
 
 # ProxyConfig
 
-**PreserveHostHeader** (JSON: `preserve_host_header`)
+**Field: `preserve_host_header`** (PreserveHostHeader, `bool`)
 
 
 
-**ListenPath** (JSON: `listen_path`)
+**Field: `listen_path`** (ListenPath, `string`)
 
 
 
-**TargetURL** (JSON: `target_url`)
+**Field: `target_url`** (TargetURL, `string`)
 
 
 
-**DisableStripSlash** (JSON: `disable_strip_slash`)
+**Field: `disable_strip_slash`** (DisableStripSlash, `bool`)
 
 
 
-**StripListenPath** (JSON: `strip_listen_path`)
+**Field: `strip_listen_path`** (StripListenPath, `bool`)
 
 
 
-**EnableLoadBalancing** (JSON: `enable_load_balancing`)
+**Field: `enable_load_balancing`** (EnableLoadBalancing, `bool`)
 
 
 
-**Targets** (JSON: `target_list`)
+**Field: `target_list`** (Targets, `[]string`)
 
 
 
-**CheckHostAgainstUptimeTests** (JSON: `check_host_against_uptime_tests`)
+**Field: `check_host_against_uptime_tests`** (CheckHostAgainstUptimeTests, `bool`)
 
 
 
-**ServiceDiscovery** (JSON: `service_discovery`)
+**Field: `service_discovery`** (ServiceDiscovery, [ServiceDiscoveryConfiguration](#ServiceDiscoveryConfiguration))
 
 
 
-**Transport** (JSON: `transport`)
+**Field: `transport`** (Transport, `struct{}`)
 
 
 
 # MiddlewareSection
 
-**Pre** (JSON: `pre`)
+**Field: `pre`** (Pre, [[]MiddlewareDefinition](#MiddlewareDefinition))
 
 
 
-**Post** (JSON: `post`)
+**Field: `post`** (Post, [[]MiddlewareDefinition](#MiddlewareDefinition))
 
 
 
-**PostKeyAuth** (JSON: `post_key_auth`)
+**Field: `post_key_auth`** (PostKeyAuth, [[]MiddlewareDefinition](#MiddlewareDefinition))
 
 
 
-**AuthCheck** (JSON: `auth_check`)
+**Field: `auth_check`** (AuthCheck, [MiddlewareDefinition](#MiddlewareDefinition))
 
 
 
-**Response** (JSON: `response`)
+**Field: `response`** (Response, [[]MiddlewareDefinition](#MiddlewareDefinition))
 
 
 
-**Driver** (JSON: `driver`)
+**Field: `driver`** (Driver, [MiddlewareDriver](#MiddlewareDriver))
 
 
 
-**IdExtractor** (JSON: `id_extractor`)
+**Field: `id_extractor`** (IdExtractor, [MiddlewareIdExtractor](#MiddlewareIdExtractor))
 
 
 
 # CacheOptions
 
-**CacheTimeout** (JSON: `cache_timeout`)
+**Field: `cache_timeout`** (CacheTimeout, `int64`)
 
 
 
-**EnableCache** (JSON: `enable_cache`)
+**Field: `enable_cache`** (EnableCache, `bool`)
 
 
 
-**CacheAllSafeRequests** (JSON: `cache_all_safe_requests`)
+**Field: `cache_all_safe_requests`** (CacheAllSafeRequests, `bool`)
 
 
 
-**CacheOnlyResponseCodes** (JSON: `cache_response_codes`)
+**Field: `cache_response_codes`** (CacheOnlyResponseCodes, `[]int`)
 
 
 
-**EnableUpstreamCacheControl** (JSON: `enable_upstream_cache_control`)
+**Field: `enable_upstream_cache_control`** (EnableUpstreamCacheControl, `bool`)
 
 
 
-**CacheControlTTLHeader** (JSON: `cache_control_ttl_header`)
+**Field: `cache_control_ttl_header`** (CacheControlTTLHeader, `string`)
 
 
 
-**CacheByHeaders** (JSON: `cache_by_headers`)
+**Field: `cache_by_headers`** (CacheByHeaders, `[]string`)
 
 
 
 # AuthProviderMeta
 
-**Name** (JSON: `name`)
+**Field: `name`** (Name, [AuthProviderCode](#AuthProviderCode))
 
 
 
-**StorageEngine** (JSON: `storage_engine`)
+**Field: `storage_engine`** (StorageEngine, [StorageEngineCode](#StorageEngineCode))
 
 
 
-**Meta** (JSON: `meta`)
+**Field: `meta`** (Meta, `map[string]interface{}`)
 
 
 
 # SessionProviderMeta
 
-**Name** (JSON: `name`)
+**Field: `name`** (Name, [SessionProviderCode](#SessionProviderCode))
 
 
 
-**StorageEngine** (JSON: `storage_engine`)
+**Field: `storage_engine`** (StorageEngine, [StorageEngineCode](#StorageEngineCode))
 
 
 
-**Meta** (JSON: `meta`)
+**Field: `meta`** (Meta, `map[string]interface{}`)
 
 
 
 # EventHandlerMetaConfig
 
-**Events** (JSON: `events`)
+**Field: `events`** (Events, `map[TykEvent]interface{}`)
+
+
+
+# ResponseProcessor
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `options`** (Options, ``)
 
 
 
 # CORSConfig
 
-**Enable** (JSON: `enable`)
+**Field: `enable`** (Enable, `bool`)
 
 
 
-**AllowedOrigins** (JSON: `allowed_origins`)
+**Field: `allowed_origins`** (AllowedOrigins, `[]string`)
 
 
 
-**AllowedMethods** (JSON: `allowed_methods`)
+**Field: `allowed_methods`** (AllowedMethods, `[]string`)
 
 
 
-**AllowedHeaders** (JSON: `allowed_headers`)
+**Field: `allowed_headers`** (AllowedHeaders, `[]string`)
 
 
 
-**ExposedHeaders** (JSON: `exposed_headers`)
+**Field: `exposed_headers`** (ExposedHeaders, `[]string`)
 
 
 
-**AllowCredentials** (JSON: `allow_credentials`)
+**Field: `allow_credentials`** (AllowCredentials, `bool`)
 
 
 
-**MaxAge** (JSON: `max_age`)
+**Field: `max_age`** (MaxAge, `int`)
 
 
 
-**OptionsPassthrough** (JSON: `options_passthrough`)
+**Field: `options_passthrough`** (OptionsPassthrough, `bool`)
 
 
 
-**Debug** (JSON: `debug`)
+**Field: `debug`** (Debug, `bool`)
 
 
 
 # GlobalRateLimit
 
-**Rate** (JSON: `rate`)
+**Field: `rate`** (Rate, `float64`)
 
 
 
-**Per** (JSON: `per`)
+**Field: `per`** (Per, `float64`)
 
 
 
@@ -749,1429 +759,1517 @@ No exposed fields available.
 
 GraphQLConfig is the root config object for a GraphQL API.
 
-**Enabled** (JSON: `enabled`)
+**Field: `enabled`** (Enabled, `bool`)
 
 Enabled indicates if GraphQL should be enabled.
 
-**ExecutionMode** (JSON: `execution_mode`)
+**Field: `execution_mode`** (ExecutionMode, [GraphQLExecutionMode](#GraphQLExecutionMode))
 
 ExecutionMode is the mode to define how an api behaves.
 
-**Version** (JSON: `version`)
+**Field: `version`** (Version, [GraphQLConfigVersion](#GraphQLConfigVersion))
 
 Version defines the version of the GraphQL config and engine to be used.
 
-**Schema** (JSON: `schema`)
+**Field: `schema`** (Schema, `string`)
 
 Schema is the GraphQL Schema exposed by the GraphQL API/Upstream/Engine.
 
-**LastSchemaUpdate** (JSON: `last_schema_update`)
+**Field: `last_schema_update`** (LastSchemaUpdate, `time.Time`)
 
 LastSchemaUpdate contains the date and time of the last triggered schema update to the upstream.
 
-**TypeFieldConfigurations** (JSON: `type_field_configurations`)
+**Field: `type_field_configurations`** (TypeFieldConfigurations, `[]datasource.TypeFieldConfiguration`)
 
 TypeFieldConfigurations is a rule set of data source and mapping of a schema field.
 
-**GraphQLPlayground** (JSON: `playground`)
+**Field: `playground`** (GraphQLPlayground, [GraphQLPlayground](#GraphQLPlayground))
 
 GraphQLPlayground is the Playground specific configuration.
 
-**Engine** (JSON: `engine`)
+**Field: `engine`** (Engine, [GraphQLEngineConfig](#GraphQLEngineConfig))
 
 Engine holds the configuration for engine v2 and upwards.
 
-**Proxy** (JSON: `proxy`)
+**Field: `proxy`** (Proxy, [GraphQLProxyConfig](#GraphQLProxyConfig))
 
 Proxy holds the configuration for a proxy only api.
 
-**Subgraph** (JSON: `subgraph`)
+**Field: `subgraph`** (Subgraph, [GraphQLSubgraphConfig](#GraphQLSubgraphConfig))
 
 Subgraph holds the configuration for a GraphQL federation subgraph.
 
-**Supergraph** (JSON: `supergraph`)
+**Field: `supergraph`** (Supergraph, [GraphQLSupergraphConfig](#GraphQLSupergraphConfig))
 
 Supergraph holds the configuration for a GraphQL federation supergraph.
 
 # AnalyticsPluginConfig
 
-**Enabled** (JSON: `enable`)
+**Field: `enable`** (Enabled, `bool`)
 
 
 
-**PluginPath** (JSON: `plugin_path`)
+**Field: `plugin_path`** (PluginPath, `string`)
 
 
 
-**FuncName** (JSON: `func_name`)
-
-
-
-# ValidationResult
-
-**IsValid** (JSON: `IsValid`)
-
-
-
-**Errors** (JSON: `Errors`)
-
-
-
-# ValidationRuleSet
-
-No exposed fields available.
-
-# ValidationRule
-
-No exposed fields available.
-
-# RuleUniqueDataSourceNames
-
-No exposed fields available.
-
-# RuleAtLeastEnableOneAuthSource
-
-No exposed fields available.
-
-# RuleValidateIPList
-
-No exposed fields available.
-
-# AuthProviderCode
-
-No exposed fields available.
-
-# SessionProviderCode
-
-No exposed fields available.
-
-# StorageEngineCode
-
-No exposed fields available.
-
-# TykEvent
-
-No exposed fields available.
-
-# TykEventHandlerName
-
-No exposed fields available.
-
-# EndpointMethodAction
-
-No exposed fields available.
-
-# SourceMode
-
-No exposed fields available.
-
-# MiddlewareDriver
-
-No exposed fields available.
-
-# IdExtractorSource
-
-No exposed fields available.
-
-# IdExtractorType
-
-No exposed fields available.
-
-# RoutingTriggerOnType
-
-No exposed fields available.
-
-# SubscriptionType
-
-No exposed fields available.
-
-# IDExtractor
-
-No exposed fields available.
-
-# EndpointMethodMeta
-
-**Action** (JSON: `action`)
-
-
-
-**Code** (JSON: `code`)
-
-
-
-**Data** (JSON: `data`)
-
-
-
-**Headers** (JSON: `headers`)
-
-
-
-# MockResponseMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**IgnoreCase** (JSON: `ignore_case`)
-
-
-
-**Code** (JSON: `code`)
-
-
-
-**Body** (JSON: `body`)
-
-
-
-**Headers** (JSON: `headers`)
-
-
-
-# EndPointMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**IgnoreCase** (JSON: `ignore_case`)
-
-
-
-**MethodActions** (JSON: `method_actions`)
-
-Deprecated. Use Method instead.
-
-# CacheMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**CacheKeyRegex** (JSON: `cache_key_regex`)
-
-
-
-**CacheOnlyResponseCodes** (JSON: `cache_response_codes`)
-
-
-
-# RequestInputType
-
-No exposed fields available.
-
-# TemplateData
-
-**Input** (JSON: `input_type`)
-
-
-
-**Mode** (JSON: `template_mode`)
-
-
-
-**EnableSession** (JSON: `enable_session`)
-
-
-
-**TemplateSource** (JSON: `template_source`)
-
-
-
-# TemplateMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**TemplateData** (JSON: `template_data`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-# TransformJQMeta
-
-**Filter** (JSON: `filter`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-# HeaderInjectionMeta
-
-**DeleteHeaders** (JSON: `delete_headers`)
-
-
-
-**AddHeaders** (JSON: `add_headers`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**ActOnResponse** (JSON: `act_on`)
-
-
-
-# HardTimeoutMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**TimeOut** (JSON: `timeout`)
-
-
-
-# TrackEndpointMeta
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-# InternalMeta
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-# RequestSizeMeta
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**SizeLimit** (JSON: `size_limit`)
-
-
-
-# CircuitBreakerMeta
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**ThresholdPercent** (JSON: `threshold_percent`)
-
-
-
-**Samples** (JSON: `samples`)
-
-
-
-**ReturnToServiceAfter** (JSON: `return_to_service_after`)
-
-
-
-**DisableHalfOpenState** (JSON: `disable_half_open_state`)
-
-
-
-# StringRegexMap
-
-**MatchPattern** (JSON: `match_rx`)
-
-
-
-**Reverse** (JSON: `reverse`)
-
-
-
-# RoutingTriggerOptions
-
-**HeaderMatches** (JSON: `header_matches`)
-
-
-
-**QueryValMatches** (JSON: `query_val_matches`)
-
-
-
-**PathPartMatches** (JSON: `path_part_matches`)
-
-
-
-**SessionMetaMatches** (JSON: `session_meta_matches`)
-
-
-
-**RequestContextMatches** (JSON: `request_context_matches`)
-
-
-
-**PayloadMatches** (JSON: `payload_matches`)
-
-
-
-# RoutingTrigger
-
-**On** (JSON: `on`)
-
-
-
-**Options** (JSON: `options`)
-
-
-
-**RewriteTo** (JSON: `rewrite_to`)
-
-
-
-# URLRewriteMeta
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**MatchPattern** (JSON: `match_pattern`)
-
-
-
-**RewriteTo** (JSON: `rewrite_to`)
-
-
-
-**Triggers** (JSON: `triggers`)
-
-
-
-# VirtualMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**ResponseFunctionName** (JSON: `response_function_name`)
-
-
-
-**FunctionSourceType** (JSON: `function_source_type`)
-
-
-
-**FunctionSourceURI** (JSON: `function_source_uri`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**UseSession** (JSON: `use_session`)
-
-
-
-**ProxyOnError** (JSON: `proxy_on_error`)
-
-
-
-# MethodTransformMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**ToMethod** (JSON: `to_method`)
-
-
-
-# ValidatePathMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**Schema** (JSON: `schema`)
-
-
-
-**SchemaB64** (JSON: `schema_b64`)
-
-
-
-**ErrorResponseCode** (JSON: `error_response_code`)
-
-Allows override of default 422 Unprocessible Entity response code for validation errors.
-
-# ValidateRequestMeta
-
-**Enabled** (JSON: `enabled`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**ErrorResponseCode** (JSON: `error_response_code`)
-
-Allows override of default 422 Unprocessible Entity response code for validation errors.
-
-# PersistGraphQLMeta
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**Operation** (JSON: `operation`)
-
-
-
-**Variables** (JSON: `variables`)
-
-
-
-# GoPluginMeta
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**PluginPath** (JSON: `plugin_path`)
-
-
-
-**SymbolName** (JSON: `func_name`)
-
-
-
-# ExtendedPathsSet
-
-**Ignored** (JSON: `ignored`)
-
-
-
-**WhiteList** (JSON: `white_list`)
-
-
-
-**BlackList** (JSON: `black_list`)
-
-
-
-**MockResponse** (JSON: `mock_response`)
-
-
-
-**Cached** (JSON: `cache`)
-
-
-
-**AdvanceCacheConfig** (JSON: `advance_cache_config`)
-
-
-
-**Transform** (JSON: `transform`)
-
-
-
-**TransformResponse** (JSON: `transform_response`)
-
-
-
-**TransformJQ** (JSON: `transform_jq`)
-
-
-
-**TransformJQResponse** (JSON: `transform_jq_response`)
-
-
-
-**TransformHeader** (JSON: `transform_headers`)
-
-
-
-**TransformResponseHeader** (JSON: `transform_response_headers`)
-
-
-
-**HardTimeouts** (JSON: `hard_timeouts`)
-
-
-
-**CircuitBreaker** (JSON: `circuit_breakers`)
-
-
-
-**URLRewrite** (JSON: `url_rewrites`)
-
-
-
-**Virtual** (JSON: `virtual`)
-
-
-
-**SizeLimit** (JSON: `size_limits`)
-
-
-
-**MethodTransforms** (JSON: `method_transforms`)
-
-
-
-**TrackEndpoints** (JSON: `track_endpoints`)
-
-
-
-**DoNotTrackEndpoints** (JSON: `do_not_track_endpoints`)
-
-
-
-**ValidateJSON** (JSON: `validate_json`)
-
-
-
-**ValidateRequest** (JSON: `validate_request`)
-
-
-
-**Internal** (JSON: `internal`)
-
-
-
-**GoPlugin** (JSON: `go_plugin`)
-
-
-
-**PersistGraphQL** (JSON: `persist_graphql`)
-
-
-
-# VersionInfo
-
-**Name** (JSON: `name`)
-
-
-
-**Expires** (JSON: `expires`)
-
-
-
-**Paths** (JSON: `paths`)
-
-
-
-**UseExtendedPaths** (JSON: `use_extended_paths`)
-
-
-
-**ExtendedPaths** (JSON: `extended_paths`)
-
-
-
-**GlobalHeaders** (JSON: `global_headers`)
-
-
-
-**GlobalHeadersRemove** (JSON: `global_headers_remove`)
-
-
-
-**GlobalResponseHeaders** (JSON: `global_response_headers`)
-
-
-
-**GlobalResponseHeadersRemove** (JSON: `global_response_headers_remove`)
-
-
-
-**IgnoreEndpointCase** (JSON: `ignore_endpoint_case`)
-
-
-
-**GlobalSizeLimit** (JSON: `global_size_limit`)
-
-
-
-**OverrideTarget** (JSON: `override_target`)
-
-
-
-# EventHandlerTriggerConfig
-
-**Handler** (JSON: `handler_name`)
-
-
-
-**HandlerMeta** (JSON: `handler_meta`)
-
-
-
-# MiddlewareDefinition
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**Name** (JSON: `name`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-**RequireSession** (JSON: `require_session`)
-
-
-
-**RawBodyOnly** (JSON: `raw_body_only`)
-
-
-
-# MiddlewareIdExtractor
-
-**Disabled** (JSON: `disabled`)
-
-
-
-**ExtractFrom** (JSON: `extract_from`)
-
-
-
-**ExtractWith** (JSON: `extract_with`)
-
-
-
-**ExtractorConfig** (JSON: `extractor_config`)
-
-
-
-# ResponseProcessor
-
-**Name** (JSON: `name`)
-
-
-
-**Options** (JSON: `options`)
-
-
-
-# HostCheckObject
-
-**CheckURL** (JSON: `url`)
-
-
-
-**Protocol** (JSON: `protocol`)
-
-
-
-**Timeout** (JSON: `timeout`)
-
-
-
-**EnableProxyProtocol** (JSON: `enable_proxy_protocol`)
-
-
-
-**Commands** (JSON: `commands`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**Headers** (JSON: `headers`)
-
-
-
-**Body** (JSON: `body`)
-
-
-
-# CheckCommand
-
-**Name** (JSON: `name`)
-
-
-
-**Message** (JSON: `message`)
-
-
-
-# ServiceDiscoveryConfiguration
-
-**UseDiscoveryService** (JSON: `use_discovery_service`)
-
-
-
-**QueryEndpoint** (JSON: `query_endpoint`)
-
-
-
-**UseNestedQuery** (JSON: `use_nested_query`)
-
-
-
-**ParentDataPath** (JSON: `parent_data_path`)
-
-
-
-**DataPath** (JSON: `data_path`)
-
-
-
-**PortDataPath** (JSON: `port_data_path`)
-
-
-
-**TargetPath** (JSON: `target_path`)
-
-
-
-**UseTargetList** (JSON: `use_target_list`)
-
-
-
-**CacheDisabled** (JSON: `cache_disabled`)
-
-
-
-**CacheTimeout** (JSON: `cache_timeout`)
-
-
-
-**EndpointReturnsList** (JSON: `endpoint_returns_list`)
-
-
-
-# OIDProviderConfig
-
-**Issuer** (JSON: `issuer`)
-
-
-
-**ClientIDs** (JSON: `client_ids`)
-
-
-
-# ScopeClaim
-
-**ScopeClaimName** (JSON: `scope_claim_name`)
-
-
-
-**ScopeToPolicy** (JSON: `scope_to_policy`)
-
-
-
-# UptimeTestsConfig
-
-**ExpireUptimeAnalyticsAfter** (JSON: `expire_utime_after`)
-
-
-
-> must have an expireAt TTL index set (http://docs.mongodb.org/manual/tutorial/expire-data/)
-
-**ServiceDiscovery** (JSON: `service_discovery`)
-
-
-
-**RecheckWait** (JSON: `recheck_wait`)
-
-
-
-# SignatureConfig
-
-**Algorithm** (JSON: `algorithm`)
-
-
-
-**Header** (JSON: `header`)
-
-
-
-**UseParam** (JSON: `use_param`)
-
-
-
-**ParamName** (JSON: `param_name`)
-
-
-
-**Secret** (JSON: `secret`)
-
-
-
-**AllowedClockSkew** (JSON: `allowed_clock_skew`)
-
-
-
-**ErrorCode** (JSON: `error_code`)
-
-
-
-**ErrorMessage** (JSON: `error_message`)
-
-
-
-# BundleManifest
-
-**FileList** (JSON: `file_list`)
-
-
-
-**CustomMiddleware** (JSON: `custom_middleware`)
-
-
-
-**Checksum** (JSON: `checksum`)
-
-
-
-**Signature** (JSON: `signature`)
-
-
-
-# GraphQLConfigVersion
-
-No exposed fields available.
-
-# GraphQLResponseExtensions
-
-**OnErrorForwarding** (JSON: `on_error_forwarding`)
-
-
-
-# GraphQLProxyConfig
-
-**AuthHeaders** (JSON: `auth_headers`)
-
-
-
-**SubscriptionType** (JSON: `subscription_type`)
-
-
-
-**RequestHeaders** (JSON: `request_headers`)
-
-
-
-**UseResponseExtensions** (JSON: `use_response_extensions`)
-
-
-
-# GraphQLSubgraphConfig
-
-**SDL** (JSON: `sdl`)
-
-
-
-# GraphQLSupergraphConfig
-
-**UpdatedAt** (JSON: `updated_at`)
-
-UpdatedAt contains the date and time of the last update of a supergraph API.
-
-**Subgraphs** (JSON: `subgraphs`)
-
-
-
-**MergedSDL** (JSON: `merged_sdl`)
-
-
-
-**GlobalHeaders** (JSON: `global_headers`)
-
-
-
-**DisableQueryBatching** (JSON: `disable_query_batching`)
-
-
-
-# GraphQLSubgraphEntity
-
-**APIID** (JSON: `api_id`)
-
-
-
-**Name** (JSON: `name`)
-
-
-
-**URL** (JSON: `url`)
-
-
-
-**SDL** (JSON: `sdl`)
-
-
-
-**Headers** (JSON: `headers`)
-
-
-
-**SubscriptionType** (JSON: `subscription_type`)
-
-
-
-# GraphQLEngineConfig
-
-**FieldConfigs** (JSON: `field_configs`)
-
-
-
-**DataSources** (JSON: `data_sources`)
-
-
-
-# GraphQLFieldConfig
-
-**TypeName** (JSON: `type_name`)
-
-
-
-**FieldName** (JSON: `field_name`)
-
-
-
-**DisableDefaultMapping** (JSON: `disable_default_mapping`)
-
-
-
-**Path** (JSON: `path`)
-
-
-
-# GraphQLEngineDataSourceKind
-
-No exposed fields available.
-
-# GraphQLEngineDataSource
-
-**Kind** (JSON: `kind`)
-
-
-
-**Name** (JSON: `name`)
-
-
-
-**Internal** (JSON: `internal`)
-
-
-
-**RootFields** (JSON: `root_fields`)
-
-
-
-**Config** (JSON: `config`)
-
-
-
-# GraphQLTypeFields
-
-**Type** (JSON: `type`)
-
-
-
-**Fields** (JSON: `fields`)
-
-
-
-# GraphQLEngineDataSourceConfigREST
-
-**URL** (JSON: `url`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**Headers** (JSON: `headers`)
-
-
-
-**Query** (JSON: `query`)
-
-
-
-**Body** (JSON: `body`)
-
-
-
-# GraphQLEngineDataSourceConfigGraphQL
-
-**URL** (JSON: `url`)
-
-
-
-**Method** (JSON: `method`)
-
-
-
-**Headers** (JSON: `headers`)
-
-
-
-**SubscriptionType** (JSON: `subscription_type`)
-
-
-
-**HasOperation** (JSON: `has_operation`)
-
-
-
-**Operation** (JSON: `operation`)
-
-
-
-**Variables** (JSON: `variables`)
-
-
-
-# GraphQLEngineDataSourceConfigKafka
-
-**BrokerAddresses** (JSON: `broker_addresses`)
-
-
-
-**Topics** (JSON: `topics`)
-
-
-
-**GroupID** (JSON: `group_id`)
-
-
-
-**ClientID** (JSON: `client_id`)
-
-
-
-**KafkaVersion** (JSON: `kafka_version`)
-
-
-
-**StartConsumingLatest** (JSON: `start_consuming_latest`)
-
-
-
-**BalanceStrategy** (JSON: `balance_strategy`)
-
-
-
-**IsolationLevel** (JSON: `isolation_level`)
-
-
-
-**SASL** (JSON: `sasl`)
-
-
-
-# QueryVariable
-
-**Name** (JSON: `name`)
-
-
-
-**Value** (JSON: `value`)
+**Field: `func_name`** (FuncName, `string`)
 
 
 
 # Provider
 
-**JWT** (JSON: `jwt`)
+**Field: `jwt`** (JWT, [JWTValidation](#JWTValidation))
 
 
 
-**Introspection** (JSON: `introspection`)
+**Field: `introspection`** (Introspection, [Introspection](#Introspection))
 
 
 
-# JWTValidation
+# OIDProviderConfig
 
-**Enabled** (JSON: `enabled`)
+**Field: `issuer`** (Issuer, `string`)
 
 
 
-**SigningMethod** (JSON: `signing_method`)
+**Field: `client_ids`** (ClientIDs, `map[string]string`)
 
 
 
-**Source** (JSON: `source`)
+# SignatureConfig
 
+**Field: `algorithm`** (Algorithm, `string`)
 
 
-**IssuedAtValidationSkew** (JSON: `issued_at_validation_skew`)
 
+**Field: `header`** (Header, `string`)
 
 
-**NotBeforeValidationSkew** (JSON: `not_before_validation_skew`)
 
+**Field: `use_param`** (UseParam, `bool`)
 
 
-**ExpiresAtValidationSkew** (JSON: `expires_at_validation_skew`)
 
+**Field: `param_name`** (ParamName, `string`)
 
 
-**IdentityBaseField** (JSON: `identity_base_field`)
 
+**Field: `secret`** (Secret, `string`)
 
 
-# Introspection
 
-**Enabled** (JSON: `enabled`)
+**Field: `allowed_clock_skew`** (AllowedClockSkew, `int64`)
 
 
 
-**URL** (JSON: `url`)
+**Field: `error_code`** (ErrorCode, `int`)
 
 
 
-**ClientID** (JSON: `client_id`)
+**Field: `error_message`** (ErrorMessage, `string`)
 
 
 
-**ClientSecret** (JSON: `client_secret`)
+# ScopeClaim
 
+**Field: `scope_claim_name`** (ScopeClaimName, `string`)
 
 
-**IdentityBaseField** (JSON: `identity_base_field`)
 
+**Field: `scope_to_policy`** (ScopeToPolicy, `map[string]string`)
 
 
-**Cache** (JSON: `cache`)
 
+# ScopeClaim
 
+**Field: `scope_claim_name`** (ScopeClaimName, `string`)
 
-# IntrospectionCache
 
-**Enabled** (JSON: `enabled`)
 
+**Field: `scope_to_policy`** (ScopeToPolicy, `map[string]string`)
 
 
-**Timeout** (JSON: `timeout`)
 
+# HostCheckObject
 
+**Field: `url`** (CheckURL, `string`)
 
-# HostList
 
-No exposed fields available.
 
-# InboundData
+**Field: `protocol`** (Protocol, `string`)
 
-**KeyName** (JSON: `KeyName`)
 
 
+**Field: `timeout`** (Timeout, `time.Duration`)
 
-**Value** (JSON: `Value`)
 
 
+**Field: `enable_proxy_protocol`** (EnableProxyProtocol, `bool`)
 
-**SessionState** (JSON: `SessionState`)
 
 
+**Field: `commands`** (Commands, [[]CheckCommand](#CheckCommand))
 
-**Timeout** (JSON: `Timeout`)
 
 
+**Field: `method`** (Method, `string`)
 
-**Per** (JSON: `Per`)
 
 
+**Field: `headers`** (Headers, `map[string]string`)
 
-**Expire** (JSON: `Expire`)
 
 
+**Field: `body`** (Body, `string`)
 
-# DefRequest
 
-**OrgId** (JSON: `OrgId`)
 
+# UptimeTestsConfig
 
+**Field: `expire_utime_after`** (ExpireUptimeAnalyticsAfter, `int64`)
 
-**Tags** (JSON: `Tags`)
 
 
+> must have an expireAt TTL index set (http://docs.mongodb.org/manual/tutorial/expire-data/)
 
-**LoadOAS** (JSON: `LoadOAS`)
+**Field: `service_discovery`** (ServiceDiscovery, [ServiceDiscoveryConfiguration](#ServiceDiscoveryConfiguration))
 
 
 
-# GroupLoginRequest
+**Field: `recheck_wait`** (RecheckWait, `int`)
 
-**UserKey** (JSON: `UserKey`)
 
 
+# ServiceDiscoveryConfiguration
 
-**GroupID** (JSON: `GroupID`)
+**Field: `use_discovery_service`** (UseDiscoveryService, `bool`)
 
 
 
-**ForceSync** (JSON: `ForceSync`)
+**Field: `query_endpoint`** (QueryEndpoint, `string`)
 
 
 
-# GroupKeySpaceRequest
+**Field: `use_nested_query`** (UseNestedQuery, `bool`)
 
-**OrgID** (JSON: `OrgID`)
 
 
+**Field: `parent_data_path`** (ParentDataPath, `string`)
 
-**GroupID** (JSON: `GroupID`)
 
 
+**Field: `data_path`** (DataPath, `string`)
 
-# KeysValuesPair
 
-**Keys** (JSON: `Keys`)
 
+**Field: `port_data_path`** (PortDataPath, `string`)
 
 
-**Values** (JSON: `Values`)
 
+**Field: `target_path`** (TargetPath, `string`)
 
+
+
+**Field: `use_target_list`** (UseTargetList, `bool`)
+
+
+
+**Field: `cache_disabled`** (CacheDisabled, `bool`)
+
+
+
+**Field: `cache_timeout`** (CacheTimeout, `int64`)
+
+
+
+**Field: `endpoint_returns_list`** (EndpointReturnsList, `bool`)
+
+
+
+# MiddlewareDefinition
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `require_session`** (RequireSession, `bool`)
+
+
+
+**Field: `raw_body_only`** (RawBodyOnly, `bool`)
+
+
+
+# MiddlewareDefinition
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `require_session`** (RequireSession, `bool`)
+
+
+
+**Field: `raw_body_only`** (RawBodyOnly, `bool`)
+
+
+
+# MiddlewareDefinition
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `require_session`** (RequireSession, `bool`)
+
+
+
+**Field: `raw_body_only`** (RawBodyOnly, `bool`)
+
+
+
+# MiddlewareDefinition
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `require_session`** (RequireSession, `bool`)
+
+
+
+**Field: `raw_body_only`** (RawBodyOnly, `bool`)
+
+
+
+# MiddlewareDefinition
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `require_session`** (RequireSession, `bool`)
+
+
+
+**Field: `raw_body_only`** (RawBodyOnly, `bool`)
+
+
+
+# MiddlewareDriver
+
+Type defined as `string`, see [string](string) definition.
+
+# MiddlewareIdExtractor
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `extract_from`** (ExtractFrom, [IdExtractorSource](#IdExtractorSource))
+
+
+
+**Field: `extract_with`** (ExtractWith, [IdExtractorType](#IdExtractorType))
+
+
+
+**Field: `extractor_config`** (ExtractorConfig, `map[string]interface{}`)
+
+
+
+# AuthProviderCode
+
+Type defined as `string`, see [string](string) definition.
+
+# StorageEngineCode
+
+Type defined as `string`, see [string](string) definition.
+
+# SessionProviderCode
+
+Type defined as `string`, see [string](string) definition.
 
 # GraphQLExecutionMode
 
 GraphQLExecutionMode is the mode in which the GraphQL Middleware should operate.
 
-No exposed fields available.
+Type defined as `string`, see [string](string) definition.
+
+# GraphQLConfigVersion
+
+Type defined as `string`, see [string](string) definition.
 
 # GraphQLPlayground
 
 GraphQLPlayground represents the configuration for the public playground which will be hosted alongside the api.
 
-**Enabled** (JSON: `enabled`)
+**Field: `enabled`** (Enabled, `bool`)
 
 Enabled indicates if the playground should be enabled.
 
-**Path** (JSON: `path`)
+**Field: `path`** (Path, `string`)
 
 Path sets the path on which the playground will be hosted if enabled.
+
+# GraphQLEngineConfig
+
+**Field: `field_configs`** (FieldConfigs, [[]GraphQLFieldConfig](#GraphQLFieldConfig))
+
+
+
+**Field: `data_sources`** (DataSources, [[]GraphQLEngineDataSource](#GraphQLEngineDataSource))
+
+
+
+# GraphQLProxyConfig
+
+**Field: `auth_headers`** (AuthHeaders, `map[string]string`)
+
+
+
+**Field: `subscription_type`** (SubscriptionType, [SubscriptionType](#SubscriptionType))
+
+
+
+**Field: `request_headers`** (RequestHeaders, `map[string]string`)
+
+
+
+**Field: `use_response_extensions`** (UseResponseExtensions, [GraphQLResponseExtensions](#GraphQLResponseExtensions))
+
+
+
+# GraphQLSubgraphConfig
+
+**Field: `sdl`** (SDL, `string`)
+
+
+
+# GraphQLSupergraphConfig
+
+**Field: `updated_at`** (UpdatedAt, `time.Time`)
+
+UpdatedAt contains the date and time of the last update of a supergraph API.
+
+**Field: `subgraphs`** (Subgraphs, [[]GraphQLSubgraphEntity](#GraphQLSubgraphEntity))
+
+
+
+**Field: `merged_sdl`** (MergedSDL, `string`)
+
+
+
+**Field: `global_headers`** (GlobalHeaders, `map[string]string`)
+
+
+
+**Field: `disable_query_batching`** (DisableQueryBatching, `bool`)
+
+
+
+# JWTValidation
+
+**Field: `enabled`** (Enabled, `bool`)
+
+
+
+**Field: `signing_method`** (SigningMethod, `string`)
+
+
+
+**Field: `source`** (Source, `string`)
+
+
+
+**Field: `issued_at_validation_skew`** (IssuedAtValidationSkew, `uint64`)
+
+
+
+**Field: `not_before_validation_skew`** (NotBeforeValidationSkew, `uint64`)
+
+
+
+**Field: `expires_at_validation_skew`** (ExpiresAtValidationSkew, `uint64`)
+
+
+
+**Field: `identity_base_field`** (IdentityBaseField, `string`)
+
+
+
+# Introspection
+
+**Field: `enabled`** (Enabled, `bool`)
+
+
+
+**Field: `url`** (URL, `string`)
+
+
+
+**Field: `client_id`** (ClientID, `string`)
+
+
+
+**Field: `client_secret`** (ClientSecret, `string`)
+
+
+
+**Field: `identity_base_field`** (IdentityBaseField, `string`)
+
+
+
+**Field: `cache`** (Cache, [IntrospectionCache](#IntrospectionCache))
+
+
+
+# CheckCommand
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `message`** (Message, `string`)
+
+
+
+# IdExtractorSource
+
+Type defined as `string`, see [string](string) definition.
+
+# IdExtractorType
+
+Type defined as `string`, see [string](string) definition.
+
+# GraphQLFieldConfig
+
+**Field: `type_name`** (TypeName, `string`)
+
+
+
+**Field: `field_name`** (FieldName, `string`)
+
+
+
+**Field: `disable_default_mapping`** (DisableDefaultMapping, `bool`)
+
+
+
+**Field: `path`** (Path, `[]string`)
+
+
+
+# GraphQLEngineDataSource
+
+**Field: `kind`** (Kind, [GraphQLEngineDataSourceKind](#GraphQLEngineDataSourceKind))
+
+
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `internal`** (Internal, `bool`)
+
+
+
+**Field: `root_fields`** (RootFields, [[]GraphQLTypeFields](#GraphQLTypeFields))
+
+
+
+**Field: `config`** (Config, `json.RawMessage`)
+
+
+
+# SubscriptionType
+
+Type defined as `string`, see [string](string) definition.
+
+# GraphQLResponseExtensions
+
+**Field: `on_error_forwarding`** (OnErrorForwarding, `bool`)
+
+
+
+# GraphQLSubgraphEntity
+
+**Field: `api_id`** (APIID, `string`)
+
+
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `url`** (URL, `string`)
+
+
+
+**Field: `sdl`** (SDL, `string`)
+
+
+
+**Field: `headers`** (Headers, `map[string]string`)
+
+
+
+**Field: `subscription_type`** (SubscriptionType, [SubscriptionType](#SubscriptionType))
+
+
+
+# IntrospectionCache
+
+**Field: `enabled`** (Enabled, `bool`)
+
+
+
+**Field: `timeout`** (Timeout, `int64`)
+
+
+
+# GraphQLEngineDataSourceKind
+
+Type defined as `string`, see [string](string) definition.
+
+# GraphQLTypeFields
+
+**Field: `type`** (Type, `string`)
+
+
+
+**Field: `fields`** (Fields, `[]string`)
+
+
+
+# TykEvent
+
+Type defined as `string`, see [string](string) definition.
+
+# TykEventHandlerName
+
+Type defined as `string`, see [string](string) definition.
+
+# EndpointMethodAction
+
+Type defined as `string`, see [string](string) definition.
+
+# SourceMode
+
+Type defined as `string`, see [string](string) definition.
+
+# RoutingTriggerOnType
+
+Type defined as `string`, see [string](string) definition.
+
+# IDExtractor
+
+Type defined as ``, see []() definition.
+
+# EndpointMethodMeta
+
+**Field: `action`** (Action, [EndpointMethodAction](#EndpointMethodAction))
+
+
+
+**Field: `code`** (Code, `int`)
+
+
+
+**Field: `data`** (Data, `string`)
+
+
+
+**Field: `headers`** (Headers, `map[string]string`)
+
+
+
+# MockResponseMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `ignore_case`** (IgnoreCase, `bool`)
+
+
+
+**Field: `code`** (Code, `int`)
+
+
+
+**Field: `body`** (Body, `string`)
+
+
+
+**Field: `headers`** (Headers, `map[string]string`)
+
+
+
+# EndPointMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `ignore_case`** (IgnoreCase, `bool`)
+
+
+
+**Field: `method_actions`** (MethodActions, `map[string]EndpointMethodMeta`)
+
+Deprecated. Use Method instead.
+
+# CacheMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `cache_key_regex`** (CacheKeyRegex, `string`)
+
+
+
+**Field: `cache_response_codes`** (CacheOnlyResponseCodes, `[]int`)
+
+
+
+# RequestInputType
+
+Type defined as `string`, see [string](string) definition.
+
+# TemplateData
+
+**Field: `input_type`** (Input, [RequestInputType](#RequestInputType))
+
+
+
+**Field: `template_mode`** (Mode, [SourceMode](#SourceMode))
+
+
+
+**Field: `enable_session`** (EnableSession, `bool`)
+
+
+
+**Field: `template_source`** (TemplateSource, `string`)
+
+
+
+# TemplateMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `template_data`** (TemplateData, [TemplateData](#TemplateData))
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+# TransformJQMeta
+
+**Field: `filter`** (Filter, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+# HeaderInjectionMeta
+
+**Field: `delete_headers`** (DeleteHeaders, `[]string`)
+
+
+
+**Field: `add_headers`** (AddHeaders, `map[string]string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `act_on`** (ActOnResponse, `bool`)
+
+
+
+# HardTimeoutMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `timeout`** (TimeOut, `int`)
+
+
+
+# TrackEndpointMeta
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+# InternalMeta
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+# RequestSizeMeta
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `size_limit`** (SizeLimit, `int64`)
+
+
+
+# CircuitBreakerMeta
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `threshold_percent`** (ThresholdPercent, `float64`)
+
+
+
+**Field: `samples`** (Samples, `int64`)
+
+
+
+**Field: `return_to_service_after`** (ReturnToServiceAfter, `int`)
+
+
+
+**Field: `disable_half_open_state`** (DisableHalfOpenState, `bool`)
+
+
+
+# StringRegexMap
+
+**Field: `match_rx`** (MatchPattern, `string`)
+
+
+
+**Field: `reverse`** (Reverse, `bool`)
+
+
+
+# RoutingTriggerOptions
+
+**Field: `header_matches`** (HeaderMatches, `map[string]StringRegexMap`)
+
+
+
+**Field: `query_val_matches`** (QueryValMatches, `map[string]StringRegexMap`)
+
+
+
+**Field: `path_part_matches`** (PathPartMatches, `map[string]StringRegexMap`)
+
+
+
+**Field: `session_meta_matches`** (SessionMetaMatches, `map[string]StringRegexMap`)
+
+
+
+**Field: `request_context_matches`** (RequestContextMatches, `map[string]StringRegexMap`)
+
+
+
+**Field: `payload_matches`** (PayloadMatches, [StringRegexMap](#StringRegexMap))
+
+
+
+# RoutingTrigger
+
+**Field: `on`** (On, [RoutingTriggerOnType](#RoutingTriggerOnType))
+
+
+
+**Field: `options`** (Options, [RoutingTriggerOptions](#RoutingTriggerOptions))
+
+
+
+**Field: `rewrite_to`** (RewriteTo, `string`)
+
+
+
+# URLRewriteMeta
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `match_pattern`** (MatchPattern, `string`)
+
+
+
+**Field: `rewrite_to`** (RewriteTo, `string`)
+
+
+
+**Field: `triggers`** (Triggers, [[]RoutingTrigger](#RoutingTrigger))
+
+
+
+# VirtualMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `response_function_name`** (ResponseFunctionName, `string`)
+
+
+
+**Field: `function_source_type`** (FunctionSourceType, [SourceMode](#SourceMode))
+
+
+
+**Field: `function_source_uri`** (FunctionSourceURI, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `use_session`** (UseSession, `bool`)
+
+
+
+**Field: `proxy_on_error`** (ProxyOnError, `bool`)
+
+
+
+# MethodTransformMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `to_method`** (ToMethod, `string`)
+
+
+
+# ValidatePathMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `schema`** (Schema, `map[string]interface{}`)
+
+
+
+**Field: `schema_b64`** (SchemaB64, `string`)
+
+
+
+**Field: `error_response_code`** (ErrorResponseCode, `int`)
+
+Allows override of default 422 Unprocessible Entity response code for validation errors.
+
+# ValidateRequestMeta
+
+**Field: `enabled`** (Enabled, `bool`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `error_response_code`** (ErrorResponseCode, `int`)
+
+Allows override of default 422 Unprocessible Entity response code for validation errors.
+
+# PersistGraphQLMeta
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `operation`** (Operation, `string`)
+
+
+
+**Field: `variables`** (Variables, `map[string]interface{}`)
+
+
+
+# GoPluginMeta
+
+**Field: `disabled`** (Disabled, `bool`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `plugin_path`** (PluginPath, `string`)
+
+
+
+**Field: `func_name`** (SymbolName, `string`)
+
+
+
+# ExtendedPathsSet
+
+**Field: `ignored`** (Ignored, [[]EndPointMeta](#EndPointMeta))
+
+
+
+**Field: `white_list`** (WhiteList, [[]EndPointMeta](#EndPointMeta))
+
+
+
+**Field: `black_list`** (BlackList, [[]EndPointMeta](#EndPointMeta))
+
+
+
+**Field: `mock_response`** (MockResponse, [[]MockResponseMeta](#MockResponseMeta))
+
+
+
+**Field: `cache`** (Cached, `[]string`)
+
+
+
+**Field: `advance_cache_config`** (AdvanceCacheConfig, [[]CacheMeta](#CacheMeta))
+
+
+
+**Field: `transform`** (Transform, [[]TemplateMeta](#TemplateMeta))
+
+
+
+**Field: `transform_response`** (TransformResponse, [[]TemplateMeta](#TemplateMeta))
+
+
+
+**Field: `transform_jq`** (TransformJQ, [[]TransformJQMeta](#TransformJQMeta))
+
+
+
+**Field: `transform_jq_response`** (TransformJQResponse, [[]TransformJQMeta](#TransformJQMeta))
+
+
+
+**Field: `transform_headers`** (TransformHeader, [[]HeaderInjectionMeta](#HeaderInjectionMeta))
+
+
+
+**Field: `transform_response_headers`** (TransformResponseHeader, [[]HeaderInjectionMeta](#HeaderInjectionMeta))
+
+
+
+**Field: `hard_timeouts`** (HardTimeouts, [[]HardTimeoutMeta](#HardTimeoutMeta))
+
+
+
+**Field: `circuit_breakers`** (CircuitBreaker, [[]CircuitBreakerMeta](#CircuitBreakerMeta))
+
+
+
+**Field: `url_rewrites`** (URLRewrite, [[]URLRewriteMeta](#URLRewriteMeta))
+
+
+
+**Field: `virtual`** (Virtual, [[]VirtualMeta](#VirtualMeta))
+
+
+
+**Field: `size_limits`** (SizeLimit, [[]RequestSizeMeta](#RequestSizeMeta))
+
+
+
+**Field: `method_transforms`** (MethodTransforms, [[]MethodTransformMeta](#MethodTransformMeta))
+
+
+
+**Field: `track_endpoints`** (TrackEndpoints, [[]TrackEndpointMeta](#TrackEndpointMeta))
+
+
+
+**Field: `do_not_track_endpoints`** (DoNotTrackEndpoints, [[]TrackEndpointMeta](#TrackEndpointMeta))
+
+
+
+**Field: `validate_json`** (ValidateJSON, [[]ValidatePathMeta](#ValidatePathMeta))
+
+
+
+**Field: `validate_request`** (ValidateRequest, [[]ValidateRequestMeta](#ValidateRequestMeta))
+
+
+
+**Field: `internal`** (Internal, [[]InternalMeta](#InternalMeta))
+
+
+
+**Field: `go_plugin`** (GoPlugin, [[]GoPluginMeta](#GoPluginMeta))
+
+
+
+**Field: `persist_graphql`** (PersistGraphQL, [[]PersistGraphQLMeta](#PersistGraphQLMeta))
+
+
+
+# VersionInfo
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `expires`** (Expires, `string`)
+
+
+
+**Field: `paths`** (Paths, `struct{}`)
+
+
+
+**Field: `use_extended_paths`** (UseExtendedPaths, `bool`)
+
+
+
+**Field: `extended_paths`** (ExtendedPaths, [ExtendedPathsSet](#ExtendedPathsSet))
+
+
+
+**Field: `global_headers`** (GlobalHeaders, `map[string]string`)
+
+
+
+**Field: `global_headers_remove`** (GlobalHeadersRemove, `[]string`)
+
+
+
+**Field: `global_response_headers`** (GlobalResponseHeaders, `map[string]string`)
+
+
+
+**Field: `global_response_headers_remove`** (GlobalResponseHeadersRemove, `[]string`)
+
+
+
+**Field: `ignore_endpoint_case`** (IgnoreEndpointCase, `bool`)
+
+
+
+**Field: `global_size_limit`** (GlobalSizeLimit, `int64`)
+
+
+
+**Field: `override_target`** (OverrideTarget, `string`)
+
+
+
+# EventHandlerTriggerConfig
+
+**Field: `handler_name`** (Handler, [TykEventHandlerName](#TykEventHandlerName))
+
+
+
+**Field: `handler_meta`** (HandlerMeta, `map[string]interface{}`)
+
+
+
+# BundleManifest
+
+**Field: `file_list`** (FileList, `[]string`)
+
+
+
+**Field: `custom_middleware`** (CustomMiddleware, [MiddlewareSection](#MiddlewareSection))
+
+
+
+**Field: `checksum`** (Checksum, `string`)
+
+
+
+**Field: `signature`** (Signature, `string`)
+
+
+
+# GraphQLEngineDataSourceConfigREST
+
+**Field: `url`** (URL, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `headers`** (Headers, `map[string]string`)
+
+
+
+**Field: `query`** (Query, [[]QueryVariable](#QueryVariable))
+
+
+
+**Field: `body`** (Body, `string`)
+
+
+
+# GraphQLEngineDataSourceConfigGraphQL
+
+**Field: `url`** (URL, `string`)
+
+
+
+**Field: `method`** (Method, `string`)
+
+
+
+**Field: `headers`** (Headers, `map[string]string`)
+
+
+
+**Field: `subscription_type`** (SubscriptionType, [SubscriptionType](#SubscriptionType))
+
+
+
+**Field: `has_operation`** (HasOperation, `bool`)
+
+
+
+**Field: `operation`** (Operation, `string`)
+
+
+
+**Field: `variables`** (Variables, `json.RawMessage`)
+
+
+
+# GraphQLEngineDataSourceConfigKafka
+
+**Field: `broker_addresses`** (BrokerAddresses, `[]string`)
+
+
+
+**Field: `topics`** (Topics, `[]string`)
+
+
+
+**Field: `group_id`** (GroupID, `string`)
+
+
+
+**Field: `client_id`** (ClientID, `string`)
+
+
+
+**Field: `kafka_version`** (KafkaVersion, `string`)
+
+
+
+**Field: `start_consuming_latest`** (StartConsumingLatest, `bool`)
+
+
+
+**Field: `balance_strategy`** (BalanceStrategy, `string`)
+
+
+
+**Field: `isolation_level`** (IsolationLevel, `string`)
+
+
+
+**Field: `sasl`** (SASL, `kafka_datasource.SASL`)
+
+
+
+# QueryVariable
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `value`** (Value, `string`)
+
+
+
+# HostList
+
+Type defined as ``, see []() definition.
+
+# InboundData
+
+**Field: `KeyName`** (KeyName, `string`)
+
+
+
+**Field: `Value`** (Value, `string`)
+
+
+
+**Field: `SessionState`** (SessionState, `string`)
+
+
+
+**Field: `Timeout`** (Timeout, `int64`)
+
+
+
+**Field: `Per`** (Per, `int64`)
+
+
+
+**Field: `Expire`** (Expire, `int64`)
+
+
+
+# DefRequest
+
+**Field: `OrgId`** (OrgId, `string`)
+
+
+
+**Field: `Tags`** (Tags, `[]string`)
+
+
+
+**Field: `LoadOAS`** (LoadOAS, `bool`)
+
+
+
+# GroupLoginRequest
+
+**Field: `UserKey`** (UserKey, `string`)
+
+
+
+**Field: `GroupID`** (GroupID, `string`)
+
+
+
+**Field: `ForceSync`** (ForceSync, `bool`)
+
+
+
+# GroupKeySpaceRequest
+
+**Field: `OrgID`** (OrgID, `string`)
+
+
+
+**Field: `GroupID`** (GroupID, `string`)
+
+
+
+# KeysValuesPair
+
+**Field: `Keys`** (Keys, `[]string`)
+
+
+
+**Field: `Values`** (Values, `[]string`)
+
+
+
+# ValidationResult
+
+**Field: `IsValid`** (IsValid, `bool`)
+
+
+
+**Field: `Errors`** (Errors, `[]error`)
+
+
+
+# ValidationRuleSet
+
+Type defined as `[]ValidationRule`, see [ValidationRule](ValidationRule) definition.
+
+# ValidationRule
+
+Type defined as ``, see []() definition.
+
+# RuleUniqueDataSourceNames
+
+Type defined as ``, see []() definition.
+
+# RuleAtLeastEnableOneAuthSource
+
+Type defined as ``, see []() definition.
+
+# RuleValidateIPList
+
+Type defined as ``, see []() definition.
 
 # IDExtractorConfig
 
 IDExtractorConfig specifies the configuration for ID extractor
 
-**HeaderName** (JSON: `header_name`)
+**Field: `header_name`** (HeaderName, `string`)
 
 HeaderName is the header name to extract ID from.
 
-**FormParamName** (JSON: `param_name`)
+**Field: `param_name`** (FormParamName, `string`)
 
 FormParamName is the form parameter name to extract ID from.
 
-**RegexExpression** (JSON: `regex_expression`)
+**Field: `regex_expression`** (RegexExpression, `string`)
 
 RegexExpression is the regular expression to match ID.
 
-**RegexMatchIndex** (JSON: `regex_match_index`)
+**Field: `regex_match_index`** (RegexMatchIndex, `int`)
 
 RegexMatchIndex is the index from which ID to be extracted after a match.
 
-**XPathExpression** (JSON: `xpath_expression`)
+**Field: `xpath_expression`** (XPathExpression, `string`)
 
 XPathExp is the xpath expression to match ID.
 

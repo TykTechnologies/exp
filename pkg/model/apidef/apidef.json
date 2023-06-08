@@ -1,10 +1,5 @@
 {
   "imports": [
-    "\"errors\"",
-    "\"fmt\"",
-    "\"net\"",
-    "\"sort\"",
-    "\"strings\"",
     "\"encoding/base64\"",
     "\"encoding/json\"",
     "\"encoding/xml\"",
@@ -32,68 +27,14 @@
     "\"net\"",
     "\"net/http\"",
     "\"time\"",
-    "logger \"github.com/TykTechnologies/tyk/log\""
+    "logger \"github.com/TykTechnologies/tyk/log\"",
+    "\"errors\"",
+    "\"fmt\"",
+    "\"net\"",
+    "\"sort\"",
+    "\"strings\""
   ],
   "declarations": [
-    {
-      "types": [
-        {
-          "name": "ValidationResult",
-          "fields": [
-            {
-              "name": "IsValid",
-              "type": "bool",
-              "path": "ValidationResult.IsValid",
-              "tag": "",
-              "json_name": "IsValid"
-            },
-            {
-              "name": "Errors",
-              "type": "[]error",
-              "path": "ValidationResult.Errors",
-              "tag": "",
-              "json_name": "Errors"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationRuleSet",
-          "type": "[]ValidationRule"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationRule"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleUniqueDataSourceNames"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleAtLeastEnableOneAuthSource"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleValidateIPList"
-        }
-      ]
-    },
     {
       "types": [
         {
@@ -3431,6 +3372,65 @@
               "json_name": "Values"
             }
           ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationResult",
+          "fields": [
+            {
+              "name": "IsValid",
+              "type": "bool",
+              "path": "ValidationResult.IsValid",
+              "tag": "",
+              "json_name": "IsValid"
+            },
+            {
+              "name": "Errors",
+              "type": "[]error",
+              "path": "ValidationResult.Errors",
+              "tag": "",
+              "json_name": "Errors"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationRuleSet",
+          "type": "[]ValidationRule"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationRule"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleUniqueDataSourceNames"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleAtLeastEnableOneAuthSource"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleValidateIPList"
         }
       ]
     },

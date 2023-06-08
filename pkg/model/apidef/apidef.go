@@ -11,21 +11,6 @@ import (
 	"github.com/TykTechnologies/storage/persistent/model"
 )
 
-type ValidationResult struct {
-	IsValid bool
-
-	Errors []error
-}
-
-type ValidationRuleSet []ValidationRule
-type ValidationRule struct{}
-
-type RuleUniqueDataSourceNames struct{}
-
-type RuleAtLeastEnableOneAuthSource struct{}
-
-type RuleValidateIPList struct{}
-
 type AuthProviderCode string
 type SessionProviderCode string
 type StorageEngineCode string
@@ -917,6 +902,21 @@ type KeysValuesPair struct {
 
 	Values []string
 }
+
+type ValidationResult struct {
+	IsValid bool
+
+	Errors []error
+}
+
+type ValidationRuleSet []ValidationRule
+type ValidationRule struct{}
+
+type RuleUniqueDataSourceNames struct{}
+
+type RuleAtLeastEnableOneAuthSource struct{}
+
+type RuleValidateIPList struct{}
 
 // APIDefinition represents the configuration for a single proxied API and it's versions.
 //
