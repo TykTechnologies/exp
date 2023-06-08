@@ -1,4 +1,4 @@
-package restore
+package markdown
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// Run is the entrypoint for `schema-gen restore`.
+// Run is the entrypoint for `schema-gen extract`.
 func Run() (err error) {
 	cfg := NewOptions()
 
@@ -15,5 +15,5 @@ func Run() (err error) {
 		return nil
 	}
 
-	return restore(cfg)
+	return render("markdown", cfg.inputFile, cfg.outputFile, cfg.rootElement)
 }

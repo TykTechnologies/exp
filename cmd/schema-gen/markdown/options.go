@@ -1,4 +1,4 @@
-package restore
+package markdown
 
 import (
 	"fmt"
@@ -9,25 +9,25 @@ import (
 type options struct {
 	inputFile   string
 	outputFile  string
-	packageName string
+	rootElement string
 }
 
 func NewOptions() *options {
 	cfg := &options{
 		inputFile:   "schema.json",
-		outputFile:  "schema.go.txt",
-		packageName: "schema",
+		outputFile:  "schema.md",
+		rootElement: "",
 	}
 	flag.StringVarP(&cfg.outputFile, "output-file", "o", cfg.outputFile, "output file")
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
-	flag.StringVarP(&cfg.packageName, "package-name", "p", cfg.packageName, "package name")
+	flag.StringVar(&cfg.rootElement, "root", cfg.rootElement, "package name")
 	flag.Parse()
 
 	return cfg
 }
 
 func PrintHelp() {
-	fmt.Println("Usage: schema-gen restore <options>:")
+	fmt.Println("Usage: schema-gen markdown <options>:")
 	fmt.Println()
 	flag.PrintDefaults()
 }

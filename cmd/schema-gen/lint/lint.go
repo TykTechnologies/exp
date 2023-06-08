@@ -11,7 +11,7 @@ import (
 func lint(cfg *options) error {
 	fmt.Println(cfg.inputFile)
 
-	pkgInfo, err := model.LoadPackageInfo(cfg.inputFile)
+	pkgInfo, err := model.Load(cfg.inputFile)
 	if err != nil {
 		return fmt.Errorf("Error loading package info: %w", err)
 	}

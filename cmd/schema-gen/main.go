@@ -13,7 +13,7 @@ import (
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/extract"
 	"github.com/TykTechnologies/exp/cmd/schema-gen/lint"
-	"github.com/TykTechnologies/exp/cmd/schema-gen/render"
+	"github.com/TykTechnologies/exp/cmd/schema-gen/markdown"
 	"github.com/TykTechnologies/exp/cmd/schema-gen/restore"
 )
 
@@ -26,10 +26,10 @@ func main() {
 
 func start() (err error) {
 	commands := map[string]func() error{
-		"extract": extract.Run,
-		"restore": restore.Run,
-		"render":  render.Run,
-		"lint":    lint.Run,
+		"extract":  extract.Run,
+		"restore":  restore.Run,
+		"markdown": markdown.Run,
+		"lint":     lint.Run,
 	}
 	commandList := maps.Keys(commands)
 	sort.Strings(commandList)

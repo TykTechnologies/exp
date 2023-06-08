@@ -15,7 +15,7 @@ type PackageInfo struct {
 	Declarations DeclarationList `json:"declarations"`
 }
 
-func LoadPackageInfo(filename string) (*PackageInfo, error) {
+func Load(filename string) (*PackageInfo, error) {
 	body, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -43,6 +43,29 @@ type DeclarationInfo struct {
 // DeclarationList implements list operations over a *DeclarationInfo slice.
 type DeclarationList []*DeclarationInfo
 
+// Find returns a TypeList containing TypeInfo objects from the DeclarationList in the specified order.
+func (x DeclarationList) Find(order []string) TypeList {
+	typeInfoMap := make(map[string]*TypeInfo)
+
+	// Step 1: Create a map of type names to TypeInfo objects for fast lookup
+	for _, decl := range x {
+		for _, t := range decl.Types {
+			typeInfoMap[t.Name] = t
+		}
+	}
+
+	result := make(TypeList, 0, len(order))
+
+	// Step 2: Traverse the order slice and retrieve the corresponding TypeInfo objects
+	for _, typeName := range order {
+		if typeInfo, ok := typeInfoMap[typeName]; ok {
+			result = append(result, typeInfo)
+		}
+	}
+
+	return result
+}
+
 func (x DeclarationList) Len() int           { return len(x) }
 func (x DeclarationList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
 func (x DeclarationList) Less(i, j int) bool { return x[i].Doc < x[j].Doc }
@@ -52,8 +75,8 @@ func (x *DeclarationList) Append(newInfo *DeclarationInfo) int {
 	return len(*x)
 }
 
-func (d *DeclarationInfo) Valid() bool {
-	return len(d.Types) > 0
+func (x *DeclarationInfo) Valid() bool {
+	return len(x.Types) > 0
 }
 
 // TypeInfo holds ast field information for the docs generator.

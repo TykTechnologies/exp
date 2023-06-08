@@ -17,7 +17,7 @@ func restore(cfg *options) error {
 		outputFile = cfg.outputFile
 	)
 
-	pkgInfo, err := model.LoadPackageInfo(inputFile)
+	pkgInfo, err := model.Load(inputFile)
 	if err != nil {
 		return fmt.Errorf("Error loading package info: %w", err)
 	}

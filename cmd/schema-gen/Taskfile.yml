@@ -23,14 +23,15 @@ tasks:
     deps: [ build ]
     cmds:
       - schema-gen extract -i model/ -o model/model.json
+      - schema-gen markdown -i model/model.json -o model/model.md --root PackageInfo
       - schema-gen lint -i model/model.json
 
   examples:
     desc: "Build examples"
-    silent: true
     cmds:
       - echo "Building examples:"
       - schema-gen extract -i model/ -o model/model.json
+      - schema-gen markdown -i model/model.json -o model/model.md --root PackageInfo
       - schema-gen restore -i model/model.json -o model/model.go.txt -p model
       - schema-gen extract -i _example/ -o _example/example.json
       - schema-gen restore -i _example/example.json -o _example/example.go.txt -p example
