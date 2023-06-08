@@ -359,9 +359,11 @@ type HttpServerOptionsConfig struct {
 
 	// MaxRequestBodySize configures the maximum request body size in bytes.
 	//
-	// Tyk API Gateway copies the whole request into memory at the beginning
-	// of the request handling. Large requests could fill up memory if they
-	// are not blocked.
+	// This option evaluates the `Content-Length` header and responds with
+	// a HTTP 413 status code if larger than the defined size. If the header
+	// is not provided, the request body is read up to the defined size.
+	// If the request body is larger than the defined size, then we respond
+	// with HTTP 413 status code.
 	//
 	// See more information about setting request size limits here:
 	// https://tyk.io/docs/basic-config-and-security/control-limit-traffic/request-size-limits/#maximum-request-sizes

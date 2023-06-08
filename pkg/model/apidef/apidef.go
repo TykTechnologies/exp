@@ -11,6 +11,21 @@ import (
 	"github.com/TykTechnologies/storage/persistent/model"
 )
 
+type ValidationResult struct {
+	IsValid bool
+
+	Errors []error
+}
+
+type ValidationRuleSet []ValidationRule
+type ValidationRule struct{}
+
+type RuleUniqueDataSourceNames struct{}
+
+type RuleAtLeastEnableOneAuthSource struct{}
+
+type RuleValidateIPList struct{}
+
 type AuthProviderCode string
 type SessionProviderCode string
 type StorageEngineCode string
@@ -677,12 +692,18 @@ type CORSConfig struct {
 }
 
 type GraphQLConfigVersion string
+type GraphQLResponseExtensions struct {
+	OnErrorForwarding bool `bson:"on_error_forwarding" json:"on_error_forwarding"`
+}
+
 type GraphQLProxyConfig struct {
 	AuthHeaders map[string]string `bson:"auth_headers" json:"auth_headers"`
 
 	SubscriptionType SubscriptionType `bson:"subscription_type" json:"subscription_type,omitempty"`
 
 	RequestHeaders map[string]string `bson:"request_headers" json:"request_headers"`
+
+	UseResponseExtensions GraphQLResponseExtensions `bson:"use_response_extensions" json:"use_response_extensions"`
 }
 
 type GraphQLSubgraphConfig struct {
@@ -896,21 +917,6 @@ type KeysValuesPair struct {
 
 	Values []string
 }
-
-type ValidationResult struct {
-	IsValid bool
-
-	Errors []error
-}
-
-type ValidationRuleSet []ValidationRule
-type ValidationRule struct{}
-
-type RuleUniqueDataSourceNames struct{}
-
-type RuleAtLeastEnableOneAuthSource struct{}
-
-type RuleValidateIPList struct{}
 
 // APIDefinition represents the configuration for a single proxied API and it's versions.
 //

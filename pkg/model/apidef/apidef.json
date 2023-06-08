@@ -1,5 +1,10 @@
 {
   "imports": [
+    "\"errors\"",
+    "\"fmt\"",
+    "\"net\"",
+    "\"sort\"",
+    "\"strings\"",
     "\"encoding/base64\"",
     "\"encoding/json\"",
     "\"encoding/xml\"",
@@ -27,14 +32,68 @@
     "\"net\"",
     "\"net/http\"",
     "\"time\"",
-    "logger \"github.com/TykTechnologies/tyk/log\"",
-    "\"errors\"",
-    "\"fmt\"",
-    "\"net\"",
-    "\"sort\"",
-    "\"strings\""
+    "logger \"github.com/TykTechnologies/tyk/log\""
   ],
   "declarations": [
+    {
+      "types": [
+        {
+          "name": "ValidationResult",
+          "fields": [
+            {
+              "name": "IsValid",
+              "type": "bool",
+              "path": "ValidationResult.IsValid",
+              "tag": "",
+              "json_name": "IsValid"
+            },
+            {
+              "name": "Errors",
+              "type": "[]error",
+              "path": "ValidationResult.Errors",
+              "tag": "",
+              "json_name": "Errors"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationRuleSet",
+          "type": "[]ValidationRule"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationRule"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleUniqueDataSourceNames"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleAtLeastEnableOneAuthSource"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleValidateIPList"
+        }
+      ]
+    },
     {
       "types": [
         {
@@ -2539,6 +2598,22 @@
     {
       "types": [
         {
+          "name": "GraphQLResponseExtensions",
+          "fields": [
+            {
+              "name": "OnErrorForwarding",
+              "type": "bool",
+              "path": "GraphQLResponseExtensions.OnErrorForwarding",
+              "tag": "bson:\"on_error_forwarding\" json:\"on_error_forwarding\"",
+              "json_name": "on_error_forwarding"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
           "name": "GraphQLProxyConfig",
           "fields": [
             {
@@ -2561,6 +2636,13 @@
               "path": "GraphQLProxyConfig.RequestHeaders",
               "tag": "bson:\"request_headers\" json:\"request_headers\"",
               "json_name": "request_headers"
+            },
+            {
+              "name": "UseResponseExtensions",
+              "type": "GraphQLResponseExtensions",
+              "path": "GraphQLProxyConfig.UseResponseExtensions",
+              "tag": "bson:\"use_response_extensions\" json:\"use_response_extensions\"",
+              "json_name": "use_response_extensions"
             }
           ]
         }
@@ -3349,65 +3431,6 @@
               "json_name": "Values"
             }
           ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationResult",
-          "fields": [
-            {
-              "name": "IsValid",
-              "type": "bool",
-              "path": "ValidationResult.IsValid",
-              "tag": "",
-              "json_name": "IsValid"
-            },
-            {
-              "name": "Errors",
-              "type": "[]error",
-              "path": "ValidationResult.Errors",
-              "tag": "",
-              "json_name": "Errors"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationRuleSet",
-          "type": "[]ValidationRule"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationRule"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleUniqueDataSourceNames"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleAtLeastEnableOneAuthSource"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleValidateIPList"
         }
       ]
     },

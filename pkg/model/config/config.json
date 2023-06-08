@@ -923,7 +923,7 @@
               "name": "MaxRequestBodySize",
               "type": "int64",
               "path": "HttpServerOptionsConfig.MaxRequestBodySize",
-              "doc": "MaxRequestBodySize configures the maximum request body size in bytes.\n\nTyk API Gateway copies the whole request into memory at the beginning\nof the request handling. Large requests could fill up memory if they\nare not blocked.\n\nSee more information about setting request size limits here:\nhttps://tyk.io/docs/basic-config-and-security/control-limit-traffic/request-size-limits/#maximum-request-sizes",
+              "doc": "MaxRequestBodySize configures the maximum request body size in bytes.\n\nThis option evaluates the `Content-Length` header and responds with\na HTTP 413 status code if larger than the defined size. If the header\nis not provided, the request body is read up to the defined size.\nIf the request body is larger than the defined size, then we respond\nwith HTTP 413 status code.\n\nSee more information about setting request size limits here:\nhttps://tyk.io/docs/basic-config-and-security/control-limit-traffic/request-size-limits/#maximum-request-sizes",
               "tag": "json:\"max_request_body_size\"",
               "json_name": "max_request_body_size"
             }
