@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
+	"golang.org/x/exp/slices"
 )
 
 // Extract package structs
@@ -135,6 +136,7 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 	deduplicate(result.Imports)
 
 	sort.Stable(result.Declarations)
+	slices.Sort(result.Imports)
 
 	return result, err
 }

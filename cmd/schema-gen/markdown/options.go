@@ -20,7 +20,7 @@ func NewOptions() *options {
 	}
 	flag.StringVarP(&cfg.outputFile, "output-file", "o", cfg.outputFile, "output file")
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
-	flag.StringVar(&cfg.rootElement, "root", cfg.rootElement, "package name")
+	flag.StringVar(&cfg.rootElement, "root", cfg.rootElement, "root type to put first in output")
 	flag.Parse()
 
 	return cfg

@@ -1,9 +1,9 @@
 {
   "imports": [
-    "\"golang.org/x/exp/slices\"",
-    "\"errors\"",
     "\"encoding/json\"",
+    "\"errors\"",
     "\"go/ast\"",
+    "\"golang.org/x/exp/slices\"",
     "\"os\"",
     "\"strings\""
   ],
