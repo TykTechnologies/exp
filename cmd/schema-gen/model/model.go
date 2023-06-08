@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"go/ast"
 	"os"
+	"strings"
 )
 
-// PackageInfo holds all the declarations.
+// PackageInfo holds all the declarations for a package scope.
 type PackageInfo struct {
 	// Imports holds a list of imported packages.
 	Imports []string `json:"imports"`
@@ -15,6 +16,7 @@ type PackageInfo struct {
 	Declarations DeclarationList `json:"declarations"`
 }
 
+// Load reads and decodes a json file to produce a `*PackageInfo`.
 func Load(filename string) (*PackageInfo, error) {
 	body, err := os.ReadFile(filename)
 	if err != nil {
@@ -25,7 +27,7 @@ func Load(filename string) (*PackageInfo, error) {
 	return result, json.Unmarshal(body, result)
 }
 
-// DeclarationInfo holds *ast.GenDecl docs and declarations.
+// DeclarationInfo holds the declarations block for an exposed value or type.
 type DeclarationInfo struct {
 	// Doc is the declaration doc comment. It usually
 	// occurs just before a *ast.TypeDecl, but may be
@@ -40,7 +42,7 @@ type DeclarationInfo struct {
 	Types TypeList `json:"types,omitempty"`
 }
 
-// DeclarationList implements list operations over a *DeclarationInfo slice.
+// DeclarationList implements list operations over a `*DeclarationInfo` slice.
 type DeclarationList []*DeclarationInfo
 
 // Find returns a TypeList containing TypeInfo objects from the DeclarationList in the specified order.
@@ -54,7 +56,7 @@ func (x DeclarationList) Find(order []string) TypeList {
 		}
 	}
 
-	result := make(TypeList, 0, len(order))
+	result := make(TypeList, 0, len(typeInfoMap))
 
 	// Step 2: Traverse the order slice and retrieve the corresponding TypeInfo objects
 	for _, typeName := range order {
@@ -79,7 +81,7 @@ func (x *DeclarationInfo) Valid() bool {
 	return len(x.Types) > 0
 }
 
-// TypeInfo holds ast field information for the docs generator.
+// TypeInfo holds details about a type definition.
 type TypeInfo struct {
 	// Name is struct go name.
 	Name string `json:"name"`
@@ -100,6 +102,10 @@ type TypeInfo struct {
 	StructObj *ast.StructType `json:"-"`
 }
 
+func (f *TypeInfo) TypeRef() string {
+	return strings.TrimLeft(f.Type, "[]*")
+}
+
 // TypeList implements list operations over a *TypeInfo slice.
 type TypeList []*TypeInfo
 
@@ -112,7 +118,7 @@ func (x *TypeList) Append(newInfo *TypeInfo) int {
 	return len(*x)
 }
 
-// FieldInfo holds details about a field.
+// FieldInfo holds details about a field definition.
 type FieldInfo struct {
 	// Name is the name of the field.
 	Name string `json:"name"`
@@ -137,6 +143,10 @@ type FieldInfo struct {
 
 	// MapKey is the map key type, if this field is a map.
 	MapKey string `json:"map_key,omitempty"`
+}
+
+func (f *FieldInfo) TypeRef() string {
+	return strings.TrimLeft(f.Type, "[]*")
 }
 
 func (f FieldInfo) Valid() bool {

@@ -1,13 +1,15 @@
 {
   "imports": [
+    "\"golang.org/x/exp/slices\"",
     "\"errors\"",
     "\"encoding/json\"",
     "\"go/ast\"",
-    "\"os\""
+    "\"os\"",
+    "\"strings\""
   ],
   "declarations": [
     {
-      "doc": "DeclarationInfo holds *ast.GenDecl docs and declarations.",
+      "doc": "DeclarationInfo holds the declarations block for an exposed value or type.",
       "types": [
         {
           "name": "DeclarationInfo",
@@ -41,7 +43,7 @@
       ]
     },
     {
-      "doc": "DeclarationList implements list operations over a *DeclarationInfo slice.",
+      "doc": "DeclarationList implements list operations over a `*DeclarationInfo` slice.",
       "types": [
         {
           "name": "DeclarationList",
@@ -50,7 +52,7 @@
       ]
     },
     {
-      "doc": "FieldInfo holds details about a field.",
+      "doc": "FieldInfo holds details about a field definition.",
       "types": [
         {
           "name": "FieldInfo",
@@ -124,7 +126,7 @@
       ]
     },
     {
-      "doc": "PackageInfo holds all the declarations.",
+      "doc": "PackageInfo holds all the declarations for a package scope.",
       "types": [
         {
           "name": "PackageInfo",
@@ -150,7 +152,7 @@
       ]
     },
     {
-      "doc": "TypeInfo holds ast field information for the docs generator.",
+      "doc": "TypeInfo holds details about a type definition.",
       "types": [
         {
           "name": "TypeInfo",

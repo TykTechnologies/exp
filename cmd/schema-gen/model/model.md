@@ -1,103 +1,103 @@
 # PackageInfo
 
-PackageInfo holds all the declarations.
+PackageInfo holds all the declarations for a package scope.
 
-**Imports** (JSON: `imports`)
+**Field: `imports`** (Imports, `[]string`)
 
 Imports holds a list of imported packages.
 
-**Declarations** (JSON: `declarations`)
+**Field: `declarations`** (Declarations, [DeclarationList](#DeclarationList))
 
 Declarations within the package.
 
 # DeclarationList
 
-DeclarationList implements list operations over a *DeclarationInfo slice.
+DeclarationList implements list operations over a `*DeclarationInfo` slice.
 
-No exposed fields available.
+Type defined as `[]*DeclarationInfo`, see [DeclarationInfo](DeclarationInfo) definition.
 
 # DeclarationInfo
 
-DeclarationInfo holds *ast.GenDecl docs and declarations.
+DeclarationInfo holds the declarations block for an exposed value or type.
 
-**Doc** (JSON: `doc`)
+**Field: `doc`** (Doc, `string`)
 
 Doc is the declaration doc comment. It usually
 occurs just before a *ast.TypeDecl, but may be
 applied to multiple ones.
 
-**FileDoc** (JSON: `file_doc`)
+**Field: `file_doc`** (FileDoc, `string`)
 
 FileDoc is the doc comment for a file which
 contains the definitions here.
 
-**Types** (JSON: `types`)
+**Field: `types`** (Types, [TypeList](#TypeList))
 
 Types are all the type declarations in the block.
-
-# FieldInfo
-
-FieldInfo holds details about a field.
-
-**Name** (JSON: `name`)
-
-Name is the name of the field.
-
-**Type** (JSON: `type`)
-
-Type is the literal type of the Go field.
-
-**Path** (JSON: `path`)
-
-Path is the go path of this field starting from root object.
-
-**Doc** (JSON: `doc`)
-
-Doc holds the field doc.
-
-**Comment** (JSON: `comment`)
-
-Comment holds the field comment text.
-
-**Tag** (JSON: `tag`)
-
-Tag is the go tag, unmodified.
-
-**JSONName** (JSON: `json_name`)
-
-JSONName is the corresponding json name of the field.
-
-**MapKey** (JSON: `map_key`)
-
-MapKey is the map key type, if this field is a map.
-
-# TypeInfo
-
-TypeInfo holds ast field information for the docs generator.
-
-**Name** (JSON: `name`)
-
-Name is struct go name.
-
-**Doc** (JSON: `doc`)
-
-Doc is the struct doc.
-
-**Comment** (JSON: `comment`)
-
-Comment is the struct comment.
-
-**Type** (JSON: `type`)
-
-Type is an optional type if the declaration is a type alias or similar.
-
-**Fields** (JSON: `fields`)
-
-Fields holds information of the fields, if this object is a struct.
 
 # TypeList
 
 TypeList implements list operations over a *TypeInfo slice.
 
-No exposed fields available.
+Type defined as `[]*TypeInfo`, see [TypeInfo](TypeInfo) definition.
+
+# TypeInfo
+
+TypeInfo holds details about a type definition.
+
+**Field: `name`** (Name, `string`)
+
+Name is struct go name.
+
+**Field: `doc`** (Doc, `string`)
+
+Doc is the struct doc.
+
+**Field: `comment`** (Comment, `string`)
+
+Comment is the struct comment.
+
+**Field: `type`** (Type, `string`)
+
+Type is an optional type if the declaration is a type alias or similar.
+
+**Field: `fields`** (Fields, [[]*FieldInfo](#FieldInfo))
+
+Fields holds information of the fields, if this object is a struct.
+
+# FieldInfo
+
+FieldInfo holds details about a field definition.
+
+**Field: `name`** (Name, `string`)
+
+Name is the name of the field.
+
+**Field: `type`** (Type, `string`)
+
+Type is the literal type of the Go field.
+
+**Field: `path`** (Path, `string`)
+
+Path is the go path of this field starting from root object.
+
+**Field: `doc`** (Doc, `string`)
+
+Doc holds the field doc.
+
+**Field: `comment`** (Comment, `string`)
+
+Comment holds the field comment text.
+
+**Field: `tag`** (Tag, `string`)
+
+Tag is the go tag, unmodified.
+
+**Field: `json_name`** (JSONName, `string`)
+
+JSONName is the corresponding json name of the field.
+
+**Field: `map_key`** (MapKey, `string`)
+
+MapKey is the map key type, if this field is a map.
 

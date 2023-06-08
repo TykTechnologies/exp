@@ -15,5 +15,5 @@ func Run() (err error) {
 		return nil
 	}
 
-	return render("markdown", cfg.inputFile, cfg.outputFile, cfg.rootElement)
+	return render(cfg)
 }

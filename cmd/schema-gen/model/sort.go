@@ -1,64 +1,94 @@
 package model
 
+import (
+	"golang.org/x/exp/slices"
+)
+
+// TypeInfo returns a `*TypeInfo` for a type by name.
+func (p DeclarationList) TypeInfo(name string) *TypeInfo {
+	for _, decl := range p {
+		for _, t := range decl.Types {
+			if t.Name == name {
+				return t
+			}
+		}
+	}
+	return nil
+}
+
+// TypeDeclarations returns a default order of type names and a lookup map.
+func (p DeclarationList) TypeDeclarations() ([]string, map[string]bool) {
+	result := []string{}
+	resultMap := map[string]bool{}
+	for _, decl := range p {
+		for _, t := range decl.Types {
+			result = append(result, t.Name)
+			resultMap[t.Name] = true
+		}
+	}
+	return result, resultMap
+}
+
 // GetOrder returns a list of type names in the order of declaration.
 func (p DeclarationList) GetOrder(root string) []string {
-	// Step 1: Gather all type declarations from the root type info
-	var (
-		rootTypeDeclarations []string
-		rootTypeInfo         *TypeInfo
-	)
-	for _, decl := range p {
-		for _, t := range decl.Types {
-			rootTypeDeclarations = append(rootTypeDeclarations, t.Name)
-			if root != "" && t.Name == root {
-				rootTypeInfo = t
+	typeOrder, typeOrderMap := p.TypeDeclarations()
+
+	// If root element can't be found, return default order
+	if !slices.Contains(typeOrder, root) {
+		return typeOrder
+	}
+
+	wantOrder := []string{root}
+	wantOrderIndex := 0
+
+	// getTypes ranges over type fields and gets the slice of
+	// type names that are referenced.
+	var getTypes func(info *TypeInfo) []string
+	getTypes = func(info *TypeInfo) []string {
+		result := []string{}
+
+		// Log `B` from `type A []*B`
+		if typeRef := info.TypeRef(); typeRef != "" {
+			if valid, _ := typeOrderMap[typeRef]; valid {
+				result = append(result, typeRef)
 			}
 		}
-	}
 
-	// Step 2: If root type info is not found, return rootTypeDeclarations as is
-	if root == "" || rootTypeInfo == nil {
-		return rootTypeDeclarations
-	}
+		// Struct fields
+		for _, field := range info.Fields {
+			typeRef := field.TypeRef()
 
-	// Build lookup array for valid declarations
-	rootTypeDeclarationsMap := make(map[string]bool)
-	for _, v := range rootTypeDeclarations {
-		rootTypeDeclarationsMap[v] = true
-	}
-
-	// Create a map to track the visited type declarations
-	visited := make(map[string]bool)
-	visited[root] = true
-
-	// Initialize the output list with the root type name
-	outputList := []string{rootTypeInfo.Name}
-
-	// Traverse the fields in the root type info
-	for _, field := range rootTypeInfo.Fields {
-		if visited[field.Type] {
-			continue
-		}
-		ok, _ := rootTypeDeclarationsMap[field.Type]
-		if !ok {
-			continue
-		}
-
-		// Add the field's type to the output list
-		outputList = append(outputList, field.Type)
-		visited[field.Type] = true
-	}
-
-	// Traverse the whole DeclarationList to add any unreferenced type declarations
-	for _, decl := range p {
-		for _, t := range decl.Types {
-			if visited[t.Name] {
+			// Skip seen type declarations
+			if slices.Contains(wantOrder, typeRef) {
 				continue
 			}
-			outputList = append(outputList, t.Name)
-			visited[t.Name] = true
+
+			if valid, _ := typeOrderMap[typeRef]; valid {
+				result = append(result, typeRef)
+			}
+		}
+
+		return result
+	}
+
+	for {
+		if wantOrderIndex < len(wantOrder) {
+			elem := wantOrder[wantOrderIndex]
+			names := getTypes(p.TypeInfo(elem))
+			if len(names) > 0 {
+				wantOrder = append(wantOrder, names...)
+			}
+			wantOrderIndex++
+			continue
+		}
+		break
+	}
+
+	for _, typeName := range typeOrder {
+		if !slices.Contains(wantOrder, typeName) {
+			wantOrder = append(wantOrder, typeName)
 		}
 	}
 
-	return outputList
+	return wantOrder
 }

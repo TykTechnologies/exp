@@ -14,6 +14,7 @@ tasks:
     cmds:
       - goimports -w .
       - go fmt ./...
+      - go mod tidy
       - go clean -cache
       - go build .
       - go install .
@@ -28,6 +29,7 @@ tasks:
 
   examples:
     desc: "Build examples"
+    silent: true
     cmds:
       - echo "Building examples:"
       - schema-gen extract -i model/ -o model/model.json

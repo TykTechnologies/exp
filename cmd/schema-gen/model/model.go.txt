@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"go/ast"
+	"golang.org/x/exp/slices"
 	"os"
+	"strings"
 )
 
-// DeclarationInfo holds *ast.GenDecl docs and declarations.
+// DeclarationInfo holds the declarations block for an exposed value or type.
 type DeclarationInfo struct {
 	// Doc is the declaration doc comment. It usually
 	// occurs just before a *ast.TypeDecl, but may be
@@ -24,10 +26,10 @@ type DeclarationInfo struct {
 	Types TypeList `json:"types,omitempty"`
 }
 
-// DeclarationList implements list operations over a *DeclarationInfo slice.
+// DeclarationList implements list operations over a `*DeclarationInfo` slice.
 type DeclarationList []*DeclarationInfo
 
-// FieldInfo holds details about a field.
+// FieldInfo holds details about a field definition.
 type FieldInfo struct {
 	// Name is the name of the field.
 	Name string `json:"name"`
@@ -54,7 +56,7 @@ type FieldInfo struct {
 	MapKey string `json:"map_key,omitempty"`
 }
 
-// PackageInfo holds all the declarations.
+// PackageInfo holds all the declarations for a package scope.
 type PackageInfo struct {
 	// Imports holds a list of imported packages.
 	Imports []string `json:"imports"`
@@ -63,7 +65,7 @@ type PackageInfo struct {
 	Declarations DeclarationList `json:"declarations"`
 }
 
-// TypeInfo holds ast field information for the docs generator.
+// TypeInfo holds details about a type definition.
 type TypeInfo struct {
 	// Name is struct go name.
 	Name string `json:"name"`

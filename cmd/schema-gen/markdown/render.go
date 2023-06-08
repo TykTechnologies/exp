@@ -8,9 +8,17 @@ import (
 	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
+	"golang.org/x/exp/slices"
 )
 
-func render(kind, inputFile, outputFile, rootElement string) error {
+func render(cfg *options) error {
+	var (
+		kind        = "markdown"
+		inputFile   = cfg.inputFile
+		outputFile  = cfg.outputFile
+		rootElement = cfg.rootElement
+	)
+
 	pkgInfo, err := model.Load(inputFile)
 	if err != nil {
 		return fmt.Errorf("Error loading package info for %s: %w", inputFile, err)
@@ -32,41 +40,57 @@ func render(kind, inputFile, outputFile, rootElement string) error {
 func renderMarkdown(schema model.DeclarationList, order []string) ([]byte, error) {
 	output := new(bytes.Buffer)
 	decls := schema.Find(order)
+
+	allTypes := make([]string, 0, len(decls))
 	for _, decl := range decls {
-		if err := renderMarkdownType(output, decl); err != nil {
+		allTypes = append(allTypes, decl.Name)
+	}
+
+	for _, decl := range decls {
+		if err := renderMarkdownType(output, decl, allTypes); err != nil {
 			return nil, err
 		}
 	}
 	return output.Bytes(), nil
 }
 
-func renderMarkdownType(w io.Writer, decl *model.TypeInfo) error {
+func renderMarkdownType(w io.Writer, decl *model.TypeInfo, allTypes []string) error {
 	fmt.Fprintf(w, "# %s\n\n", decl.Name)
 	if decl.Doc != "" {
 		fmt.Fprintf(w, "%s\n\n", decl.Doc)
 	}
-	renderMarkdownFields(w, decl)
+	renderMarkdownFields(w, decl, allTypes)
 	return nil
 }
 
-func renderMarkdownFields(w io.Writer, decl *model.TypeInfo) {
-	if len(decl.Fields) == 0 {
-		fmt.Fprintf(w, "No exposed fields available.\n\n")
-		return
-	}
-
+func renderMarkdownFields(w io.Writer, decl *model.TypeInfo, allTypes []string) {
 	for _, field := range decl.Fields {
-		fmt.Fprintf(w, "**%s** (JSON: `%s`)\n\n", field.Name, strings.Split(field.JSONName, ",")[0])
+		jsonTag := strings.Split(field.JSONName, ",")
+
+		sanitizedType := strings.TrimLeft(field.Type, "[]*")
+		isKnown := slices.Contains(allTypes, sanitizedType)
+
+		if isKnown {
+			// Link the known type
+			fmt.Fprintf(w, "**Field: `%s`** (%s, [%s](#%s))\n\n", jsonTag[0], field.Name, field.Type, sanitizedType)
+		} else {
+			fmt.Fprintf(w, "**Field: `%s`** (%s, `%s`)\n\n", jsonTag[0], field.Name, field.Type)
+		}
+
 		fmt.Fprintf(w, "%s\n\n", field.Doc)
 		if field.Comment != "" {
 			fmt.Fprintf(w, "> %s\n\n", field.Comment)
 		}
 	}
+
+	if len(decl.Fields) == 0 {
+		sanitizedType := strings.TrimLeft(decl.Type, "[]*")
+		fmt.Fprintf(w, "Type defined as `%s`, see [%s](%s) definition.\n\n", decl.Type, sanitizedType, sanitizedType)
+	}
 }
 
 func sanitize(x model.DeclarationList) model.DeclarationList {
-	// everything is a pointer, so no weird handling for modifiying
-	// the slice values
+	result := model.DeclarationList{}
 	for _, decl := range x {
 		// Move declaration doc comment into type decl if there
 		// is only one and the comment is empty. Weird.
@@ -74,6 +98,23 @@ func sanitize(x model.DeclarationList) model.DeclarationList {
 			decl.Types[0].Doc = decl.Doc
 			decl.Doc = ""
 		}
+
+		/*
+			// Skip types with no exposed fields
+			newTypes := model.TypeList{}
+			for _, typeDecl := range decl.Types {
+				if len(typeDecl.Fields) > 0 {
+					newTypes = append(newTypes, typeDecl)
+				}
+			}
+			decl.Types = newTypes
+
+			if len(newTypes) > 0 {
+				result = append(result, decl)
+			}
+		*/
+
+		result = append(result, decl)
 	}
-	return x
+	return result
 }
