@@ -1028,10 +1028,6 @@ Default value is 0, ie if regexpMatchIndex is not provided ID is matched from in
 
 XPathExp is the xpath expression to match ID.
 
-# EndpointPostPlugins
-
-Type defined as `[]EndpointPostPlugin`, see [EndpointPostPlugin](EndpointPostPlugin) definition.
-
 # OAuthProvider
 
 **Field: `jwt`** (JWT, [JWTValidation](#JWTValidation))
@@ -1125,6 +1121,10 @@ For introspection caching, it is suggested to use a short interval.
 
 
 > required
+
+# EndpointPostPlugins
+
+Type defined as `[]EndpointPostPlugin`, see [EndpointPostPlugin](EndpointPostPlugin) definition.
 
 # APIDef
 

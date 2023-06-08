@@ -1,7 +1,13 @@
 {
   "imports": [
     "\"encoding/json\"",
+    "\"encoding/json\"",
     "\"fmt\"",
+    "\"github.com/TykTechnologies/tyk/apidef\"",
+    "\"github.com/TykTechnologies/tyk/regexp\"",
+    "\"github.com/kelseyhightower/envconfig\"",
+    "\"github.com/kelseyhightower/envconfig\"",
+    "\"gopkg.in/yaml.v3\"",
     "\"io\"",
     "\"io/ioutil\"",
     "\"os\"",
@@ -9,14 +15,8 @@
     "\"runtime\"",
     "\"strings\"",
     "\"time\"",
-    "\"github.com/kelseyhightower/envconfig\"",
-    "\"github.com/TykTechnologies/tyk/apidef\"",
-    "logger \"github.com/TykTechnologies/tyk/log\"",
-    "\"github.com/TykTechnologies/tyk/regexp\"",
-    "\"encoding/json\"",
-    "\"github.com/kelseyhightower/envconfig\"",
     "jaeger \"github.com/uber/jaeger-client-go/config\"",
-    "\"gopkg.in/yaml.v3\""
+    "logger \"github.com/TykTechnologies/tyk/log\""
   ],
   "declarations": [
     {

@@ -9,7 +9,6 @@ import (
 	"github.com/TykTechnologies/tyk/apidef"
 )
 
-type EndpointPostPlugins []EndpointPostPlugin
 type OAuthProvider struct {
 	JWT JWTValidation `bson:"jwt,omitempty" json:"jwt,omitempty"`
 
@@ -76,6 +75,8 @@ type ExternalOAuth struct {
 
 	Providers []OAuthProvider `bson:"providers" json:"providers"` // required
 }
+
+type EndpointPostPlugins []EndpointPostPlugin
 
 // APIDef is struct to hold both OAS and Classic forms of an API definition.
 type APIDef struct {

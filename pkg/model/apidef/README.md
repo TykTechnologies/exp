@@ -1383,6 +1383,110 @@ Type defined as `string`, see [string](string) definition.
 
 
 
+# InboundData
+
+**Field: `KeyName`** (KeyName, `string`)
+
+
+
+**Field: `Value`** (Value, `string`)
+
+
+
+**Field: `SessionState`** (SessionState, `string`)
+
+
+
+**Field: `Timeout`** (Timeout, `int64`)
+
+
+
+**Field: `Per`** (Per, `int64`)
+
+
+
+**Field: `Expire`** (Expire, `int64`)
+
+
+
+# DefRequest
+
+**Field: `OrgId`** (OrgId, `string`)
+
+
+
+**Field: `Tags`** (Tags, `[]string`)
+
+
+
+**Field: `LoadOAS`** (LoadOAS, `bool`)
+
+
+
+# GroupLoginRequest
+
+**Field: `UserKey`** (UserKey, `string`)
+
+
+
+**Field: `GroupID`** (GroupID, `string`)
+
+
+
+**Field: `ForceSync`** (ForceSync, `bool`)
+
+
+
+# GroupKeySpaceRequest
+
+**Field: `OrgID`** (OrgID, `string`)
+
+
+
+**Field: `GroupID`** (GroupID, `string`)
+
+
+
+# KeysValuesPair
+
+**Field: `Keys`** (Keys, `[]string`)
+
+
+
+**Field: `Values`** (Values, `[]string`)
+
+
+
+# ValidationResult
+
+**Field: `IsValid`** (IsValid, `bool`)
+
+
+
+**Field: `Errors`** (Errors, `[]error`)
+
+
+
+# ValidationRuleSet
+
+Type defined as `[]ValidationRule`, see [ValidationRule](ValidationRule) definition.
+
+# ValidationRule
+
+Type defined as ``, see []() definition.
+
+# RuleUniqueDataSourceNames
+
+Type defined as ``, see []() definition.
+
+# RuleAtLeastEnableOneAuthSource
+
+Type defined as ``, see []() definition.
+
+# RuleValidateIPList
+
+Type defined as ``, see []() definition.
+
 # TykEvent
 
 Type defined as `string`, see [string](string) definition.
@@ -2142,110 +2246,6 @@ Allows override of default 422 Unprocessible Entity response code for validation
 
 
 # HostList
-
-Type defined as ``, see []() definition.
-
-# InboundData
-
-**Field: `KeyName`** (KeyName, `string`)
-
-
-
-**Field: `Value`** (Value, `string`)
-
-
-
-**Field: `SessionState`** (SessionState, `string`)
-
-
-
-**Field: `Timeout`** (Timeout, `int64`)
-
-
-
-**Field: `Per`** (Per, `int64`)
-
-
-
-**Field: `Expire`** (Expire, `int64`)
-
-
-
-# DefRequest
-
-**Field: `OrgId`** (OrgId, `string`)
-
-
-
-**Field: `Tags`** (Tags, `[]string`)
-
-
-
-**Field: `LoadOAS`** (LoadOAS, `bool`)
-
-
-
-# GroupLoginRequest
-
-**Field: `UserKey`** (UserKey, `string`)
-
-
-
-**Field: `GroupID`** (GroupID, `string`)
-
-
-
-**Field: `ForceSync`** (ForceSync, `bool`)
-
-
-
-# GroupKeySpaceRequest
-
-**Field: `OrgID`** (OrgID, `string`)
-
-
-
-**Field: `GroupID`** (GroupID, `string`)
-
-
-
-# KeysValuesPair
-
-**Field: `Keys`** (Keys, `[]string`)
-
-
-
-**Field: `Values`** (Values, `[]string`)
-
-
-
-# ValidationResult
-
-**Field: `IsValid`** (IsValid, `bool`)
-
-
-
-**Field: `Errors`** (Errors, `[]error`)
-
-
-
-# ValidationRuleSet
-
-Type defined as `[]ValidationRule`, see [ValidationRule](ValidationRule) definition.
-
-# ValidationRule
-
-Type defined as ``, see []() definition.
-
-# RuleUniqueDataSourceNames
-
-Type defined as ``, see []() definition.
-
-# RuleAtLeastEnableOneAuthSource
-
-Type defined as ``, see []() definition.
-
-# RuleValidateIPList
 
 Type defined as ``, see []() definition.
 

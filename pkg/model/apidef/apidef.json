@@ -1,40 +1,256 @@
 {
   "imports": [
+    "\"bytes\"",
     "\"encoding/base64\"",
+    "\"encoding/json\"",
     "\"encoding/json\"",
     "\"encoding/xml\"",
     "\"errors\"",
-    "\"net/http\"",
-    "\"text/template\"",
-    "\"time\"",
-    "\"github.com/TykTechnologies/storage/persistent/model\"",
-    "\"github.com/clbanning/mxj\"",
-    "\"github.com/lonelycode/osin\"",
+    "\"errors\"",
+    "\"errors\"",
+    "\"errors\"",
+    "\"fmt\"",
+    "\"github.com/TykTechnologies/gojsonschema\"",
     "\"github.com/TykTechnologies/graphql-go-tools/pkg/engine/datasource/kafka_datasource\"",
     "\"github.com/TykTechnologies/graphql-go-tools/pkg/execution/datasource\"",
-    "\"github.com/TykTechnologies/gojsonschema\"",
+    "\"github.com/TykTechnologies/storage/persistent/model\"",
     "\"github.com/TykTechnologies/tyk/regexp\"",
-    "\"errors\"",
-    "\"sync\"",
-    "\"errors\"",
+    "\"github.com/clbanning/mxj\"",
+    "\"github.com/lonelycode/osin\"",
+    "\"io/ioutil\"",
+    "\"net\"",
+    "\"net\"",
+    "\"net/http\"",
+    "\"net/http\"",
     "\"net/http\"",
     "\"net/url\"",
     "\"sort\"",
-    "\"strings\"",
-    "\"bytes\"",
-    "\"encoding/json\"",
-    "\"io/ioutil\"",
-    "\"net\"",
-    "\"net/http\"",
-    "\"time\"",
-    "logger \"github.com/TykTechnologies/tyk/log\"",
-    "\"errors\"",
-    "\"fmt\"",
-    "\"net\"",
     "\"sort\"",
-    "\"strings\""
+    "\"strings\"",
+    "\"strings\"",
+    "\"sync\"",
+    "\"text/template\"",
+    "\"time\"",
+    "\"time\"",
+    "logger \"github.com/TykTechnologies/tyk/log\""
   ],
   "declarations": [
+    {
+      "types": [
+        {
+          "name": "InboundData",
+          "fields": [
+            {
+              "name": "KeyName",
+              "type": "string",
+              "path": "InboundData.KeyName",
+              "tag": "",
+              "json_name": "KeyName"
+            },
+            {
+              "name": "Value",
+              "type": "string",
+              "path": "InboundData.Value",
+              "tag": "",
+              "json_name": "Value"
+            },
+            {
+              "name": "SessionState",
+              "type": "string",
+              "path": "InboundData.SessionState",
+              "tag": "",
+              "json_name": "SessionState"
+            },
+            {
+              "name": "Timeout",
+              "type": "int64",
+              "path": "InboundData.Timeout",
+              "tag": "",
+              "json_name": "Timeout"
+            },
+            {
+              "name": "Per",
+              "type": "int64",
+              "path": "InboundData.Per",
+              "tag": "",
+              "json_name": "Per"
+            },
+            {
+              "name": "Expire",
+              "type": "int64",
+              "path": "InboundData.Expire",
+              "tag": "",
+              "json_name": "Expire"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "DefRequest",
+          "fields": [
+            {
+              "name": "OrgId",
+              "type": "string",
+              "path": "DefRequest.OrgId",
+              "tag": "",
+              "json_name": "OrgId"
+            },
+            {
+              "name": "Tags",
+              "type": "[]string",
+              "path": "DefRequest.Tags",
+              "tag": "",
+              "json_name": "Tags"
+            },
+            {
+              "name": "LoadOAS",
+              "type": "bool",
+              "path": "DefRequest.LoadOAS",
+              "tag": "",
+              "json_name": "LoadOAS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "GroupLoginRequest",
+          "fields": [
+            {
+              "name": "UserKey",
+              "type": "string",
+              "path": "GroupLoginRequest.UserKey",
+              "tag": "",
+              "json_name": "UserKey"
+            },
+            {
+              "name": "GroupID",
+              "type": "string",
+              "path": "GroupLoginRequest.GroupID",
+              "tag": "",
+              "json_name": "GroupID"
+            },
+            {
+              "name": "ForceSync",
+              "type": "bool",
+              "path": "GroupLoginRequest.ForceSync",
+              "tag": "",
+              "json_name": "ForceSync"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "GroupKeySpaceRequest",
+          "fields": [
+            {
+              "name": "OrgID",
+              "type": "string",
+              "path": "GroupKeySpaceRequest.OrgID",
+              "tag": "",
+              "json_name": "OrgID"
+            },
+            {
+              "name": "GroupID",
+              "type": "string",
+              "path": "GroupKeySpaceRequest.GroupID",
+              "tag": "",
+              "json_name": "GroupID"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "KeysValuesPair",
+          "fields": [
+            {
+              "name": "Keys",
+              "type": "[]string",
+              "path": "KeysValuesPair.Keys",
+              "tag": "",
+              "json_name": "Keys"
+            },
+            {
+              "name": "Values",
+              "type": "[]string",
+              "path": "KeysValuesPair.Values",
+              "tag": "",
+              "json_name": "Values"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationResult",
+          "fields": [
+            {
+              "name": "IsValid",
+              "type": "bool",
+              "path": "ValidationResult.IsValid",
+              "tag": "",
+              "json_name": "IsValid"
+            },
+            {
+              "name": "Errors",
+              "type": "[]error",
+              "path": "ValidationResult.Errors",
+              "tag": "",
+              "json_name": "Errors"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationRuleSet",
+          "type": "[]ValidationRule"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "ValidationRule"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleUniqueDataSourceNames"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleAtLeastEnableOneAuthSource"
+        }
+      ]
+    },
+    {
+      "types": [
+        {
+          "name": "RuleValidateIPList"
+        }
+      ]
+    },
     {
       "types": [
         {
@@ -3215,222 +3431,6 @@
       "types": [
         {
           "name": "HostList"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "InboundData",
-          "fields": [
-            {
-              "name": "KeyName",
-              "type": "string",
-              "path": "InboundData.KeyName",
-              "tag": "",
-              "json_name": "KeyName"
-            },
-            {
-              "name": "Value",
-              "type": "string",
-              "path": "InboundData.Value",
-              "tag": "",
-              "json_name": "Value"
-            },
-            {
-              "name": "SessionState",
-              "type": "string",
-              "path": "InboundData.SessionState",
-              "tag": "",
-              "json_name": "SessionState"
-            },
-            {
-              "name": "Timeout",
-              "type": "int64",
-              "path": "InboundData.Timeout",
-              "tag": "",
-              "json_name": "Timeout"
-            },
-            {
-              "name": "Per",
-              "type": "int64",
-              "path": "InboundData.Per",
-              "tag": "",
-              "json_name": "Per"
-            },
-            {
-              "name": "Expire",
-              "type": "int64",
-              "path": "InboundData.Expire",
-              "tag": "",
-              "json_name": "Expire"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "DefRequest",
-          "fields": [
-            {
-              "name": "OrgId",
-              "type": "string",
-              "path": "DefRequest.OrgId",
-              "tag": "",
-              "json_name": "OrgId"
-            },
-            {
-              "name": "Tags",
-              "type": "[]string",
-              "path": "DefRequest.Tags",
-              "tag": "",
-              "json_name": "Tags"
-            },
-            {
-              "name": "LoadOAS",
-              "type": "bool",
-              "path": "DefRequest.LoadOAS",
-              "tag": "",
-              "json_name": "LoadOAS"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "GroupLoginRequest",
-          "fields": [
-            {
-              "name": "UserKey",
-              "type": "string",
-              "path": "GroupLoginRequest.UserKey",
-              "tag": "",
-              "json_name": "UserKey"
-            },
-            {
-              "name": "GroupID",
-              "type": "string",
-              "path": "GroupLoginRequest.GroupID",
-              "tag": "",
-              "json_name": "GroupID"
-            },
-            {
-              "name": "ForceSync",
-              "type": "bool",
-              "path": "GroupLoginRequest.ForceSync",
-              "tag": "",
-              "json_name": "ForceSync"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "GroupKeySpaceRequest",
-          "fields": [
-            {
-              "name": "OrgID",
-              "type": "string",
-              "path": "GroupKeySpaceRequest.OrgID",
-              "tag": "",
-              "json_name": "OrgID"
-            },
-            {
-              "name": "GroupID",
-              "type": "string",
-              "path": "GroupKeySpaceRequest.GroupID",
-              "tag": "",
-              "json_name": "GroupID"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "KeysValuesPair",
-          "fields": [
-            {
-              "name": "Keys",
-              "type": "[]string",
-              "path": "KeysValuesPair.Keys",
-              "tag": "",
-              "json_name": "Keys"
-            },
-            {
-              "name": "Values",
-              "type": "[]string",
-              "path": "KeysValuesPair.Values",
-              "tag": "",
-              "json_name": "Values"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationResult",
-          "fields": [
-            {
-              "name": "IsValid",
-              "type": "bool",
-              "path": "ValidationResult.IsValid",
-              "tag": "",
-              "json_name": "IsValid"
-            },
-            {
-              "name": "Errors",
-              "type": "[]error",
-              "path": "ValidationResult.Errors",
-              "tag": "",
-              "json_name": "Errors"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationRuleSet",
-          "type": "[]ValidationRule"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "ValidationRule"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleUniqueDataSourceNames"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleAtLeastEnableOneAuthSource"
-        }
-      ]
-    },
-    {
-      "types": [
-        {
-          "name": "RuleValidateIPList"
         }
       ]
     },

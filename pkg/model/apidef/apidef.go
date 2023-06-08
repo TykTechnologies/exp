@@ -11,6 +11,63 @@ import (
 	"github.com/TykTechnologies/storage/persistent/model"
 )
 
+type InboundData struct {
+	KeyName string
+
+	Value string
+
+	SessionState string
+
+	Timeout int64
+
+	Per int64
+
+	Expire int64
+}
+
+type DefRequest struct {
+	OrgId string
+
+	Tags []string
+
+	LoadOAS bool
+}
+
+type GroupLoginRequest struct {
+	UserKey string
+
+	GroupID string
+
+	ForceSync bool
+}
+
+type GroupKeySpaceRequest struct {
+	OrgID string
+
+	GroupID string
+}
+
+type KeysValuesPair struct {
+	Keys []string
+
+	Values []string
+}
+
+type ValidationResult struct {
+	IsValid bool
+
+	Errors []error
+}
+
+type ValidationRuleSet []ValidationRule
+type ValidationRule struct{}
+
+type RuleUniqueDataSourceNames struct{}
+
+type RuleAtLeastEnableOneAuthSource struct{}
+
+type RuleValidateIPList struct{}
+
 type AuthProviderCode string
 type SessionProviderCode string
 type StorageEngineCode string
@@ -860,63 +917,6 @@ type IntrospectionCache struct {
 }
 
 type HostList struct{}
-
-type InboundData struct {
-	KeyName string
-
-	Value string
-
-	SessionState string
-
-	Timeout int64
-
-	Per int64
-
-	Expire int64
-}
-
-type DefRequest struct {
-	OrgId string
-
-	Tags []string
-
-	LoadOAS bool
-}
-
-type GroupLoginRequest struct {
-	UserKey string
-
-	GroupID string
-
-	ForceSync bool
-}
-
-type GroupKeySpaceRequest struct {
-	OrgID string
-
-	GroupID string
-}
-
-type KeysValuesPair struct {
-	Keys []string
-
-	Values []string
-}
-
-type ValidationResult struct {
-	IsValid bool
-
-	Errors []error
-}
-
-type ValidationRuleSet []ValidationRule
-type ValidationRule struct{}
-
-type RuleUniqueDataSourceNames struct{}
-
-type RuleAtLeastEnableOneAuthSource struct{}
-
-type RuleValidateIPList struct{}
 
 // APIDefinition represents the configuration for a single proxied API and it's versions.
 //
