@@ -14,6 +14,19 @@ To install:
 
 Invoke `schema-gen` without arguments to print usage help.
 
+```
+./schema-gen
+Usage: schema-gen <command> help
+Available commands: extract, lint, markdown, restore
+```
+
+- `extract` dumps go type declarations into a .json document,
+- `lint` takes a .json document and applies linter rules,
+- `markdown` takes a .json document and renders a markdown doc,
+- `render` takes a .json document and renders it to .go source code.
+
+The tool is ready for general use.
+
 Usage:
 
 - `schema-gen`

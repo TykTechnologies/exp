@@ -37,6 +37,7 @@ tasks:
       - schema-gen restore -i model/model.json -o model/model.go.txt -p model
       - schema-gen extract -i _example/ -o _example/example.json
       - schema-gen restore -i _example/example.json -o _example/example.go.txt -p example
+      - schema-gen restore -i _example/example.json -o _example/example_file.go.txt --keep File -p example
 
   help:
     desc: "Run schema gen to print usage/help"
