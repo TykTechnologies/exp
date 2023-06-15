@@ -97,7 +97,7 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 					output.WriteString(fmt.Sprintf(" // %s", typeDecl.Comment))
 				}
 				output.WriteString("\n")
-				continue
+				goto includeFunctions
 			}
 
 			output.WriteString("type ")
@@ -121,7 +121,16 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 				printStruct(&output, typeDecl)
 				output.WriteString("\n\n")
 			}
-			output.WriteString(")\n")
+			output.WriteString(")\n\n")
+		}
+
+	includeFunctions:
+		for _, typeDecl := range decl.Types {
+			for _, funcDecl := range typeDecl.Functions {
+				if slices.Contains(cfg.includeFunctions, funcDecl.Name) {
+					output.WriteString(funcDecl.Source + "\n\n")
+				}
+			}
 		}
 	}
 

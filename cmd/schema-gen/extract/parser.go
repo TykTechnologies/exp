@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
-	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/exp/slices"
 )
 
@@ -170,6 +169,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 						goPath := r.X.(*ast.Ident).Name
 						funcinfo := &FuncInfo{
 							Name:      getTypeDeclaration(fun.Name),
+							Doc:       TrimSpace(fun.Doc),
 							Type:      recvType,
 							Path:      goPath,
 							Signature: signature,
@@ -181,9 +181,8 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 
 				return
 			})
-
-			spew.Dump(funcs)
 		}
+
 		// Collect imports
 		for _, imported := range fileObj.Imports {
 			importLiteral := imported.Path.Value
@@ -235,6 +234,20 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			if info.Valid() {
 				result.Declarations.Append(info)
 			}
+		}
+	}
+
+	if options.includeFunctions {
+		for _, funcInfo := range funcs {
+			for _, decl := range result.Declarations {
+				for _, typeDecl := range decl.Types {
+					if typeDecl.Name == funcInfo.Path {
+						typeDecl.Functions = append(typeDecl.Functions, funcInfo)
+						goto done
+					}
+				}
+			}
+		done:
 		}
 	}
 

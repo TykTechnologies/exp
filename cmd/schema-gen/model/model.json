@@ -38,6 +38,16 @@
               "tag": "json:\"types,omitempty\"",
               "json_name": "types,omitempty"
             }
+          ],
+          "functions": [
+            {
+              "name": "Valid",
+              "doc": "",
+              "type": "x *DeclarationInfo",
+              "path": "DeclarationInfo",
+              "signature": "Valid () bool",
+              "source": "func (x *DeclarationInfo) Valid() bool {\n\treturn len(x.Types) \u003e 0\n}"
+            }
           ]
         }
       ]
@@ -47,7 +57,17 @@
       "types": [
         {
           "name": "DeclarationList",
-          "type": "[]*DeclarationInfo"
+          "type": "[]*DeclarationInfo",
+          "functions": [
+            {
+              "name": "Append",
+              "doc": "",
+              "type": "x *DeclarationList",
+              "path": "DeclarationList",
+              "signature": "Append (newInfo *DeclarationInfo) int",
+              "source": "func (x *DeclarationList) Append(newInfo *DeclarationInfo) int {\n\t*x = append(*x, newInfo)\n\treturn len(*x)\n}"
+            }
+          ]
         }
       ]
     },
@@ -120,6 +140,68 @@
               "doc": "MapKey is the map key type, if this field is a map.",
               "tag": "json:\"map_key,omitempty\"",
               "json_name": "map_key,omitempty"
+            }
+          ],
+          "functions": [
+            {
+              "name": "TypeRef",
+              "doc": "",
+              "type": "f *FieldInfo",
+              "path": "FieldInfo",
+              "signature": "TypeRef () string",
+              "source": "func (f *FieldInfo) TypeRef() string {\n\treturn strings.TrimLeft(f.Type, \"[]*\")\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc": "FuncInfo holds details about a function definition.",
+      "types": [
+        {
+          "name": "FuncInfo",
+          "fields": [
+            {
+              "name": "Name",
+              "type": "string",
+              "path": "FuncInfo.Name",
+              "tag": "json:\"name\"",
+              "json_name": "name"
+            },
+            {
+              "name": "Doc",
+              "type": "string",
+              "path": "FuncInfo.Doc",
+              "tag": "json:\"doc\"",
+              "json_name": "doc"
+            },
+            {
+              "name": "Type",
+              "type": "string",
+              "path": "FuncInfo.Type",
+              "tag": "json:\"type\"",
+              "json_name": "type"
+            },
+            {
+              "name": "Path",
+              "type": "string",
+              "path": "FuncInfo.Path",
+              "tag": "json:\"path\"",
+              "json_name": "path"
+            },
+            {
+              "name": "Signature",
+              "type": "string",
+              "path": "FuncInfo.Signature",
+              "tag": "json:\"signature\"",
+              "json_name": "signature"
+            },
+            {
+              "name": "Source",
+              "type": "string",
+              "path": "FuncInfo.Source",
+              "tag": "json:\"source\"",
+              "json_name": "source"
             }
           ]
         }
@@ -196,6 +278,23 @@
               "doc": "Fields holds information of the fields, if this object is a struct.",
               "tag": "json:\"fields,omitempty\"",
               "json_name": "fields,omitempty"
+            },
+            {
+              "name": "Functions",
+              "type": "[]*FuncInfo",
+              "path": "TypeInfo.Functions",
+              "tag": "json:\"functions,omitempty\"",
+              "json_name": "functions,omitempty"
+            }
+          ],
+          "functions": [
+            {
+              "name": "TypeRef",
+              "doc": "TypeRef trims array and pointer info from a type reference.",
+              "type": "f *TypeInfo",
+              "path": "TypeInfo",
+              "signature": "TypeRef () string",
+              "source": "// TypeRef trims array and pointer info from a type reference.\nfunc (f *TypeInfo) TypeRef() string {\n\treturn strings.TrimLeft(f.Type, \"[]*\")\n}"
             }
           ]
         }
@@ -206,7 +305,17 @@
       "types": [
         {
           "name": "TypeList",
-          "type": "[]*TypeInfo"
+          "type": "[]*TypeInfo",
+          "functions": [
+            {
+              "name": "Append",
+              "doc": "",
+              "type": "x *TypeList",
+              "path": "TypeList",
+              "signature": "Append (newInfo *TypeInfo) int",
+              "source": "func (x *TypeList) Append(newInfo *TypeInfo) int {\n\t*x = append(*x, newInfo)\n\treturn len(*x)\n}"
+            }
+          ]
         }
       ]
     }

@@ -11,7 +11,8 @@ type options struct {
 	outputFile  string
 	packageName string
 
-	keep []string
+	keep             []string
+	includeFunctions []string
 }
 
 func NewOptions() *options {
@@ -24,6 +25,7 @@ func NewOptions() *options {
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 	flag.StringVarP(&cfg.packageName, "package-name", "p", cfg.packageName, "package name")
 	flag.StringSliceVarP(&cfg.keep, "keep", "", cfg.keep, "type definition names to keep (default: all)")
+	flag.StringSliceVarP(&cfg.includeFunctions, "include-functions", "", cfg.includeFunctions, "include functions (default: none)")
 	flag.Parse()
 
 	return cfg

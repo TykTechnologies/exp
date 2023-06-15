@@ -20,6 +20,16 @@
               "tag": "json:\"session_id\"",
               "json_name": "session_id"
             }
+          ],
+          "functions": [
+            {
+              "name": "Validate",
+              "doc": "",
+              "type": "t *KeyRequest",
+              "path": "KeyRequest",
+              "signature": "Validate () error",
+              "source": "func (t *KeyRequest) Validate() error {\n\tif t.SessionID == \"\" {\n\t\treturn errors.New(\"invalid KeyRequest, empty session\")\n\t}\n}"
+            }
           ]
         },
         {

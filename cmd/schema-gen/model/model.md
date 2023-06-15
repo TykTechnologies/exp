@@ -65,6 +65,10 @@ Type is an optional type if the declaration is a type alias or similar.
 
 Fields holds information of the fields, if this object is a struct.
 
+**Field: `functions`** (Functions, [[]*FuncInfo](#FuncInfo))
+
+
+
 # FieldInfo
 
 FieldInfo holds details about a field definition.
@@ -100,4 +104,32 @@ JSONName is the corresponding json name of the field.
 **Field: `map_key`** (MapKey, `string`)
 
 MapKey is the map key type, if this field is a map.
+
+# FuncInfo
+
+FuncInfo holds details about a function definition.
+
+**Field: `name`** (Name, `string`)
+
+
+
+**Field: `doc`** (Doc, `string`)
+
+
+
+**Field: `type`** (Type, `string`)
+
+
+
+**Field: `path`** (Path, `string`)
+
+
+
+**Field: `signature`** (Signature, `string`)
+
+
+
+**Field: `source`** (Source, `string`)
+
+
 

@@ -98,10 +98,13 @@ type TypeInfo struct {
 	// Fields holds information of the fields, if this object is a struct.
 	Fields []*FieldInfo `json:"fields,omitempty"`
 
+	Functions []*FuncInfo `json:"functions,omitempty"`
+
 	// StructObj is the (optionally present) raw ast.StructType value
 	StructObj *ast.StructType `json:"-"`
 }
 
+// TypeRef trims array and pointer info from a type reference.
 func (f *TypeInfo) TypeRef() string {
 	return strings.TrimLeft(f.Type, "[]*")
 }
@@ -163,4 +166,14 @@ func (f FieldInfo) Valid() bool {
 		return false
 	}
 	return true
+}
+
+// FuncInfo holds details about a function definition.
+type FuncInfo struct {
+	Name      string `json:"name"`
+	Doc       string `json:"doc"`
+	Type      string `json:"type"`
+	Path      string `json:"path"`
+	Signature string `json:"signature"`
+	Source    string `json:"source"`
 }

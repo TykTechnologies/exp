@@ -56,6 +56,10 @@ type FieldInfo struct {
 	MapKey string `json:"map_key,omitempty"`
 }
 
+func (f *FieldInfo) TypeRef() string {
+	return strings.TrimLeft(f.Type, "[]*")
+}
+
 // FuncInfo holds details about a function definition.
 type FuncInfo struct {
 	Name string `json:"name"`
@@ -98,6 +102,11 @@ type TypeInfo struct {
 	Fields []*FieldInfo `json:"fields,omitempty"`
 
 	Functions []*FuncInfo `json:"functions,omitempty"`
+}
+
+// TypeRef trims array and pointer info from a type reference.
+func (f *TypeInfo) TypeRef() string {
+	return strings.TrimLeft(f.Type, "[]*")
 }
 
 // TypeList implements list operations over a *TypeInfo slice.
