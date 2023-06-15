@@ -21,6 +21,12 @@ type (
 		Status  string `json:"status"`
 		Message string `json:"message"`
 	}
+
+	// Key embeds KeyRequest and KeyResponse.
+	Key struct {
+		KeyRequest  `json:""`
+		KeyResponse `json:""`
+	}
 )
 
 func (t *KeyRequest) Validate() error {

@@ -69,6 +69,10 @@ Fields holds information of the fields, if this object is a struct.
 
 
 
+**Field: `-`** (StructObj, `ast.StructType`)
+
+StructObj is the (optionally present) raw ast.StructType value
+
 # FieldInfo
 
 FieldInfo holds details about a field definition.

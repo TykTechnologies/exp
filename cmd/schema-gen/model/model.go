@@ -153,16 +153,8 @@ func (f *FieldInfo) TypeRef() string {
 }
 
 func (f FieldInfo) Valid() bool {
-	// Not encoded to json.
-	if f.JSONName == "-" {
-		return false
-	}
 	// Not exported.
-	if !ast.IsExported(f.Name) {
-		return false
-	}
-	// Ignored.
-	if f.Name == "_" || f.Name == "" {
+	if f.Name != "" && !ast.IsExported(f.Name) {
 		return false
 	}
 	return true

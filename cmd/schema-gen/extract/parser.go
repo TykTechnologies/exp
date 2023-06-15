@@ -164,6 +164,9 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 						return
 					}
 					if r, ok := fun.Recv.List[0].Type.(*ast.StarExpr); ok {
+						if len(fun.Recv.List[0].Names) == 0 {
+							return
+						}
 						recvType := getTypeDeclaration(fun.Recv.List[0].Names[0]) + " " + getTypeDeclarationsForPointerType(r)
 						signature := p.functionDef(fun)
 						goPath := r.X.(*ast.Ident).Name

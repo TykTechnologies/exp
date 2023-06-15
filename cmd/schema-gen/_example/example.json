@@ -8,6 +8,26 @@
       "doc": "Declaration doc.",
       "types": [
         {
+          "name": "Key",
+          "doc": "Key embeds KeyRequest and KeyResponse.",
+          "fields": [
+            {
+              "name": "",
+              "type": "KeyRequest",
+              "path": "Key.",
+              "tag": "json:\"\"",
+              "json_name": ""
+            },
+            {
+              "name": "",
+              "type": "KeyResponse",
+              "path": "Key.",
+              "tag": "json:\"\"",
+              "json_name": ""
+            }
+          ]
+        },
+        {
           "name": "KeyRequest",
           "doc": "KeyRequest doc.",
           "fields": [

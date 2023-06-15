@@ -9,6 +9,13 @@ import (
 
 // Declaration doc.
 type (
+	// Key embeds KeyRequest and KeyResponse.
+	Key struct {
+		KeyRequest `json:""`
+
+		KeyResponse `json:""`
+	}
+
 	// KeyRequest doc.
 	KeyRequest struct {
 		// SessionID doc

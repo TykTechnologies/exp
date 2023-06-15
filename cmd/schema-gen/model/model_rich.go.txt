@@ -102,6 +102,9 @@ type TypeInfo struct {
 	Fields []*FieldInfo `json:"fields,omitempty"`
 
 	Functions []*FuncInfo `json:"functions,omitempty"`
+
+	// StructObj is the (optionally present) raw ast.StructType value
+	StructObj ast.StructType `json:"-"`
 }
 
 // TypeRef trims array and pointer info from a type reference.

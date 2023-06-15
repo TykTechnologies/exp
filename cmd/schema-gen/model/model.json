@@ -285,6 +285,14 @@
               "path": "TypeInfo.Functions",
               "tag": "json:\"functions,omitempty\"",
               "json_name": "functions,omitempty"
+            },
+            {
+              "name": "StructObj",
+              "type": "ast.StructType",
+              "path": "TypeInfo.StructObj",
+              "doc": "StructObj is the (optionally present) raw ast.StructType value",
+              "tag": "json:\"-\"",
+              "json_name": "-"
             }
           ],
           "functions": [
