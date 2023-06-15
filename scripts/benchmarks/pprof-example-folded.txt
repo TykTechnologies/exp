@@ -1,0 +1,3 @@
+testing.(*B).launch;testing.(*B).runN;example.com/pgo/inline.BenchmarkA;example.com/pgo/inline.benchmarkB;example.com/pgo/inline.A;example.com/pgo/inline.(*BS).NS 124
+testing.(*B).launch;testing.(*B).runN;example.com/pgo/inline.BenchmarkA;example.com/pgo/inline.benchmarkB;example.com/pgo/inline.A;example.com/pgo/inline.(*BS).NS;example.com/pgo/inline.T 5
+testing.(*B).launch;testing.(*B).runN;example.com/pgo/inline.BenchmarkA;example.com/pgo/inline.benchmarkB;example.com/pgo/inline.A 1
