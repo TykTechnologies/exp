@@ -92,6 +92,9 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 			}
 
 			if !strings.Contains(importLiteral, "/internal") {
+				if slices.Contains(result.Imports, importLiteral) {
+					continue
+				}
 				result.Imports = append(result.Imports, importLiteral)
 			}
 		}
@@ -132,8 +135,6 @@ func (p *objParser) GetDeclarations() (*PackageInfo, error) {
 			}
 		}
 	}
-
-	deduplicate(result.Imports)
 
 	sort.Stable(result.Declarations)
 	slices.Sort(result.Imports)
