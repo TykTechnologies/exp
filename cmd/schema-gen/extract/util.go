@@ -92,8 +92,10 @@ func jsonTag(tag string) string {
 	return reflect.StructTag(tag).Get("json")
 }
 
-func write(filename string, inputPackage string) error {
-	sts, err := Extract(inputPackage)
+func write(filename string, inputPackage string, includeFunctions bool) error {
+	opts := NewExtractOptions(includeFunctions, nil)
+
+	sts, err := Extract(inputPackage, opts)
 	if err != nil {
 		return err
 	}

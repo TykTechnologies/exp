@@ -1,22 +1,43 @@
 package extract
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
+	"log"
 	"os"
 	"path"
 	"sort"
 	"strings"
 
 	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
+	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/exp/slices"
 )
 
+// ExtractOptions contains options for extraction
+type ExtractOptions struct {
+	includeFunctions bool
+	ignoreFiles      []string
+}
+
+func NewExtractOptions(includeFunctions bool, ignoreFiles []string) *ExtractOptions {
+	return &ExtractOptions{
+		includeFunctions: includeFunctions,
+		ignoreFiles:      ignoreFiles,
+	}
+}
+
 // Extract package structs
-func Extract(filepath string, ignoreFiles ...string) (*PackageInfo, error) {
+func Extract(filepath string, options *ExtractOptions) (*PackageInfo, error) {
+	var (
+		ignoreFiles = options.ignoreFiles
+	)
+
 	ignoreList := make(map[string]bool)
 	for _, file := range ignoreFiles {
 		ignoreList[file] = true
@@ -52,7 +73,7 @@ func Extract(filepath string, ignoreFiles ...string) (*PackageInfo, error) {
 
 	p := NewParser(fileSet, pkgs[requiredPkgName])
 
-	return p.GetDeclarations()
+	return p.GetDeclarations(options)
 }
 
 type objParser struct {
@@ -71,17 +92,98 @@ func NewParser(fileset *token.FileSet, pkg *ast.Package) *objParser {
 	return p
 }
 
+func (p *objParser) getSourceCode(node ast.Node) string {
+	var buf strings.Builder
+	err := printer.Fprint(&buf, p.fileset, node)
+	if err != nil {
+		return ""
+	}
+	return buf.String()
+}
+
+func (p *objParser) functionDef(fun *ast.FuncDecl) string {
+	var fset = p.fileset
+	name := fun.Name.Name
+	params := make([]string, 0)
+	for _, p := range fun.Type.Params.List {
+		var typeNameBuf bytes.Buffer
+		err := printer.Fprint(&typeNameBuf, fset, p.Type)
+		if err != nil {
+			log.Fatalf("failed printing %s", err)
+		}
+		names := make([]string, 0)
+		for _, name := range p.Names {
+			names = append(names, name.Name)
+		}
+		params = append(params, fmt.Sprintf("%s %s", strings.Join(names, ","), typeNameBuf.String()))
+	}
+	returns := make([]string, 0)
+	if fun.Type.Results != nil {
+		for _, r := range fun.Type.Results.List {
+			var typeNameBuf bytes.Buffer
+			err := printer.Fprint(&typeNameBuf, fset, r.Type)
+			if err != nil {
+				log.Fatalf("failed printing %s", err)
+			}
+
+			returns = append(returns, typeNameBuf.String())
+		}
+	}
+	returnString := ""
+	if len(returns) == 1 {
+		returnString = returns[0]
+	} else if len(returns) > 1 {
+		returnString = fmt.Sprintf("(%s)", strings.Join(returns, ", "))
+	}
+	return fmt.Sprintf("%s (%s) %v", name, strings.Join(params, ", "), returnString)
+}
+
 // GetDeclaration returns a filled out PackageInfo{} and an error if any.
-func (p *objParser) GetDeclarations() (*PackageInfo, error) {
+func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, error) {
 	var err error
 	result := &PackageInfo{
 		Declarations: DeclarationList{},
 		Imports:      []string{},
 	}
 
+	var funcs []*FuncInfo
+
 	for _, fileObj := range p.pkg.Files {
 		// https://pkg.go.dev/go/ast#File
 
+		if options.includeFunctions {
+			ast.Inspect(fileObj, func(n ast.Node) (res bool) {
+				res = true
+				if fun, ok := n.(*ast.FuncDecl); ok {
+					if fun.Recv == nil {
+						return
+					}
+					if !fun.Name.IsExported() {
+						return
+					}
+					if len(fun.Recv.List) != 1 {
+						return
+					}
+					if r, ok := fun.Recv.List[0].Type.(*ast.StarExpr); ok {
+						recvType := getTypeDeclaration(fun.Recv.List[0].Names[0]) + " " + getTypeDeclarationsForPointerType(r)
+						signature := p.functionDef(fun)
+						goPath := r.X.(*ast.Ident).Name
+						funcinfo := &FuncInfo{
+							Name:      getTypeDeclaration(fun.Name),
+							Type:      recvType,
+							Path:      goPath,
+							Signature: signature,
+							Source:    p.getSourceCode(n), // functionSource(fun, recvType, signature),
+						}
+						funcs = append(funcs, funcinfo)
+					}
+				}
+
+				return
+			})
+
+			spew.Dump(funcs)
+		}
 		// Collect imports
 		for _, imported := range fileObj.Imports {
 			importLiteral := imported.Path.Value
