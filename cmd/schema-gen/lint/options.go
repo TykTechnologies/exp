@@ -17,6 +17,7 @@ func NewOptions() *options {
 			"require-field-comment",
 			"require-dot-or-backtick",
 			"require-field-prefix",
+			"require-no-globals",
 		},
 		verbose: false,
 	}

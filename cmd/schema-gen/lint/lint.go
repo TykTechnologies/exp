@@ -2,10 +2,10 @@ package lint
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
+	"golang.org/x/exp/slices"
 )
 
 func lint(cfg *options) error {
@@ -16,16 +16,21 @@ func lint(cfg *options) error {
 		return fmt.Errorf("Error loading package info: %w", err)
 	}
 
-	errs := NewFieldDocError()
+	// require-no-globals
+	//
+	// When doing model/repository work, the package `model` provides
+	// the type declarations for `structs`, `var` and `const`'s.
+	//
+	// The repository package should provide interfaces, possibly
+	// constructor functions for the repositories, but should not
+	// expose symbols outside of that. Those belong in model.
 
-	// Dump out declarations
-	for _, decl := range pkgInfo.Declarations {
-		for _, typeDecl := range decl.Types {
-			for _, fieldDecl := range typeDecl.Fields {
-				errs.Append(lintField(cfg, decl, typeDecl, fieldDecl)...)
-			}
-		}
-	}
+	errs := NewLintError()
+	errs.Combine(runLinter(cfg, NewLinter("require-no-globals", linterNoGlobals), pkgInfo))
+
+	errs.Combine(runLinter(cfg, NewLinter("require-field-comment", linterFields), pkgInfo))
+	errs.Combine(runLinter(cfg, NewLinter("require-dot-or-backtick", linterFields), pkgInfo))
+	errs.Combine(runLinter(cfg, NewLinter("require-field-prefix", linterFields), pkgInfo))
 
 	if errs.Empty() {
 		return nil
@@ -33,62 +38,10 @@ func lint(cfg *options) error {
 	return errs
 }
 
-func lintField(cfg *options, decl *DeclarationInfo, typeDecl *TypeInfo, fieldDecl *FieldInfo) []string {
-	result := make([]string, 0, len(cfg.rules))
-
-	var (
-		name  = fieldDecl.Name
-		doc   = fieldDecl.Doc
-		field = fieldDecl.Path
-	)
-
-	if cfg.verbose {
-		fmt.Printf("// %s\n", doc)
-		fmt.Printf("%s\n\n", field)
+func runLinter(cfg *options, linter Linter, pkgInfo *PackageInfo) *LintError {
+	if !slices.Contains(cfg.rules, linter.GetName()) {
+		return nil
 	}
 
-	for _, rule := range cfg.rules {
-		result = append(result, validateRule(rule, field, name, doc))
-	}
-	return result
-}
-
-func validateRule(rule, field, name, doc string) string {
-	switch rule {
-	case "require-field-comment":
-		if doc == "" {
-			return fmt.Sprintf("[%s] No comment on exposed field.", field)
-		}
-	case "require-dot-or-backtick":
-		if doc == "" {
-			return ""
-		}
-		if strings.HasSuffix(doc, ".") || strings.HasSuffix(doc, "`") {
-			return ""
-		}
-
-		return fmt.Sprintf("[%s] Field comment must end with dot or `.\nGot:  %s\n", field, doc)
-	case "require-field-prefix":
-		if doc == "" {
-			return ""
-		}
-		prefixes := []string{
-			fmt.Sprintf("%s ", name),
-			fmt.Sprintf("%s: ", name),
-		}
-		hasPrefix := func(doc string, prefixes []string) bool {
-			for _, prefix := range prefixes {
-				if strings.HasPrefix(doc, prefix) {
-					return true
-				}
-			}
-			return false
-		}(doc, prefixes)
-
-		if !hasPrefix {
-			return fmt.Sprintf("[%s] Comment must start with field name.\nGot:  %s\n", field, doc)
-		}
-	default:
-	}
-	return ""
+	return linter.Do(cfg, pkgInfo)
 }
