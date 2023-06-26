@@ -2,6 +2,10 @@
 
 PackageInfo holds all the declarations for a package scope.
 
+**Field: `name`** (Name, `string`)
+
+Name is the package name.
+
 **Field: `imports`** (Imports, `[]string`)
 
 Imports holds a list of imported packages.
@@ -10,11 +14,43 @@ Imports holds a list of imported packages.
 
 Declarations within the package.
 
+**Field: `functions`** (Functions, [[]*FuncInfo](#FuncInfo))
+
+Functions within the package, enabled with `--include-functions`.
+
 # DeclarationList
 
 DeclarationList implements list operations over a `*DeclarationInfo` slice.
 
 Type defined as `[]*DeclarationInfo`, see [DeclarationInfo](DeclarationInfo) definition.
+
+# FuncInfo
+
+FuncInfo holds details about a function definition.
+
+**Field: `name`** (Name, `string`)
+
+Name holds the name of the function.
+
+**Field: `doc`** (Doc, `string`)
+
+Doc holds the function doc comment.
+
+**Field: `type`** (Type, `string`)
+
+Type holds the receiver if any.
+
+**Field: `path`** (Path, `string`)
+
+Path is the path to the symbol (`Type.FuncName` or `FuncName` if global func).
+
+**Field: `signature`** (Signature, `string`)
+
+Signature is an interface compatible signature for the function.
+
+**Field: `source`** (Source, `string`)
+
+Source is a 1-1 source code for the function.
 
 # DeclarationInfo
 
@@ -108,32 +144,4 @@ JSONName is the corresponding json name of the field.
 **Field: `map_key`** (MapKey, `string`)
 
 MapKey is the map key type, if this field is a map.
-
-# FuncInfo
-
-FuncInfo holds details about a function definition.
-
-**Field: `name`** (Name, `string`)
-
-
-
-**Field: `doc`** (Doc, `string`)
-
-
-
-**Field: `type`** (Type, `string`)
-
-
-
-**Field: `path`** (Path, `string`)
-
-
-
-**Field: `signature`** (Signature, `string`)
-
-
-
-**Field: `source`** (Source, `string`)
-
-
 

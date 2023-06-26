@@ -20,21 +20,21 @@ import (
 
 // ExtractOptions contains options for extraction
 type ExtractOptions struct {
-	includeFunctions     bool
-	includeTestFunctions bool
-	ignoreFiles          []string
+	includeFunctions bool
+	includeTests     bool
+	ignoreFiles      []string
 }
 
 func NewExtractOptions(cfg *options) *ExtractOptions {
 	return &ExtractOptions{
-		includeFunctions:     cfg.includeFunctions,
-		includeTestFunctions: cfg.includeTestFunctions,
-		ignoreFiles:          cfg.ignoreFiles,
+		includeFunctions: cfg.includeFunctions,
+		includeTests:     cfg.includeTests,
+		ignoreFiles:      cfg.ignoreFiles,
 	}
 }
 
 // Extract package structs
-func Extract(filepath string, options *ExtractOptions) (*PackageInfo, error) {
+func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
 	var (
 		ignoreFiles = options.ignoreFiles
 	)
@@ -46,7 +46,15 @@ func Extract(filepath string, options *ExtractOptions) (*PackageInfo, error) {
 
 	// filter skips explicitly ignored files, and tests files
 	filter := func(fInfo os.FileInfo) bool {
-		return !(ignoreList[fInfo.Name()] || strings.HasSuffix(fInfo.Name(), "_test.go"))
+		if ignored := ignoreList[fInfo.Name()]; ignored {
+			return false
+		}
+
+		if strings.HasSuffix(fInfo.Name(), "_test.go") {
+			return options.includeTests
+		}
+
+		return true
 	}
 
 	fileSet := token.NewFileSet()
@@ -55,26 +63,17 @@ func Extract(filepath string, options *ExtractOptions) (*PackageInfo, error) {
 		return nil, err
 	}
 
-	if len(pkgs) != 1 {
-		return nil, fmt.Errorf("expecting single go package, got %d", len(pkgs))
-	}
-
-	requiredPkgName := func() string {
-		// Get first package name
-		var pkgName string
-		for pkgName, _ = range pkgs {
-			break
+	result := make([]*PackageInfo, 0, len(pkgs))
+	for pkgName, pkg := range pkgs {
+		p := NewParser(fileSet, pkg)
+		pkgInfo, err := p.GetDeclarations(options)
+		pkgInfo.Name = pkgName
+		if err != nil {
+			return nil, err
 		}
-		return pkgName
-	}()
-
-	if _, ok := pkgs[requiredPkgName]; !ok {
-		return nil, fmt.Errorf("required package %q", requiredPkgName)
+		result = append(result, pkgInfo)
 	}
-
-	p := NewParser(fileSet, pkgs[requiredPkgName])
-
-	return p.GetDeclarations(options)
+	return result, nil
 }
 
 type objParser struct {
@@ -136,7 +135,12 @@ func (p *objParser) functionDef(fun *ast.FuncDecl) string {
 	} else if len(returns) > 1 {
 		returnString = fmt.Sprintf("(%s)", strings.Join(returns, ", "))
 	}
-	return fmt.Sprintf("%s (%s) %v", name, strings.Join(params, ", "), returnString)
+
+	paramsString := strings.Join(params, ", ")
+	if returnString != "" {
+		return fmt.Sprintf("%s (%s) %v", name, paramsString, returnString)
+	}
+	return fmt.Sprintf("%s (%s)", name, paramsString)
 }
 
 // GetDeclaration returns a filled out PackageInfo{} and an error if any.
@@ -148,6 +152,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 	}
 
 	var funcs []*FuncInfo
+	var globalFuncs []*FuncInfo
 
 	for _, fileObj := range p.pkg.Files {
 		// https://pkg.go.dev/go/ast#File
@@ -156,13 +161,19 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			ast.Inspect(fileObj, func(n ast.Node) (res bool) {
 				res = true
 				if fun, ok := n.(*ast.FuncDecl); ok {
-					if fun.Recv == nil {
-						return
-					}
 					if !fun.Name.IsExported() {
 						return
 					}
-					if len(fun.Recv.List) != 1 {
+					if fun.Recv == nil || len(fun.Recv.List) == 0 {
+						name := getTypeDeclaration(fun.Name)
+						funcinfo := &FuncInfo{
+							Name:      name,
+							Doc:       TrimSpace(fun.Doc),
+							Path:      name,
+							Signature: p.functionDef(fun),
+							Source:    p.getSourceCode(n),
+						}
+						globalFuncs = append(globalFuncs, funcinfo)
 						return
 					}
 					if r, ok := fun.Recv.List[0].Type.(*ast.StarExpr); ok {
@@ -178,10 +189,11 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 							Type:      recvType,
 							Path:      goPath,
 							Signature: signature,
-							Source:    p.getSourceCode(n), // functionSource(fun, recvType, signature),
+							Source:    p.getSourceCode(n),
 						}
 						funcs = append(funcs, funcinfo)
 					}
+
 				}
 
 				return
@@ -248,12 +260,12 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				for _, typeDecl := range decl.Types {
 					if typeDecl.Name == funcInfo.Path {
 						typeDecl.Functions = append(typeDecl.Functions, funcInfo)
-						goto done
 					}
 				}
 			}
-		done:
 		}
+
+		result.Functions = globalFuncs
 	}
 
 	sort.Stable(result.Declarations)
@@ -296,16 +308,12 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo) {
 	p.visited[name] = true
 
 	for _, field := range structInfo.StructObj.Fields.List {
-		pos := p.fileset.Position(field.Pos())
-		filePos := path.Base(pos.String())
+		//pos := p.fileset.Position(field.Pos())
+		//filePos := path.Base(pos.String())
 
 		var goName string
 		if len(field.Names) > 0 {
 			goName = field.Names[0].Name
-		}
-
-		if goName == "" {
-			fmt.Printf("[%s] unidentified field in %s\n", filePos, goPath)
 		}
 
 		tagValue := ""

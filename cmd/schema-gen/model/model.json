@@ -1,331 +1,378 @@
-{
-  "imports": [
-    "\"encoding/json\"",
-    "\"errors\"",
-    "\"go/ast\"",
-    "\"golang.org/x/exp/slices\"",
-    "\"os\"",
-    "\"strings\""
-  ],
-  "declarations": [
-    {
-      "doc": "DeclarationInfo holds the declarations block for an exposed value or type.",
-      "types": [
-        {
-          "name": "DeclarationInfo",
-          "fields": [
-            {
-              "name": "Doc",
-              "type": "string",
-              "path": "DeclarationInfo.Doc",
-              "doc": "Doc is the declaration doc comment. It usually\noccurs just before a *ast.TypeDecl, but may be\napplied to multiple ones.",
-              "tag": "json:\"doc,omitempty\"",
-              "json_name": "doc,omitempty"
-            },
-            {
-              "name": "FileDoc",
-              "type": "string",
-              "path": "DeclarationInfo.FileDoc",
-              "doc": "FileDoc is the doc comment for a file which\ncontains the definitions here.",
-              "tag": "json:\"file_doc,omitempty\"",
-              "json_name": "file_doc,omitempty"
-            },
-            {
-              "name": "Types",
-              "type": "TypeList",
-              "path": "DeclarationInfo.Types",
-              "doc": "Types are all the type declarations in the block.",
-              "tag": "json:\"types,omitempty\"",
-              "json_name": "types,omitempty"
-            }
-          ],
-          "functions": [
-            {
-              "name": "Valid",
-              "doc": "",
-              "type": "x *DeclarationInfo",
-              "path": "DeclarationInfo",
-              "signature": "Valid () bool",
-              "source": "func (x *DeclarationInfo) Valid() bool {\n\treturn len(x.Types) \u003e 0\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "doc": "DeclarationList implements list operations over a `*DeclarationInfo` slice.",
-      "types": [
-        {
-          "name": "DeclarationList",
-          "type": "[]*DeclarationInfo",
-          "functions": [
-            {
-              "name": "Append",
-              "doc": "",
-              "type": "x *DeclarationList",
-              "path": "DeclarationList",
-              "signature": "Append (newInfo *DeclarationInfo) int",
-              "source": "func (x *DeclarationList) Append(newInfo *DeclarationInfo) int {\n\t*x = append(*x, newInfo)\n\treturn len(*x)\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "doc": "FieldInfo holds details about a field definition.",
-      "types": [
-        {
-          "name": "FieldInfo",
-          "fields": [
-            {
-              "name": "Name",
-              "type": "string",
-              "path": "FieldInfo.Name",
-              "doc": "Name is the name of the field.",
-              "tag": "json:\"name\"",
-              "json_name": "name"
-            },
-            {
-              "name": "Type",
-              "type": "string",
-              "path": "FieldInfo.Type",
-              "doc": "Type is the literal type of the Go field.",
-              "tag": "json:\"type\"",
-              "json_name": "type"
-            },
-            {
-              "name": "Path",
-              "type": "string",
-              "path": "FieldInfo.Path",
-              "doc": "Path is the go path of this field starting from root object.",
-              "tag": "json:\"path\"",
-              "json_name": "path"
-            },
-            {
-              "name": "Doc",
-              "type": "string",
-              "path": "FieldInfo.Doc",
-              "doc": "Doc holds the field doc.",
-              "tag": "json:\"doc,omitempty\"",
-              "json_name": "doc,omitempty"
-            },
-            {
-              "name": "Comment",
-              "type": "string",
-              "path": "FieldInfo.Comment",
-              "doc": "Comment holds the field comment text.",
-              "tag": "json:\"comment,omitempty\"",
-              "json_name": "comment,omitempty"
-            },
-            {
-              "name": "Tag",
-              "type": "string",
-              "path": "FieldInfo.Tag",
-              "doc": "Tag is the go tag, unmodified.",
-              "tag": "json:\"tag\"",
-              "json_name": "tag"
-            },
-            {
-              "name": "JSONName",
-              "type": "string",
-              "path": "FieldInfo.JSONName",
-              "doc": "JSONName is the corresponding json name of the field.",
-              "tag": "json:\"json_name\"",
-              "json_name": "json_name"
-            },
-            {
-              "name": "MapKey",
-              "type": "string",
-              "path": "FieldInfo.MapKey",
-              "doc": "MapKey is the map key type, if this field is a map.",
-              "tag": "json:\"map_key,omitempty\"",
-              "json_name": "map_key,omitempty"
-            }
-          ],
-          "functions": [
-            {
-              "name": "TypeRef",
-              "doc": "",
-              "type": "f *FieldInfo",
-              "path": "FieldInfo",
-              "signature": "TypeRef () string",
-              "source": "func (f *FieldInfo) TypeRef() string {\n\treturn strings.TrimLeft(f.Type, \"[]*\")\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "doc": "FuncInfo holds details about a function definition.",
-      "types": [
-        {
-          "name": "FuncInfo",
-          "fields": [
-            {
-              "name": "Name",
-              "type": "string",
-              "path": "FuncInfo.Name",
-              "tag": "json:\"name\"",
-              "json_name": "name"
-            },
-            {
-              "name": "Doc",
-              "type": "string",
-              "path": "FuncInfo.Doc",
-              "tag": "json:\"doc\"",
-              "json_name": "doc"
-            },
-            {
-              "name": "Type",
-              "type": "string",
-              "path": "FuncInfo.Type",
-              "tag": "json:\"type\"",
-              "json_name": "type"
-            },
-            {
-              "name": "Path",
-              "type": "string",
-              "path": "FuncInfo.Path",
-              "tag": "json:\"path\"",
-              "json_name": "path"
-            },
-            {
-              "name": "Signature",
-              "type": "string",
-              "path": "FuncInfo.Signature",
-              "tag": "json:\"signature\"",
-              "json_name": "signature"
-            },
-            {
-              "name": "Source",
-              "type": "string",
-              "path": "FuncInfo.Source",
-              "tag": "json:\"source\"",
-              "json_name": "source"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "doc": "PackageInfo holds all the declarations for a package scope.",
-      "types": [
-        {
-          "name": "PackageInfo",
-          "fields": [
-            {
-              "name": "Imports",
-              "type": "[]string",
-              "path": "PackageInfo.Imports",
-              "doc": "Imports holds a list of imported packages.",
-              "tag": "json:\"imports\"",
-              "json_name": "imports"
-            },
-            {
-              "name": "Declarations",
-              "type": "DeclarationList",
-              "path": "PackageInfo.Declarations",
-              "doc": "Declarations within the package.",
-              "tag": "json:\"declarations\"",
-              "json_name": "declarations"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "doc": "TypeInfo holds details about a type definition.",
-      "types": [
-        {
-          "name": "TypeInfo",
-          "fields": [
-            {
-              "name": "Name",
-              "type": "string",
-              "path": "TypeInfo.Name",
-              "doc": "Name is struct go name.",
-              "tag": "json:\"name\"",
-              "json_name": "name"
-            },
-            {
-              "name": "Doc",
-              "type": "string",
-              "path": "TypeInfo.Doc",
-              "doc": "Doc is the struct doc.",
-              "tag": "json:\"doc,omitempty\"",
-              "json_name": "doc,omitempty"
-            },
-            {
-              "name": "Comment",
-              "type": "string",
-              "path": "TypeInfo.Comment",
-              "doc": "Comment is the struct comment.",
-              "tag": "json:\"comment,omitempty\"",
-              "json_name": "comment,omitempty"
-            },
-            {
-              "name": "Type",
-              "type": "string",
-              "path": "TypeInfo.Type",
-              "doc": "Type is an optional type if the declaration is a type alias or similar.",
-              "tag": "json:\"type,omitempty\"",
-              "json_name": "type,omitempty"
-            },
-            {
-              "name": "Fields",
-              "type": "[]*FieldInfo",
-              "path": "TypeInfo.Fields",
-              "doc": "Fields holds information of the fields, if this object is a struct.",
-              "tag": "json:\"fields,omitempty\"",
-              "json_name": "fields,omitempty"
-            },
-            {
-              "name": "Functions",
-              "type": "[]*FuncInfo",
-              "path": "TypeInfo.Functions",
-              "tag": "json:\"functions,omitempty\"",
-              "json_name": "functions,omitempty"
-            },
-            {
-              "name": "StructObj",
-              "type": "ast.StructType",
-              "path": "TypeInfo.StructObj",
-              "doc": "StructObj is the (optionally present) raw ast.StructType value",
-              "tag": "json:\"-\"",
-              "json_name": "-"
-            }
-          ],
-          "functions": [
-            {
-              "name": "TypeRef",
-              "doc": "TypeRef trims array and pointer info from a type reference.",
-              "type": "f *TypeInfo",
-              "path": "TypeInfo",
-              "signature": "TypeRef () string",
-              "source": "// TypeRef trims array and pointer info from a type reference.\nfunc (f *TypeInfo) TypeRef() string {\n\treturn strings.TrimLeft(f.Type, \"[]*\")\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "doc": "TypeList implements list operations over a *TypeInfo slice.",
-      "types": [
-        {
-          "name": "TypeList",
-          "type": "[]*TypeInfo",
-          "functions": [
-            {
-              "name": "Append",
-              "doc": "",
-              "type": "x *TypeList",
-              "path": "TypeList",
-              "signature": "Append (newInfo *TypeInfo) int",
-              "source": "func (x *TypeList) Append(newInfo *TypeInfo) int {\n\t*x = append(*x, newInfo)\n\treturn len(*x)\n}"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "name": "model",
+    "imports": [
+      "\"encoding/json\"",
+      "\"errors\"",
+      "\"go/ast\"",
+      "\"golang.org/x/exp/slices\"",
+      "\"os\"",
+      "\"strings\""
+    ],
+    "declarations": [
+      {
+        "doc": "DeclarationInfo holds the declarations block for an exposed value or type.",
+        "types": [
+          {
+            "name": "DeclarationInfo",
+            "fields": [
+              {
+                "name": "Doc",
+                "type": "string",
+                "path": "DeclarationInfo.Doc",
+                "doc": "Doc is the declaration doc comment. It usually\noccurs just before a *ast.TypeDecl, but may be\napplied to multiple ones.",
+                "tag": "json:\"doc,omitempty\"",
+                "json_name": "doc,omitempty"
+              },
+              {
+                "name": "FileDoc",
+                "type": "string",
+                "path": "DeclarationInfo.FileDoc",
+                "doc": "FileDoc is the doc comment for a file which\ncontains the definitions here.",
+                "tag": "json:\"file_doc,omitempty\"",
+                "json_name": "file_doc,omitempty"
+              },
+              {
+                "name": "Types",
+                "type": "TypeList",
+                "path": "DeclarationInfo.Types",
+                "doc": "Types are all the type declarations in the block.",
+                "tag": "json:\"types,omitempty\"",
+                "json_name": "types,omitempty"
+              }
+            ],
+            "functions": [
+              {
+                "name": "Valid",
+                "type": "x *DeclarationInfo",
+                "path": "DeclarationInfo",
+                "signature": "Valid () bool",
+                "source": "func (x *DeclarationInfo) Valid() bool {\n\treturn len(x.Types) \u003e 0\n}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "DeclarationList implements list operations over a `*DeclarationInfo` slice.",
+        "types": [
+          {
+            "name": "DeclarationList",
+            "type": "[]*DeclarationInfo",
+            "functions": [
+              {
+                "name": "Append",
+                "type": "x *DeclarationList",
+                "path": "DeclarationList",
+                "signature": "Append (newInfo *DeclarationInfo) int",
+                "source": "func (x *DeclarationList) Append(newInfo *DeclarationInfo) int {\n\t*x = append(*x, newInfo)\n\treturn len(*x)\n}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "FieldInfo holds details about a field definition.",
+        "types": [
+          {
+            "name": "FieldInfo",
+            "fields": [
+              {
+                "name": "Name",
+                "type": "string",
+                "path": "FieldInfo.Name",
+                "doc": "Name is the name of the field.",
+                "tag": "json:\"name\"",
+                "json_name": "name"
+              },
+              {
+                "name": "Type",
+                "type": "string",
+                "path": "FieldInfo.Type",
+                "doc": "Type is the literal type of the Go field.",
+                "tag": "json:\"type\"",
+                "json_name": "type"
+              },
+              {
+                "name": "Path",
+                "type": "string",
+                "path": "FieldInfo.Path",
+                "doc": "Path is the go path of this field starting from root object.",
+                "tag": "json:\"path\"",
+                "json_name": "path"
+              },
+              {
+                "name": "Doc",
+                "type": "string",
+                "path": "FieldInfo.Doc",
+                "doc": "Doc holds the field doc.",
+                "tag": "json:\"doc,omitempty\"",
+                "json_name": "doc,omitempty"
+              },
+              {
+                "name": "Comment",
+                "type": "string",
+                "path": "FieldInfo.Comment",
+                "doc": "Comment holds the field comment text.",
+                "tag": "json:\"comment,omitempty\"",
+                "json_name": "comment,omitempty"
+              },
+              {
+                "name": "Tag",
+                "type": "string",
+                "path": "FieldInfo.Tag",
+                "doc": "Tag is the go tag, unmodified.",
+                "tag": "json:\"tag\"",
+                "json_name": "tag"
+              },
+              {
+                "name": "JSONName",
+                "type": "string",
+                "path": "FieldInfo.JSONName",
+                "doc": "JSONName is the corresponding json name of the field.",
+                "tag": "json:\"json_name\"",
+                "json_name": "json_name"
+              },
+              {
+                "name": "MapKey",
+                "type": "string",
+                "path": "FieldInfo.MapKey",
+                "doc": "MapKey is the map key type, if this field is a map.",
+                "tag": "json:\"map_key,omitempty\"",
+                "json_name": "map_key,omitempty"
+              }
+            ],
+            "functions": [
+              {
+                "name": "TypeRef",
+                "type": "f *FieldInfo",
+                "path": "FieldInfo",
+                "signature": "TypeRef () string",
+                "source": "func (f *FieldInfo) TypeRef() string {\n\treturn strings.TrimLeft(f.Type, \"[]*\")\n}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "FuncInfo holds details about a function definition.",
+        "types": [
+          {
+            "name": "FuncInfo",
+            "fields": [
+              {
+                "name": "Name",
+                "type": "string",
+                "path": "FuncInfo.Name",
+                "doc": "Name holds the name of the function.",
+                "tag": "json:\"name\"",
+                "json_name": "name"
+              },
+              {
+                "name": "Doc",
+                "type": "string",
+                "path": "FuncInfo.Doc",
+                "doc": "Doc holds the function doc comment.",
+                "tag": "json:\"doc,omitempty\"",
+                "json_name": "doc,omitempty"
+              },
+              {
+                "name": "Type",
+                "type": "string",
+                "path": "FuncInfo.Type",
+                "doc": "Type holds the receiver if any.",
+                "tag": "json:\"type,omitempty\"",
+                "json_name": "type,omitempty"
+              },
+              {
+                "name": "Path",
+                "type": "string",
+                "path": "FuncInfo.Path",
+                "doc": "Path is the path to the symbol (`Type.FuncName` or `FuncName` if global func).",
+                "tag": "json:\"path\"",
+                "json_name": "path"
+              },
+              {
+                "name": "Signature",
+                "type": "string",
+                "path": "FuncInfo.Signature",
+                "doc": "Signature is an interface compatible signature for the function.",
+                "tag": "json:\"signature\"",
+                "json_name": "signature"
+              },
+              {
+                "name": "Source",
+                "type": "string",
+                "path": "FuncInfo.Source",
+                "doc": "Source is a 1-1 source code for the function.",
+                "tag": "json:\"source\"",
+                "json_name": "source"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "PackageInfo holds all the declarations for a package scope.",
+        "types": [
+          {
+            "name": "PackageInfo",
+            "fields": [
+              {
+                "name": "Name",
+                "type": "string",
+                "path": "PackageInfo.Name",
+                "doc": "Name is the package name.",
+                "tag": "json:\"name\"",
+                "json_name": "name"
+              },
+              {
+                "name": "Imports",
+                "type": "[]string",
+                "path": "PackageInfo.Imports",
+                "doc": "Imports holds a list of imported packages.",
+                "tag": "json:\"imports\"",
+                "json_name": "imports"
+              },
+              {
+                "name": "Declarations",
+                "type": "DeclarationList",
+                "path": "PackageInfo.Declarations",
+                "doc": "Declarations within the package.",
+                "tag": "json:\"declarations\"",
+                "json_name": "declarations"
+              },
+              {
+                "name": "Functions",
+                "type": "[]*FuncInfo",
+                "path": "PackageInfo.Functions",
+                "doc": "Functions within the package, enabled with `--include-functions`.",
+                "tag": "json:\"functions,omitempty\"",
+                "json_name": "functions,omitempty"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "TypeInfo holds details about a type definition.",
+        "types": [
+          {
+            "name": "TypeInfo",
+            "fields": [
+              {
+                "name": "Name",
+                "type": "string",
+                "path": "TypeInfo.Name",
+                "doc": "Name is struct go name.",
+                "tag": "json:\"name\"",
+                "json_name": "name"
+              },
+              {
+                "name": "Doc",
+                "type": "string",
+                "path": "TypeInfo.Doc",
+                "doc": "Doc is the struct doc.",
+                "tag": "json:\"doc,omitempty\"",
+                "json_name": "doc,omitempty"
+              },
+              {
+                "name": "Comment",
+                "type": "string",
+                "path": "TypeInfo.Comment",
+                "doc": "Comment is the struct comment.",
+                "tag": "json:\"comment,omitempty\"",
+                "json_name": "comment,omitempty"
+              },
+              {
+                "name": "Type",
+                "type": "string",
+                "path": "TypeInfo.Type",
+                "doc": "Type is an optional type if the declaration is a type alias or similar.",
+                "tag": "json:\"type,omitempty\"",
+                "json_name": "type,omitempty"
+              },
+              {
+                "name": "Fields",
+                "type": "[]*FieldInfo",
+                "path": "TypeInfo.Fields",
+                "doc": "Fields holds information of the fields, if this object is a struct.",
+                "tag": "json:\"fields,omitempty\"",
+                "json_name": "fields,omitempty"
+              },
+              {
+                "name": "Functions",
+                "type": "[]*FuncInfo",
+                "path": "TypeInfo.Functions",
+                "tag": "json:\"functions,omitempty\"",
+                "json_name": "functions,omitempty"
+              },
+              {
+                "name": "StructObj",
+                "type": "ast.StructType",
+                "path": "TypeInfo.StructObj",
+                "doc": "StructObj is the (optionally present) raw ast.StructType value",
+                "tag": "json:\"-\"",
+                "json_name": "-"
+              }
+            ],
+            "functions": [
+              {
+                "name": "TypeRef",
+                "doc": "TypeRef trims array and pointer info from a type reference.",
+                "type": "f *TypeInfo",
+                "path": "TypeInfo",
+                "signature": "TypeRef () string",
+                "source": "// TypeRef trims array and pointer info from a type reference.\nfunc (f *TypeInfo) TypeRef() string {\n\treturn strings.TrimLeft(f.Type, \"[]*\")\n}"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "TypeList implements list operations over a *TypeInfo slice.",
+        "types": [
+          {
+            "name": "TypeList",
+            "type": "[]*TypeInfo",
+            "functions": [
+              {
+                "name": "Append",
+                "type": "x *TypeList",
+                "path": "TypeList",
+                "signature": "Append (newInfo *TypeInfo) int",
+                "source": "func (x *TypeList) Append(newInfo *TypeInfo) int {\n\t*x = append(*x, newInfo)\n\treturn len(*x)\n}"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "functions": [
+      {
+        "name": "Load",
+        "doc": "Load reads and decodes a json file to produce a `*PackageInfo`.",
+        "path": "Load",
+        "signature": "Load (filename string) ([]*PackageInfo, error)",
+        "source": "// Load reads and decodes a json file to produce a `*PackageInfo`.\nfunc Load(filename string) ([]*PackageInfo, error) {\n\tbody, err := os.ReadFile(filename)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tresult := []*PackageInfo{}\n\terr = json.Unmarshal(body, \u0026result)\n\treturn result, err\n}"
+      }
+    ]
+  },
+  {
+    "name": "model_test",
+    "imports": [
+      "\"github.com/TykTechnologies/exp/cmd/schema-gen/model\"",
+      "\"github.com/davecgh/go-spew/spew\"",
+      "\"testing\""
+    ],
+    "declarations": [],
+    "functions": [
+      {
+        "name": "Test_DefinitionsList_Sort",
+        "path": "Test_DefinitionsList_Sort",
+        "signature": "Test_DefinitionsList_Sort (t *testing.T)",
+        "source": "func Test_DefinitionsList_Sort(t *testing.T) {\n\ts, _ := model.Load(\"model.json\")\n\tspew.Dump(s.Declarations.GetOrder(\"PackageInfo\"))\n}"
+      }
+    ]
+  }
+]

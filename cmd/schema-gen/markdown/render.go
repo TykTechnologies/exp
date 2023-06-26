@@ -16,25 +16,46 @@ func render(cfg *options) error {
 		kind        = "markdown"
 		inputFile   = cfg.inputFile
 		outputFile  = cfg.outputFile
+		packageName = cfg.packageName
 		rootElement = cfg.rootElement
 	)
 
-	pkgInfo, err := model.Load(inputFile)
+	pkgInfos, err := model.Load(inputFile)
 	if err != nil {
 		return fmt.Errorf("Error loading package info for %s: %w", inputFile, err)
 	}
 
-	order := pkgInfo.Declarations.GetOrder(rootElement)
-
-	switch kind {
-	case "markdown":
-		body, err := renderMarkdown(sanitize(pkgInfo.Declarations), order)
-		if err != nil {
-			return err
+	if packageName == "" {
+		for _, pkgInfo := range pkgInfos {
+			if strings.HasSuffix(pkgInfo.Name, "_test") {
+				continue
+			}
+			packageName = pkgInfo.Name
+			break
 		}
-		return os.WriteFile(outputFile, body, 0644)
 	}
-	return fmt.Errorf("Renderer %q not implemented", kind)
+
+	for _, pkgInfo := range pkgInfos {
+		// If we have multiple packages (tests), we only render one
+		// of them, e.g. usually the public-facing API and not tests.
+		// With the packageName option, this can be customized.
+		if len(pkgInfos) != 1 && pkgInfo.Name != packageName {
+			continue
+		}
+
+		order := pkgInfo.Declarations.GetOrder(rootElement)
+
+		switch kind {
+		case "markdown":
+			body, err := renderMarkdown(sanitize(pkgInfo.Declarations), order)
+			if err != nil {
+				return err
+			}
+			return os.WriteFile(outputFile, body, 0644)
+		}
+		return fmt.Errorf("Renderer %q not implemented", kind)
+	}
+	return fmt.Errorf("Uknown package name: %q", packageName)
 }
 
 func renderMarkdown(schema model.DeclarationList, order []string) ([]byte, error) {

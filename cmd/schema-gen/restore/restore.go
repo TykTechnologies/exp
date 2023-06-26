@@ -15,22 +15,42 @@ import (
 func restore(cfg *options) error {
 	// unpack options into scope
 	var (
-		inputFile  = cfg.inputFile
-		outputFile = cfg.outputFile
+		inputFile   = cfg.inputFile
+		outputFile  = cfg.outputFile
+		packageName = cfg.packageName
 	)
 
-	pkgInfo, err := model.Load(inputFile)
+	pkgInfos, err := model.Load(inputFile)
 	if err != nil {
 		return fmt.Errorf("Error loading package info: %w", err)
 	}
 
-	body, err := restorePackageInfo(pkgInfo, cfg)
-	if err != nil {
-		return err
+	if packageName == "" {
+		for _, pkgInfo := range pkgInfos {
+			if strings.HasSuffix(pkgInfo.Name, "_test") {
+				continue
+			}
+			packageName = pkgInfo.Name
+			break
+		}
 	}
 
-	fmt.Println(outputFile)
-	return os.WriteFile(outputFile, body, 0644)
+	for _, pkgInfo := range pkgInfos {
+		// only allow restoring 1 package explicitly by name
+		if len(pkgInfos) != 1 && pkgInfo.Name != packageName {
+			continue
+		}
+
+		body, err := restorePackageInfo(pkgInfo, cfg)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(outputFile)
+		return os.WriteFile(outputFile, body, 0644)
+	}
+
+	return fmt.Errorf("No such package: %q", packageName)
 }
 
 func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error) {

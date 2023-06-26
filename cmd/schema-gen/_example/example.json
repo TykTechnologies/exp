@@ -1,87 +1,89 @@
-{
-  "imports": [
-    "\"errors\"",
-    "\"os\""
-  ],
-  "declarations": [
-    {
-      "doc": "Declaration doc.",
-      "types": [
-        {
-          "name": "Key",
-          "doc": "Key embeds KeyRequest and KeyResponse.",
-          "fields": [
-            {
-              "name": "",
-              "type": "KeyRequest",
-              "path": "Key.",
-              "tag": "json:\"\"",
-              "json_name": ""
-            },
-            {
-              "name": "",
-              "type": "KeyResponse",
-              "path": "Key.",
-              "tag": "json:\"\"",
-              "json_name": ""
-            }
-          ]
-        },
-        {
-          "name": "KeyRequest",
-          "doc": "KeyRequest doc.",
-          "fields": [
-            {
-              "name": "SessionID",
-              "type": "string",
-              "path": "KeyRequest.SessionID",
-              "doc": "SessionID doc",
-              "comment": "SessionID comment",
-              "tag": "json:\"session_id\"",
-              "json_name": "session_id"
-            }
-          ],
-          "functions": [
-            {
-              "name": "Validate",
-              "doc": "",
-              "type": "t *KeyRequest",
-              "path": "KeyRequest",
-              "signature": "Validate () error",
-              "source": "func (t *KeyRequest) Validate() error {\n\tif t.SessionID == \"\" {\n\t\treturn errors.New(\"invalid KeyRequest, empty session\")\n\t}\n}"
-            }
-          ]
-        },
-        {
-          "name": "KeyResponse",
-          "doc": "KeyResponse doc.",
-          "fields": [
-            {
-              "name": "Status",
-              "type": "string",
-              "path": "KeyResponse.Status",
-              "tag": "json:\"status\"",
-              "json_name": "status"
-            },
-            {
-              "name": "Message",
-              "type": "string",
-              "path": "KeyResponse.Message",
-              "tag": "json:\"message\"",
-              "json_name": "message"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "doc": "Type declaration doc, File is an alias of os.File.",
-      "types": [
-        {
-          "name": "File",
-          "type": "os.File"
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "name": "example",
+    "imports": [
+      "\"errors\"",
+      "\"os\""
+    ],
+    "declarations": [
+      {
+        "doc": "Declaration doc.",
+        "types": [
+          {
+            "name": "Key",
+            "doc": "Key embeds KeyRequest and KeyResponse.",
+            "fields": [
+              {
+                "name": "",
+                "type": "KeyRequest",
+                "path": "Key.",
+                "tag": "json:\"\"",
+                "json_name": ""
+              },
+              {
+                "name": "",
+                "type": "KeyResponse",
+                "path": "Key.",
+                "tag": "json:\"\"",
+                "json_name": ""
+              }
+            ]
+          },
+          {
+            "name": "KeyRequest",
+            "doc": "KeyRequest doc.",
+            "fields": [
+              {
+                "name": "SessionID",
+                "type": "string",
+                "path": "KeyRequest.SessionID",
+                "doc": "SessionID doc",
+                "comment": "SessionID comment",
+                "tag": "json:\"session_id\"",
+                "json_name": "session_id"
+              }
+            ],
+            "functions": [
+              {
+                "name": "Validate",
+                "type": "t *KeyRequest",
+                "path": "KeyRequest",
+                "signature": "Validate () error",
+                "source": "func (t *KeyRequest) Validate() error {\n\tif t.SessionID == \"\" {\n\t\treturn errors.New(\"invalid KeyRequest, empty session\")\n\t}\n}"
+              }
+            ]
+          },
+          {
+            "name": "KeyResponse",
+            "doc": "KeyResponse doc.",
+            "fields": [
+              {
+                "name": "Status",
+                "type": "string",
+                "path": "KeyResponse.Status",
+                "tag": "json:\"status\"",
+                "json_name": "status"
+              },
+              {
+                "name": "Message",
+                "type": "string",
+                "path": "KeyResponse.Message",
+                "tag": "json:\"message\"",
+                "json_name": "message"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "Type declaration doc, File is an alias of os.File.",
+        "types": [
+          {
+            "name": "File",
+            "type": "os.File"
+          }
+        ]
+      }
+    ]
+  }
+]

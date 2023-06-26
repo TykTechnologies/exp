@@ -22,7 +22,7 @@ tasks:
   gen:model:
     desc: "Generate model/ from schema-gen"
     cmds:
-      - schema-gen extract -i model/ --include-functions -o model/model.json
+      - schema-gen extract -i model/ --include-functions --include-tests -o model/model.json
       - schema-gen markdown -i model/model.json -o model/model.md --root PackageInfo
       - schema-gen restore -i model/model.json -o model/model_rich.go.txt --include-functions TypeRef -p model
       - schema-gen restore -i model/model.json -o model/model.go.txt -p model

@@ -9,22 +9,29 @@ import (
 
 // PackageInfo holds all the declarations for a package scope.
 type PackageInfo struct {
+	// Name is the package name.
+	Name string `json:"name"`
+
 	// Imports holds a list of imported packages.
 	Imports []string `json:"imports"`
 
 	// Declarations within the package.
 	Declarations DeclarationList `json:"declarations"`
+
+	// Functions within the package, enabled with `--include-functions`.
+	Functions []*FuncInfo `json:"functions,omitempty"`
 }
 
 // Load reads and decodes a json file to produce a `*PackageInfo`.
-func Load(filename string) (*PackageInfo, error) {
+func Load(filename string) ([]*PackageInfo, error) {
 	body, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	result := &PackageInfo{}
-	return result, json.Unmarshal(body, result)
+	result := []*PackageInfo{}
+	err = json.Unmarshal(body, &result)
+	return result, err
 }
 
 // DeclarationInfo holds the declarations block for an exposed value or type.
@@ -162,10 +169,21 @@ func (f FieldInfo) Valid() bool {
 
 // FuncInfo holds details about a function definition.
 type FuncInfo struct {
-	Name      string `json:"name"`
-	Doc       string `json:"doc"`
-	Type      string `json:"type"`
-	Path      string `json:"path"`
+	// Name holds the name of the function.
+	Name string `json:"name"`
+
+	// Doc holds the function doc comment.
+	Doc string `json:"doc,omitempty"`
+
+	// Type holds the receiver if any.
+	Type string `json:"type,omitempty"`
+
+	// Path is the path to the symbol (`Type.FuncName` or `FuncName` if global func).
+	Path string `json:"path"`
+
+	// Signature is an interface compatible signature for the function.
 	Signature string `json:"signature"`
-	Source    string `json:"source"`
+
+	// Source is a 1-1 source code for the function.
+	Source string `json:"source"`
 }
