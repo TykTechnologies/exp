@@ -20,14 +20,16 @@ import (
 
 // ExtractOptions contains options for extraction
 type ExtractOptions struct {
-	includeFunctions bool
-	ignoreFiles      []string
+	includeFunctions     bool
+	includeTestFunctions bool
+	ignoreFiles          []string
 }
 
-func NewExtractOptions(includeFunctions bool, ignoreFiles []string) *ExtractOptions {
+func NewExtractOptions(cfg *options) *ExtractOptions {
 	return &ExtractOptions{
-		includeFunctions: includeFunctions,
-		ignoreFiles:      ignoreFiles,
+		includeFunctions:     cfg.includeFunctions,
+		includeTestFunctions: cfg.includeTestFunctions,
+		ignoreFiles:          cfg.ignoreFiles,
 	}
 }
 

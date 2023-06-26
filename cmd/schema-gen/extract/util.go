@@ -92,15 +92,15 @@ func jsonTag(tag string) string {
 	return reflect.StructTag(tag).Get("json")
 }
 
-func write(filename string, inputPackage string, includeFunctions bool) error {
-	opts := NewExtractOptions(includeFunctions, nil)
+func write(cfg *options) error {
+	opts := NewExtractOptions(cfg)
 
-	sts, err := Extract(inputPackage, opts)
+	sts, err := Extract(cfg.sourcePath, opts)
 	if err != nil {
 		return err
 	}
 
-	return dump(filename, sts)
+	return dump(cfg.outputFile, sts)
 }
 
 func dump(filename string, data interface{}) error {
