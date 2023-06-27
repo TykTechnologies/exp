@@ -7,7 +7,6 @@ import (
 	"os"
 )
 
-// Declaration doc.
 type (
 	// Key embeds KeyRequest and KeyResponse.
 	Key struct {
@@ -28,7 +27,6 @@ type (
 
 		Message string `json:"message"`
 	}
-)
 
-// Type declaration doc, File is an alias of os.File.
-type File = os.File
+	File = os.File
+)

@@ -7,5 +7,4 @@ import (
 	"os"
 )
 
-// Type declaration doc, File is an alias of os.File.
 type File = os.File

@@ -11,118 +11,113 @@ import (
 	"strings"
 )
 
-// DeclarationInfo holds the declarations block for an exposed value or type.
-type DeclarationInfo struct {
-	// Doc is the declaration doc comment. It usually
-	// occurs just before a *ast.TypeDecl, but may be
-	// applied to multiple ones.
-	Doc string `json:"doc,omitempty"`
+type (
+	DeclarationInfo struct {
+		// Doc is the declaration doc comment. It usually
+		// occurs just before a *ast.TypeDecl, but may be
+		// applied to multiple ones.
+		Doc string `json:"doc,omitempty"`
 
-	// FileDoc is the doc comment for a file which
-	// contains the definitions here.
-	FileDoc string `json:"file_doc,omitempty"`
+		// FileDoc is the doc comment for a file which
+		// contains the definitions here.
+		FileDoc string `json:"file_doc,omitempty"`
 
-	// Types are all the type declarations in the block.
-	Types TypeList `json:"types,omitempty"`
-}
+		// Types are all the type declarations in the block.
+		Types TypeList `json:"types,omitempty"`
+	}
 
-// DeclarationList implements list operations over a `*DeclarationInfo` slice.
-type DeclarationList []*DeclarationInfo
+	DeclarationList = []*DeclarationInfo
 
-// FieldInfo holds details about a field definition.
-type FieldInfo struct {
-	// Name is the name of the field.
-	Name string `json:"name"`
+	FieldInfo struct {
+		// Name is the name of the field.
+		Name string `json:"name"`
 
-	// Type is the literal type of the Go field.
-	Type string `json:"type"`
+		// Type is the literal type of the Go field.
+		Type string `json:"type"`
 
-	// Path is the go path of this field starting from root object.
-	Path string `json:"path"`
+		// Path is the go path of this field starting from root object.
+		Path string `json:"path"`
 
-	// Doc holds the field doc.
-	Doc string `json:"doc,omitempty"`
+		// Doc holds the field doc.
+		Doc string `json:"doc,omitempty"`
 
-	// Comment holds the field comment text.
-	Comment string `json:"comment,omitempty"`
+		// Comment holds the field comment text.
+		Comment string `json:"comment,omitempty"`
 
-	// Tag is the go tag, unmodified.
-	Tag string `json:"tag"`
+		// Tag is the go tag, unmodified.
+		Tag string `json:"tag"`
 
-	// JSONName is the corresponding json name of the field.
-	JSONName string `json:"json_name"`
+		// JSONName is the corresponding json name of the field.
+		JSONName string `json:"json_name"`
 
-	// MapKey is the map key type, if this field is a map.
-	MapKey string `json:"map_key,omitempty"`
-}
+		// MapKey is the map key type, if this field is a map.
+		MapKey string `json:"map_key,omitempty"`
+	}
+
+	FuncInfo struct {
+		// Name holds the name of the function.
+		Name string `json:"name"`
+
+		// Doc holds the function doc comment.
+		Doc string `json:"doc,omitempty"`
+
+		// Type holds the receiver if any.
+		Type string `json:"type,omitempty"`
+
+		// Path is the path to the symbol (`Type.FuncName` or `FuncName` if global func).
+		Path string `json:"path"`
+
+		// Signature is an interface compatible signature for the function.
+		Signature string `json:"signature"`
+
+		// Source is a 1-1 source code for the function.
+		Source string `json:"source"`
+	}
+
+	PackageInfo struct {
+		// Name is the package name.
+		Name string `json:"name"`
+
+		// Imports holds a list of imported packages.
+		Imports []string `json:"imports"`
+
+		// Declarations within the package.
+		Declarations DeclarationList `json:"declarations"`
+
+		// Functions within the package, enabled with `--include-functions`.
+		Functions []*FuncInfo `json:"functions,omitempty"`
+	}
+
+	TypeInfo struct {
+		// Name is struct go name.
+		Name string `json:"name"`
+
+		// Doc is the struct doc.
+		Doc string `json:"doc,omitempty"`
+
+		// Comment is the struct comment.
+		Comment string `json:"comment,omitempty"`
+
+		// Type is an optional type if the declaration is a type alias or similar.
+		Type string `json:"type,omitempty"`
+
+		// Fields holds information of the fields, if this object is a struct.
+		Fields []*FieldInfo `json:"fields,omitempty"`
+
+		Functions []*FuncInfo `json:"functions,omitempty"`
+
+		// StructObj is the (optionally present) raw ast.StructType value
+		StructObj ast.StructType `json:"-"`
+	}
+
+	TypeList = []*TypeInfo
+)
 
 func (f *FieldInfo) TypeRef() string {
 	return strings.TrimLeft(f.Type, "[]*")
-}
-
-// FuncInfo holds details about a function definition.
-type FuncInfo struct {
-	// Name holds the name of the function.
-	Name string `json:"name"`
-
-	// Doc holds the function doc comment.
-	Doc string `json:"doc,omitempty"`
-
-	// Type holds the receiver if any.
-	Type string `json:"type,omitempty"`
-
-	// Path is the path to the symbol (`Type.FuncName` or `FuncName` if global func).
-	Path string `json:"path"`
-
-	// Signature is an interface compatible signature for the function.
-	Signature string `json:"signature"`
-
-	// Source is a 1-1 source code for the function.
-	Source string `json:"source"`
-}
-
-// PackageInfo holds all the declarations for a package scope.
-type PackageInfo struct {
-	// Name is the package name.
-	Name string `json:"name"`
-
-	// Imports holds a list of imported packages.
-	Imports []string `json:"imports"`
-
-	// Declarations within the package.
-	Declarations DeclarationList `json:"declarations"`
-
-	// Functions within the package, enabled with `--include-functions`.
-	Functions []*FuncInfo `json:"functions,omitempty"`
-}
-
-// TypeInfo holds details about a type definition.
-type TypeInfo struct {
-	// Name is struct go name.
-	Name string `json:"name"`
-
-	// Doc is the struct doc.
-	Doc string `json:"doc,omitempty"`
-
-	// Comment is the struct comment.
-	Comment string `json:"comment,omitempty"`
-
-	// Type is an optional type if the declaration is a type alias or similar.
-	Type string `json:"type,omitempty"`
-
-	// Fields holds information of the fields, if this object is a struct.
-	Fields []*FieldInfo `json:"fields,omitempty"`
-
-	Functions []*FuncInfo `json:"functions,omitempty"`
-
-	// StructObj is the (optionally present) raw ast.StructType value
-	StructObj ast.StructType `json:"-"`
 }
 
 // TypeRef trims array and pointer info from a type reference.
 func (f *TypeInfo) TypeRef() string {
 	return strings.TrimLeft(f.Type, "[]*")
 }
-
-// TypeList implements list operations over a *TypeInfo slice.
-type TypeList []*TypeInfo

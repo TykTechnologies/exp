@@ -2,6 +2,7 @@ package restore
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/format"
 	"os"
@@ -82,74 +83,71 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 	}
 
 	// Dump out declarations
-	for _, decl := range pkgInfo.Declarations {
-		filtered := model.TypeList{}
-		for _, typeDecl := range decl.Types {
-			if !canRender(typeDecl.Name) {
-				continue
-			}
-			filtered = append(filtered, typeDecl)
-		}
-		decl.Types = filtered
+	order := pkgInfo.Declarations.GetOrder(cfg.rootElement)
+	typeDecls := pkgInfo.Declarations.Find(order)
 
-		if len(decl.Types) == 0 {
+	filtered := model.TypeList{}
+	for _, typeDecl := range typeDecls {
+		if !canRender(typeDecl.Name) {
 			continue
 		}
+		filtered = append(filtered, typeDecl)
+	}
+	typeDecls = filtered
 
-		if decl.Doc != "" {
-			printDoc(&output, decl.Doc)
-		}
+	if len(typeDecls) == 0 {
+		return nil, errors.New("No types to render")
+	}
 
-		if len(decl.Types) == 1 && decl.Types[0].Doc == "" {
-			typeDecl := decl.Types[0]
-			if typeDecl.Type != "" {
-				output.WriteString("type " + typeDecl.Name)
+	if len(typeDecls) == 1 && typeDecls[0].Doc == "" {
+		typeDecl := typeDecls[0]
+		if typeDecl.Type != "" {
+			output.WriteString("type " + typeDecl.Name)
 
-				// This is likely wrong, but also an edge case.
-				// We should not import third party data models.
-				if strings.Contains(typeDecl.Type, ".") {
-					output.WriteString(fmt.Sprintf(" = %s", typeDecl.Type))
-				} else {
-					output.WriteString(" " + typeDecl.Type)
-				}
-
-				if typeDecl.Comment != "" {
-					output.WriteString(fmt.Sprintf(" // %s", typeDecl.Comment))
-				}
-				output.WriteString("\n")
-				goto includeFunctions
+			// This is likely wrong, but also an edge case.
+			// We should not import third party data models.
+			if strings.Contains(typeDecl.Type, ".") {
+				output.WriteString(fmt.Sprintf(" = %s", typeDecl.Type))
+			} else {
+				output.WriteString(" " + typeDecl.Type)
 			}
 
-			output.WriteString("type ")
+			if typeDecl.Comment != "" {
+				output.WriteString(fmt.Sprintf(" // %s", typeDecl.Comment))
+			}
+			output.WriteString("\n")
+			goto includeFunctions
+		}
+
+		output.WriteString("type ")
+		printStruct(&output, typeDecl)
+		output.WriteString("\n\n")
+	} else {
+		output.WriteString("type (")
+		for idx, typeDecl := range typeDecls {
+			printDoc(&output, typeDecl.Doc)
+
+			// Generic type declaration
+			if typeDecl.Type != "" {
+				// Type declaration
+				output.WriteString(fmt.Sprintf("\n%s = %s", typeDecl.Name, typeDecl.Type))
+				if idx+1 < len(typeDecls) {
+					output.WriteString("\n")
+				}
+				continue
+			}
+
 			printStruct(&output, typeDecl)
 			output.WriteString("\n\n")
-		} else {
-			output.WriteString("type (")
-			for idx, typeDecl := range decl.Types {
-				printDoc(&output, typeDecl.Doc)
-
-				// Generic type declaration
-				if typeDecl.Type != "" {
-					// Type declaration
-					output.WriteString(fmt.Sprintf("\n%s = %s", typeDecl.Name, typeDecl.Type))
-					if idx+1 < len(decl.Types) {
-						output.WriteString("\n")
-					}
-					continue
-				}
-
-				printStruct(&output, typeDecl)
-				output.WriteString("\n\n")
-			}
-			output.WriteString(")\n\n")
 		}
+		output.WriteString(")\n\n")
+	}
 
-	includeFunctions:
-		for _, typeDecl := range decl.Types {
-			for _, funcDecl := range typeDecl.Functions {
-				if slices.Contains(cfg.includeFunctions, funcDecl.Name) {
-					output.WriteString(funcDecl.Source + "\n\n")
-				}
+includeFunctions:
+	for _, typeDecl := range typeDecls {
+		for _, funcDecl := range typeDecl.Functions {
+			if slices.Contains(cfg.includeFunctions, funcDecl.Name) {
+				output.WriteString(funcDecl.Source + "\n\n")
 			}
 		}
 	}
