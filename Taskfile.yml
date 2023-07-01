@@ -1,0 +1,7 @@
+---
+version: "3"
+
+includes:
+  install:
+    taskfile: .taskfiles/install/Taskfile.yml
+    aliases: ["deps"]
