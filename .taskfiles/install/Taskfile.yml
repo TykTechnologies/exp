@@ -5,17 +5,17 @@ tasks:
   default:
     desc: Install dependencies for testing
     deps:
-      - install:gocovmerge
-      - install:gotestsum
+      - gocovmerge
+      - gotestsum
 
-  install:gocovmerge:
+  gocovmerge:
     internal: true
     status:
      - type gotestsum
     cmds:
       - go install github.com/wadey/gocovmerge@latest
 
-  install:gotestsum:
+  gotestsum:
     internal: true
     status:
       - type gotestsum
