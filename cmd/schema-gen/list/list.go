@@ -1,6 +1,7 @@
 package list
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
@@ -24,19 +25,19 @@ func listStructures(cfg *options) error {
 }
 
 type PackageFile struct {
-	Name string
-	Path string
+	Name string `json:"name"`
+	Path string `json:"path"`
 
-	PackageInfo *PackageInfo
+	PackageInfo *PackageInfo `json:"-"`
 }
 
 // PackageFileMap key is symbol Path for the struct ordered into a file.
 type PackageFileMap map[string]*PackageFile
 
 func printPackage(cfg *options, files PackageFileMap) {
-	fmt.Println("name", "path")
-	for k, v := range files {
-		fmt.Println(k, v.Path)
+	for _, v := range files {
+		s, _ := json.Marshal(v)
+		fmt.Println(string(s))
 	}
 }
 
