@@ -159,14 +159,6 @@ func (f *FieldInfo) TypeRef() string {
 	return strings.TrimLeft(f.Type, "[]*")
 }
 
-func (f FieldInfo) Valid() bool {
-	// Not exported.
-	if f.Name != "" && !ast.IsExported(f.Name) {
-		return false
-	}
-	return true
-}
-
 // FuncInfo holds details about a function definition.
 type FuncInfo struct {
 	// Name holds the name of the function.
