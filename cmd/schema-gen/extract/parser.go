@@ -20,16 +20,18 @@ import (
 
 // ExtractOptions contains options for extraction
 type ExtractOptions struct {
-	includeFunctions bool
-	includeTests     bool
-	ignoreFiles      []string
+	includeFunctions  bool
+	includeTests      bool
+	includeUnexported bool
+	ignoreFiles       []string
 }
 
 func NewExtractOptions(cfg *options) *ExtractOptions {
 	return &ExtractOptions{
-		includeFunctions: cfg.includeFunctions,
-		includeTests:     cfg.includeTests,
-		ignoreFiles:      cfg.ignoreFiles,
+		includeFunctions:  cfg.includeFunctions,
+		includeTests:      cfg.includeTests,
+		includeUnexported: cfg.includeUnexported,
+		ignoreFiles:       cfg.ignoreFiles,
 	}
 }
 
@@ -161,7 +163,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			ast.Inspect(fileObj, func(n ast.Node) (res bool) {
 				res = true
 				if fun, ok := n.(*ast.FuncDecl); ok {
-					if !fun.Name.IsExported() {
+					if !fun.Name.IsExported() && !options.includeUnexported {
 						return
 					}
 					if fun.Recv == nil || len(fun.Recv.List) == 0 {
@@ -235,12 +237,13 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				case *ast.TypeSpec:
 					typeInfo, err := NewTypeSpecInfo(obj)
 					if err != nil {
-						if !errors.Is(err, ErrUnexported) {
-							fmt.Println("Declaration omitted due to error", err)
+						isUnexported := errors.Is(err, ErrUnexported)
+						if isUnexported && !options.includeUnexported {
+							continue
 						}
-						continue
 					}
-					p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo)
+
+					p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo, options)
 
 					info.Types.Append(typeInfo)
 				}
@@ -298,7 +301,7 @@ func NewTypeSpecInfo(from *ast.TypeSpec) (*TypeInfo, error) {
 	return info, nil
 }
 
-func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo) {
+func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, options *ExtractOptions) {
 	if structInfo.StructObj == nil {
 		return
 	}
@@ -314,6 +317,7 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo) {
 		var goName string
 		if len(field.Names) > 0 {
 			goName = field.Names[0].Name
+
 		}
 
 		tagValue := ""
@@ -345,9 +349,12 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo) {
 			JSONName: jsonName,
 		}
 
-		if fieldInfo.Valid() {
-			structInfo.Fields = append(structInfo.Fields, fieldInfo)
+		isExported := ast.IsExported(fieldInfo.Name)
+		if !isExported && !options.includeUnexported {
+			continue
 		}
+
+		structInfo.Fields = append(structInfo.Fields, fieldInfo)
 	}
 	return
 }

@@ -30,7 +30,7 @@ tasks:
   gen:examples:
     desc: "Generate _examples/ from schema-gen"
     cmds:
-      - schema-gen extract -i _example/ --include-functions -o _example/example.json
+      - schema-gen extract -i _example/ --include-functions --include-unexported -o _example/example.json
       - schema-gen restore -i _example/example.json -o _example/example.go.txt -p example
       - schema-gen restore -i _example/example.json -o _example/example_file.go.txt --keep File -p example
 

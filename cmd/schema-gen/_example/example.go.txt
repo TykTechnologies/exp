@@ -8,6 +8,8 @@ import (
 )
 
 type (
+	keyRequest struct{}
+
 	// Key embeds KeyRequest and KeyResponse.
 	Key struct {
 		KeyRequest `json:""`
@@ -23,6 +25,8 @@ type (
 
 	// KeyResponse doc.
 	KeyResponse struct {
+		id string `json:"-"`
+
 		Status string `json:"status"`
 
 		Message string `json:"message"`

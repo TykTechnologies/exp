@@ -18,6 +18,8 @@ type (
 
 	// KeyResponse doc.
 	KeyResponse struct {
+		id string `json:"-"`
+
 		Status  string `json:"status"`
 		Message string `json:"message"`
 	}
@@ -29,8 +31,22 @@ type (
 	}
 )
 
+const foo = "bar"
+
+var bar = "baz"
+
+type keyRequest struct{}
+
 func (t *KeyRequest) Validate() error {
 	if t.SessionID == "" {
 		return errors.New("invalid KeyRequest, empty session")
 	}
+}
+
+func Validate() error {
+	return nil
+}
+
+func validate() error {
+	return nil
 }

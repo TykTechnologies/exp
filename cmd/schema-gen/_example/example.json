@@ -7,6 +7,13 @@
     ],
     "declarations": [
       {
+        "types": [
+          {
+            "name": "keyRequest"
+          }
+        ]
+      },
+      {
         "doc": "Declaration doc.",
         "types": [
           {
@@ -58,6 +65,13 @@
             "doc": "KeyResponse doc.",
             "fields": [
               {
+                "name": "id",
+                "type": "string",
+                "path": "KeyResponse.id",
+                "tag": "json:\"-\"",
+                "json_name": "-"
+              },
+              {
                 "name": "Status",
                 "type": "string",
                 "path": "KeyResponse.Status",
@@ -83,6 +97,20 @@
             "type": "os.File"
           }
         ]
+      }
+    ],
+    "functions": [
+      {
+        "name": "Validate",
+        "path": "Validate",
+        "signature": "Validate () error",
+        "source": "func Validate() error {\n\treturn nil\n}"
+      },
+      {
+        "name": "validate",
+        "path": "validate",
+        "signature": "validate () error",
+        "source": "func validate() error {\n\treturn nil\n}"
       }
     ]
   }
