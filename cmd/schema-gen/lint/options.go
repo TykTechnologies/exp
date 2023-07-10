@@ -24,5 +24,6 @@ func NewOptions() *options {
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 	flag.StringSliceVarP(&cfg.rules, "rules", "", cfg.rules, "linter rules to run")
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
+	flag.Parse()
 	return cfg
 }
