@@ -26,6 +26,7 @@ tasks:
       - schema-gen markdown -i model/model.json -o model/model.md --root PackageInfo
       - schema-gen restore -i model/model.json -o model/model_rich.go.txt --include-functions TypeRef -p model
       - schema-gen restore -i model/model.json -o model/model.go.txt -p model
+      - schema-gen list -i model/model.json
 
   gen:examples:
     desc: "Generate _examples/ from schema-gen"
@@ -33,6 +34,7 @@ tasks:
       - schema-gen extract -i _example/ --include-functions --include-unexported -o _example/example.json
       - schema-gen restore -i _example/example.json -o _example/example.go.txt -p example
       - schema-gen restore -i _example/example.json -o _example/example_file.go.txt --keep File -p example
+      - schema-gen list -i _example/example.json
 
   lint:
     desc: "Run linter tests against schema-gen model"
