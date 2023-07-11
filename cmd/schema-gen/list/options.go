@@ -6,6 +6,7 @@ import (
 
 type options struct {
 	inputFile string
+	summary   bool
 }
 
 func NewOptions() *options {
@@ -13,6 +14,7 @@ func NewOptions() *options {
 		inputFile: "schema.json",
 	}
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
+	flag.BoolVar(&cfg.summary, "summary", cfg.summary, "print summary")
 	flag.Parse()
 	return cfg
 }

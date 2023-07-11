@@ -39,6 +39,10 @@ func printPackage(cfg *options, files PackageFileMap) {
 		s, _ := json.Marshal(v)
 		fmt.Println(string(s))
 	}
+
+	if cfg.summary {
+		fmt.Printf("Summary: found %d files\n", len(files))
+	}
 }
 
 func listPackage(cfg *options, pkgInfo *PackageInfo) PackageFileMap {
