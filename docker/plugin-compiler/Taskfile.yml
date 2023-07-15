@@ -41,12 +41,73 @@ tasks:
       - |
         docker run --platform {{.platform}} -e GITHUB_TAG={{.tag}} -e GITHUB_SHA={{.sha}} --rm -v $PWD/{{.release}}/data/basic-plugin/:/plugin-source {{.build}}:{{.tag}} basic.so
 
+  sync:
+    desc: "Sync changes from release branches"
+    deps:
+      - pull
+    cmds:
+      - rsync -a git/release-5.0.3/ci/images/plugin-compiler/ 5.0/
+      - rsync -a git/release-5.1.1/ci/images/plugin-compiler/ 5.1/
+      - rsync -a git/master/ci/images/plugin-compiler/ latest/
+
   checkout:
     desc: Checkout tyk repo branches
     cmds:
-      - git clone -b release-5.0.3 --depth=1 https://github.com/TykTechnologies/tyk.git git/release-5.0.3 || true
-      - git clone -b release-5.1 --depth=1 https://github.com/TykTechnologies/tyk.git git/release-5.1.0 || true
-      - git clone -b master --depth=1 https://github.com/TykTechnologies/tyk.git git/master || true
-      - rsync -a git/release-5.0.3/ci/images/plugin-compiler/ 5.0/
-      - rsync -a git/release-5.1.0/ci/images/plugin-compiler/ 5.1/
-      - rsync -a git/master/ci/images/plugin-compiler/ latest/
+      - task: git:checkout
+        vars: { branch: 'release-5.0.3' }
+      - task: git:checkout
+        vars: { branch: 'release-5.1.1' }
+      - task: git:checkout
+        vars: { branch: 'master' }
+
+  pull:
+    desc: "Git pull upstream repos"
+    cmds:
+      - task: git:pull
+        vars: { branch: 'release-5.0.3' }
+      - task: git:pull
+        vars: { branch: 'release-5.1.1' }
+      - task: git:pull
+        vars: { branch: 'master' }
+
+  status:
+    desc: "Git status for upstream branches"
+    aliases: ["st"]
+    cmds:
+      - task: git:status
+        vars: { branch: 'release-5.0.3' }
+      - task: git:status
+        vars: { branch: 'release-5.1.1' }
+      - task: git:status
+        vars: { branch: 'master' }
+
+  git:checkout:
+    desc: "Git clone upstream repo {{.branch}}"
+    internal: true
+    silent: true
+    status:
+      - test -d git/{{.branch}}
+    cmds:
+      - git clone -b {{.branch}} --depth=1 https://github.com/TykTechnologies/tyk.git git/{{.branch}}
+
+  git:pull:
+    desc: "Git pull upstream repo {{.branch}}"
+    internal: true
+    deps:
+      - git:checkout
+    dir: git/{{.branch}}
+    cmds:
+      - git pull
+
+  git:status:
+    desc: "Git status upstream repo {{.branch}}"
+    internal: true
+    silent: true
+    deps:
+      - git:checkout
+    dir: git/{{.branch}}
+    cmds:
+      - |
+        echo Checkout: {{.branch}}
+      - git branch
+      - git status --porcelain
