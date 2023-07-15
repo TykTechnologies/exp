@@ -14,6 +14,7 @@ vars:
   release: latest
   base: tykio/golang-cross:1.19-bullseye
   build: tykio/tyk-plugin-compiler
+  dockerfile: Dockerfile
   tag: '{{.GITHUB_TAG | default "v5.1.0-dev"}}'
   sha: '{{.GITHUB_SHA | default "730d98024fda2a9fa9b3dddc6c4cc031813876ff"}}'
   platform: '{{.BUILD_PLATFORM | default "linux/amd64"}}'
@@ -33,9 +34,17 @@ tasks:
         --build-arg=GITHUB_TAG={{.tag}} \
         --build-arg=GITHUB_SHA={{.sha}} \
         -t {{.build}}:{{.tag}} \
-        -f {{.release}}/Dockerfile {{.release}}
+        -f {{.release}}/{{.dockerfile}} {{.release}}
 
-  test:
+  test:release:
+    desc: "Build a test image with the release dockerfile"
+    cmds:
+      - task: build
+        vars:
+          dockerfile: Dockerfile.release
+      - task: test:plugins
+
+  test:plugins:
     desc: "Test plugin compilation"
     cmds:
       - |
@@ -49,6 +58,13 @@ tasks:
       - rsync -a git/release-5.0.3/ci/images/plugin-compiler/ 5.0/
       - rsync -a git/release-5.1.1/ci/images/plugin-compiler/ 5.1/
       - rsync -a git/master/ci/images/plugin-compiler/ latest/
+      - task: fix
+
+  fix:
+    desc: "Fix changes from upstream"
+    cmds:
+      - desc: "Adjust local paths to repo"
+        cmd: sed -i 's/ci\/images\/plugin-compiler\///g' {latest,5.1,5.0}/Dockerfile
 
   checkout:
     desc: Checkout tyk repo branches
