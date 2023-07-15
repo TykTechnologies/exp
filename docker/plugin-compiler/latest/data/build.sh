@@ -73,7 +73,6 @@ echo "PLUGIN_BUILD_PATH: ${PLUGIN_BUILD_PATH}"
 echo "PLUGIN_SOURCE_PATH: ${PLUGIN_SOURCE_PATH}"
 
 set -x
-time go mod download
 CC=$CC CGO_ENABLED=1 GOOS=$GOOS GOARCH=$GOARCH go build -buildmode=plugin -trimpath -o $plugin_name
 set +x
 

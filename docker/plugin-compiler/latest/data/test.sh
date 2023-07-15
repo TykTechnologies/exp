@@ -7,6 +7,6 @@ if [ -z "$GITHUB_TAG" ]; then
 fi
 
 export PLUGIN_SOURCE_PATH=./basic-plugin
-export TYK_GW_PATH=${TYK_GW_PATH:-$(git rev-parse --show-toplevel)}
+export TYK_GW_PATH=$(readlink -f ../../../..)
 
 ./build.sh plugin.so
