@@ -39,7 +39,7 @@ ARG GITHUB_TAG
 ENV GITHUB_SHA ${GITHUB_SHA}
 ENV GITHUB_TAG ${GITHUB_TAG}
 
-COPY ci/images/plugin-compiler/data/build.sh /build.sh
+COPY data/build.sh /build.sh
 RUN chmod +x /build.sh
 
 ENTRYPOINT ["/build.sh"]
