@@ -1,0 +1,23 @@
+---
+version: "3"
+
+vars:
+  cli: "go-fsck"
+
+tasks:
+  default:
+    desc: "{{ .cli }}: Build, test, install"
+    deps: [ fix ]
+    cmds:
+      - go build .
+      - go test -race -count=100 -cover ./...
+      - go install .
+
+  fix:
+    desc: "{{ .cli }}: Clean up source tree"
+    aliases: ["fmt"]
+    cmds:
+      - goimports -w -local $(go list .) .
+      - go fmt ./...
+      - go mod tidy
+      - go clean -cache

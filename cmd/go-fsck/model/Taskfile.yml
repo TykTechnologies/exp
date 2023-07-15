@@ -1,0 +1,10 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: "Run verbose tests"
+    cmds:
+      - goimports -w .
+      - go fmt .
+      - go test -v -count=1 -race ./...
