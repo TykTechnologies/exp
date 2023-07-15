@@ -11,7 +11,7 @@ cares about. A special case is the package level documentation, a
 comment. There are a few other edge cases where the declaration may not
 make sense, but for the most part, this encompases the go type system.
 
-Goals:
+### Goals:
 
 - group all `var` declarations into `vars.go`,
   - optional: group `var Err...` into `errors.go`.
@@ -24,7 +24,7 @@ Goals:
 - group remaining functions into `funcs_test.go`,
 - store package doc in `doc.go`.
 
-Non-goals:
+### Non-goals:
 
 - build tags?
 - unnamed `_` vars?
@@ -60,7 +60,7 @@ need to be understood and protected and testing with t.Parallel is going
 to be a pain if the data is shared. Even reusing global loggers is a
 code smell, because you can never move that file out without changes.
 
-Future ideas
+### Future ideas
 
 Now, when we have this data, we can also reuse this data to make PRs
 safer. If one of the declarations is highly coupled, this gives us
