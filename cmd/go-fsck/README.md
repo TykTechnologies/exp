@@ -64,21 +64,11 @@ need to be understood and protected and testing with t.Parallel is going
 to be a pain if the data is shared. Even reusing global loggers is a
 code smell, because you can never move that file out without changes.
 
-### Future ideas
-
-Now, when we have this data, we can also reuse this data to make PRs
-safer. If one of the declarations is highly coupled, this gives us
-a scale of how safe the change is. Declarations with less coupling
-are safer to modify. This sort of goes in both directions. If a
-function is used just in one place, changing anything inside the
-function is safe. If the function is used in multiple places, that
-change may break in multiple areas.
-
-# TL;dr
+# Summary
 
 This tool will let us pick code apart more safely. We can see what's
 already implemented in ways that let us extract it from large package
-scoped. The benefit of smaller package is focus when addressing defects,
+scope. The benefit of smaller package is focus when addressing defects,
 and this is the main goal of the tool, to enable that analysis and act on
 the data. We often don't know how large problems are due to large package
 scopes and couplings, this gives us data.
