@@ -2,6 +2,9 @@
 
 The `go fmt` for your package layout.
 
+Currently, `go-fsck extract --pretty-json` will render the schema for a
+package into a local `go-fsck.json` file. No work on restore yet.
+
 ## Motivation
 
 The go/ast package is essentially very simple. There are only a few
@@ -22,6 +25,7 @@ make sense, but for the most part, this encompases the go type system.
 - group all types into `<name>.go`,
 - group all `Test<Name>*` functions into `<name>_test.go`,
 - group remaining functions into `funcs_test.go`,
+- group all the interfaces into `interfaces.go`,
 - store package doc in `doc.go`.
 
 ### Non-goals:
