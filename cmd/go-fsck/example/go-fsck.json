@@ -1,0 +1,49 @@
+[
+  {
+    "Package": "example",
+    "Filename": "",
+    "Imports": null,
+    "Types": [
+      {
+        "Kind": "type",
+        "Name": "File",
+        "Source": "// File represents a filename\ntype File string"
+      },
+      {
+        "Kind": "type",
+        "Name": "Body",
+        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
+      }
+    ],
+    "Consts": [
+      {
+        "Kind": "const",
+        "Name": "E_WARNING",
+        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
+      }
+    ],
+    "Vars": [
+      {
+        "Kind": "var",
+        "Names": [
+          "exampleGroup1",
+          "exampleGroup2"
+        ],
+        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
+      },
+      {
+        "Kind": "var",
+        "Name": "exampleGroup3",
+        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
+      }
+    ],
+    "Funcs": [
+      {
+        "Kind": "func",
+        "Name": "GlobalFunc",
+        "Signature": "GlobalFunc () error",
+        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\tvar err error\n\treturn err\n}"
+      }
+    ]
+  }
+]

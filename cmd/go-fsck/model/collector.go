@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"sort"
 	"strings"
 
 	"golang.org/x/exp/slices"
@@ -62,6 +63,8 @@ func (v *collector) collectImports(decl *ast.GenDecl, def *Definition) {
 			def.Imports = append(def.Imports, importLiteral)
 		}
 	}
+
+	sort.Strings(def.Imports)
 }
 
 func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
