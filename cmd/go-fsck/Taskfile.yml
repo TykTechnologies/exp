@@ -12,6 +12,10 @@ tasks:
       - go build .
       - go test -race -count=100 -cover ./...
       - go install .
+      - cmd: echo {{ .cli }} extract -i example/ -o example/go-fsck.json --pretty-json | sh -x
+        silent: true
+      - cmd: echo {{ .cli }} extract -i model/ -o model/go-fsck.json --pretty-json | sh -x
+        silent: true
 
   fix:
     desc: "{{ .cli }}: Clean up source tree"

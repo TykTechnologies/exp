@@ -13,7 +13,14 @@ func extract(cfg *options) error {
 		return err
 	}
 
-	body, err := json.Marshal(definitions)
+	encode := func(in interface{}) ([]byte, error) {
+		if cfg.prettyJSON {
+			return json.MarshalIndent(in, "", "  ")
+		}
+		return json.Marshal(in)
+	}
+
+	body, err := encode(definitions)
 	if err != nil {
 		return err
 	}

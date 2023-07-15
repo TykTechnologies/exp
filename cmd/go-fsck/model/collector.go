@@ -9,81 +9,175 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"golang.org/x/exp/slices"
 )
 
-type declarationCollector struct {
-	fset       *token.FileSet
-	definition *Definition
+type collector struct {
+	fset *token.FileSet
+
+	definition map[string]*Definition
+	seen       map[string]*Declaration
 }
 
-func (v *declarationCollector) error(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
-}
-
-func (v *declarationCollector) Visit(node ast.Node) ast.Visitor {
-	switch node := node.(type) {
-	case *ast.GenDecl:
-		switch node.Tok {
-		case token.TYPE:
-			v.collectTypeDeclarations(node)
-		case token.CONST:
-			v.collectConstDeclarations(node)
-		case token.VAR:
-			v.collectVarDeclarations(node)
-		}
-	case *ast.FuncDecl:
-		v.collectFuncDeclaration(node)
+func NewCollector(fset *token.FileSet) *collector {
+	return &collector{
+		fset:       fset,
+		definition: make(map[string]*Definition),
+		seen:       make(map[string]*Declaration),
 	}
-
-	return v
 }
 
-func (v *declarationCollector) declNames(decl *ast.GenDecl) []string {
-	names := make([]string, 0, len(decl.Specs))
+func (v *collector) appendSeen(key string, value *Declaration) {
+	if len(value.Names) == 1 {
+		value.Name = value.Names[0]
+		value.Names = nil
+	}
+	v.seen[key] = value
+}
+
+func (v *collector) isSeen(key string) bool {
+	decl, ok := v.seen[key]
+	return ok && decl != nil
+}
+
+func (v *collector) collectImports(decl *ast.GenDecl, def *Definition) {
 	for _, spec := range decl.Specs {
-		valueSpec, ok := spec.(*ast.ValueSpec)
+		imported, ok := spec.(*ast.ImportSpec)
 		if !ok {
-			v.error("skipped %T, expected ConstSpec", spec)
 			continue
 		}
-		for _, name := range valueSpec.Names {
-			names = append(names, name.Name)
+
+		importLiteral := imported.Path.Value
+		if imported.Name != nil {
+			alias := imported.Name.Name
+			fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
+			importLiteral = alias + " " + importLiteral
 		}
+
+		if !strings.Contains(importLiteral, "/internal") {
+			if slices.Contains(def.Imports, importLiteral) {
+				continue
+			}
+			def.Imports = append(def.Imports, importLiteral)
+		}
+	}
+}
+
+func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
+	file, ok := (stack[0]).(*ast.File)
+	if !ok {
+		return true
+	}
+
+	packageName := file.Name.Name
+	pkg, ok := v.definition[packageName]
+	if !ok {
+		pkg = &Definition{
+			Package: packageName,
+		}
+		v.definition[packageName] = pkg
+	}
+
+	switch node := node.(type) {
+	case *ast.GenDecl:
+		if node.Tok == token.IMPORT {
+			v.collectImports(node, pkg)
+			return true
+		}
+
+		// If there's a function declaration in the stack,
+		// the var/const/struct is internal to a function.
+		for _, k := range stack {
+			_, ok := k.(*ast.FuncDecl)
+			if ok {
+				return true
+			}
+		}
+
+		names := v.Names(node)
+		for _, name := range names {
+			if v.isSeen(packageName + "." + name) {
+				return true
+			}
+		}
+
+		def := &Declaration{
+			Names:  names,
+			Source: v.getNodeSource(node),
+		}
+
+		for _, name := range names {
+			v.appendSeen(packageName+"."+name, def)
+		}
+
+		switch node.Tok {
+		case token.CONST:
+			def.Kind = ConstKind
+			pkg.Consts.Append(def)
+		case token.VAR:
+			def.Kind = VarKind
+			pkg.Vars.Append(def)
+		case token.TYPE:
+			def.Kind = TypeKind
+			pkg.Types.Append(def)
+		}
+
+	case *ast.FuncDecl:
+		def := v.collectFuncDeclaration(node)
+		if def != nil {
+			key := strings.Trim(packageName+"."+def.Receiver+"."+def.Name, "*.")
+			if v.isSeen(key) {
+				return true
+			}
+			defer v.appendSeen(key, def)
+
+			pkg.Funcs.Append(def)
+		}
+
+	}
+
+	return true
+}
+
+func (v *collector) Names(decl *ast.GenDecl) []string {
+	names := make([]string, 0, len(decl.Specs))
+	for _, spec := range decl.Specs {
+		if val, ok := spec.(*ast.ValueSpec); ok {
+			names = append(names, v.identNames(val.Names)...)
+			continue
+		}
+
+		if val, ok := spec.(*ast.TypeSpec); ok {
+			names = append(names, val.Name.Name)
+			continue
+		}
+
+		v.error("warning getting names: unhandled %T", spec)
+	}
+	if len(names) == 0 {
+		return nil
 	}
 	return names
 }
 
-func (v *declarationCollector) collectTypeDeclarations(decl *ast.GenDecl) {
-	declaration := &Declaration{
-		Kind:   TypeKind,
-		Names:  v.declNames(decl),
-		Source: v.getNodeSource(decl),
-	}
-
-	v.definition.Structs = append(v.definition.Structs, declaration)
+func (v *collector) error(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
 }
 
-func (v *declarationCollector) collectConstDeclarations(decl *ast.GenDecl) {
-	declaration := &Declaration{
-		Kind:   ConstKind,
-		Names:  v.declNames(decl),
-		Source: v.getNodeSource(decl),
+func (v *collector) identNames(decl []*ast.Ident) []string {
+	if len(decl) == 0 {
+		return nil
 	}
 
-	v.definition.Consts = append(v.definition.Consts, declaration)
-}
-
-func (v *declarationCollector) collectVarDeclarations(decl *ast.GenDecl) {
-	declaration := &Declaration{
-		Kind:   VarKind,
-		Names:  v.declNames(decl),
-		Source: v.getNodeSource(decl),
+	result := make([]string, 0, len(decl))
+	for _, t := range decl {
+		result = append(result, t.Name)
 	}
-
-	v.definition.Vars = append(v.definition.Vars, declaration)
+	return result
 }
 
-func (v *declarationCollector) collectFuncDeclaration(decl *ast.FuncDecl) {
+func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl) *Declaration {
 	declaration := &Declaration{
 		Kind:      FuncKind,
 		Name:      decl.Name.Name,
@@ -102,10 +196,10 @@ func (v *declarationCollector) collectFuncDeclaration(decl *ast.FuncDecl) {
 		declaration.Receiver = recvType
 	}
 
-	v.definition.Funcs = append(v.definition.Funcs, declaration)
+	return declaration
 }
 
-func (p *declarationCollector) getNodeSource(node ast.Node) string {
+func (p *collector) getNodeSource(node ast.Node) string {
 	var buf strings.Builder
 	err := printer.Fprint(&buf, p.fset, node)
 	if err != nil {
@@ -114,7 +208,7 @@ func (p *declarationCollector) getNodeSource(node ast.Node) string {
 	return buf.String()
 }
 
-func (p *declarationCollector) functionDef(fun *ast.FuncDecl) string {
+func (p *collector) functionDef(fun *ast.FuncDecl) string {
 	var fset = p.fset
 	name := fun.Name.Name
 	params := make([]string, 0)
