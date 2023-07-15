@@ -1,7 +1,6 @@
 [
   {
     "Package": "model",
-    "Filename": "",
     "Imports": [
       "\"bytes\"",
       "\"fmt\"",
@@ -25,7 +24,7 @@
       {
         "Kind": "type",
         "Name": "Definition",
-        "Source": "type Definition struct {\n\tPackage\t\tstring\n\tFilename\tstring\n\n\tImports\t[]string\n\tTypes\tDeclarationList\n\tConsts\tDeclarationList\n\tVars\tDeclarationList\n\tFuncs\tDeclarationList\n}"
+        "Source": "type Definition struct {\n\tPackage\tstring\n\n\tImports\t[]string\n\tTypes\tDeclarationList\n\tConsts\tDeclarationList\n\tVars\tDeclarationList\n\tFuncs\tDeclarationList\n}"
       },
       {
         "Kind": "type",
@@ -160,7 +159,6 @@
   },
   {
     "Package": "model_test",
-    "Filename": "",
     "Imports": [
       "\"github.com/TykTechnologies/exp/cmd/go-fsck/model\"",
       "\"github.com/kortschak/utter\"",

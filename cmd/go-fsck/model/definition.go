@@ -3,8 +3,7 @@ package model
 import "strings"
 
 type Definition struct {
-	Package  string
-	Filename string
+	Package string
 
 	Imports []string
 	Types   DeclarationList
