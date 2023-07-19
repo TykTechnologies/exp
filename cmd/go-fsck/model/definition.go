@@ -2,17 +2,31 @@ package model
 
 import "strings"
 
-type Definition struct {
-	Package string
+type (
+	Definition struct {
+		Package string
 
-	Imports []string
-	Types   DeclarationList
-	Consts  DeclarationList
-	Vars    DeclarationList
-	Funcs   DeclarationList
-}
+		Imports []string
+		Types   DeclarationList
+		Consts  DeclarationList
+		Vars    DeclarationList
+		Funcs   DeclarationList
+	}
+)
 
-type DeclarationKind string
+type (
+	DeclarationKind string
+
+	Declaration struct {
+		Kind      DeclarationKind
+		File      string
+		Name      string   `json:",omitempty"`
+		Names     []string `json:",omitempty"`
+		Receiver  string   `json:",omitempty"`
+		Signature string   `json:",omitempty"`
+		Source    string
+	}
+)
 
 const (
 	StructKind  DeclarationKind = "struct"
@@ -23,15 +37,6 @@ const (
 	VarKind                     = "var"
 	CommentKind                 = "comment"
 )
-
-type Declaration struct {
-	Kind      DeclarationKind
-	Name      string   `json:",omitempty"`
-	Names     []string `json:",omitempty"`
-	Receiver  string   `json:",omitempty"`
-	Signature string   `json:",omitempty"`
-	Source    string
-}
 
 func (d *Declaration) Keys() []string {
 	trimPath := "*."

@@ -3,9 +3,11 @@ package restore
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/stoewer/go-strcase"
+	"golang.org/x/exp/maps"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
@@ -28,19 +30,51 @@ func restore(cfg *options) error {
 		files[filename] = s
 	}
 	classFunc := func(t *model.Declaration) string {
-		// Receiver can be *T or T or unset;
+		name := t.Name
+
+		// Group receivers next to type declaration:
+		//
+		// Receiver can be *T or T or unset; If it's set, that function belongs
+		// into $T.go; the function behaviour is explicitly bound to T.
 		if t.Receiver != "" {
 			filename := strcase.SnakeCase(strings.TrimLeft(t.Receiver, "*")) + ".go"
 			return filename
 		}
 
+		// Constructor naming conventions:
+		//
 		// Match New$T functions into $T scope.
-		name := t.Name
-		if strings.HasPrefix(name, "New") {
-			filename := strcase.SnakeCase(name[3:]) + ".go"
+
+		if filename, ok := strings.CutPrefix(name, "New"); ok {
+			filename = strcase.SnakeCase(filename) + ".go"
 			if _, exists := files[filename]; exists {
 				return filename
 			}
+		}
+
+		// Test naming conventions:
+		//
+		// - name test `TestStructName` if it tests StructName{},
+		// - `TestStructName_subTest` for individual scoped tests,
+		//
+		// If a test depends on multiple objects and cannot be scoped
+		// into a $T_test.go file, then it will live in funcs_test.go.
+		//
+		// This is expected on some level. When coupling types together,
+		// a func($T, $V) is expected to be global. Structs may provide
+		// conversions, but code that needs multiple types doesn't have
+		// a definition of local behaviour as it needs both $T and $V
+		// to work. This means that the code will work in the package,
+		// but won't work with a reduced scope, until both $T and $V are
+		// moved into importable packages.
+
+		if filename, ok := strings.CutPrefix(name, "Test"); ok {
+			cleanName := strings.SplitN(filename, "_", 2)
+			filename = strcase.SnakeCase(cleanName[0]) + ".go"
+			if _, exists := files[filename]; exists {
+				return filename
+			}
+			return "funcs_test.go"
 		}
 
 		return "funcs.go"
@@ -71,12 +105,33 @@ func restore(cfg *options) error {
 	b, _ := json.MarshalIndent(files, "", "  ")
 	fmt.Println(string(b))
 
-	for filename, decls := range files {
+	filenames := maps.Keys(files)
+	sort.Slice(filenames, func(i int, j int) bool {
+		clean := func(s string) string {
+			cut := ".go"
+			s = s[0 : len(s)-len(cut)]
+			cut = "_test"
+			if strings.HasSuffix(s, cut) {
+				return s[:len(s)-len(cut)]
+			}
+			return s
+		}
+		p1, p2 := filenames[i], filenames[j]
+		c1, c2 := clean(p2), clean(p2)
+		if c1 == c2 {
+			return strings.Compare(p1, p2) < 0
+		}
+		return strings.Compare(c1, c2) < 0
+	})
+
+	for _, filename := range filenames {
+		decls := files[filename]
+
 		fmt.Println("#", filename)
 		fmt.Println()
 		for _, decl := range decls {
 			if decl.Kind == model.FuncKind {
-				if decl.Signature != "" {
+				if decl.Receiver != "" {
 					fmt.Printf("- func (%s) %s\n", decl.Receiver, decl.Signature)
 					continue
 				}

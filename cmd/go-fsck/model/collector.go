@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"path"
 	"sort"
 	"strings"
 
@@ -72,6 +73,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	if !ok {
 		return true
 	}
+	filename := path.Base(v.fset.Position(file.Pos()).Filename)
 
 	packageName := file.Name.Name
 	pkg, ok := v.definition[packageName]
@@ -107,6 +109,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 
 		def := &Declaration{
 			Names:  names,
+			File:   filename,
 			Source: v.getNodeSource(node),
 		}
 
@@ -127,7 +130,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		}
 
 	case *ast.FuncDecl:
-		def := v.collectFuncDeclaration(node)
+		def := v.collectFuncDeclaration(node, filename)
 		if def != nil {
 			key := strings.Trim(packageName+"."+def.Receiver+"."+def.Name, "*.")
 			if v.isSeen(key) {
@@ -180,9 +183,10 @@ func (v *collector) identNames(decl []*ast.Ident) []string {
 	return result
 }
 
-func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl) *Declaration {
+func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) *Declaration {
 	declaration := &Declaration{
 		Kind:      FuncKind,
+		File:      filename,
 		Name:      decl.Name.Name,
 		Signature: v.functionDef(decl),
 		Source:    v.getNodeSource(decl),
