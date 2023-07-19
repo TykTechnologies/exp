@@ -1,7 +1,6 @@
 package restore
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -29,16 +28,20 @@ func restore(cfg *options) error {
 		s = append(s, decl...)
 		files[filename] = s
 	}
-	classFunc := func(t *model.Declaration) string {
+	classifyFunc := func(t *model.Declaration) string {
 		name := t.Name
+		isTest := strings.HasSuffix(t.File, "_test.go")
 
 		// Group receivers next to type declaration:
 		//
 		// Receiver can be *T or T or unset; If it's set, that function belongs
 		// into $T.go; the function behaviour is explicitly bound to T.
 		if t.Receiver != "" {
-			filename := strcase.SnakeCase(strings.TrimLeft(t.Receiver, "*")) + ".go"
-			return filename
+			filename := strcase.SnakeCase(strings.TrimLeft(t.Receiver, "*"))
+			if isTest {
+				return filename + "_test.go"
+			}
+			return filename + ".go"
 		}
 
 		// Constructor naming conventions:
@@ -46,7 +49,11 @@ func restore(cfg *options) error {
 		// Match New$T functions into $T scope.
 
 		if filename, ok := strings.CutPrefix(name, "New"); ok {
-			filename = strcase.SnakeCase(filename) + ".go"
+			filename = strcase.SnakeCase(filename)
+			if isTest {
+				filename = filename + "_test"
+			}
+			filename = ".go"
 			if _, exists := files[filename]; exists {
 				return filename
 			}
@@ -68,12 +75,16 @@ func restore(cfg *options) error {
 		// but won't work with a reduced scope, until both $T and $V are
 		// moved into importable packages.
 
-		if filename, ok := strings.CutPrefix(name, "Test"); ok {
+		if filename, ok := strings.CutPrefix(name, "Test"); isTest && ok {
 			cleanName := strings.SplitN(filename, "_", 2)
 			filename = strcase.SnakeCase(cleanName[0]) + ".go"
 			if _, exists := files[filename]; exists {
 				return filename[:len(filename)-3] + "_test.go"
 			}
+			return "funcs_test.go"
+		}
+
+		if isTest {
 			return "funcs_test.go"
 		}
 
@@ -83,13 +94,17 @@ func restore(cfg *options) error {
 	for _, def := range defs {
 		for _, t := range def.Types {
 			name := findShortest(t.Names, t.Name)
-			filename := strcase.SnakeCase(name) + ".go"
+			filename := strcase.SnakeCase(name)
+			if strings.HasSuffix(t.File, "_test.go") {
+				filename = filename + "_test"
+			}
+			filename = filename + ".go"
 
 			add(filename, t)
 		}
 
 		for _, t := range def.Funcs {
-			filename := classFunc(t)
+			filename := classifyFunc(t)
 			add(filename, t)
 		}
 
@@ -101,9 +116,6 @@ func restore(cfg *options) error {
 			add("const.go", t)
 		}
 	}
-
-	b, _ := json.MarshalIndent(files, "", "  ")
-	fmt.Println(string(b))
 
 	filenames := maps.Keys(files)
 	sort.Slice(filenames, func(i int, j int) bool {
