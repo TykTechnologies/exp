@@ -72,7 +72,7 @@ func restore(cfg *options) error {
 			cleanName := strings.SplitN(filename, "_", 2)
 			filename = strcase.SnakeCase(cleanName[0]) + ".go"
 			if _, exists := files[filename]; exists {
-				return filename + "_test.go"
+				return filename[:len(filename)-3] + "_test.go"
 			}
 			return "funcs_test.go"
 		}
