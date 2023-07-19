@@ -3,6 +3,7 @@
     "Package": "model",
     "Imports": [
       "\"bytes\"",
+      "\"encoding/json\"",
       "\"fmt\"",
       "\"go/ast\"",
       "\"go/parser\"",
@@ -154,6 +155,12 @@
         "Name": "Load",
         "Signature": "Load (sourcePath string) ([]*Definition, error)",
         "Source": "// Load definitions from package located in sourcePath.\nfunc Load(sourcePath string) ([]*Definition, error) {\n\tfset := token.NewFileSet()\n\n\tpackages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tfiles := []*ast.File{}\n\tfor _, pkg := range packages {\n\t\tfor _, file := range pkg.Files {\n\t\t\tfiles = append(files, file)\n\t\t}\n\t}\n\n\tcollector := NewCollector(fset)\n\n\tinsp := inspector.New(files)\n\tinsp.WithStack(nil, collector.Visit)\n\n\tresults := make([]*Definition, 0, len(collector.definition))\n\tfor _, pkg := range collector.definition {\n\t\tresults = append(results, pkg)\n\t}\n\treturn results, nil\n}"
+      },
+      {
+        "Kind": "func",
+        "Name": "ReadFile",
+        "Signature": "ReadFile (inputPath string) ([]*Definition, error)",
+        "Source": "// ReadFile loads the definitions from a json file\nfunc ReadFile(inputPath string) ([]*Definition, error) {\n\tdata, err := os.ReadFile(inputPath)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tvar result []*Definition\n\tif err := json.Unmarshal(data, \u0026result); err != nil {\n\t\treturn nil, err\n\t}\n\n\treturn result, nil\n}"
       }
     ]
   },

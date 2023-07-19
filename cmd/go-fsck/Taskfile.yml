@@ -9,12 +9,21 @@ tasks:
     desc: "{{ .cli }}: Build, test, install"
     deps: [ fix ]
     cmds:
-      - go build .
-      - go test -race -count=100 -cover ./...
       - go install .
       - cmd: echo {{ .cli }} extract -i example/ -o example/go-fsck.json --pretty-json | sh -x
         silent: true
       - cmd: echo {{ .cli }} extract -i model/ -o model/go-fsck.json --pretty-json | sh -x
+        silent: true
+
+  test:
+    desc: "Run go tests"
+    cmds:
+      - go test -count=100 -cover ./...
+
+  restore:
+    desc: "Restore from model"
+    cmds:
+      - cmd: echo {{ .cli }} restore -i model/go-fsck.json | sh -x
         silent: true
 
   fix:
@@ -24,4 +33,8 @@ tasks:
       - goimports -w -local $(go list .) .
       - go fmt ./...
       - go mod tidy
+
+  clean:
+    desc: "{{ .cli}}: Clean build cache"
+    cmds:
       - go clean -cache

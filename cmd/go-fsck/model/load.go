@@ -1,9 +1,11 @@
 package model
 
 import (
+	"encoding/json"
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"os"
 
 	"golang.org/x/tools/go/ast/inspector"
 )
@@ -34,4 +36,19 @@ func Load(sourcePath string) ([]*Definition, error) {
 		results = append(results, pkg)
 	}
 	return results, nil
+}
+
+// ReadFile loads the definitions from a json file
+func ReadFile(inputPath string) ([]*Definition, error) {
+	data, err := os.ReadFile(inputPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*Definition
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
