@@ -2,6 +2,7 @@ package restore
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -32,16 +33,46 @@ func restore(cfg *options) error {
 		name := t.Name
 		isTest := strings.HasSuffix(t.File, "_test.go")
 
+		findFile := func(find string) (string, bool) {
+			for filename, f := range files {
+				for _, v := range f {
+					if v.Name == find {
+						return filename, true
+					}
+					for _, name := range v.Names {
+						if name == find {
+							return filename, true
+						}
+					}
+				}
+			}
+			return "", false
+		}
+
 		// Group receivers next to type declaration:
 		//
 		// Receiver can be *T or T or unset; If it's set, that function belongs
 		// into $T.go; the function behaviour is explicitly bound to T.
-		if t.Receiver != "" {
-			filename := strcase.SnakeCase(strings.TrimLeft(t.Receiver, "*"))
-			if isTest {
-				return filename + "_test.go"
+
+		receiver := strings.TrimLeft(t.Receiver, "*")
+		if receiver != "" {
+			filename, ok := findFile(receiver)
+			if !ok {
+				fmt.Println("Couldn't find receiver for %q", receiver)
+				os.Exit(1)
 			}
-			return filename + ".go"
+
+			if isTest {
+				if strings.HasSuffix(filename, "_test.go") {
+					return filename
+				}
+				return filename[:len(filename)-3] + "_test.go"
+			}
+
+			if filename, changed := cutSuffix(filename, "_test.go"); changed {
+				return filename + ".go"
+			}
+			return filename
 		}
 
 		// Constructor naming conventions:
@@ -172,4 +203,11 @@ func findShortest(s []string, def string) string {
 		return r
 	}
 	return def
+}
+
+func cutSuffix(s string, suffix string) (after string, changed bool) {
+	if !strings.HasSuffix(s, suffix) {
+		return s, false
+	}
+	return s[:len(s)-len(suffix)], true
 }

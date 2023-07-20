@@ -18,6 +18,10 @@ type (
 	}
 )
 
+func (d DeclarationKind) String() string {
+	return string(d)
+}
+
 func (d *Declaration) Keys() []string {
 	trimPath := "*."
 	if d.Name != "" {
