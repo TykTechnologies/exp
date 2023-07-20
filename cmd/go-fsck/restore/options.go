@@ -13,6 +13,9 @@ type options struct {
 	outputPath string
 
 	ignoreFiles []string
+
+	removeUnexported bool
+	removeTests      bool
 }
 
 func NewOptions() *options {
@@ -24,6 +27,10 @@ func NewOptions() *options {
 	flag.StringVarP(&cfg.outputPath, "output-path", "o", cfg.outputPath, "output path")
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 	flag.StringSliceVar(&cfg.ignoreFiles, "ignore-files", cfg.ignoreFiles, "ignore files when writing output")
+
+	flag.BoolVar(&cfg.removeUnexported, "remove-unexported", cfg.removeUnexported, "remove unexported symbols")
+	flag.BoolVar(&cfg.removeTests, "remove-tests", cfg.removeTests, "remove tests")
+
 	flag.Parse()
 
 	return cfg

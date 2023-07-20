@@ -2,6 +2,7 @@ package restore
 
 import (
 	"fmt"
+	"go/ast"
 	"sort"
 	"strings"
 
@@ -137,28 +138,52 @@ func restore(cfg *options) error {
 	})
 
 	for _, filename := range filenames {
+		if cfg.removeTests && strings.HasSuffix(filename, "_test.go") {
+			continue
+		}
 		decls := files[filename]
 
-		fmt.Println("#", filename)
-		fmt.Println()
+		lines := []string{}
 		for _, decl := range decls {
-			if decl.Kind == model.FuncKind {
-				if decl.Receiver != "" {
-					fmt.Printf("- func (%s) %s\n", decl.Receiver, decl.Signature)
+			if cfg.removeUnexported {
+				if decl.Name != "" && !ast.IsExported(decl.Name) {
 					continue
 				}
-				fmt.Printf("- func %s\n", decl.Signature)
+			}
+
+			if decl.Kind == model.FuncKind {
+				receiver := strings.TrimLeft(decl.Receiver, "*")
+				if receiver != "" {
+					if cfg.removeUnexported && !ast.IsExported(receiver) {
+						continue
+					}
+
+					lines = append(lines, fmt.Sprintf("- func (%s) %s", decl.Receiver, decl.Signature))
+					continue
+				}
+				lines = append(lines, "- func "+decl.Signature)
 				continue
 			}
 			if len(decl.Names) > 0 {
 				for _, name := range decl.Names {
-					fmt.Println("-", decl.Kind, name)
+					if cfg.removeUnexported {
+						if name != "" && !ast.IsExported(name) {
+							continue
+						}
+					}
+					lines = append(lines, "- "+decl.Kind.String()+" "+name)
 				}
 				continue
 			}
-			fmt.Println("-", decl.Kind, decl.Name)
+			lines = append(lines, "- "+decl.Kind.String()+" "+decl.Name)
 		}
-		fmt.Println()
+
+		if len(lines) > 0 {
+			fmt.Println("#", len(lines), filename)
+			fmt.Println()
+			fmt.Println(strings.Join(lines, "\n"))
+			fmt.Println()
+		}
 	}
 
 	return nil
