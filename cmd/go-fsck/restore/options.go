@@ -16,6 +16,9 @@ type options struct {
 
 	removeUnexported bool
 	removeTests      bool
+
+	save        bool
+	packageName string
 }
 
 func NewOptions() *options {
@@ -30,6 +33,9 @@ func NewOptions() *options {
 
 	flag.BoolVar(&cfg.removeUnexported, "remove-unexported", cfg.removeUnexported, "remove unexported symbols")
 	flag.BoolVar(&cfg.removeTests, "remove-tests", cfg.removeTests, "remove tests")
+
+	flag.BoolVar(&cfg.save, "save", cfg.save, "write out to files")
+	flag.StringVarP(&cfg.packageName, "package-name", "p", cfg.packageName, "package name for --save")
 
 	flag.Parse()
 

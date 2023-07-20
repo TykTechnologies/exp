@@ -20,6 +20,12 @@
     "Types": [
       {
         "Kind": "type",
+        "File": "collector.go",
+        "Name": "collector",
+        "Source": "type collector struct {\n\tfset\t*token.FileSet\n\n\tdefinition\tmap[string]*Definition\n\tseen\t\tmap[string]*Declaration\n}"
+      },
+      {
+        "Kind": "type",
         "File": "definition.go",
         "Name": "Definition",
         "Source": "type (\n\tDefinition struct {\n\t\tPackage\tstring\n\n\t\tImports\t[]string\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
@@ -38,12 +44,6 @@
         "File": "definition.go",
         "Name": "DeclarationList",
         "Source": "type DeclarationList []*Declaration"
-      },
-      {
-        "Kind": "type",
-        "File": "collector.go",
-        "Name": "collector",
-        "Source": "type collector struct {\n\tfset\t*token.FileSet\n\n\tdefinition\tmap[string]*Definition\n\tseen\t\tmap[string]*Declaration\n}"
       }
     ],
     "Consts": [
@@ -64,36 +64,6 @@
     ],
     "Vars": null,
     "Funcs": [
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Keys",
-        "Receiver": "*Declaration",
-        "Signature": "Keys () []string",
-        "Source": "func (d *Declaration) Keys() []string {\n\ttrimPath := \"*.\"\n\tif d.Name != \"\" {\n\t\treturn []string{\n\t\t\tstrings.Trim(d.Receiver+\".\"+d.Name, trimPath),\n\t\t}\n\t}\n\tif len(d.Names) != 0 {\n\t\tresult := make([]string, len(d.Names))\n\t\tfor k, v := range d.Names {\n\t\t\tresult[k] = strings.Trim(d.Receiver+\".\"+v, trimPath)\n\t\t}\n\t}\n\treturn nil\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Append",
-        "Receiver": "*DeclarationList",
-        "Signature": "Append (in *Declaration)",
-        "Source": "func (p *DeclarationList) Append(in *Declaration) {\n\t*p = append(*p, in)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "load.go",
-        "Name": "Load",
-        "Signature": "Load (sourcePath string) ([]*Definition, error)",
-        "Source": "// Load definitions from package located in sourcePath.\nfunc Load(sourcePath string) ([]*Definition, error) {\n\tfset := token.NewFileSet()\n\n\tpackages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tfiles := []*ast.File{}\n\tfor _, pkg := range packages {\n\t\tfor _, file := range pkg.Files {\n\t\t\tfiles = append(files, file)\n\t\t}\n\t}\n\n\tcollector := NewCollector(fset)\n\n\tinsp := inspector.New(files)\n\tinsp.WithStack(nil, collector.Visit)\n\n\tresults := make([]*Definition, 0, len(collector.definition))\n\tfor _, pkg := range collector.definition {\n\t\tresults = append(results, pkg)\n\t}\n\treturn results, nil\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "load.go",
-        "Name": "ReadFile",
-        "Signature": "ReadFile (inputPath string) ([]*Definition, error)",
-        "Source": "// ReadFile loads the definitions from a json file\nfunc ReadFile(inputPath string) ([]*Definition, error) {\n\tdata, err := os.ReadFile(inputPath)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tvar result []*Definition\n\tif err := json.Unmarshal(data, \u0026result); err != nil {\n\t\treturn nil, err\n\t}\n\n\treturn result, nil\n}"
-      },
       {
         "Kind": "func",
         "File": "collector.go",
@@ -180,6 +150,44 @@
         "Receiver": "*collector",
         "Signature": "functionDef (fun *ast.FuncDecl) string",
         "Source": "func (p *collector) functionDef(fun *ast.FuncDecl) string {\n\tvar fset = p.fset\n\tname := fun.Name.Name\n\tparams := make([]string, 0)\n\tfor _, p := range fun.Type.Params.List {\n\t\tvar typeNameBuf bytes.Buffer\n\t\terr := printer.Fprint(\u0026typeNameBuf, fset, p.Type)\n\t\tif err != nil {\n\t\t\tlog.Fatalf(\"failed printing %s\", err)\n\t\t}\n\t\tnames := make([]string, 0)\n\t\tfor _, name := range p.Names {\n\t\t\tnames = append(names, name.Name)\n\t\t}\n\t\tparams = append(params, fmt.Sprintf(\"%s %s\", strings.Join(names, \",\"), typeNameBuf.String()))\n\t}\n\treturns := make([]string, 0)\n\tif fun.Type.Results != nil {\n\t\tfor _, r := range fun.Type.Results.List {\n\t\t\tvar typeNameBuf bytes.Buffer\n\t\t\terr := printer.Fprint(\u0026typeNameBuf, fset, r.Type)\n\t\t\tif err != nil {\n\t\t\t\tlog.Fatalf(\"failed printing %s\", err)\n\t\t\t}\n\n\t\t\treturns = append(returns, typeNameBuf.String())\n\t\t}\n\t}\n\treturnString := \"\"\n\tif len(returns) == 1 {\n\t\treturnString = returns[0]\n\t} else if len(returns) \u003e 1 {\n\t\treturnString = fmt.Sprintf(\"(%s)\", strings.Join(returns, \", \"))\n\t}\n\n\tparamsString := strings.Join(params, \", \")\n\tif returnString != \"\" {\n\t\treturn fmt.Sprintf(\"%s (%s) %v\", name, paramsString, returnString)\n\t}\n\treturn fmt.Sprintf(\"%s (%s)\", name, paramsString)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "String",
+        "Receiver": "DeclarationKind",
+        "Signature": "String () string",
+        "Source": "func (d DeclarationKind) String() string {\n\treturn string(d)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Keys",
+        "Receiver": "*Declaration",
+        "Signature": "Keys () []string",
+        "Source": "func (d *Declaration) Keys() []string {\n\ttrimPath := \"*.\"\n\tif d.Name != \"\" {\n\t\treturn []string{\n\t\t\tstrings.Trim(d.Receiver+\".\"+d.Name, trimPath),\n\t\t}\n\t}\n\tif len(d.Names) != 0 {\n\t\tresult := make([]string, len(d.Names))\n\t\tfor k, v := range d.Names {\n\t\t\tresult[k] = strings.Trim(d.Receiver+\".\"+v, trimPath)\n\t\t}\n\t}\n\treturn nil\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Append",
+        "Receiver": "*DeclarationList",
+        "Signature": "Append (in *Declaration)",
+        "Source": "func (p *DeclarationList) Append(in *Declaration) {\n\t*p = append(*p, in)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "load.go",
+        "Name": "Load",
+        "Signature": "Load (sourcePath string) ([]*Definition, error)",
+        "Source": "// Load definitions from package located in sourcePath.\nfunc Load(sourcePath string) ([]*Definition, error) {\n\tfset := token.NewFileSet()\n\n\tpackages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tfiles := []*ast.File{}\n\tfor _, pkg := range packages {\n\t\tfor _, file := range pkg.Files {\n\t\t\tfiles = append(files, file)\n\t\t}\n\t}\n\n\tcollector := NewCollector(fset)\n\n\tinsp := inspector.New(files)\n\tinsp.WithStack(nil, collector.Visit)\n\n\tresults := make([]*Definition, 0, len(collector.definition))\n\tpkgNames := make([]string, 0, len(collector.definition))\n\tfor _, pkg := range collector.definition {\n\t\tpkgNames = append(pkgNames, pkg.Package)\n\t}\n\tsort.Strings(pkgNames)\n\n\tfor _, pkg := range collector.definition {\n\t\tfor _, name := range pkgNames {\n\t\t\tif pkg.Package == name {\n\t\t\t\tresults = append(results, pkg)\n\t\t\t}\n\t\t}\n\t}\n\n\treturn results, nil\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "load.go",
+        "Name": "ReadFile",
+        "Signature": "ReadFile (inputPath string) ([]*Definition, error)",
+        "Source": "// ReadFile loads the definitions from a json file\nfunc ReadFile(inputPath string) ([]*Definition, error) {\n\tdata, err := os.ReadFile(inputPath)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tvar result []*Definition\n\tif err := json.Unmarshal(data, \u0026result); err != nil {\n\t\treturn nil, err\n\t}\n\n\treturn result, nil\n}"
       }
     ]
   },

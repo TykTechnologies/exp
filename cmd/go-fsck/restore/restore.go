@@ -2,7 +2,6 @@ package restore
 
 import (
 	"fmt"
-	"go/ast"
 	"sort"
 	"strings"
 
@@ -92,7 +91,26 @@ func restore(cfg *options) error {
 		return "funcs.go"
 	}
 
+	var imports []string
+	var found bool
+
 	for _, def := range defs {
+		if cfg.packageName == def.Package {
+			imports = def.Imports
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("no such package: %s", cfg.packageName)
+	}
+
+	for _, def := range defs {
+		if cfg.packageName != def.Package {
+			continue
+		}
+
 		for _, t := range def.Types {
 			name := findShortest(t.Names, t.Name)
 			filename := strcase.SnakeCase(name)
@@ -137,60 +155,10 @@ func restore(cfg *options) error {
 		return strings.Compare(c1, c2) < 0
 	})
 
-	return printLayout(cfg, files, filenames)
-}
-
-func printLayout(cfg *options, files map[string][]*model.Declaration, filenames []string) error {
-	for _, filename := range filenames {
-		if cfg.removeTests && strings.HasSuffix(filename, "_test.go") {
-			continue
-		}
-		decls := files[filename]
-
-		lines := []string{}
-		for _, decl := range decls {
-			if cfg.removeUnexported {
-				if decl.Name != "" && !ast.IsExported(decl.Name) {
-					continue
-				}
-			}
-
-			if decl.Kind == model.FuncKind {
-				receiver := strings.TrimLeft(decl.Receiver, "*")
-				if receiver != "" {
-					if cfg.removeUnexported && !ast.IsExported(receiver) {
-						continue
-					}
-
-					lines = append(lines, fmt.Sprintf("- func (%s) %s", decl.Receiver, decl.Signature))
-					continue
-				}
-				lines = append(lines, "- func "+decl.Signature)
-				continue
-			}
-			if len(decl.Names) > 0 {
-				for _, name := range decl.Names {
-					if cfg.removeUnexported {
-						if name != "" && !ast.IsExported(name) {
-							continue
-						}
-					}
-					lines = append(lines, "- "+decl.Kind.String()+" "+name)
-				}
-				continue
-			}
-			lines = append(lines, "- "+decl.Kind.String()+" "+decl.Name)
-		}
-
-		if len(lines) > 0 {
-			fmt.Println("#", len(lines), filename)
-			fmt.Println()
-			fmt.Println(strings.Join(lines, "\n"))
-			fmt.Println()
-		}
+	if cfg.save {
+		return saveLayout(cfg, files, filenames, imports)
 	}
-
-	return nil
+	return printLayout(cfg, files, filenames)
 }
 
 func findShortest(s []string, def string) string {

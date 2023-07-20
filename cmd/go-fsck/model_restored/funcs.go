@@ -11,6 +11,14 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
+func NewCollector(fset *token.FileSet) *collector {
+	return &collector{
+		fset:       fset,
+		definition: make(map[string]*Definition),
+		seen:       make(map[string]*Declaration),
+	}
+}
+
 // Load definitions from package located in sourcePath.
 func Load(sourcePath string) ([]*Definition, error) {
 	fset := token.NewFileSet()

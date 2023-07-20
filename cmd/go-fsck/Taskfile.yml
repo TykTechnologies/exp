@@ -1,19 +1,16 @@
 ---
 version: "3"
 
-vars:
-  cli: "go-fsck"
-
 tasks:
   default:
-    desc: "{{ .cli }}: Build, test, install"
+    desc: "go-fsck: Build, test, install"
     deps: [ fix ]
     cmds:
       - go install .
-      - cmd: echo {{ .cli }} extract -i example/ -o example/go-fsck.json --pretty-json | sh -x
-        silent: true
-      - cmd: echo {{ .cli }} extract -i model/ -o model/go-fsck.json --pretty-json | sh -x
-        silent: true
+      - go-fsck extract -i example/ -o example/go-fsck.json --pretty-json
+      - rm -rf model_restored && mkdir -p model_restored
+      - go-fsck extract -i model/ -o model_restored/go-fsck.json --pretty-json
+      - task: restore
 
   test:
     desc: "Run go tests"
@@ -22,12 +19,15 @@ tasks:
 
   restore:
     desc: "Restore from model"
+    dir: model_restored
     cmds:
-      - cmd: echo {{ .cli }} restore -i model/go-fsck.json | sh -x
-        silent: true
+      - go-fsck restore -p model --save
+      - goimports -w .
+      - go fmt .
+      - go build .
 
   fix:
-    desc: "{{ .cli }}: Clean up source tree"
+    desc: "go-fsck: Clean up source tree"
     aliases: ["fmt"]
     cmds:
       - goimports -w -local $(go list .) .
