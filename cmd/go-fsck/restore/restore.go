@@ -19,15 +19,22 @@ func restore(cfg *options) error {
 	}
 
 	files := make(map[string][]*model.Declaration, 0)
-	add := func(filename string, decl ...*model.Declaration) {
-		s, ok := files[filename]
-		if !ok {
-			files[filename] = decl
-			return
-		}
+	add := func(filename string, decls ...*model.Declaration) {
+		fileTest := filename[:len(filename)-3] + "_test.go"
 
-		s = append(s, decl...)
-		files[filename] = s
+		for _, t := range decls {
+			dest := filename
+			if isTest := strings.HasSuffix(t.File, "_test.go"); isTest {
+				dest = fileTest
+			}
+
+			s, ok := files[dest]
+			if !ok {
+				files[dest] = decls
+				return
+			}
+			files[dest] = append(s, t)
+		}
 	}
 	classifyFunc := func(t *model.Declaration) string {
 		name := t.Name
