@@ -3,7 +3,7 @@
 The `go fmt` for your package layout.
 
 Currently, `go-fsck extract --pretty-json` will render the schema for a
-package into a local `go-fsck.json` file. No work on restore yet.
+package into a local `go-fsck.json` file.
 
 ## Motivation
 
@@ -90,3 +90,62 @@ is expected to have bugs (I am my own QA), but - here's a few caveats:
 - just consider it an academics tool, rather than a CI one. I don't
   expect this to be stable, so control the invocation.
 - i mean, it's in the experimental repo...
+
+# Aggregations
+
+A few aggregations of symbols are available below. Using `jq`
+lets us transform our schema into either an array of key value pairs,
+or an object. Jq examples filter the count and allow some
+degree of customization to quickly adjust the json schema in order
+to inspect it with various code pens.
+
+Example code pen:
+
+- https://codepen.io/kendsnyder/pen/vPmQbY
+- https://codepen.io/thecraftycoderpdx/pen/jZyzKo
+
+---
+
+Use case: number of symbols in files as an array of {name, value}:
+
+```
+go-fsck restore -p gateway --stats-files --remove-tests | \
+    jq -s '.[] | select( all(.Count; . > 10) ) | {"name": .File, "value": .Count}' | \
+    jq -s
+```
+
+Example:
+
+```
+[
+  {
+    "name": "api_definition_loader.go",
+    "value": 36
+  },
+  {
+    "name": "api_spec.go",
+    "value": 21
+  },
+```
+
+---
+
+Use case: number of symbols in files as an object with key/value:
+
+```
+go-fsck restore -p gateway --stats-files --remove-tests | \
+    jq -s '.[] | select( all(.Count; . > 10) )' | \
+    jq -s 'to_entries | map( {(.value.File) : (.value.Count)} ) | add'
+```
+
+Example:
+
+```
+{
+  "api_definition_loader.go": 36,
+  "api_spec.go": 21,
+  "base_middleware.go": 19,
+...
+```
+
+---

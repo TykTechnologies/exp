@@ -1,8 +1,10 @@
 package restore
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/ast"
+	"os"
 	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
@@ -48,6 +50,14 @@ func printLayout(cfg *options, files map[string][]*model.Declaration, filenames 
 				continue
 			}
 			lines = append(lines, "- "+decl.Kind.String()+" "+decl.Name)
+		}
+
+		if cfg.statsFiles {
+			_ = json.NewEncoder(os.Stdout).Encode(struct {
+				File  string
+				Count int
+			}{filename, len(lines)})
+			continue
 		}
 
 		if len(lines) > 0 {
