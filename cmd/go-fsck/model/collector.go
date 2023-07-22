@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 )
 
@@ -66,6 +67,12 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	filename := path.Base(v.fset.Position(file.Pos()).Filename)
 
 	packageName := file.Name.Name
+
+	// Files with build tags already have defined scope.
+	if buildTags := getBuildTags(file); len(buildTags) > 0 {
+		return true
+	}
+
 	pkg, ok := v.definition[packageName]
 	if !ok {
 		pkg = &Definition{
@@ -245,4 +252,23 @@ func (p *collector) functionDef(fun *ast.FuncDecl) string {
 		return fmt.Sprintf("%s (%s) %v", name, paramsString, returnString)
 	}
 	return fmt.Sprintf("%s (%s)", name, paramsString)
+}
+
+func getBuildTags(file *ast.File) []string {
+	// Regular expression to match build tags in comments.
+	re := regexp.MustCompile(`^\s*//\s*\+build\s+(.*)$`)
+
+	var buildTags []string
+
+	// Check each comment group for build tags.
+	if file.Doc != nil {
+		for _, comment := range file.Doc.List {
+			match := re.FindStringSubmatch(comment.Text)
+			if len(match) > 1 {
+				buildTags = append(buildTags, match[1])
+			}
+		}
+	}
+
+	return buildTags
 }

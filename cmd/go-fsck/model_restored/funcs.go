@@ -6,18 +6,11 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"regexp"
 	"sort"
 
 	"golang.org/x/tools/go/ast/inspector"
 )
-
-func NewCollector(fset *token.FileSet) *collector {
-	return &collector{
-		fset:       fset,
-		definition: make(map[string]*Definition),
-		seen:       make(map[string]*Declaration),
-	}
-}
 
 // Load definitions from package located in sourcePath.
 func Load(sourcePath string) ([]*Definition, error) {
@@ -75,4 +68,30 @@ func ReadFile(inputPath string) ([]*Definition, error) {
 	}
 
 	return result, nil
+}
+
+func NewCollector(fset *token.FileSet) *collector {
+	return &collector{
+		fset:       fset,
+		definition: make(map[string]*Definition),
+		seen:       make(map[string]*Declaration),
+	}
+}
+
+func getBuildTags(file *ast.File) []string {
+
+	re := regexp.MustCompile(`^\s*//\s*\+build\s+(.*)$`)
+
+	var buildTags []string
+
+	if file.Doc != nil {
+		for _, comment := range file.Doc.List {
+			match := re.FindStringSubmatch(comment.Text)
+			if len(match) > 1 {
+				buildTags = append(buildTags, match[1])
+			}
+		}
+	}
+
+	return buildTags
 }

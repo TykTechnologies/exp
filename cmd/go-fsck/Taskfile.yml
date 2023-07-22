@@ -7,15 +7,21 @@ tasks:
     deps: [ clean, fix ]
     cmds:
       - go install .
-      - go-fsck extract -i example/ -o example/go-fsck.json --pretty-json
       - rm -rf model_restored && mkdir -p model_restored
       - go-fsck extract -i model/ -o model_restored/go-fsck.json --pretty-json
       - task: restore
+      - task: example
 
   test:
     desc: "Run go tests"
     cmds:
       - go test -count=100 -cover ./...
+
+  example:
+    desc: "Build example"
+    cmds:
+      - go-fsck extract -i example/ -o example/go-fsck.json --pretty-json
+
 
   restore:
     desc: "Restore from model"

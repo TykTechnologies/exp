@@ -58,6 +58,11 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	filename := path.Base(v.fset.Position(file.Pos()).Filename)
 
 	packageName := file.Name.Name
+
+	if buildTags := getBuildTags(file); len(buildTags) > 0 {
+		return true
+	}
+
 	pkg, ok := v.definition[packageName]
 	if !ok {
 		pkg = &Definition{
