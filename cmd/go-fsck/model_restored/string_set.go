@@ -6,12 +6,12 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type Imports map[string][]string
+type StringSet map[string][]string
 
-func (i *Imports) Add(key, lit string) {
+func (i *StringSet) Add(key, lit string) {
 	data := *i
 	if data == nil {
-		data = make(Imports)
+		data = make(StringSet)
 	}
 	if set, ok := data[key]; ok {
 		if slices.Contains(set, lit) {
@@ -24,7 +24,7 @@ func (i *Imports) Add(key, lit string) {
 	*i = data
 }
 
-func (i Imports) Get(key string) []string {
+func (i StringSet) Get(key string) []string {
 	val, _ := i[key]
 	if val != nil {
 		sort.Strings(val)

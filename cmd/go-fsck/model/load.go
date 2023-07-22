@@ -2,10 +2,12 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
+	"path"
 	"sort"
 
 	"golang.org/x/tools/go/ast/inspector"
@@ -23,7 +25,20 @@ func Load(sourcePath string) ([]*Definition, error) {
 	files := []*ast.File{}
 	for _, pkg := range packages {
 		for _, file := range pkg.Files {
-			files = append(files, file)
+			filename := path.Base(fset.Position(file.Pos()).Filename)
+
+			src, err := os.ReadFile(path.Join(sourcePath, filename))
+			if err != nil {
+				return nil, fmt.Errorf("Error reading in source file: %s", filename)
+			}
+
+			tags := BuildTags(src)
+			if len(tags) == 0 {
+				files = append(files, file)
+				continue
+			}
+
+			fmt.Printf("WARN: Skipping file %s with build tags: %v\n", filename, tags)
 		}
 	}
 
@@ -31,6 +46,8 @@ func Load(sourcePath string) ([]*Definition, error) {
 
 	insp := inspector.New(files)
 	insp.WithStack(nil, collector.Visit)
+
+	collector.Clean()
 
 	results := make([]*Definition, 0, len(collector.definition))
 	pkgNames := make([]string, 0, len(collector.definition))

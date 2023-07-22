@@ -1,7 +1,12 @@
 [
   {
     "Package": "example",
-    "Imports": null,
+    "Doc": null,
+    "Imports": {
+      "example.go": [
+        "_ \"net/http\""
+      ]
+    },
     "Types": [
       {
         "Kind": "type",
@@ -48,13 +53,6 @@
         "Name": "GlobalFunc",
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\tvar err error\n\treturn err\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "example_tag.go",
-        "Name": "Linux",
-        "Signature": "Linux () string",
-        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   }

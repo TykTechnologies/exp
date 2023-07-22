@@ -19,6 +19,9 @@ type collector struct {
 	seen       map[string]*Declaration
 }
 
+func (v *collector) Clean() {
+}
+
 func (v *collector) appendSeen(key string, value *Declaration) {
 	if len(value.Names) == 1 {
 		value.Name = value.Names[0]
@@ -59,16 +62,16 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 
 	packageName := file.Name.Name
 
-	if buildTags := getBuildTags(file); len(buildTags) > 0 {
-		return true
-	}
-
 	pkg, ok := v.definition[packageName]
 	if !ok {
 		pkg = &Definition{
 			Package: packageName,
 		}
 		v.definition[packageName] = pkg
+	}
+
+	if file.Doc != nil {
+		pkg.Doc.Add(filename, v.getSource(file.Doc.List))
 	}
 
 	switch node := node.(type) {
@@ -95,7 +98,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		def := &Declaration{
 			Names:  names,
 			File:   filename,
-			Source: v.getNodeSource(node),
+			Source: v.getSource(node),
 		}
 
 		for _, name := range names {
@@ -174,7 +177,7 @@ func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) 
 		File:      filename,
 		Name:      decl.Name.Name,
 		Signature: v.functionDef(decl),
-		Source:    v.getNodeSource(decl),
+		Source:    v.getSource(decl),
 	}
 
 	if decl.Recv != nil {
@@ -191,7 +194,7 @@ func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) 
 	return declaration
 }
 
-func (p *collector) getNodeSource(node ast.Node) string {
+func (p *collector) getSource(node any) string {
 	var buf strings.Builder
 	err := printer.Fprint(&buf, p.fset, node)
 	if err != nil {

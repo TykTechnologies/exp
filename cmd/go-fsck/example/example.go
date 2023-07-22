@@ -1,5 +1,9 @@
 package example
 
+import (
+	_ "net/http"
+)
+
 // Comment outer
 var (
 	// Comment inner

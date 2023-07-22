@@ -18,5 +18,5 @@ func TestLoad(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, defs)
 
-	utter.Dump(defs)
+	// utter.Dump(defs)
 }
