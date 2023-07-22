@@ -29,6 +29,13 @@ func (d *Definition) Order() []*Declaration {
 	return result
 }
 
+func (d *Definition) Sort() {
+	d.Types.Sort()
+	d.Vars.Sort()
+	d.Consts.Sort()
+	d.Funcs.Sort()
+}
+
 func (d *Definition) getImports(decl *Declaration) []string {
 	return d.Imports.Get(decl.File)
 }

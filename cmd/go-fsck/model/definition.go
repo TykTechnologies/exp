@@ -1,6 +1,7 @@
 package model
 
 import (
+	"go/ast"
 	"sort"
 	"strings"
 
@@ -63,6 +64,13 @@ func (d *Definition) Order() []*Declaration {
 	result = append(result, d.Vars...)
 	result = append(result, d.Consts...)
 	return result
+}
+
+func (d *Definition) Sort() {
+	d.Types.Sort()
+	d.Vars.Sort()
+	d.Consts.Sort()
+	d.Funcs.Sort()
 }
 
 func (d *Definition) Fill() {
@@ -140,6 +148,11 @@ func (p *DeclarationList) Sort() {
 			}
 			return indexOf[a.Kind] < indexOf[b.Kind]
 		}
+		ae, be := ast.IsExported(a.Name), ast.IsExported(b.Name)
+		if ae != be {
+			return ae
+		}
+
 		if a.Receiver != b.Receiver {
 			if a.Receiver == "" {
 				return true

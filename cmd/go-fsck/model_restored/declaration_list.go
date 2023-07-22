@@ -1,6 +1,7 @@
 package model
 
 import (
+	"go/ast"
 	"sort"
 )
 
@@ -25,6 +26,11 @@ func (p *DeclarationList) Sort() {
 			}
 			return indexOf[a.Kind] < indexOf[b.Kind]
 		}
+		ae, be := ast.IsExported(a.Name), ast.IsExported(b.Name)
+		if ae != be {
+			return ae
+		}
+
 		if a.Receiver != b.Receiver {
 			if a.Receiver == "" {
 				return true

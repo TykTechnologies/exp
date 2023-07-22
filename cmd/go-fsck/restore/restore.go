@@ -124,7 +124,22 @@ func restore(cfg *options) error {
 		// when using text/template or html/template, math/rand, crypto/rand,
 		// or an internal package matching stdlib (internal/crypto).
 
-		if len(t.Imports) > 0 {
+		isConflicting := func(names []string) bool {
+			conflicting := map[string]bool{
+				"html/template": true,
+				"text/template": true,
+				"math/rand":     true,
+				"crypto/rand":   true,
+			}
+			for _, name := range names {
+				if ok, _ := conflicting[name]; ok {
+					return true
+				}
+			}
+			return false
+		}
+
+		if len(t.Imports) > 0 && isConflicting(t.Imports) {
 			filename := strcase.SnakeCase(name)
 			if isTest {
 				return filename + "_test.go"

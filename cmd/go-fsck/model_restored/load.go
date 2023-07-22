@@ -51,6 +51,7 @@ func Load(sourcePath string) ([]*Definition, error) {
 	results := make([]*Definition, 0, len(collector.definition))
 	pkgNames := make([]string, 0, len(collector.definition))
 	for _, pkg := range collector.definition {
+		pkg.Sort()
 		pkgNames = append(pkgNames, pkg.Package)
 	}
 	sort.Strings(pkgNames)
@@ -62,6 +63,10 @@ func Load(sourcePath string) ([]*Definition, error) {
 			}
 		}
 	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Package < results[j].Package
+	})
 
 	return results, nil
 }
