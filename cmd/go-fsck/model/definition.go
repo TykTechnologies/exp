@@ -26,13 +26,17 @@ type (
 	DeclarationKind string
 
 	Declaration struct {
-		Kind      DeclarationKind
-		File      string
-		Imports   []string `json:",omitempty"`
-		Name      string   `json:",omitempty"`
-		Names     []string `json:",omitempty"`
-		Receiver  string   `json:",omitempty"`
-		Signature string   `json:",omitempty"`
+		Kind     DeclarationKind
+		File     string
+		Imports  []string `json:",omitempty"`
+		Name     string   `json:",omitempty"`
+		Names    []string `json:",omitempty"`
+		Receiver string   `json:",omitempty"`
+
+		Arguments []string `json:",omitempty"`
+		Returns   []string `json:",omitempty"`
+
+		Signature string `json:",omitempty"`
 		Source    string
 	}
 )
@@ -160,6 +164,10 @@ func (p *DeclarationList) Sort() {
 			return a.Receiver < b.Receiver
 		}
 
-		return a.Signature < b.Signature
+		if a.Signature != b.Signature {
+			return a.Signature < b.Signature
+		}
+
+		return a.Name < b.Name
 	})
 }

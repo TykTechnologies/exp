@@ -219,23 +219,20 @@ func (v *collector) identNames(decl []*ast.Ident) []string {
 }
 
 func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) *Declaration {
+	args, returns := v.functionBindings(decl)
+
 	declaration := &Declaration{
 		Kind:      FuncKind,
 		File:      filename,
 		Name:      decl.Name.Name,
+		Arguments: args,
+		Returns:   returns,
 		Signature: v.functionDef(decl),
 		Source:    v.getSource(decl),
 	}
 
 	if decl.Recv != nil {
-		var recvType string
-		switch t := decl.Recv.List[0].Type.(type) {
-		case *ast.StarExpr:
-			recvType = "*" + t.X.(*ast.Ident).Name
-		case *ast.Ident:
-			recvType = t.Name
-		}
-		declaration.Receiver = recvType
+		declaration.Receiver = v.symbolType(decl.Recv.List[0].Type)
 	}
 
 	return declaration
@@ -248,6 +245,35 @@ func (p *collector) getSource(node any) string {
 		return ""
 	}
 	return buf.String()
+}
+
+func (p *collector) symbolType(expr ast.Expr) string {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		return t.Name
+	case *ast.StarExpr:
+		return "*" + p.symbolType(t.X)
+	case *ast.ArrayType:
+		return "[]" + p.symbolType(t.Elt)
+	}
+	return ""
+}
+
+func (p *collector) functionBindings(decl *ast.FuncDecl) (args []string, returns []string) {
+	// Traverse arguments
+	for _, field := range decl.Type.Params.List {
+		argType := p.symbolType(field.Type)
+		args = appendIfNotExists(args, argType)
+	}
+
+	// Traverse return values
+	if decl.Type.Results != nil {
+		for _, field := range decl.Type.Results.List {
+			returnType := p.symbolType(field.Type)
+			returns = appendIfNotExists(returns, returnType)
+		}
+	}
+	return
 }
 
 func (p *collector) functionDef(fun *ast.FuncDecl) string {
@@ -309,4 +335,13 @@ func getBuildTags(file *ast.File) []string {
 	}
 
 	return buildTags
+}
+
+func appendIfNotExists(slice []string, element string) []string {
+	for _, s := range slice {
+		if s == element {
+			return slice
+		}
+	}
+	return append(slice, element)
 }

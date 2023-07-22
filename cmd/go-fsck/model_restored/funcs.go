@@ -5,6 +5,15 @@ import (
 	"regexp"
 )
 
+func appendIfNotExists(slice []string, element string) []string {
+	for _, s := range slice {
+		if s == element {
+			return slice
+		}
+	}
+	return append(slice, element)
+}
+
 func getBuildTags(file *ast.File) []string {
 
 	re := regexp.MustCompile(`^\s*//\s*\+build\s+(.*)$`)

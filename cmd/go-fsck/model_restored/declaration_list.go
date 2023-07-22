@@ -38,6 +38,10 @@ func (p *DeclarationList) Sort() {
 			return a.Receiver < b.Receiver
 		}
 
-		return a.Signature < b.Signature
+		if a.Signature != b.Signature {
+			return a.Signature < b.Signature
+		}
+
+		return a.Name < b.Name
 	})
 }

@@ -133,7 +133,7 @@ func restore(cfg *options) error {
 			}
 			for _, name := range names {
 				if ok, _ := conflicting[name]; ok {
-					return true
+					return ok
 				}
 			}
 			return false
@@ -142,9 +142,9 @@ func restore(cfg *options) error {
 		if len(t.Imports) > 0 && isConflicting(t.Imports) {
 			filename := strcase.SnakeCase(name)
 			if isTest {
-				return filename + "_test.go"
+				return "func_" + filename + "_test.go"
 			}
-			return filename + ".go"
+			return "func_" + filename + ".go"
 		}
 
 		if isTest {

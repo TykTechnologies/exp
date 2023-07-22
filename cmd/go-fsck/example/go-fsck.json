@@ -11,14 +11,14 @@
       {
         "Kind": "type",
         "File": "example.go",
-        "Name": "File",
-        "Source": "// File represents a filename\ntype File string"
+        "Name": "Body",
+        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
       },
       {
         "Kind": "type",
         "File": "example.go",
-        "Name": "Body",
-        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
+        "Name": "File",
+        "Source": "// File represents a filename\ntype File string"
       }
     ],
     "Consts": [
@@ -51,6 +51,9 @@
         "Kind": "func",
         "File": "example.go",
         "Name": "GlobalFunc",
+        "Returns": [
+          "error"
+        ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\tvar err error\n\treturn err\n}"
       }
