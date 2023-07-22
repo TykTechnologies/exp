@@ -20,6 +20,33 @@ type collector struct {
 }
 
 func (v *collector) Clean() {
+	for _, def := range v.definition {
+		imports := []string{}
+		aliases := map[string]string{}
+
+		alias := func(alias, dest string) bool {
+			val, ok := aliases[alias]
+			if ok {
+				if val != dest {
+					fmt.Printf("WARN: Alias mismatch: %s\n%s (prev) != %s (new)\n", alias, val, dest)
+					return false
+				}
+			}
+
+			aliases[alias] = dest
+			imports = append(imports, dest)
+			return true
+		}
+
+		for _, imported := range def.Imports.All() {
+			if strings.Contains(imported, " ") {
+				line := strings.Split(imported, " ")
+				alias(line[0], strings.Trim(line[1], `"`))
+				continue
+			}
+			alias(path.Base(imported), strings.Trim(imported, `"`))
+		}
+	}
 }
 
 func (v *collector) appendSeen(key string, value *Declaration) {
@@ -43,10 +70,19 @@ func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Defi
 		}
 
 		importLiteral := imported.Path.Value
+		importClean := strings.Trim(importLiteral, `*`)
 		if imported.Name != nil {
 			alias := imported.Name.Name
-			fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
-			importLiteral = alias + " " + importLiteral
+			base := path.Base(importClean)
+			switch alias {
+			case base:
+				fmt.Printf("WARN: removing %s alias for %s)\n", alias, importClean)
+			case "_":
+
+			default:
+				fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
+				importLiteral = alias + " " + importLiteral
+			}
 		}
 
 		def.Imports.Add(filename, importLiteral)

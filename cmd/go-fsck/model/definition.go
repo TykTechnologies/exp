@@ -111,6 +111,14 @@ func (i StringSet) Get(key string) []string {
 	return val
 }
 
+func (i StringSet) All() []string {
+	result := []string{}
+	for _, set := range i {
+		result = append(result, set...)
+	}
+	return result
+}
+
 type DeclarationList []*Declaration
 
 func (p *DeclarationList) Append(in *Declaration) {

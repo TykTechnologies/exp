@@ -4,7 +4,7 @@
     "Doc": null,
     "Imports": {
       "example.go": [
-        "_ \"net/http\""
+        "\"net/http\""
       ]
     },
     "Types": [

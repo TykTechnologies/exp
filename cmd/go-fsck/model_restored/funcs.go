@@ -15,47 +15,6 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-func BuildTags(src []byte) []string {
-
-	re := regexp.MustCompile(`(?m)^\s*//\s*\+build\s+(.*)$`)
-
-	var buildTags []string
-
-	matches := re.FindAllStringSubmatch(string(src), -1)
-	for _, match := range matches {
-		buildTag := strings.TrimSpace(match[1])
-		buildTags = append(buildTags, buildTag)
-	}
-
-	return buildTags
-}
-
-func NewCollector(fset *token.FileSet) *collector {
-	return &collector{
-		fset:       fset,
-		definition: make(map[string]*Definition),
-		seen:       make(map[string]*Declaration),
-	}
-}
-
-func getBuildTags(file *ast.File) []string {
-
-	re := regexp.MustCompile(`^\s*//\s*\+build\s+(.*)$`)
-
-	var buildTags []string
-
-	if file.Doc != nil {
-		for _, comment := range file.Doc.List {
-			match := re.FindStringSubmatch(comment.Text)
-			if len(match) > 1 {
-				buildTags = append(buildTags, match[1])
-			}
-		}
-	}
-
-	return buildTags
-}
-
 // Load definitions from package located in sourcePath.
 func Load(sourcePath string) ([]*Definition, error) {
 	fset := token.NewFileSet()
@@ -127,4 +86,45 @@ func ReadFile(inputPath string) ([]*Definition, error) {
 	}
 
 	return result, nil
+}
+
+func BuildTags(src []byte) []string {
+
+	re := regexp.MustCompile(`(?m)^\s*//\s*\+build\s+(.*)$`)
+
+	var buildTags []string
+
+	matches := re.FindAllStringSubmatch(string(src), -1)
+	for _, match := range matches {
+		buildTag := strings.TrimSpace(match[1])
+		buildTags = append(buildTags, buildTag)
+	}
+
+	return buildTags
+}
+
+func NewCollector(fset *token.FileSet) *collector {
+	return &collector{
+		fset:       fset,
+		definition: make(map[string]*Definition),
+		seen:       make(map[string]*Declaration),
+	}
+}
+
+func getBuildTags(file *ast.File) []string {
+
+	re := regexp.MustCompile(`^\s*//\s*\+build\s+(.*)$`)
+
+	var buildTags []string
+
+	if file.Doc != nil {
+		for _, comment := range file.Doc.List {
+			match := re.FindStringSubmatch(comment.Text)
+			if len(match) > 1 {
+				buildTags = append(buildTags, match[1])
+			}
+		}
+	}
+
+	return buildTags
 }
