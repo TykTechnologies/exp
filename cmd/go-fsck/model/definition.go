@@ -1,17 +1,24 @@
 package model
 
-import "strings"
+import (
+	"sort"
+	"strings"
+
+	"golang.org/x/exp/slices"
+)
 
 type (
 	Definition struct {
 		Package string
 
-		Imports []string
+		Imports Imports
 		Types   DeclarationList
 		Consts  DeclarationList
 		Vars    DeclarationList
 		Funcs   DeclarationList
 	}
+
+	Imports map[string][]string
 )
 
 type (
@@ -56,6 +63,28 @@ func (d *Declaration) Keys() []string {
 		}
 	}
 	return nil
+}
+
+func (i *Imports) Add(key, lit string) {
+	data := *i
+	if data == nil {
+		data = make(Imports)
+	}
+	if set, ok := data[key]; ok {
+		if slices.Contains(set, lit) {
+			return
+		}
+		data[key] = append(set, lit)
+		return
+	}
+	data[key] = []string{lit}
+	*i = data
+}
+
+func (i Imports) Get(key string) ([]string, bool) {
+	val, ok := i[key]
+	sort.Strings(val)
+	return val, ok
 }
 
 type DeclarationList []*Declaration

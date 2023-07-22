@@ -9,10 +9,7 @@ import (
 	"log"
 	"os"
 	"path"
-	"sort"
 	"strings"
-
-	"golang.org/x/exp/slices"
 )
 
 type collector struct {
@@ -43,7 +40,7 @@ func (v *collector) isSeen(key string) bool {
 	return ok && decl != nil
 }
 
-func (v *collector) collectImports(decl *ast.GenDecl, def *Definition) {
+func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {
 	for _, spec := range decl.Specs {
 		imported, ok := spec.(*ast.ImportSpec)
 		if !ok {
@@ -57,15 +54,8 @@ func (v *collector) collectImports(decl *ast.GenDecl, def *Definition) {
 			importLiteral = alias + " " + importLiteral
 		}
 
-		if !strings.Contains(importLiteral, "/internal") {
-			if slices.Contains(def.Imports, importLiteral) {
-				continue
-			}
-			def.Imports = append(def.Imports, importLiteral)
-		}
+		def.Imports.Add(filename, importLiteral)
 	}
-
-	sort.Strings(def.Imports)
 }
 
 func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
@@ -87,7 +77,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	switch node := node.(type) {
 	case *ast.GenDecl:
 		if node.Tok == token.IMPORT {
-			v.collectImports(node, pkg)
+			v.collectImports(filename, node, pkg)
 			return true
 		}
 
