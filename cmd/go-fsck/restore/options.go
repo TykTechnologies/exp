@@ -16,6 +16,7 @@ type options struct {
 
 	removeUnexported bool
 	removeTests      bool
+	splitFunctions   bool
 
 	save        bool
 	packageName string
@@ -24,9 +25,10 @@ type options struct {
 
 func NewOptions() *options {
 	cfg := &options{
-		inputFile:   "go-fsck.json",
-		outputPath:  ".",
-		ignoreFiles: []string{"pkg.go"},
+		inputFile:      "go-fsck.json",
+		outputPath:     ".",
+		ignoreFiles:    []string{"pkg.go"},
+		splitFunctions: true,
 	}
 	flag.StringVarP(&cfg.outputPath, "output-path", "o", cfg.outputPath, "output path")
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")

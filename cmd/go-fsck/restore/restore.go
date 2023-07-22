@@ -2,6 +2,7 @@ package restore
 
 import (
 	"fmt"
+	"go/ast"
 	"os"
 	"sort"
 	"strings"
@@ -113,13 +114,12 @@ func restore(cfg *options) error {
 		// but won't work with a reduced scope, until both $T and $V are
 		// moved into importable packages.
 
-		if filename, ok := strings.CutPrefix(name, "Test"); isTest && ok {
-			cleanName := strings.SplitN(filename, "_", 2)
-			filename = strcase.SnakeCase(cleanName[0]) + ".go"
-			if _, exists := files[filename]; exists {
-				return filename[:len(filename)-3] + "_test.go"
+		if ast.IsExported(name) {
+			filename := strcase.SnakeCase(name)
+			if isTest {
+				return filename + "_test.go"
 			}
-			return "funcs_test.go"
+			return filename + ".go"
 		}
 
 		if isTest {

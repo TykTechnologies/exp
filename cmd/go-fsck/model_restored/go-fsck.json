@@ -39,6 +39,12 @@
     "Types": [
       {
         "Kind": "type",
+        "File": "collector.go",
+        "Name": "collector",
+        "Source": "type collector struct {\n\tfset\t*token.FileSet\n\n\tdefinition\tmap[string]*Definition\n\tseen\t\tmap[string]*Declaration\n}"
+      },
+      {
+        "Kind": "type",
         "File": "definition.go",
         "Name": "Definition",
         "Source": "type (\n\tDefinition struct {\n\t\tPackage\tstring\n\t\tDoc\tStringSet\n\t\tImports\tStringSet\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
@@ -63,12 +69,6 @@
         "File": "definition.go",
         "Name": "DeclarationList",
         "Source": "type DeclarationList []*Declaration"
-      },
-      {
-        "Kind": "type",
-        "File": "collector.go",
-        "Name": "collector",
-        "Source": "type collector struct {\n\tfset\t*token.FileSet\n\n\tdefinition\tmap[string]*Definition\n\tseen\t\tmap[string]*Declaration\n}"
       }
     ],
     "Consts": [
@@ -89,78 +89,6 @@
     ],
     "Vars": null,
     "Funcs": [
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "String",
-        "Receiver": "DeclarationKind",
-        "Signature": "String () string",
-        "Source": "func (d DeclarationKind) String() string {\n\treturn string(d)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "getImports",
-        "Receiver": "*Definition",
-        "Signature": "getImports (decl *Declaration) []string",
-        "Source": "func (d *Definition) getImports(decl *Declaration) []string {\n\treturn d.Imports.Get(decl.File)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Order",
-        "Receiver": "*Definition",
-        "Signature": "Order () []*Declaration",
-        "Source": "func (d *Definition) Order() []*Declaration {\n\tcount := len(d.Types) + len(d.Funcs) + len(d.Vars) + len(d.Consts)\n\tresult := make([]*Declaration, 0, count)\n\n\tresult = append(result, d.Types...)\n\tresult = append(result, d.Funcs...)\n\tresult = append(result, d.Vars...)\n\tresult = append(result, d.Consts...)\n\treturn result\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Fill",
-        "Receiver": "*Definition",
-        "Signature": "Fill ()",
-        "Source": "func (d *Definition) Fill() {\n\tfor _, decl := range d.Order() {\n\t\tdecl.Imports = d.getImports(decl)\n\t}\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Keys",
-        "Receiver": "*Declaration",
-        "Signature": "Keys () []string",
-        "Source": "func (d *Declaration) Keys() []string {\n\ttrimPath := \"*.\"\n\tif d.Name != \"\" {\n\t\treturn []string{\n\t\t\tstrings.Trim(d.Receiver+\".\"+d.Name, trimPath),\n\t\t}\n\t}\n\tif len(d.Names) != 0 {\n\t\tresult := make([]string, len(d.Names))\n\t\tfor k, v := range d.Names {\n\t\t\tresult[k] = strings.Trim(d.Receiver+\".\"+v, trimPath)\n\t\t}\n\t}\n\treturn nil\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Add",
-        "Receiver": "*StringSet",
-        "Signature": "Add (key,lit string)",
-        "Source": "func (i *StringSet) Add(key, lit string) {\n\tdata := *i\n\tif data == nil {\n\t\tdata = make(StringSet)\n\t}\n\tif set, ok := data[key]; ok {\n\t\tif slices.Contains(set, lit) {\n\t\t\treturn\n\t\t}\n\t\tdata[key] = append(set, lit)\n\t\treturn\n\t}\n\tdata[key] = []string{lit}\n\t*i = data\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Get",
-        "Receiver": "StringSet",
-        "Signature": "Get (key string) []string",
-        "Source": "func (i StringSet) Get(key string) []string {\n\tval, _ := i[key]\n\tif val != nil {\n\t\tsort.Strings(val)\n\t}\n\treturn val\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "All",
-        "Receiver": "StringSet",
-        "Signature": "All () []string",
-        "Source": "func (i StringSet) All() []string {\n\tresult := []string{}\n\tfor _, set := range i {\n\t\tresult = append(result, set...)\n\t}\n\treturn result\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "Name": "Append",
-        "Receiver": "*DeclarationList",
-        "Signature": "Append (in *Declaration)",
-        "Source": "func (p *DeclarationList) Append(in *Declaration) {\n\t*p = append(*p, in)\n}"
-      },
       {
         "Kind": "func",
         "File": "load.go",
@@ -283,6 +211,78 @@
         "Name": "getBuildTags",
         "Signature": "getBuildTags (file *ast.File) []string",
         "Source": "func getBuildTags(file *ast.File) []string {\n\n\tre := regexp.MustCompile(`^\\s*//\\s*\\+build\\s+(.*)$`)\n\n\tvar buildTags []string\n\n\tif file.Doc != nil {\n\t\tfor _, comment := range file.Doc.List {\n\t\t\tmatch := re.FindStringSubmatch(comment.Text)\n\t\t\tif len(match) \u003e 1 {\n\t\t\t\tbuildTags = append(buildTags, match[1])\n\t\t\t}\n\t\t}\n\t}\n\n\treturn buildTags\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "String",
+        "Receiver": "DeclarationKind",
+        "Signature": "String () string",
+        "Source": "func (d DeclarationKind) String() string {\n\treturn string(d)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "getImports",
+        "Receiver": "*Definition",
+        "Signature": "getImports (decl *Declaration) []string",
+        "Source": "func (d *Definition) getImports(decl *Declaration) []string {\n\treturn d.Imports.Get(decl.File)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Order",
+        "Receiver": "*Definition",
+        "Signature": "Order () []*Declaration",
+        "Source": "func (d *Definition) Order() []*Declaration {\n\tcount := len(d.Types) + len(d.Funcs) + len(d.Vars) + len(d.Consts)\n\tresult := make([]*Declaration, 0, count)\n\n\tresult = append(result, d.Types...)\n\tresult = append(result, d.Funcs...)\n\tresult = append(result, d.Vars...)\n\tresult = append(result, d.Consts...)\n\treturn result\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Fill",
+        "Receiver": "*Definition",
+        "Signature": "Fill ()",
+        "Source": "func (d *Definition) Fill() {\n\tfor _, decl := range d.Order() {\n\t\tdecl.Imports = d.getImports(decl)\n\t}\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Keys",
+        "Receiver": "*Declaration",
+        "Signature": "Keys () []string",
+        "Source": "func (d *Declaration) Keys() []string {\n\ttrimPath := \"*.\"\n\tif d.Name != \"\" {\n\t\treturn []string{\n\t\t\tstrings.Trim(d.Receiver+\".\"+d.Name, trimPath),\n\t\t}\n\t}\n\tif len(d.Names) != 0 {\n\t\tresult := make([]string, len(d.Names))\n\t\tfor k, v := range d.Names {\n\t\t\tresult[k] = strings.Trim(d.Receiver+\".\"+v, trimPath)\n\t\t}\n\t}\n\treturn nil\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Add",
+        "Receiver": "*StringSet",
+        "Signature": "Add (key,lit string)",
+        "Source": "func (i *StringSet) Add(key, lit string) {\n\tdata := *i\n\tif data == nil {\n\t\tdata = make(StringSet)\n\t}\n\tif set, ok := data[key]; ok {\n\t\tif slices.Contains(set, lit) {\n\t\t\treturn\n\t\t}\n\t\tdata[key] = append(set, lit)\n\t\treturn\n\t}\n\tdata[key] = []string{lit}\n\t*i = data\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Get",
+        "Receiver": "StringSet",
+        "Signature": "Get (key string) []string",
+        "Source": "func (i StringSet) Get(key string) []string {\n\tval, _ := i[key]\n\tif val != nil {\n\t\tsort.Strings(val)\n\t}\n\treturn val\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "All",
+        "Receiver": "StringSet",
+        "Signature": "All () []string",
+        "Source": "func (i StringSet) All() []string {\n\tresult := []string{}\n\tfor _, set := range i {\n\t\tresult = append(result, set...)\n\t}\n\treturn result\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Append",
+        "Receiver": "*DeclarationList",
+        "Signature": "Append (in *Declaration)",
+        "Source": "func (p *DeclarationList) Append(in *Declaration) {\n\t*p = append(*p, in)\n}"
       }
     ]
   },
