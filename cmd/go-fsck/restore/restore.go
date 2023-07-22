@@ -129,12 +129,9 @@ func restore(cfg *options) error {
 		return "funcs.go"
 	}
 
-	var imports []string
 	var found bool
-
 	for _, def := range defs {
 		if cfg.packageName == def.Package {
-			imports = def.Imports
 			found = true
 			break
 		}
@@ -180,9 +177,7 @@ func restore(cfg *options) error {
 			cut := ".go"
 			s = s[0 : len(s)-len(cut)]
 			cut = "_test"
-			if strings.HasSuffix(s, cut) {
-				return s[:len(s)-len(cut)]
-			}
+			s, _ = cutSuffix(s, cut)
 			return s
 		}
 		p1, p2 := filenames[i], filenames[j]
@@ -194,7 +189,7 @@ func restore(cfg *options) error {
 	})
 
 	if cfg.save {
-		return saveLayout(cfg, files, filenames, imports)
+		return saveLayout(cfg, files, filenames)
 	}
 	return printLayout(cfg, files, filenames)
 }

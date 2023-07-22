@@ -17,9 +17,9 @@ type (
 		Vars    DeclarationList
 		Funcs   DeclarationList
 	}
-
-	Imports map[string][]string
 )
+
+type Imports map[string][]string
 
 type (
 	DeclarationKind string
@@ -27,6 +27,7 @@ type (
 	Declaration struct {
 		Kind      DeclarationKind
 		File      string
+		Imports   []string `json:",omitempty"`
 		Name      string   `json:",omitempty"`
 		Names     []string `json:",omitempty"`
 		Receiver  string   `json:",omitempty"`
@@ -47,6 +48,21 @@ const (
 
 func (d DeclarationKind) String() string {
 	return string(d)
+}
+
+func (d *Definition) getImports(decl *Declaration) []string {
+	return d.Imports.Get(decl.File)
+}
+
+func (d *Definition) Fill() {
+	all := append([]*Declaration{}, d.Types...)
+	all = append(all, d.Funcs...)
+	all = append(all, d.Vars...)
+	all = append(all, d.Consts...)
+
+	for _, decl := range all {
+		decl.Imports = d.getImports(decl)
+	}
 }
 
 func (d *Declaration) Keys() []string {
@@ -81,10 +97,12 @@ func (i *Imports) Add(key, lit string) {
 	*i = data
 }
 
-func (i Imports) Get(key string) ([]string, bool) {
-	val, ok := i[key]
-	sort.Strings(val)
-	return val, ok
+func (i Imports) Get(key string) []string {
+	val, _ := i[key]
+	if val != nil {
+		sort.Strings(val)
+	}
+	return val
 }
 
 type DeclarationList []*Declaration

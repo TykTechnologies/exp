@@ -10,6 +10,7 @@ type (
 	Declaration struct {
 		Kind      DeclarationKind
 		File      string
+		Imports   []string `json:",omitempty"`
 		Name      string   `json:",omitempty"`
 		Names     []string `json:",omitempty"`
 		Receiver  string   `json:",omitempty"`

@@ -5,10 +5,12 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/exp/maps"
+
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
 
-func saveLayout(cfg *options, files map[string][]*model.Declaration, filenames []string, imports []string) error {
+func saveLayout(cfg *options, files map[string][]*model.Declaration, filenames []string) error {
 	for _, filename := range filenames {
 		if cfg.removeTests && strings.HasSuffix(filename, "_test.go") {
 			continue
@@ -17,12 +19,17 @@ func saveLayout(cfg *options, files map[string][]*model.Declaration, filenames [
 
 		// Collect sources
 		lines := []string{"package " + cfg.packageName}
-		if len(imports) != 0 {
-			lines = append(lines, "", "import (")
-			for _, i := range imports {
-				lines = append(lines, strings.TrimSpace(i))
+
+		imports := map[string]bool{}
+		for _, decl := range decls {
+			for _, v := range decl.Imports {
+				imports[v] = true
 			}
-			lines = append(lines, ")")
+		}
+		if len(imports) > 0 {
+			lines = append(lines, "", "import (")
+			lines = append(lines, maps.Keys(imports)...)
+			lines = append(lines, "", ")")
 		}
 
 		for _, decl := range decls {

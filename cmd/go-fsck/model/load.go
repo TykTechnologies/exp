@@ -62,5 +62,9 @@ func ReadFile(inputPath string) ([]*Definition, error) {
 		return nil, err
 	}
 
+	for _, decl := range result {
+		decl.Fill()
+	}
+
 	return result, nil
 }

@@ -1,22 +1,33 @@
 [
   {
     "Package": "model",
-    "Imports": [
-      "\"bytes\"",
-      "\"encoding/json\"",
-      "\"fmt\"",
-      "\"go/ast\"",
-      "\"go/parser\"",
-      "\"go/printer\"",
-      "\"go/token\"",
-      "\"golang.org/x/exp/slices\"",
-      "\"golang.org/x/tools/go/ast/inspector\"",
-      "\"log\"",
-      "\"os\"",
-      "\"path\"",
-      "\"sort\"",
-      "\"strings\""
-    ],
+    "Imports": {
+      "collector.go": [
+        "\"bytes\"",
+        "\"fmt\"",
+        "\"go/ast\"",
+        "\"go/printer\"",
+        "\"go/token\"",
+        "\"log\"",
+        "\"os\"",
+        "\"path\"",
+        "\"strings\""
+      ],
+      "definition.go": [
+        "\"sort\"",
+        "\"strings\"",
+        "\"golang.org/x/exp/slices\""
+      ],
+      "load.go": [
+        "\"encoding/json\"",
+        "\"go/ast\"",
+        "\"go/parser\"",
+        "\"go/token\"",
+        "\"os\"",
+        "\"sort\"",
+        "\"golang.org/x/tools/go/ast/inspector\""
+      ]
+    },
     "Types": [
       {
         "Kind": "type",
@@ -28,7 +39,13 @@
         "Kind": "type",
         "File": "definition.go",
         "Name": "Definition",
-        "Source": "type (\n\tDefinition struct {\n\t\tPackage\tstring\n\n\t\tImports\t[]string\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
+        "Source": "type (\n\tDefinition struct {\n\t\tPackage\tstring\n\n\t\tImports\tImports\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
+      },
+      {
+        "Kind": "type",
+        "File": "definition.go",
+        "Name": "Imports",
+        "Source": "type Imports map[string][]string"
       },
       {
         "Kind": "type",
@@ -37,7 +54,7 @@
           "DeclarationKind",
           "Declaration"
         ],
-        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\t\tDeclarationKind\n\t\tFile\t\tstring\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\t\tSignature\tstring\t\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
+        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\t\tDeclarationKind\n\t\tFile\t\tstring\n\t\tImports\t\t[]string\t`json:\",omitempty\"`\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\t\tSignature\tstring\t\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
       },
       {
         "Kind": "type",
@@ -92,8 +109,8 @@
         "File": "collector.go",
         "Name": "collectImports",
         "Receiver": "*collector",
-        "Signature": "collectImports (decl *ast.GenDecl, def *Definition)",
-        "Source": "func (v *collector) collectImports(decl *ast.GenDecl, def *Definition) {\n\tfor _, spec := range decl.Specs {\n\t\timported, ok := spec.(*ast.ImportSpec)\n\t\tif !ok {\n\t\t\tcontinue\n\t\t}\n\n\t\timportLiteral := imported.Path.Value\n\t\tif imported.Name != nil {\n\t\t\talias := imported.Name.Name\n\t\t\tfmt.Printf(\"WARN: package %s is aliased to %s\\n\", importLiteral, alias)\n\t\t\timportLiteral = alias + \" \" + importLiteral\n\t\t}\n\n\t\tif !strings.Contains(importLiteral, \"/internal\") {\n\t\t\tif slices.Contains(def.Imports, importLiteral) {\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\tdef.Imports = append(def.Imports, importLiteral)\n\t\t}\n\t}\n\n\tsort.Strings(def.Imports)\n}"
+        "Signature": "collectImports (filename string, decl *ast.GenDecl, def *Definition)",
+        "Source": "func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {\n\tfor _, spec := range decl.Specs {\n\t\timported, ok := spec.(*ast.ImportSpec)\n\t\tif !ok {\n\t\t\tcontinue\n\t\t}\n\n\t\timportLiteral := imported.Path.Value\n\t\tif imported.Name != nil {\n\t\t\talias := imported.Name.Name\n\t\t\tfmt.Printf(\"WARN: package %s is aliased to %s\\n\", importLiteral, alias)\n\t\t\timportLiteral = alias + \" \" + importLiteral\n\t\t}\n\n\t\tdef.Imports.Add(filename, importLiteral)\n\t}\n}"
       },
       {
         "Kind": "func",
@@ -101,7 +118,7 @@
         "Name": "Visit",
         "Receiver": "*collector",
         "Signature": "Visit (node ast.Node, push bool, stack []ast.Node) bool",
-        "Source": "func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {\n\tfile, ok := (stack[0]).(*ast.File)\n\tif !ok {\n\t\treturn true\n\t}\n\tfilename := path.Base(v.fset.Position(file.Pos()).Filename)\n\n\tpackageName := file.Name.Name\n\tpkg, ok := v.definition[packageName]\n\tif !ok {\n\t\tpkg = \u0026Definition{\n\t\t\tPackage: packageName,\n\t\t}\n\t\tv.definition[packageName] = pkg\n\t}\n\n\tswitch node := node.(type) {\n\tcase *ast.GenDecl:\n\t\tif node.Tok == token.IMPORT {\n\t\t\tv.collectImports(node, pkg)\n\t\t\treturn true\n\t\t}\n\n\t\tfor _, k := range stack {\n\t\t\t_, ok := k.(*ast.FuncDecl)\n\t\t\tif ok {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tnames := v.Names(node)\n\t\tfor _, name := range names {\n\t\t\tif v.isSeen(packageName + \".\" + name) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tdef := \u0026Declaration{\n\t\t\tNames:\tnames,\n\t\t\tFile:\tfilename,\n\t\t\tSource:\tv.getNodeSource(node),\n\t\t}\n\n\t\tfor _, name := range names {\n\t\t\tv.appendSeen(packageName+\".\"+name, def)\n\t\t}\n\n\t\tswitch node.Tok {\n\t\tcase token.CONST:\n\t\t\tdef.Kind = ConstKind\n\t\t\tpkg.Consts.Append(def)\n\t\tcase token.VAR:\n\t\t\tdef.Kind = VarKind\n\t\t\tpkg.Vars.Append(def)\n\t\tcase token.TYPE:\n\t\t\tdef.Kind = TypeKind\n\t\t\tpkg.Types.Append(def)\n\t\t}\n\n\tcase *ast.FuncDecl:\n\t\tdef := v.collectFuncDeclaration(node, filename)\n\t\tif def != nil {\n\t\t\tkey := strings.Trim(packageName+\".\"+def.Receiver+\".\"+def.Name, \"*.\")\n\t\t\tif v.isSeen(key) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\tdefer v.appendSeen(key, def)\n\n\t\t\tpkg.Funcs.Append(def)\n\t\t}\n\n\t}\n\n\treturn true\n}"
+        "Source": "func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {\n\tfile, ok := (stack[0]).(*ast.File)\n\tif !ok {\n\t\treturn true\n\t}\n\tfilename := path.Base(v.fset.Position(file.Pos()).Filename)\n\n\tpackageName := file.Name.Name\n\tpkg, ok := v.definition[packageName]\n\tif !ok {\n\t\tpkg = \u0026Definition{\n\t\t\tPackage: packageName,\n\t\t}\n\t\tv.definition[packageName] = pkg\n\t}\n\n\tswitch node := node.(type) {\n\tcase *ast.GenDecl:\n\t\tif node.Tok == token.IMPORT {\n\t\t\tv.collectImports(filename, node, pkg)\n\t\t\treturn true\n\t\t}\n\n\t\tfor _, k := range stack {\n\t\t\t_, ok := k.(*ast.FuncDecl)\n\t\t\tif ok {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tnames := v.Names(node)\n\t\tfor _, name := range names {\n\t\t\tif v.isSeen(packageName + \".\" + name) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tdef := \u0026Declaration{\n\t\t\tNames:\tnames,\n\t\t\tFile:\tfilename,\n\t\t\tSource:\tv.getNodeSource(node),\n\t\t}\n\n\t\tfor _, name := range names {\n\t\t\tv.appendSeen(packageName+\".\"+name, def)\n\t\t}\n\n\t\tswitch node.Tok {\n\t\tcase token.CONST:\n\t\t\tdef.Kind = ConstKind\n\t\t\tpkg.Consts.Append(def)\n\t\tcase token.VAR:\n\t\t\tdef.Kind = VarKind\n\t\t\tpkg.Vars.Append(def)\n\t\tcase token.TYPE:\n\t\t\tdef.Kind = TypeKind\n\t\t\tpkg.Types.Append(def)\n\t\t}\n\n\tcase *ast.FuncDecl:\n\t\tdef := v.collectFuncDeclaration(node, filename)\n\t\tif def != nil {\n\t\t\tkey := strings.Trim(packageName+\".\"+def.Receiver+\".\"+def.Name, \"*.\")\n\t\t\tif v.isSeen(key) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\tdefer v.appendSeen(key, def)\n\n\t\t\tpkg.Funcs.Append(def)\n\t\t}\n\n\t}\n\n\treturn true\n}"
       },
       {
         "Kind": "func",
@@ -162,10 +179,42 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "Name": "getImports",
+        "Receiver": "*Definition",
+        "Signature": "getImports (decl *Declaration) []string",
+        "Source": "func (d *Definition) getImports(decl *Declaration) []string {\n\treturn d.Imports.Get(decl.File)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Fill",
+        "Receiver": "*Definition",
+        "Signature": "Fill ()",
+        "Source": "func (d *Definition) Fill() {\n\tall := append([]*Declaration{}, d.Types...)\n\tall = append(all, d.Funcs...)\n\tall = append(all, d.Vars...)\n\tall = append(all, d.Consts...)\n\n\tfor _, decl := range all {\n\t\tdecl.Imports = d.getImports(decl)\n\t}\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
         "Name": "Keys",
         "Receiver": "*Declaration",
         "Signature": "Keys () []string",
         "Source": "func (d *Declaration) Keys() []string {\n\ttrimPath := \"*.\"\n\tif d.Name != \"\" {\n\t\treturn []string{\n\t\t\tstrings.Trim(d.Receiver+\".\"+d.Name, trimPath),\n\t\t}\n\t}\n\tif len(d.Names) != 0 {\n\t\tresult := make([]string, len(d.Names))\n\t\tfor k, v := range d.Names {\n\t\t\tresult[k] = strings.Trim(d.Receiver+\".\"+v, trimPath)\n\t\t}\n\t}\n\treturn nil\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Add",
+        "Receiver": "*Imports",
+        "Signature": "Add (key,lit string)",
+        "Source": "func (i *Imports) Add(key, lit string) {\n\tdata := *i\n\tif data == nil {\n\t\tdata = make(Imports)\n\t}\n\tif set, ok := data[key]; ok {\n\t\tif slices.Contains(set, lit) {\n\t\t\treturn\n\t\t}\n\t\tdata[key] = append(set, lit)\n\t\treturn\n\t}\n\tdata[key] = []string{lit}\n\t*i = data\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "Get",
+        "Receiver": "Imports",
+        "Signature": "Get (key string) []string",
+        "Source": "func (i Imports) Get(key string) []string {\n\tval, _ := i[key]\n\tif val != nil {\n\t\tsort.Strings(val)\n\t}\n\treturn val\n}"
       },
       {
         "Kind": "func",
@@ -187,18 +236,20 @@
         "File": "load.go",
         "Name": "ReadFile",
         "Signature": "ReadFile (inputPath string) ([]*Definition, error)",
-        "Source": "// ReadFile loads the definitions from a json file\nfunc ReadFile(inputPath string) ([]*Definition, error) {\n\tdata, err := os.ReadFile(inputPath)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tvar result []*Definition\n\tif err := json.Unmarshal(data, \u0026result); err != nil {\n\t\treturn nil, err\n\t}\n\n\treturn result, nil\n}"
+        "Source": "// ReadFile loads the definitions from a json file\nfunc ReadFile(inputPath string) ([]*Definition, error) {\n\tdata, err := os.ReadFile(inputPath)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tvar result []*Definition\n\tif err := json.Unmarshal(data, \u0026result); err != nil {\n\t\treturn nil, err\n\t}\n\n\tfor _, decl := range result {\n\t\tdecl.Fill()\n\t}\n\n\treturn result, nil\n}"
       }
     ]
   },
   {
     "Package": "model_test",
-    "Imports": [
-      "\"github.com/TykTechnologies/exp/cmd/go-fsck/model\"",
-      "\"github.com/kortschak/utter\"",
-      "\"github.com/stretchr/testify/assert\"",
-      "\"testing\""
-    ],
+    "Imports": {
+      "load_test.go": [
+        "\"testing\"",
+        "\"github.com/kortschak/utter\"",
+        "\"github.com/stretchr/testify/assert\"",
+        "\"github.com/TykTechnologies/exp/cmd/go-fsck/model\""
+      ]
+    },
     "Types": null,
     "Consts": null,
     "Vars": null,

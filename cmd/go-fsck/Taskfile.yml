@@ -4,7 +4,7 @@ version: "3"
 tasks:
   default:
     desc: "go-fsck: Build, test, install"
-    deps: [ fix ]
+    deps: [ clean, fix ]
     cmds:
       - go install .
       - go-fsck extract -i example/ -o example/go-fsck.json --pretty-json
@@ -35,6 +35,6 @@ tasks:
       - go mod tidy
 
   clean:
-    desc: "{{ .cli}}: Clean build cache"
+    desc: "{{ .cli}}: Clean model_restored"
     cmds:
-      - go clean -cache
+      - rm -rf model_restored && mkdir model_restored
