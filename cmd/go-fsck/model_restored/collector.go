@@ -310,6 +310,15 @@ func (p *collector) symbolType(expr ast.Expr) string {
 		return "*" + p.symbolType(t.X)
 	case *ast.ArrayType:
 		return "[]" + p.symbolType(t.Elt)
+	case *ast.Ellipsis:
+		return "..." + p.symbolType(t.Elt)
+	case *ast.SelectorExpr:
+		return p.symbolType(t.X) + "." + p.symbolType(t.Sel)
+	case *ast.MapType:
+		k, v := p.symbolType(t.Key), p.symbolType(t.Value)
+		return fmt.Sprintf("map[%s]%s", k, v)
+	case *ast.InterfaceType:
+		return ""
 	}
-	return ""
+	return fmt.Sprintf("%T", expr)
 }

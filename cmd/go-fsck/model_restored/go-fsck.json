@@ -122,7 +122,7 @@
         "File": "collector.go",
         "Name": "NewCollector",
         "Arguments": [
-          "*"
+          "*token.FileSet"
         ],
         "Returns": [
           "*collector"
@@ -161,10 +161,10 @@
         "Name": "Append",
         "Receiver": "*DeclarationList",
         "Arguments": [
-          "*Declaration"
+          "...*Declaration"
         ],
-        "Signature": "Append (in *Declaration)",
-        "Source": "func (p *DeclarationList) Append(in *Declaration) {\n\t*p = append(*p, in)\n}"
+        "Signature": "Append (in ...*Declaration)",
+        "Source": "func (p *DeclarationList) Append(in ...*Declaration) {\n\t*p = append(*p, in...)\n}"
       },
       {
         "Kind": "func",
@@ -226,7 +226,7 @@
         "Name": "Names",
         "Receiver": "*collector",
         "Arguments": [
-          "*"
+          "*ast.GenDecl"
         ],
         "Returns": [
           "[]string"
@@ -240,9 +240,9 @@
         "Name": "Visit",
         "Receiver": "*collector",
         "Arguments": [
-          "",
+          "ast.Node",
           "bool",
-          "[]"
+          "[]ast.Node"
         ],
         "Returns": [
           "bool"
@@ -260,6 +260,20 @@
         ],
         "Signature": "String () string",
         "Source": "func (d DeclarationKind) String() string {\n\treturn string(d)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "Name": "FindKind",
+        "Receiver": "DeclarationList",
+        "Arguments": [
+          "DeclarationKind"
+        ],
+        "Returns": [
+          "[]*Declaration"
+        ],
+        "Signature": "FindKind (kind DeclarationKind) []*Declaration",
+        "Source": "func (p DeclarationList) FindKind(kind DeclarationKind) (result []*Declaration) {\n\tfor _, decl := range p {\n\t\tif decl.Kind == kind {\n\t\t\tresult = append(result, decl)\n\t\t}\n\t}\n\treturn\n}"
       },
       {
         "Kind": "func",
@@ -305,7 +319,7 @@
         "File": "collector.go",
         "Name": "getBuildTags",
         "Arguments": [
-          "*"
+          "*ast.File"
         ],
         "Returns": [
           "[]string"
@@ -345,7 +359,7 @@
         "Name": "collectFuncDeclaration",
         "Receiver": "*collector",
         "Arguments": [
-          "*",
+          "*ast.FuncDecl",
           "string"
         ],
         "Returns": [
@@ -361,7 +375,7 @@
         "Receiver": "*collector",
         "Arguments": [
           "string",
-          "*",
+          "*ast.GenDecl",
           "*Definition"
         ],
         "Signature": "collectImports (filename string, decl *ast.GenDecl, def *Definition)",
@@ -374,7 +388,7 @@
         "Receiver": "*collector",
         "Arguments": [
           "string",
-          ""
+          "..."
         ],
         "Signature": "error (format string, args ...interface{})",
         "Source": "func (v *collector) error(format string, args ...interface{}) {\n\tfmt.Fprintf(os.Stderr, format+\"\\n\", args...)\n}"
@@ -385,7 +399,7 @@
         "Name": "functionBindings",
         "Receiver": "*collector",
         "Arguments": [
-          "*"
+          "*ast.FuncDecl"
         ],
         "Returns": [
           "[]string"
@@ -399,7 +413,7 @@
         "Name": "functionDef",
         "Receiver": "*collector",
         "Arguments": [
-          "*"
+          "*ast.FuncDecl"
         ],
         "Returns": [
           "string"
@@ -427,7 +441,7 @@
         "Name": "identNames",
         "Receiver": "*collector",
         "Arguments": [
-          "[]*"
+          "[]*ast.Ident"
         ],
         "Returns": [
           "[]string"
@@ -455,13 +469,13 @@
         "Name": "symbolType",
         "Receiver": "*collector",
         "Arguments": [
-          ""
+          "ast.Expr"
         ],
         "Returns": [
           "string"
         ],
         "Signature": "symbolType (expr ast.Expr) string",
-        "Source": "func (p *collector) symbolType(expr ast.Expr) string {\n\tswitch t := expr.(type) {\n\tcase *ast.Ident:\n\t\treturn t.Name\n\tcase *ast.StarExpr:\n\t\treturn \"*\" + p.symbolType(t.X)\n\tcase *ast.ArrayType:\n\t\treturn \"[]\" + p.symbolType(t.Elt)\n\t}\n\treturn \"\"\n}"
+        "Source": "func (p *collector) symbolType(expr ast.Expr) string {\n\tswitch t := expr.(type) {\n\tcase *ast.Ident:\n\t\treturn t.Name\n\tcase *ast.StarExpr:\n\t\treturn \"*\" + p.symbolType(t.X)\n\tcase *ast.ArrayType:\n\t\treturn \"[]\" + p.symbolType(t.Elt)\n\tcase *ast.Ellipsis:\n\t\treturn \"...\" + p.symbolType(t.Elt)\n\tcase *ast.SelectorExpr:\n\t\treturn p.symbolType(t.X) + \".\" + p.symbolType(t.Sel)\n\tcase *ast.MapType:\n\t\tk, v := p.symbolType(t.Key), p.symbolType(t.Value)\n\t\treturn fmt.Sprintf(\"map[%s]%s\", k, v)\n\tcase *ast.InterfaceType:\n\t\treturn \"\"\n\t}\n\treturn fmt.Sprintf(\"%T\", expr)\n}"
       }
     ]
   },
@@ -485,7 +499,7 @@
         "File": "load_test.go",
         "Name": "TestLoad",
         "Arguments": [
-          "*"
+          "*testing.T"
         ],
         "Signature": "TestLoad (t *testing.T)",
         "Source": "func TestLoad(t *testing.T) {\n\tutter.Config.IgnoreUnexported = true\n\tutter.Config.OmitZero = true\n\tutter.Config.ElideType = true\n\n\tdefs, err := model.Load(\".\")\n\tassert.NoError(t, err)\n\tassert.NotNil(t, defs)\n\n}"

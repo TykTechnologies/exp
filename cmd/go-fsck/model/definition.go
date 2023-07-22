@@ -133,8 +133,17 @@ func (i StringSet) All() []string {
 
 type DeclarationList []*Declaration
 
-func (p *DeclarationList) Append(in *Declaration) {
-	*p = append(*p, in)
+func (p *DeclarationList) Append(in ...*Declaration) {
+	*p = append(*p, in...)
+}
+
+func (p DeclarationList) FindKind(kind DeclarationKind) (result []*Declaration) {
+	for _, decl := range p {
+		if decl.Kind == kind {
+			result = append(result, decl)
+		}
+	}
+	return
 }
 
 func (p *DeclarationList) Sort() {

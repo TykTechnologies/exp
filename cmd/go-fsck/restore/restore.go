@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/stoewer/go-strcase"
 	"golang.org/x/exp/maps"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
@@ -21,12 +20,21 @@ func restore(cfg *options) error {
 
 	files := make(map[string]model.DeclarationList, 0)
 	add := func(filename string, decls ...*model.Declaration) {
-		fileTest := filename[:len(filename)-3] + "_test.go"
+		filename, explicit := strings.CutPrefix(filename, "!")
+
+		filename, _ = cutSuffix(filename, "_test.go")
+		filename, _ = cutSuffix(filename, ".go")
+		fileTest := filename + "_test.go"
+		filename = filename + ".go"
 
 		for _, t := range decls {
 			dest := filename
-			if isTest := strings.HasSuffix(t.File, "_test.go"); isTest {
-				dest = fileTest
+			switch {
+			case explicit:
+			default:
+				if isTest := strings.HasSuffix(t.File, "_test.go"); isTest {
+					dest = fileTest
+				}
 			}
 
 			s, ok := files[dest]
@@ -39,7 +47,6 @@ func restore(cfg *options) error {
 	}
 	classifyFunc := func(t *model.Declaration) string {
 		name := t.Name
-		isTest := strings.HasSuffix(t.File, "_test.go")
 
 		findFile := func(find string) (string, bool) {
 			for filename, f := range files {
@@ -69,30 +76,53 @@ func restore(cfg *options) error {
 				fmt.Println("Couldn't find receiver for %q", receiver)
 				os.Exit(1)
 			}
-
-			if isTest {
-				if strings.HasSuffix(filename, "_test.go") {
-					return filename
-				}
-				return filename[:len(filename)-3] + "_test.go"
-			}
-
-			if filename, changed := cutSuffix(filename, "_test.go"); changed {
-				return filename + ".go"
-			}
 			return filename
 		}
 
-		// Constructor naming conventions:
-		//
-		// Match New$T functions into $T scope.
+		// Functions can return (T, error), T, error...
+		// bind those to the type. This catches constructors
+		// based on the return type.
 
-		if filename, ok := strings.CutPrefix(name, "New"); ok {
-			filename = strcase.SnakeCase(filename)
-			if isTest {
-				return filename + "_test.go"
+		firstArg := map[string]string{
+			"http.ResponseWriter": "http_handlers.go",
+			"http.Handler":        "http_handlers.go",
+			"http.":               "http_util.go",
+			"jwt.":                "jwt.go",
+			"tls.":                "tls.go",
+			"user.":               "user.go",
+			"testing.":            "testing.go",
+		}
+
+		if len(t.Arguments) > 0 {
+			first := strings.TrimLeft(t.Arguments[0], `*`)
+			for arg, filename := range firstArg {
+				if strings.HasPrefix(first, arg) {
+					return filename
+				}
 			}
-			return filename + ".go"
+
+			// Group by first argument type
+			if !strings.Contains(first, ".") {
+				if filename, ok := findFile(strings.TrimLeft(first, `*`)); ok {
+					return filename
+				}
+			}
+		}
+
+		if len(t.Returns) > 0 {
+			first := strings.TrimLeft(t.Returns[0], `*`)
+			for arg, filename := range firstArg {
+				if strings.HasPrefix(first, arg) {
+					return filename
+				}
+			}
+
+			// Group by first return type
+			if !strings.Contains(first, ".") {
+				if filename, ok := findFile(strings.TrimLeft(first, `*`)); ok {
+					return filename
+				}
+			}
 		}
 
 		// Test naming conventions:
@@ -112,50 +142,24 @@ func restore(cfg *options) error {
 		// moved into importable packages.
 
 		if ast.IsExported(name) {
-			filename := strcase.SnakeCase(name)
-			if isTest {
-				return filename + "_test.go"
-			}
-			return filename + ".go"
-		}
-
-		// The problem with unexported functions is that their imports,
-		// when merged, would conflict with another function. For example,
-		// when using text/template or html/template, math/rand, crypto/rand,
-		// or an internal package matching stdlib (internal/crypto).
-
-		isConflicting := func(names []string) bool {
-			conflicting := map[string]bool{
-				"html/template": true,
-				"text/template": true,
-				"math/rand":     true,
-				"crypto/rand":   true,
-			}
-			for _, name := range names {
-				if ok, _ := conflicting[name]; ok {
-					return ok
-				}
-			}
-			return false
+			filename := toFilename(name)
+			return filename
 		}
 
 		if len(t.Imports) > 0 && isConflicting(t.Imports) {
-			filename := strcase.SnakeCase(name)
-			if isTest {
-				return "func_" + filename + "_test.go"
-			}
-			return "func_" + filename + ".go"
+			fmt.Println("WARN: possible conflict over", name)
+			return toFilename(name)
 		}
 
-		if isTest {
-			return "funcs_test.go"
-		}
+		fmt.Println(t.Signature)
 
 		return "funcs.go"
 	}
 
 	var found bool
-	for _, def := range defs {
+	var def *model.Definition
+
+	for _, def = range defs {
 		if cfg.packageName == def.Package {
 			found = true
 			break
@@ -166,34 +170,43 @@ func restore(cfg *options) error {
 		return fmt.Errorf("no such package: %s", cfg.packageName)
 	}
 
-	for _, def := range defs {
-		if cfg.packageName != def.Package {
-			continue
-		}
+	for _, t := range def.Types {
+		name := findShortest(t.Names, t.Name)
+		add(toFilename(name), t)
+	}
 
-		for _, t := range def.Types {
-			name := findShortest(t.Names, t.Name)
-			filename := strcase.SnakeCase(name)
-			if strings.HasSuffix(t.File, "_test.go") {
-				filename = filename + "_test"
+	for _, t := range def.Funcs {
+		filename := classifyFunc(t)
+		add(filename, t)
+	}
+
+	for _, t := range def.Vars {
+		add("vars.go", t)
+	}
+
+	for _, t := range def.Consts {
+		add("const.go", t)
+	}
+
+	m := model.DeclarationList{}
+	for filename, fd := range files {
+		count, total := 0, 0
+		for _, f := range fd {
+			if f.Kind == model.TypeKind {
+				count++
 			}
-			filename = filename + ".go"
-
-			add(filename, t)
+			total++
 		}
-
-		for _, t := range def.Funcs {
-			filename := classifyFunc(t)
-			add(filename, t)
+		if count == total {
+			m.Append(fd...)
+			delete(files, filename)
 		}
-
-		for _, t := range def.Vars {
-			add("vars.go", t)
+	}
+	for _, t := range m {
+		if isConflicting(t.Imports) {
+			add("model_rich.go", t)
 		}
-
-		for _, t := range def.Consts {
-			add("const.go", t)
-		}
+		add("model.go", t)
 	}
 
 	filenames := maps.Keys(files)
