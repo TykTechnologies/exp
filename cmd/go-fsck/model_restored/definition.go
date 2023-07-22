@@ -12,8 +12,10 @@ type (
 	}
 )
 
-func (d *Definition) getImports(decl *Declaration) []string {
-	return d.Imports.Get(decl.File)
+func (d *Definition) Fill() {
+	for _, decl := range d.Order() {
+		decl.Imports = d.getImports(decl)
+	}
 }
 
 func (d *Definition) Order() []*Declaration {
@@ -27,8 +29,6 @@ func (d *Definition) Order() []*Declaration {
 	return result
 }
 
-func (d *Definition) Fill() {
-	for _, decl := range d.Order() {
-		decl.Imports = d.getImports(decl)
-	}
+func (d *Definition) getImports(decl *Declaration) []string {
+	return d.Imports.Get(decl.File)
 }

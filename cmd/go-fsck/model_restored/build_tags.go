@@ -17,5 +17,9 @@ func BuildTags(src []byte) []string {
 		buildTags = append(buildTags, buildTag)
 	}
 
+	if len(buildTags) == 1 && strings.HasPrefix(buildTags[0], "!") {
+		return nil
+	}
+
 	return buildTags
 }

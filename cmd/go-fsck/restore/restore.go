@@ -19,7 +19,7 @@ func restore(cfg *options) error {
 		return err
 	}
 
-	files := make(map[string][]*model.Declaration, 0)
+	files := make(map[string]model.DeclarationList, 0)
 	add := func(filename string, decls ...*model.Declaration) {
 		fileTest := filename[:len(filename)-3] + "_test.go"
 
@@ -90,12 +90,9 @@ func restore(cfg *options) error {
 		if filename, ok := strings.CutPrefix(name, "New"); ok {
 			filename = strcase.SnakeCase(filename)
 			if isTest {
-				filename = filename + "_test"
+				return filename + "_test.go"
 			}
-			filename = ".go"
-			if _, exists := files[filename]; exists {
-				return filename
-			}
+			return filename + ".go"
 		}
 
 		// Test naming conventions:
@@ -115,6 +112,19 @@ func restore(cfg *options) error {
 		// moved into importable packages.
 
 		if ast.IsExported(name) {
+			filename := strcase.SnakeCase(name)
+			if isTest {
+				return filename + "_test.go"
+			}
+			return filename + ".go"
+		}
+
+		// The problem with unexported functions is that their imports,
+		// when merged, would conflict with another function. For example,
+		// when using text/template or html/template, math/rand, crypto/rand,
+		// or an internal package matching stdlib (internal/crypto).
+
+		if len(t.Imports) > 0 {
 			filename := strcase.SnakeCase(name)
 			if isTest {
 				return filename + "_test.go"

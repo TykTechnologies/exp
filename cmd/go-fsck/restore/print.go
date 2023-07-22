@@ -10,7 +10,7 @@ import (
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
 
-func printLayout(cfg *options, files map[string][]*model.Declaration, filenames []string) error {
+func printLayout(cfg *options, files map[string]model.DeclarationList, filenames []string) error {
 	for _, filename := range filenames {
 		if cfg.removeTests && strings.HasSuffix(filename, "_test.go") {
 			continue

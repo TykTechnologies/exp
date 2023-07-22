@@ -19,6 +19,14 @@ type collector struct {
 	seen       map[string]*Declaration
 }
 
+func NewCollector(fset *token.FileSet) *collector {
+	return &collector{
+		fset:       fset,
+		definition: make(map[string]*Definition),
+		seen:       make(map[string]*Declaration),
+	}
+}
+
 func (v *collector) Clean() {
 	for _, def := range v.definition {
 		imports := []string{}
@@ -49,44 +57,25 @@ func (v *collector) Clean() {
 	}
 }
 
-func (v *collector) appendSeen(key string, value *Declaration) {
-	if len(value.Names) == 1 {
-		value.Name = value.Names[0]
-		value.Names = nil
-	}
-	v.seen[key] = value
-}
-
-func (v *collector) isSeen(key string) bool {
-	decl, ok := v.seen[key]
-	return ok && decl != nil
-}
-
-func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {
+func (v *collector) Names(decl *ast.GenDecl) []string {
+	names := make([]string, 0, len(decl.Specs))
 	for _, spec := range decl.Specs {
-		imported, ok := spec.(*ast.ImportSpec)
-		if !ok {
+		if val, ok := spec.(*ast.ValueSpec); ok {
+			names = append(names, v.identNames(val.Names)...)
 			continue
 		}
 
-		importLiteral := imported.Path.Value
-		importClean := strings.Trim(importLiteral, `*`)
-		if imported.Name != nil {
-			alias := imported.Name.Name
-			base := path.Base(importClean)
-			switch alias {
-			case base:
-				fmt.Printf("WARN: removing %s alias for %s)\n", alias, importClean)
-			case "_":
-
-			default:
-				fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
-				importLiteral = alias + " " + importLiteral
-			}
+		if val, ok := spec.(*ast.TypeSpec); ok {
+			names = append(names, val.Name.Name)
+			continue
 		}
 
-		def.Imports.Add(filename, importLiteral)
+		v.error("warning getting names: unhandled %T", spec)
 	}
+	if len(names) == 0 {
+		return nil
+	}
+	return names
 }
 
 func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
@@ -170,41 +159,12 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	return true
 }
 
-func (v *collector) Names(decl *ast.GenDecl) []string {
-	names := make([]string, 0, len(decl.Specs))
-	for _, spec := range decl.Specs {
-		if val, ok := spec.(*ast.ValueSpec); ok {
-			names = append(names, v.identNames(val.Names)...)
-			continue
-		}
-
-		if val, ok := spec.(*ast.TypeSpec); ok {
-			names = append(names, val.Name.Name)
-			continue
-		}
-
-		v.error("warning getting names: unhandled %T", spec)
+func (v *collector) appendSeen(key string, value *Declaration) {
+	if len(value.Names) == 1 {
+		value.Name = value.Names[0]
+		value.Names = nil
 	}
-	if len(names) == 0 {
-		return nil
-	}
-	return names
-}
-
-func (v *collector) error(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
-}
-
-func (v *collector) identNames(decl []*ast.Ident) []string {
-	if len(decl) == 0 {
-		return nil
-	}
-
-	result := make([]string, 0, len(decl))
-	for _, t := range decl {
-		result = append(result, t.Name)
-	}
-	return result
+	v.seen[key] = value
 }
 
 func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) *Declaration {
@@ -230,13 +190,35 @@ func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) 
 	return declaration
 }
 
-func (p *collector) getSource(node any) string {
-	var buf strings.Builder
-	err := printer.Fprint(&buf, p.fset, node)
-	if err != nil {
-		return ""
+func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {
+	for _, spec := range decl.Specs {
+		imported, ok := spec.(*ast.ImportSpec)
+		if !ok {
+			continue
+		}
+
+		importLiteral := imported.Path.Value
+		importClean := strings.Trim(importLiteral, `*`)
+		if imported.Name != nil {
+			alias := imported.Name.Name
+			base := path.Base(importClean)
+			switch alias {
+			case base:
+				fmt.Printf("WARN: removing %s alias for %s)\n", alias, importClean)
+			case "_":
+
+			default:
+				fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
+				importLiteral = alias + " " + importLiteral
+			}
+		}
+
+		def.Imports.Add(filename, importLiteral)
 	}
-	return buf.String()
+}
+
+func (v *collector) error(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
 }
 
 func (p *collector) functionDef(fun *ast.FuncDecl) string {
@@ -279,4 +261,30 @@ func (p *collector) functionDef(fun *ast.FuncDecl) string {
 		return fmt.Sprintf("%s (%s) %v", name, paramsString, returnString)
 	}
 	return fmt.Sprintf("%s (%s)", name, paramsString)
+}
+
+func (p *collector) getSource(node any) string {
+	var buf strings.Builder
+	err := printer.Fprint(&buf, p.fset, node)
+	if err != nil {
+		return ""
+	}
+	return buf.String()
+}
+
+func (v *collector) identNames(decl []*ast.Ident) []string {
+	if len(decl) == 0 {
+		return nil
+	}
+
+	result := make([]string, 0, len(decl))
+	for _, t := range decl {
+		result = append(result, t.Name)
+	}
+	return result
+}
+
+func (v *collector) isSeen(key string) bool {
+	decl, ok := v.seen[key]
+	return ok && decl != nil
 }

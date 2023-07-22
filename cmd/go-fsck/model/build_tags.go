@@ -18,5 +18,11 @@ func BuildTags(src []byte) []string {
 		buildTags = append(buildTags, buildTag)
 	}
 
+	// If a build tag is `!jq` (starts with !), consider it
+	// as if it's not present.
+	if len(buildTags) == 1 && strings.HasPrefix(buildTags[0], "!") {
+		return nil
+	}
+
 	return buildTags
 }

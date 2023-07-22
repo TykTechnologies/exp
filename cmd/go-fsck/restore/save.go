@@ -10,12 +10,13 @@ import (
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
 
-func saveLayout(cfg *options, files map[string][]*model.Declaration, filenames []string) error {
+func saveLayout(cfg *options, files map[string]model.DeclarationList, filenames []string) error {
 	for _, filename := range filenames {
 		if cfg.removeTests && strings.HasSuffix(filename, "_test.go") {
 			continue
 		}
 		decls := files[filename]
+		decls.Sort()
 
 		// Collect sources
 		lines := []string{"package " + cfg.packageName}
