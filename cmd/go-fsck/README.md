@@ -58,6 +58,8 @@ package and make other code have local behaviour.
      some packages are function oriented, other more struct and
      interface. This tool is firstly aimed at the struct case.
 
+- Restore needs work (sorting symbols is a big chunk).
+
 In a single package, when a struct A depends on struct B and C, then the
 behaviour of A is not local. However, if B and C are imported from
 packages, then the behaviour of A is local. Another way to remove the
