@@ -120,6 +120,12 @@ jobs:
     needs: [configs, dashboard, gateway]
     runs-on: ubuntu-latest
     steps:
+      - name: Restore artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Print artifacts
+        run: find ./ -type f
+
       - name: Checkout Docs
         uses: actions/checkout@v3
         with:
@@ -128,8 +134,6 @@ jobs:
           path: ./tyk-docs
           ref: ${{ github.event.inputs.docsBranch }}
 
-      - name: Restore artifacts
-        uses: actions/download-artifact@v3
 
       - name: Write out docs
         run: |
