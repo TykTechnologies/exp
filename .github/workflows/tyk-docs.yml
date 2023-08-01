@@ -71,8 +71,8 @@ jobs:
       - name: Generate docs
         run: |
           mkdir -p dashboard-docs/
-          cp ./tyk-analytics/swagger.yml dashboard_docs/dashboard-swagger.yml
-          cp ./tyk-analytics/swagger-admin.yml dashboard_docs/dashboard-admin-swagger.yml
+          cp ./tyk-analytics/swagger.yml dashboard-docs/dashboard-swagger.yml
+          cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
 
       - name: Store docs
         uses: actions/upload-artifact@v3
@@ -91,13 +91,11 @@ jobs:
           path: ./tyk-config-info-generator
           token: ${{ secrets.ORG_GH_TOKEN }}
 
-      - name: Create output folder
-        run: mkdir -p config-docs/
-
       - name: Generate config docs (gw+dash)
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.repo == 'dashboard' || github.event.inputs.repo == 'gateway'}}
         run: |
+          mkdir -p config-docs/
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js gateway:${{ github.event.inputs.repoBranch }}
           cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/gateway.md config-docs/gateway-config.md
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js dashboard:${{ github.event.inputs.repoBranch }}
@@ -107,6 +105,7 @@ jobs:
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.repo != 'dashboard' && github.event.inputs.repo != 'gateway'}}
         run: |
+          mkdir -p config-docs/
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js ${{ github.event.inputs.repo }}:${{ github.event.inputs.repoBranch }}
           cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md config-docs/${{ github.event.inputs.repo }}-config.md
 
