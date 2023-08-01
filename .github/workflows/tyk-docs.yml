@@ -152,6 +152,8 @@ jobs:
           commit-message: Import config/docs
           title: '[${{ env.JIRA }}] Update documentation from ${{ github.event.inputs.repo }}:${{ github.event.inputs.repoBranch }}'
           body: |
+            Triggered by: ${{ env.GITHUB_ACTOR }}
+            
             JIRA: https://tyktech.atlassian.net/browse/${{ env.JIRA }}
           branch: update/${{ env.JIRA }}/${{ github.event.inputs.repoBranch }}-update-docs
           path: ./tyk-docs
