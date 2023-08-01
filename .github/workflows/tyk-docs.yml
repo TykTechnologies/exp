@@ -59,8 +59,8 @@ jobs:
     if: ${{ github.event.inputs.repo == 'dashboard' || github.event.inputs.repo == 'gateway'}}
     runs-on: ubuntu-latest
     outputs:
-      swagger: ${{ steps.dashboard-output.outputs.swagger }}
-      swagger-admin: ${{ steps.dashboard-output.outputs.swagger-admin }}
+      swagger: ${{ steps.swagger.outputs.output }}
+      swagger-admin: ${{ steps.swagger-admin.outputs.output }}
     steps:
       - name: Checkout Dashboard
         uses: actions/checkout@v3
@@ -70,13 +70,14 @@ jobs:
           repository: TykTechnologies/tyk-analytics
           ref: ${{ github.event.inputs.repoBranch }}
           path: ./tyk-analytics
-      - name: Populate output
-        id: dashboard-output
+      - id: swagger
         run: |
-          echo "swagger<<EOF" >> $GITHUB_OUTPUT
+          echo "output<<EOF" >> $GITHUB_OUTPUT
           cat ./tyk-analytics/swagger.yml >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          echo "swagger-admin<<EOF" >> $GITHUB_OUTPUT
+      - id: swagger-admin
+        run: |
+          echo "output<<EOF" >> $GITHUB_OUTPUT
           cat ./tyk-analytics/swagger-admin.yml >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
