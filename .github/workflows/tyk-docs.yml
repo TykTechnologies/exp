@@ -143,7 +143,7 @@ jobs:
           cp gateway-docs/* ./tyk-docs/tyk-docs/content/shared/          # x-tyk-gateway.md
 
       - name: Sanitize JIRA input
-        run: echo "JIRA=$(dirname ${{ github.event.inputs.jira }})" >> $GITHUB_ENV
+        run: echo "JIRA=$(basename ${{ github.event.inputs.jira }})" >> $GITHUB_ENV
 
       - name: Raise docs changes PR
         uses: peter-evans/create-pull-request@v4
