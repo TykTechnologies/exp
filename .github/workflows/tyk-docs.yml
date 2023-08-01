@@ -47,8 +47,8 @@ jobs:
       - name: Populate output
         id: gateway-output
         run: |
-          echo "x-tyk-gateway=$(cat ./tyk/apidef/oas/schema/x-tyk-gateway.md | base64)" >> $GITHUB_OUTPUT
-          echo "swagger=$(cat ./tyk/swagger.yml | base64)" >> $GITHUB_OUTPUT
+          echo "x-tyk-gateway=$(cat ./tyk/apidef/oas/schema/x-tyk-gateway.md | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "swagger=$(cat ./tyk/swagger.yml | base64 -w 0)" >> $GITHUB_OUTPUT
 
   dashboard:
     name: Dashboard docs
@@ -68,8 +68,8 @@ jobs:
           path: ./tyk-analytics
       - id: dashboard-output
         run: |
-          echo "swagger=$(cat ./tyk-analytics/swagger.yml | base64)" >> $GITHUB_OUTPUT
-          echo "swagger-admin=$(cat ./tyk-analytics/swagger-admin.yml | base64)" >> $GITHUB_OUTPUT
+          echo "swagger=$(cat ./tyk-analytics/swagger.yml | base64 -w 0)" >> $GITHUB_OUTPUT
+          echo "swagger-admin=$(cat ./tyk-analytics/swagger-admin.yml | base64 -w 0)" >> $GITHUB_OUTPUT
 
   configs:
     name: Configuration docs
@@ -92,7 +92,7 @@ jobs:
       - name: Populate output
         id: config-output
         run: |
-          echo "output=$(cat /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md | base64)" >> $GITHUB_OUTPUT
+          echo "output=$(cat /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md | base64 -w 0)" >> $GITHUB_OUTPUT
 
   finish:
     name: Open PR against tyk-docs
