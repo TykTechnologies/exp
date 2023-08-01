@@ -95,19 +95,19 @@ jobs:
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.repo == 'dashboard' || github.event.inputs.repo == 'gateway'}}
         run: |
-          mkdir -p config-docs/
+          mkdir -p $GITHUB_WORKSPACE/config-docs/
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js gateway:${{ github.event.inputs.repoBranch }}
-          cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/gateway.md config-docs/gateway-config.md
+          cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/gateway.md $GITHUB_WORKSPACE/config-docs/gateway-config.md
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js dashboard:${{ github.event.inputs.repoBranch }}
-          cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/dashboard.md config-docs/dashboard-config.md
+          cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/dashboard.md $GITHUB_WORKSPACE/config-docs/dashboard-config.md
 
       - name: Generate config docs (other)
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.repo != 'dashboard' && github.event.inputs.repo != 'gateway'}}
         run: |
-          mkdir -p config-docs/
+          mkdir -p $GITHUB_WORKSPACE/config-docs/
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js ${{ github.event.inputs.repo }}:${{ github.event.inputs.repoBranch }}
-          cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md config-docs/${{ github.event.inputs.repo }}-config.md
+          cp /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md $GITHUB_WORKSPACE/config-docs/${{ github.event.inputs.repo }}-config.md
 
       - name: Store docs
         uses: actions/upload-artifact@v3
