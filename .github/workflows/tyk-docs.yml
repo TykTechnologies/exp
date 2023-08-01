@@ -1,6 +1,9 @@
 name: Tyk Docs sync for release
 
 # This workflow will pull the repository branch for a project.
+#
+# If the chosen repo is either 'dashboard' or 'gateway', the docs
+# will be updated from both repositories in the same PR.
 
 on:
   workflow_dispatch:
@@ -28,7 +31,7 @@ env:
 jobs:
   gateway:
     name: Gateway docs
-    if: ${{ github.event.inputs.repo == 'gateway' }}
+    if: ${{ github.event.inputs.repo == 'dashboard' || github.event.inputs.repo == 'gateway'}}
     outputs:
       x-tyk-gateway: ${{ steps.gateway-output.outputs.x-tyk-gateway }}
       swagger: ${{ steps.gateway-output.outputs.swagger }}
@@ -53,7 +56,7 @@ jobs:
 
   dashboard:
     name: Dashboard docs
-    if: ${{ github.event.inputs.repo == 'dashboard' }}
+    if: ${{ github.event.inputs.repo == 'dashboard' || github.event.inputs.repo == 'gateway'}}
     runs-on: ubuntu-latest
     outputs:
       swagger: ${{ steps.dashboard-output.outputs.swagger }}
