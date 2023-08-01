@@ -65,6 +65,7 @@ jobs:
       - name: Checkout Dashboard
         uses: actions/checkout@v3
         with:
+          token: ${{ secrets.ORG_GH_TOKEN }}
           fetch-depth: 1
           repository: TykTechnologies/tyk-analytics
           ref: ${{ github.event.inputs.repoBranch }}
