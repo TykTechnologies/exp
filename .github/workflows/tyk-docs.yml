@@ -26,25 +26,9 @@ env:
   GOPRIVATE: github.com/TykTechnologies
 
 jobs:
-  checkout:
-    name: Checkout required repositories
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Docs
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-          path: ./tyk-docs
-          ref: ${{ github.event.inputs.docsBranch }}
-      - uses: actions/cache/save@v3
-        with:
-          path: ./*
-          key: tyk-docs-${{ github.event.inputs.docsBranch }}
-
   gateway:
     name: Gateway docs
     if: ${{ github.event.inputs.repo == 'gateway' }}
-    needs: checkout
     outputs:
       x-tyk-gateway: ${{ steps.gateway-output.outputs.x-tyk-gateway }}
       swagger: ${{ steps.gateway-output.outputs.swagger }}
@@ -70,7 +54,6 @@ jobs:
   dashboard:
     name: Dashboard docs
     if: ${{ github.event.inputs.repo == 'dashboard' }}
-    needs: checkout
     runs-on: ubuntu-latest
     outputs:
       swagger: ${{ steps.dashboard-output.outputs.swagger }}
@@ -91,7 +74,6 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
   configs:
-    needs: checkout
     runs-on: ubuntu-latest
     outputs:
       config: ${{ steps.config-output.outputs.output }}
@@ -116,13 +98,15 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
   finish:
-    needs: [configs, dashboard, gateway, checkout]
+    needs: [configs, dashboard, gateway]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/cache/restore@v3
+      - name: Checkout Docs
+        uses: actions/checkout@v3
         with:
-          path: ./*
-          key: tyk-docs-${{ github.event.inputs.docsBranch }}
+          fetch-depth: 1
+          path: ./tyk-docs
+          ref: ${{ github.event.inputs.docsBranch }}
 
       - name: Write out docs
         run: |
