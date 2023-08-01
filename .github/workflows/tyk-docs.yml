@@ -47,20 +47,16 @@ jobs:
       - name: Populate output
         id: gateway-output
         run: |
-          echo "x-tyk-gateway<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat ./tyk/apidef/oas/schema/x-tyk-gateway.md)" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "swagger<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat ./tyk/swagger.yml)" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "x-tyk-gateway=$(cat ./tyk/apidef/oas/schema/x-tyk-gateway.md | base64)" >> $GITHUB_OUTPUT
+          echo "swagger=$(cat ./tyk/swagger.yml | base64)" >> $GITHUB_OUTPUT
 
   dashboard:
     name: Dashboard docs
     if: ${{ github.event.inputs.repo == 'dashboard' || github.event.inputs.repo == 'gateway'}}
     runs-on: ubuntu-latest
     outputs:
-      swagger: ${{ steps.swagger.outputs.output }}
-      swagger-admin: ${{ steps.swagger-admin.outputs.output }}
+      swagger: ${{ steps.dashboard-output.outputs.swagger }}
+      swagger-admin: ${{ steps.dashboard-output.outputs.swagger-admin }}
     steps:
       - name: Checkout Dashboard
         uses: actions/checkout@v3
@@ -70,16 +66,10 @@ jobs:
           repository: TykTechnologies/tyk-analytics
           ref: ${{ github.event.inputs.repoBranch }}
           path: ./tyk-analytics
-      - id: swagger
+      - id: dashboard-output
         run: |
-          echo "output<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat ./tyk-analytics/swagger.yml)" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - id: swagger-admin
-        run: |
-          echo "output<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat ./tyk-analytics/swagger-admin.yml)" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "swagger=$(cat ./tyk-analytics/swagger.yml | base64)" >> $GITHUB_OUTPUT
+          echo "swagger-admin=$(cat ./tyk-analytics/swagger-admin.yml | base64)" >> $GITHUB_OUTPUT
 
   configs:
     name: Configuration docs
@@ -102,9 +92,7 @@ jobs:
       - name: Populate output
         id: config-output
         run: |
-          echo "output<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md)" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "output=$(cat /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md | base64)" >> $GITHUB_OUTPUT
 
   finish:
     name: Open PR against tyk-docs
@@ -121,11 +109,11 @@ jobs:
 
       - name: Write out docs
         run: |
-          echo "${{ needs.gateway.outputs.x-tyk-gateway }}"     > ./tyk-docs/tyk-docs/content/shared/x-tyk-gateway.md
-          echo "${{ needs.gateway.outputs.swagger }}"           > ./tyk-docs/tyk-docs/assets/others/gateway-swagger.yml
-          echo "${{ needs.dashboard.outputs.swagger }}"         > ./tyk-docs/tyk-docs/assets/others/dashboard-swagger.yml
-          echo "${{ needs.dashboard.outputs.swagger-admin }}"   > ./tyk-docs/tyk-docs/assets/others/dashboard-admin-swagger.yml
-          echo "${{ needs.configs.outputs.config }}"            > ./tyk-docs/tyk-docs/content/shared/${{ github.event.inputs.repo }}-config.md
+          echo '${{ needs.gateway.outputs.x-tyk-gateway }}'     | base64 --decode > ./tyk-docs/tyk-docs/content/shared/x-tyk-gateway.md
+          echo '${{ needs.gateway.outputs.swagger }}'           | base64 --decode > ./tyk-docs/tyk-docs/assets/others/gateway-swagger.yml
+          echo '${{ needs.dashboard.outputs.swagger }}'         | base64 --decode > ./tyk-docs/tyk-docs/assets/others/dashboard-swagger.yml
+          echo '${{ needs.dashboard.outputs.swagger-admin }}'   | base64 --decode > ./tyk-docs/tyk-docs/assets/others/dashboard-admin-swagger.yml
+          echo '${{ needs.configs.outputs.config }}'            | base64 --decode > ./tyk-docs/tyk-docs/content/shared/${{ github.event.inputs.repo }}-config.md
 
       - name: Raise docs changes PR
         uses: peter-evans/create-pull-request@v4
