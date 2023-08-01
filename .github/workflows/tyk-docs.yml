@@ -154,5 +154,4 @@ jobs:
             JIRA: https://tyktech.atlassian.net/browse/${{ env.JIRA }}
           branch: update/${{ env.JIRA }}/${{ github.event.inputs.repoBranch }}-update-docs
           path: ./tyk-docs
-          branch-suffix: random
           delete-branch: true
