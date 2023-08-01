@@ -48,10 +48,10 @@ jobs:
         id: gateway-output
         run: |
           echo "x-tyk-gateway<<EOF" >> $GITHUB_OUTPUT
-          cat ./tyk/apidef/oas/schema/x-tyk-gateway.md >> $GITHUB_OUTPUT
+          echo "$(cat ./tyk/apidef/oas/schema/x-tyk-gateway.md)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           echo "swagger<<EOF" >> $GITHUB_OUTPUT
-          cat ./tyk/swagger.yml >> $GITHUB_OUTPUT
+          echo "$(cat ./tyk/swagger.yml)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   dashboard:
@@ -73,12 +73,12 @@ jobs:
       - id: swagger
         run: |
           echo "output<<EOF" >> $GITHUB_OUTPUT
-          cat ./tyk-analytics/swagger.yml >> $GITHUB_OUTPUT
+          echo "$(cat ./tyk-analytics/swagger.yml)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
       - id: swagger-admin
         run: |
           echo "output<<EOF" >> $GITHUB_OUTPUT
-          cat ./tyk-analytics/swagger-admin.yml >> $GITHUB_OUTPUT
+          echo "$(cat ./tyk-analytics/swagger-admin.yml)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   configs:
@@ -102,7 +102,7 @@ jobs:
         id: config-output
         run: |
           echo "output<<EOF" >> $GITHUB_OUTPUT
-          cat /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md >> $GITHUB_OUTPUT
+          echo "$(cat /node/home/tyk-config-info-generator/info/${{ github.event.inputs.repoBranch }}/${{ github.event.inputs.repo }}.md)" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   finish:
