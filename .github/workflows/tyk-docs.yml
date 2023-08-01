@@ -73,8 +73,11 @@ jobs:
       - name: Populate output
         id: dashboard-output
         run: |
-          echo "output<<EOF" >> $GITHUB_OUTPUT
-          cat ./tyk/apidef/oas/schema/x-tyk-gateway.md >> $GITHUB_OUTPUT
+          echo "swagger<<EOF" >> $GITHUB_OUTPUT
+          cat ./tyk-analytics/swagger.yml >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "swagger-admin<<EOF" >> $GITHUB_OUTPUT
+          cat ./tyk-analytics/swagger-admin.yml >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
   configs:
