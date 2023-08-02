@@ -1,0 +1,11 @@
+---
+version: '3'
+
+tasks:
+  default:
+    name: "Run tool"
+    cmds:
+      - goimports -w .
+      - go fmt .
+      - go install .
+      - github-actions-viz -i example/ > example/example.mermaidjs
