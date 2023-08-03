@@ -167,7 +167,13 @@ func renderJob(key string, job *model.Job, outputs map[string][]string) string {
 	}
 
 	if len(job.Steps) == 0 {
-		return fmt.Sprintf(indent+"%s: %s", key, name)
+		result := []string{
+			indent + fmt.Sprintf("%s: %s", key, name),
+			indent + fmt.Sprintf("state %s {", key),
+			indent + "    [*] --> Finish",
+			indent + "}",
+		}
+		return strings.Join(result, "\n") + "\n"
 	}
 
 	result := []string{
