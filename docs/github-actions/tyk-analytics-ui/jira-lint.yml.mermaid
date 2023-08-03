@@ -3,7 +3,8 @@ stateDiagram-v2
     state workflow {
         jira_lint: Jira lint
         state jira_lint {
-            [*] --> Finish
+            jira_lint_finish: Done
+            [*] --> jira_lint_finish
         }
     }
 

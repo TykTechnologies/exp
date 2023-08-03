@@ -42,7 +42,8 @@ stateDiagram-v2
 
         sbom: Sbom
         state sbom {
-            [*] --> Finish
+            sbom_finish: Done
+            [*] --> sbom_finish
         }
 
         smoke_tests: Smoke tests
@@ -53,7 +54,8 @@ stateDiagram-v2
 
         tat: Tat
         state tat {
-            [*] --> Finish
+            tat_finish: Done
+            [*] --> tat_finish
         }
 
         upgrade_deb: Upgrade deb
