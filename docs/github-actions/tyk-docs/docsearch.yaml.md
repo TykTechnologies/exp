@@ -1,0 +1,13 @@
+# Index update
+
+```mermaid
+stateDiagram-v2
+    workflow : docsearch.yaml - Index update
+    state workflow {
+        index: Index
+        state index {
+            [*] --> step0index
+            step0index : Index
+        }
+    }
+```
