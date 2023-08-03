@@ -181,6 +181,7 @@ func renderJob(key string, job *model.Job, outputs map[string][]string) string {
 	}
 
 	if val, ok := outputs[key]; ok {
+		sort.Strings(val)
 		for _, output := range val {
 			result = append(result, fmt.Sprintf("    %s --> %s", to, output))
 		}
