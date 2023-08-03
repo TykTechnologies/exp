@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/nektos/act/pkg/model"
@@ -24,12 +25,23 @@ func main() {
 	}
 }
 
+type options struct {
+	inputPath string
+	writeOut  bool
+	format    string
+}
+
 func start(context.Context) error {
-	var inputPath = "."
-	pflag.StringVarP(&inputPath, "input-path", "i", inputPath, "input path")
+	config := options{
+		inputPath: ".",
+		format:    "md",
+	}
+	pflag.StringVarP(&config.inputPath, "input-path", "i", config.inputPath, "input path")
+	pflag.BoolVarP(&config.writeOut, "write-out", "w", config.writeOut, "write out as files")
+	pflag.StringVar(&config.format, "format", config.format, "format (md, mermaid)")
 	pflag.Parse()
 
-	files, err := filepath.Glob(path.Join(inputPath, "*.yml"))
+	files, err := filepath.Glob(path.Join(config.inputPath, "*.yml"))
 	if err != nil {
 		return err
 	}
@@ -43,7 +55,10 @@ func start(context.Context) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(render(m, filename))
+		output := render(config, m, filename)
+		if output != "" {
+			fmt.Println(output)
+		}
 	}
 
 	return nil
@@ -69,7 +84,9 @@ const header = `stateDiagram-v2
     state workflow {
 `
 
-func render(m *model.Workflow, filename string) string {
+func render(config options, m *model.Workflow, filename string) string {
+	var none string
+
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, header, filename, m.Name)
 
@@ -89,6 +106,12 @@ func render(m *model.Workflow, filename string) string {
 			outputs[need] = append(outputs[need], key)
 		}
 	}
+	sort.SliceStable(rootJobs, func(i, j int) bool {
+		if rootJobs[i].K < rootJobs[j].K {
+			return true
+		}
+		return false
+	})
 
 	workflows := []string{}
 	for _, v := range rootJobs {
@@ -97,6 +120,32 @@ func render(m *model.Workflow, filename string) string {
 
 	io.WriteString(buf, strings.Join(workflows, "\n"))
 	io.WriteString(buf, "    }\n\n")
+
+	if config.format == "md" {
+		markdown := []string{}
+		markdown = append(markdown, "# "+m.Name)
+		markdown = append(markdown, fmt.Sprintf("```mermaid\n%s```", buf.String()))
+
+		if config.writeOut {
+			output := filename + ".md"
+			fmt.Println(output)
+			body := []byte(strings.Join(markdown, "\n\n") + "\n")
+			if err := os.WriteFile(output, body, 0644); err != nil {
+				panic(err)
+			}
+			return none
+		}
+	}
+
+	if config.writeOut {
+		output := filename + ".mermaid"
+		fmt.Println(output)
+		body := buf.Bytes()
+		if err := os.WriteFile(output, body, 0644); err != nil {
+			panic(err)
+		}
+		return none
+	}
 
 	return buf.String()
 }

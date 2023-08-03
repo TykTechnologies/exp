@@ -8,4 +8,11 @@ tasks:
       - goimports -w .
       - go fmt .
       - go install .
-      - github-actions-viz -i example/ > example/example.mermaidjs
+      - task: example
+
+  example:
+    desc: "Build examples"
+    dir: example
+    cmds:
+      - github-actions-viz -w --format md
+      - github-actions-viz -w --format mermaid
