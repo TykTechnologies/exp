@@ -1,11 +1,17 @@
 # GitHub Actions Vizualizer
 
-The tool, if ran in a github actions folder, reads in the *.yml files and
-produces a mermaidjs diagram for each workflow to standard output.
+The tool, if ran in a github actions folder, reads in the `*.{yml,yaml}`
+files and produces a mermaidjs diagram for each workflow.
 
 To install:
 
 `go install github.com/TykTechnologies/exp/cmd/github-actions-viz@main`
+
+Flags:
+
+- `-i <folder>` - input folder (defaults to .),
+- `--format <md|mermaid>` - define the output format,
+- `-w` writes out files to disk.
 
 To use:
 
