@@ -1,13 +1,10 @@
-# Release
-
-```mermaid
 stateDiagram-v2
     workflow : release.yml - Release
     state workflow {
         ci: ci
         state ci {
             [*] --> step0ci
-            step0ci : Shallow checkout of tyk-analytics
+            step0ci : Shallow checkout of tyk
             step0ci --> step2ci
             step2ci : Login to Amazon ECR
             step2ci --> step4ci
@@ -23,7 +20,7 @@ stateDiagram-v2
             [*] --> step0goreleaser
             step0goreleaser : Fix private module deps
             step0goreleaser --> step1goreleaser
-            step1goreleaser : Checkout of tyk-analytics
+            step1goreleaser : Checkout of tyk
             step1goreleaser --> step2goreleaser
             step2goreleaser : Add Git safe.directory
             step2goreleaser --> step5goreleaser
@@ -62,6 +59,8 @@ stateDiagram-v2
             step4upgrade-deb : generate dockerfile
             step4upgrade-deb --> step5upgrade-deb
             step5upgrade-deb : install on ${{ matrix.distro }}
+            step5upgrade-deb --> step6upgrade-deb
+            step6upgrade-deb : Test the built container image with api functionality test.
         }
 
         upgrade-rpm: upgrade-rpm
@@ -70,6 +69,8 @@ stateDiagram-v2
             step3upgrade-rpm : generate dockerfile
             step3upgrade-rpm --> step4upgrade-rpm
             step4upgrade-rpm : install on ${{ matrix.distro }}
+            step4upgrade-rpm --> step5upgrade-rpm
+            step5upgrade-rpm : Test the built container image with api functionality test.
         }
     }
-```
+

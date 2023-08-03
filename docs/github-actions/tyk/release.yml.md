@@ -41,6 +41,10 @@ stateDiagram-v2
         }
 
         sbom: sbom
+        state sbom {
+            [*] --> Finish
+        }
+
         smoke-tests: smoke-tests
         state smoke-tests {
             [*] --> step1smoke-tests
@@ -48,6 +52,10 @@ stateDiagram-v2
         }
 
         tat: tat
+        state tat {
+            [*] --> Finish
+        }
+
         upgrade-deb: upgrade-deb
         state upgrade-deb {
             [*] --> step4upgrade-deb

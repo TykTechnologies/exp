@@ -46,6 +46,7 @@ tasks:
     dir: '{{.project}}'
     cmds:
       - github-actions-viz -w --format md
+      - github-actions-viz -w --format mermaid
 
   git:clone:
     internal: true
