@@ -41,10 +41,18 @@ func start(context.Context) error {
 	pflag.StringVar(&config.format, "format", config.format, "format (md, mermaid)")
 	pflag.Parse()
 
-	files, err := filepath.Glob(path.Join(config.inputPath, "*.yml"))
+	yamls, err := filepath.Glob(path.Join(config.inputPath, "*.yaml"))
 	if err != nil {
 		return err
 	}
+	ymls, err := filepath.Glob(path.Join(config.inputPath, "*.yml"))
+	if err != nil {
+		return err
+	}
+
+	files := []string{}
+	files = append(files, yamls...)
+	files = append(files, ymls...)
 
 	for _, filename := range files {
 		if path.Base(filename) == "Taskfile.yml" {
