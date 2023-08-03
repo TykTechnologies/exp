@@ -1,0 +1,69 @@
+name: Config Generator
+on:
+  repository_dispatch:
+    types: [ tyk-config-docs ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Docs Branch'
+        required: true
+        default: 'master'
+      repoBranch:
+        description: 'Project Branch'
+        required: true
+        default: 'master'
+      repo:
+        description: 'Project ID. Allowed values: gateway, dashboard, pump, mdcb'
+        required: true
+        default: ''
+
+jobs:
+  config-gen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Repository Dispatch ENV
+        if: ${{ github.event_name == 'repository_dispatch'}}
+        run: |
+          echo "REPO=${{ github.event.client_payload.repo }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.event.client_payload.branch }}" >> $GITHUB_ENV
+          echo "DOC_BRANCH=master" >> $GITHUB_ENV
+          echo "TRIGGER=Automatically triggered: " >> $GITHUB_ENV
+      - name: Set Workflow Dispatch  env
+        if: ${{ github.event_name == 'workflow_dispatch'}}
+        run: |
+          echo "REPO=${{ github.event.inputs.repo }}" >> $GITHUB_ENV
+          echo "BRANCH=${{ github.event.inputs.repoBranch }}" >> $GITHUB_ENV
+          echo "DOC_BRANCH=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
+          echo "TRIGGER=Manual triggered: " >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: ./tyk-docs
+          token: ${{ secrets.ORG_GH_TOKEN }}
+          ref: ${{ env.DOC_BRANCH }}
+
+      - name: Checkout Config Generator Repo
+        uses: actions/checkout@v3
+        with:
+          repository: TykTechnologies/tyk-config-info-generator
+          path: ./tyk-config-info-generator
+          token: ${{ secrets.ORG_GH_TOKEN }}
+
+      - name: Generate markdown
+        run: |
+          cd ./tyk-config-info-generator/src
+          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js ${{ env.REPO }}:${{ env.BRANCH }}
+          cp /node/home/tyk-config-info-generator/info/${{ env.BRANCH }}/${{ env.REPO }}.md ../../tyk-docs/tyk-docs/content/shared/${{ env.REPO }}-config.md
+
+      - name: Raise configuration changes Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.ORG_GH_TOKEN }}
+          commit-message: update config
+          title: ${{env.TRIGGER}} Import config documentation from ${{ env.REPO  }}:${{ env.BRANCH  }}
+          branch: ${{ env.REPO  }}/${{ env.BRANCH  }}/update-config
+          path: ./tyk-docs
+          branch-suffix: random
+          delete-branch: true
+          reviewers: dcs3spp

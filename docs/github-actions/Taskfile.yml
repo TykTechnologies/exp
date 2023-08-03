@@ -1,0 +1,34 @@
+---
+version: "3"
+
+vars:
+  projects: tyk tyk-analytics tyk-analytics-ui tyk-docs exp
+
+tasks:
+  sync:
+    desc: "Update docs"
+    vars:
+    cmds:
+      - for: { var: projects, as: project }
+        silent: true
+        cmd: |
+             set -e
+             echo {{.project}}
+             mkdir {{.project}} -p
+             rsync -a --del git/{{.project}}/.github/workflows/ ./{{.project}}/
+      - for: { var: projects, as: project }
+        silent: true
+        cmd: |
+             set -e
+             cd {{.project}}
+             github-actions-viz -w --format md
+             cd -
+
+  git:clone:
+    desc: ""
+    cmds:
+      - mkdir git -p
+      - for:
+          var: projects
+          as: project
+        cmd: git clone --depth=1 git@github.com:TykTechnologies/{{.project}}.git git/{{.project}}

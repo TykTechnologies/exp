@@ -1,0 +1,18 @@
+# Test React
+
+```mermaid
+stateDiagram-v2
+    workflow : test-react.yml - Test React
+    state workflow {
+        test: 
+        state test {
+            [*] --> step3test
+            step3test : Fetch base branch
+            step3test --> step4test
+            step4test : install
+            step4test --> step5test
+            step5test : SonarCloud Scan
+        }
+    }
+
+```

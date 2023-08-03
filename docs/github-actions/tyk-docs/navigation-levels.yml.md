@@ -1,0 +1,18 @@
+# Check maximum nesting level is not exceeded
+
+```mermaid
+stateDiagram-v2
+    workflow : navigation-levels.yml - Check maximum nesting level is not exceeded
+    state workflow {
+        Check-max-levels: Check-menu-max-levels
+        state Check-max-levels {
+            [*] --> step0Check-max-levels
+            step0Check-max-levels : Checkout
+            step0Check-max-levels --> step1Check-max-levels
+            step1Check-max-levels : Set up Go
+            step1Check-max-levels --> step2Check-max-levels
+            step2Check-max-levels : Check navigation level does not exceed the defined maximum
+        }
+    }
+
+```

@@ -1,0 +1,89 @@
+# This workflow will update the reference to tyk on go.mod
+
+name: Update go.mod
+
+on:
+  repository_dispatch:
+    types: [new-tyk]
+  workflow_dispatch:
+    inputs:
+      tyk_treeish:
+        default: ''
+        description: 'tyk tree-ish to use'
+        required: true
+
+env:
+  SLACK_CLI_TOKEN: ${{ secrets.BENDER_TOKEN }}
+  TYK_TREEISH: ${{ github.event.client_payload.sha || github.event.inputs.tyk_treeish }}
+  TYK_REF: ${{ github.event.client_payload.ref }}
+  GOPRIVATE: github.com/TykTechnologies
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: checkout tyk-analytics/${{ github.event.client_payload.ref }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.TYK_REF }}
+
+      - uses: actions/setup-go@v2
+        with:
+          ssh-private-key: ${{ secrets.bindata_deploy_key }}
+          go-version: 1.19.x
+
+      - name: Fix Dependencies
+        env:
+          TOKEN: '${{ secrets.ORG_GH_TOKEN }}'
+        run: >
+          git config --global url."https://${TOKEN}@github.com".insteadOf "https://github.com"
+      - name: update go.mod
+        run: |
+          go get github.com/TykTechnologies/tyk@${TYK_TREEISH##*/}
+          
+          # We are using replace statement so have to change it too
+          go mod edit -replace github.com/TykTechnologies/tyk=github.com/TykTechnologies/tyk@${TYK_TREEISH##*/}
+          
+          go mod tidy
+
+      - name: Commit go.mod
+        run: |
+          git config --local user.email "tip@tyk"
+          git config --local user.name "Bender"
+          git add go.mod go.sum
+          git commit -m "[CI] Updating go.mod from tyk/${{ env.TYK_REF }}/${{ env.TYK_TREEISH }}"
+
+      - uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ secrets.bindata_deploy_key }}
+          
+      - name: Push changes
+        id: push
+        run: |
+          git pull --recurse-submodules=off origin ${{ env.TYK_REF }} --rebase
+          git remote set-url origin "$(git config --get remote.origin.url | sed 's#http.*com/#git@github.com:#g')"
+          git push -v origin ${{ env.TYK_REF }}
+
+      - name: Notify status
+        if: ${{ failure() }}
+        run: |
+          curl https://raw.githubusercontent.com/rockymadden/slack-cli/master/src/slack -o /tmp/slack && chmod +x /tmp/slack
+          colour=bad
+          pretext="Please review the workflow run and correct manually if required"
+          /tmp/slack chat send \
+          --actions '{"type": "button", "style": "primary", "text": "See log", "url": "https://github.com/TykTechnologies/tyk-analytics/actions/runs/${{ github.run_id }}"}' \
+          --author 'Bender' \
+          --author-icon 'https://hcoop.net/~alephnull/bender/bender-arms.jpg' \
+          --author-link 'https://github.com/TykTechnologies/tyk-ci' \
+          --channel '#dashboard' \
+          --color bad \
+          --fields '{"title": "Branch", "value": "${{ github.ref }}", "short": false}' \
+          --footer 'github-actions' \
+          --footer-icon 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
+          --image 'https://assets-cdn.github.com/images/modules/logos_page/Octocat.png' \
+          --pretext "$pretext" \
+          --text 'Failed on `${{ env.TYK_REF }}` for tyk treeish `${{ env.TYK_TREEISH }}`' \
+          --title 'Updating go.mod' \
+          --title-link 'https://github.com/TykTechnologies/tyk-analytics/actions/runs/${{ github.run_id }}'
+

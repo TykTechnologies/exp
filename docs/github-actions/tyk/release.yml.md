@@ -1,0 +1,78 @@
+# Release
+
+```mermaid
+stateDiagram-v2
+    workflow : release.yml - Release
+    state workflow {
+        ci: 
+        state ci {
+            [*] --> step0ci
+            step0ci : Shallow checkout of tyk
+            step0ci --> step2ci
+            step2ci : Login to Amazon ECR
+            step2ci --> step4ci
+            step4ci : Docker metadata
+            step4ci --> step7ci
+            step7ci : CI build
+            step7ci --> tat
+            step7ci --> sbom
+        }
+
+        goreleaser: ${{ matrix.golang_cross }}
+        state goreleaser {
+            [*] --> step0goreleaser
+            step0goreleaser : Fix private module deps
+            step0goreleaser --> step1goreleaser
+            step1goreleaser : Checkout of tyk
+            step1goreleaser --> step2goreleaser
+            step2goreleaser : Add Git safe.directory
+            step2goreleaser --> step5goreleaser
+            step5goreleaser : Login to DockerHub
+            step5goreleaser --> step6goreleaser
+            step6goreleaser : Login to Cloudsmith
+            step6goreleaser --> step7goreleaser
+            step7goreleaser : Unlock agent and set tag
+            step7goreleaser --> step8goreleaser
+            step8goreleaser : Delete old release assets
+            step8goreleaser --> upgrade-deb
+            step8goreleaser --> upgrade-rpm
+            step8goreleaser --> smoke-tests
+            step8goreleaser --> ci
+        }
+
+        sbom: 
+        state sbom {
+        }
+
+        smoke-tests: 
+        state smoke-tests {
+            [*] --> step1smoke-tests
+            step1smoke-tests : Run tests
+        }
+
+        tat: 
+        state tat {
+        }
+
+        upgrade-deb: 
+        state upgrade-deb {
+            [*] --> step4upgrade-deb
+            step4upgrade-deb : generate dockerfile
+            step4upgrade-deb --> step5upgrade-deb
+            step5upgrade-deb : install on ${{ matrix.distro }}
+            step5upgrade-deb --> step6upgrade-deb
+            step6upgrade-deb : Test the built container image with api functionality test.
+        }
+
+        upgrade-rpm: 
+        state upgrade-rpm {
+            [*] --> step3upgrade-rpm
+            step3upgrade-rpm : generate dockerfile
+            step3upgrade-rpm --> step4upgrade-rpm
+            step4upgrade-rpm : install on ${{ matrix.distro }}
+            step4upgrade-rpm --> step5upgrade-rpm
+            step5upgrade-rpm : Test the built container image with api functionality test.
+        }
+    }
+
+```

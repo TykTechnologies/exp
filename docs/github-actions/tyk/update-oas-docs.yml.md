@@ -1,0 +1,12 @@
+# Update OAS docs
+
+```mermaid
+stateDiagram-v2
+    workflow : update-oas-docs.yml - Update OAS docs
+    state workflow {
+        sync: tyk-oas-docs
+        state sync {
+        }
+    }
+
+```
