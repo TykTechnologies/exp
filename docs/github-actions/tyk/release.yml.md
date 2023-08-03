@@ -14,8 +14,8 @@ stateDiagram-v2
             step4ci : Docker metadata
             step4ci --> step7ci
             step7ci : CI build
-            step7ci --> tat
             step7ci --> sbom
+            step7ci --> tat
         }
 
         goreleaser: ${{ matrix.golang_cross }}
@@ -34,10 +34,10 @@ stateDiagram-v2
             step7goreleaser : Unlock agent and set tag
             step7goreleaser --> step8goreleaser
             step8goreleaser : Delete old release assets
+            step8goreleaser --> ci
+            step8goreleaser --> smoke-tests
             step8goreleaser --> upgrade-deb
             step8goreleaser --> upgrade-rpm
-            step8goreleaser --> smoke-tests
-            step8goreleaser --> ci
         }
 
         sbom: 

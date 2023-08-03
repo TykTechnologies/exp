@@ -34,8 +34,8 @@ stateDiagram-v2
             step7goreleaser : Unlock agent and set tag
             step7goreleaser --> step8goreleaser
             step8goreleaser : Delete old release assets
-            step8goreleaser --> smoke-tests
             step8goreleaser --> ci
+            step8goreleaser --> smoke-tests
             step8goreleaser --> upgrade-deb
             step8goreleaser --> upgrade-rpm
         }

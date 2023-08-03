@@ -5,9 +5,24 @@ vars:
   projects: tyk tyk-analytics tyk-analytics-ui tyk-docs exp
 
 tasks:
-  sync:
-    desc: "Update docs"
+  default:
+    desc: "Update GitHub Actions"
     vars:
+    cmds:
+      - task: docs:sync
+      - task: docs:gen
+
+  docs:fetch:
+    desc: "Fetch projects"
+    cmds:
+      - mkdir -p git
+      - for: { var: projects, as: project }
+        task: git:clone
+        vars:
+          project: '{{.project}}'
+
+  docs:sync:
+    desc: "Sync GitHub worlflows"
     cmds:
       - for: { var: projects, as: project }
         silent: true
@@ -16,19 +31,26 @@ tasks:
              echo {{.project}}
              mkdir {{.project}} -p
              rsync -a --del git/{{.project}}/.github/workflows/ ./{{.project}}/
+
+  docs:gen:
+    desc: "Generate docs"
+    cmds:
       - for: { var: projects, as: project }
-        silent: true
-        cmd: |
-             set -e
-             cd {{.project}}
-             github-actions-viz -w --format md
-             cd -
+        task: report
+        vars:
+          project: '{{.project}}'
+
+  report:
+    internal: true
+    require: [project]
+    dir: '{{.project}}'
+    cmds:
+      - github-actions-viz -w --format md
 
   git:clone:
-    desc: ""
+    internal: true
+    require: [project]
+    status:
+      - type -d git/{{.project}}
     cmds:
-      - mkdir git -p
-      - for:
-          var: projects
-          as: project
-        cmd: git clone --depth=1 git@github.com:TykTechnologies/{{.project}}.git git/{{.project}}
+      - git clone --depth=1 git@github.com:TykTechnologies/{{.project}}.git git/{{.project}}
