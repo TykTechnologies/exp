@@ -13,28 +13,6 @@ stateDiagram-v2
             step3golangci_lint : golangci-lint
         }
 
-        sonar_cloud_analysis: Sonar cloud analysis
-        state sonar_cloud_analysis {
-            [*] --> step0sonar_cloud_analysis
-            step0sonar_cloud_analysis : Checkout Tyk Analytics
-            step0sonar_cloud_analysis --> step1sonar_cloud_analysis
-            step1sonar_cloud_analysis : Fetch base branch
-            step1sonar_cloud_analysis --> step2sonar_cloud_analysis
-            step2sonar_cloud_analysis : Setup Golang
-            step2sonar_cloud_analysis --> step3sonar_cloud_analysis
-            step3sonar_cloud_analysis : Download coverage artifacts
-            step3sonar_cloud_analysis --> step4sonar_cloud_analysis
-            step4sonar_cloud_analysis : Download golangcilint artifacts
-            step4sonar_cloud_analysis --> step5sonar_cloud_analysis
-            step5sonar_cloud_analysis : Check reports existence
-            step5sonar_cloud_analysis --> step6sonar_cloud_analysis
-            step6sonar_cloud_analysis : Install Dependencies
-            step6sonar_cloud_analysis --> step7sonar_cloud_analysis
-            step7sonar_cloud_analysis : merge reports
-            step7sonar_cloud_analysis --> step8sonar_cloud_analysis
-            step8sonar_cloud_analysis : SonarCloud Scan
-        }
-
         test: ${{ matrix.databases }}
         state test {
             [*] --> step0test
@@ -56,6 +34,28 @@ stateDiagram-v2
             step7test --> step8test
             step8test : Run Dashboard Tests
             step8test --> sonar_cloud_analysis
+        }
+
+        sonar_cloud_analysis: Sonar cloud analysis
+        state sonar_cloud_analysis {
+            [*] --> step0sonar_cloud_analysis
+            step0sonar_cloud_analysis : Checkout Tyk Analytics
+            step0sonar_cloud_analysis --> step1sonar_cloud_analysis
+            step1sonar_cloud_analysis : Fetch base branch
+            step1sonar_cloud_analysis --> step2sonar_cloud_analysis
+            step2sonar_cloud_analysis : Setup Golang
+            step2sonar_cloud_analysis --> step3sonar_cloud_analysis
+            step3sonar_cloud_analysis : Download coverage artifacts
+            step3sonar_cloud_analysis --> step4sonar_cloud_analysis
+            step4sonar_cloud_analysis : Download golangcilint artifacts
+            step4sonar_cloud_analysis --> step5sonar_cloud_analysis
+            step5sonar_cloud_analysis : Check reports existence
+            step5sonar_cloud_analysis --> step6sonar_cloud_analysis
+            step6sonar_cloud_analysis : Install Dependencies
+            step6sonar_cloud_analysis --> step7sonar_cloud_analysis
+            step7sonar_cloud_analysis : merge reports
+            step7sonar_cloud_analysis --> step8sonar_cloud_analysis
+            step8sonar_cloud_analysis : SonarCloud Scan
         }
     }
 

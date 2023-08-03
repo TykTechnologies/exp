@@ -1,20 +1,6 @@
 stateDiagram-v2
     workflow : release.yml - Release
     state workflow {
-        ci: Ci
-        state ci {
-            [*] --> step0ci
-            step0ci : Shallow checkout of tyk
-            step0ci --> step2ci
-            step2ci : Login to Amazon ECR
-            step2ci --> step4ci
-            step4ci : Docker metadata
-            step4ci --> step7ci
-            step7ci : CI build
-            step7ci --> sbom
-            step7ci --> tat
-        }
-
         goreleaser: ${{ matrix.golang_cross }}
         state goreleaser {
             [*] --> step0goreleaser
@@ -35,6 +21,20 @@ stateDiagram-v2
             step8goreleaser --> smoke_tests
             step8goreleaser --> upgrade_deb
             step8goreleaser --> upgrade_rpm
+        }
+
+        ci: Ci
+        state ci {
+            [*] --> step0ci
+            step0ci : Shallow checkout of tyk
+            step0ci --> step2ci
+            step2ci : Login to Amazon ECR
+            step2ci --> step4ci
+            step4ci : Docker metadata
+            step4ci --> step7ci
+            step7ci : CI build
+            step7ci --> sbom
+            step7ci --> tat
         }
 
         sbom: Sbom
