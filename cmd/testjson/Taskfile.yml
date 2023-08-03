@@ -32,7 +32,7 @@ tasks:
       - go test -race -cover ./...
       - task: build
       - testjson -i test-log.json > test-log.fixed.json
-      - gotestsum --format dots-v2 --hide-summary skipped --raw-command -- cat task-log.fixed.json
+      - gotestsum --format dots-v2 --hide-summary skipped --raw-command -- cat test-log.fixed.json
 
   benchmark:
     desc: "Run benchmarks for the Go project"
