@@ -32,9 +32,9 @@ stateDiagram-v2
             step7goreleaser --> step8goreleaser
             step8goreleaser : Delete old release assets
             step8goreleaser --> ci
-            step8goreleaser --> smoke-tests
-            step8goreleaser --> upgrade-deb
-            step8goreleaser --> upgrade-rpm
+            step8goreleaser --> smoke_tests
+            step8goreleaser --> upgrade_deb
+            step8goreleaser --> upgrade_rpm
         }
 
         sbom: Sbom
