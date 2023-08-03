@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : test-react.yml - Test React
     state workflow {
-        test: test
+        test: Test
         state test {
             [*] --> step3test
             step3test : Fetch base branch

@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : update-oas-docs.yml - Update OAS docs
     state workflow {
-        sync: tyk-oas-docs
+        sync: Tyk oas docs
         state sync {
         }
     }

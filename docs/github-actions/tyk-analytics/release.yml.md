@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : release.yml - Release
     state workflow {
-        ci: ci
+        ci: Ci
         state ci {
             [*] --> step0ci
             step0ci : Shallow checkout of tyk-analytics
@@ -40,36 +40,36 @@ stateDiagram-v2
             step8goreleaser --> upgrade-rpm
         }
 
-        sbom: sbom
+        sbom: Sbom
         state sbom {
             [*] --> Finish
         }
 
-        smoke-tests: smoke-tests
-        state smoke-tests {
-            [*] --> step1smoke-tests
-            step1smoke-tests : Run tests
+        smoke_tests: Smoke tests
+        state smoke_tests {
+            [*] --> step1smoke_tests
+            step1smoke_tests : Run tests
         }
 
-        tat: tat
+        tat: Tat
         state tat {
             [*] --> Finish
         }
 
-        upgrade-deb: upgrade-deb
-        state upgrade-deb {
-            [*] --> step4upgrade-deb
-            step4upgrade-deb : generate dockerfile
-            step4upgrade-deb --> step5upgrade-deb
-            step5upgrade-deb : install on ${{ matrix.distro }}
+        upgrade_deb: Upgrade deb
+        state upgrade_deb {
+            [*] --> step4upgrade_deb
+            step4upgrade_deb : generate dockerfile
+            step4upgrade_deb --> step5upgrade_deb
+            step5upgrade_deb : install on ${{ matrix.distro }}
         }
 
-        upgrade-rpm: upgrade-rpm
-        state upgrade-rpm {
-            [*] --> step3upgrade-rpm
-            step3upgrade-rpm : generate dockerfile
-            step3upgrade-rpm --> step4upgrade-rpm
-            step4upgrade-rpm : install on ${{ matrix.distro }}
+        upgrade_rpm: Upgrade rpm
+        state upgrade_rpm {
+            [*] --> step3upgrade_rpm
+            step3upgrade_rpm : generate dockerfile
+            step3upgrade_rpm --> step4upgrade_rpm
+            step4upgrade_rpm : install on ${{ matrix.distro }}
         }
     }
 ```

@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : vale.yaml - Linting
     state workflow {
-        prose: prose
+        prose: Prose
         state prose {
             [*] --> step0prose
             step0prose : Checkout

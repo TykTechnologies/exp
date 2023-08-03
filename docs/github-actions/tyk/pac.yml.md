@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : pac.yml - Policy as Code
     state workflow {
-        terraform: terraform
+        terraform: Terraform
         state terraform {
             [*] --> step0terraform
             step0terraform : Checkout

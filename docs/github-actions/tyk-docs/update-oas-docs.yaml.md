@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : update-oas-docs.yaml - Tyk OAS API definition fields sync
     state workflow {
-        update: update
+        update: Update
         state update {
             [*] --> step0update
             step0update : Set Repository Dispatch ENV

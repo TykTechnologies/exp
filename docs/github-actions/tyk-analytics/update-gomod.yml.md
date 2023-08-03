@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : update-gomod.yml - Update go.mod
     state workflow {
-        update: update
+        update: Update
         state update {
             [*] --> step0update
             step0update : checkout tyk-analytics/${{ github.event.client_payload.ref }}

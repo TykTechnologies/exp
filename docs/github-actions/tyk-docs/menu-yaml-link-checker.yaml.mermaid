@@ -1,7 +1,7 @@
 stateDiagram-v2
     workflow : menu-yaml-link-checker.yaml - Check for missing links in menu.yaml
     state workflow {
-        check_menu_links: check_menu_links
+        check_menu_links: Check menu links
         state check_menu_links {
             [*] --> step0check_menu_links
             step0check_menu_links : setup Hugo

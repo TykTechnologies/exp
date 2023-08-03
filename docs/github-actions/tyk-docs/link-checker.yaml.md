@@ -4,12 +4,12 @@
 stateDiagram-v2
     workflow : link-checker.yaml - Link Checker
     state workflow {
-        link-checker: link-checker
-        state link-checker {
-            [*] --> step0link-checker
-            step0link-checker : Setup Hugo
-            step0link-checker --> step2link-checker
-            step2link-checker : Check broken links
+        link_checker: Link checker
+        state link_checker {
+            [*] --> step0link_checker
+            step0link_checker : Setup Hugo
+            step0link_checker --> step2link_checker
+            step2link_checker : Check broken links
         }
     }
 ```

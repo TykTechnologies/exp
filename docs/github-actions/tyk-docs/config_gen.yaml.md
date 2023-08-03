@@ -4,20 +4,20 @@
 stateDiagram-v2
     workflow : config_gen.yaml - Config Generator
     state workflow {
-        config-gen: config-gen
-        state config-gen {
-            [*] --> step0config-gen
-            step0config-gen : Set Repository Dispatch ENV
-            step0config-gen --> step1config-gen
-            step1config-gen : Set Workflow Dispatch  env
-            step1config-gen --> step2config-gen
-            step2config-gen : Checkout
-            step2config-gen --> step3config-gen
-            step3config-gen : Checkout Config Generator Repo
-            step3config-gen --> step4config-gen
-            step4config-gen : Generate markdown
-            step4config-gen --> step5config-gen
-            step5config-gen : Raise configuration changes Pull Request
+        config_gen: Config gen
+        state config_gen {
+            [*] --> step0config_gen
+            step0config_gen : Set Repository Dispatch ENV
+            step0config_gen --> step1config_gen
+            step1config_gen : Set Workflow Dispatch  env
+            step1config_gen --> step2config_gen
+            step2config_gen : Checkout
+            step2config_gen --> step3config_gen
+            step3config_gen : Checkout Config Generator Repo
+            step3config_gen --> step4config_gen
+            step4config_gen : Generate markdown
+            step4config_gen --> step5config_gen
+            step5config_gen : Raise configuration changes Pull Request
         }
     }
 ```

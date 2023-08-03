@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : htmltest.yaml - Test HTML
     state workflow {
-        htmltest: htmltest
+        htmltest: Htmltest
         state htmltest {
             [*] --> step0htmltest
             step0htmltest : Setup Hugo

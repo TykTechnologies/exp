@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : sync-automation.yml - Sync automation
     state workflow {
-        sync: sync
+        sync: Sync
         state sync {
             [*] --> step1sync
             step1sync : sync ${{matrix.branch}} from master

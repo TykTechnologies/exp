@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : release.yml - Release
     state workflow {
-        ci: ci
+        ci: Ci
         state ci {
             [*] --> step0ci
             step0ci : Shallow checkout of tyk
@@ -40,40 +40,40 @@ stateDiagram-v2
             step8goreleaser --> upgrade-rpm
         }
 
-        sbom: sbom
+        sbom: Sbom
         state sbom {
             [*] --> Finish
         }
 
-        smoke-tests: smoke-tests
-        state smoke-tests {
-            [*] --> step1smoke-tests
-            step1smoke-tests : Run tests
+        smoke_tests: Smoke tests
+        state smoke_tests {
+            [*] --> step1smoke_tests
+            step1smoke_tests : Run tests
         }
 
-        tat: tat
+        tat: Tat
         state tat {
             [*] --> Finish
         }
 
-        upgrade-deb: upgrade-deb
-        state upgrade-deb {
-            [*] --> step4upgrade-deb
-            step4upgrade-deb : generate dockerfile
-            step4upgrade-deb --> step5upgrade-deb
-            step5upgrade-deb : install on ${{ matrix.distro }}
-            step5upgrade-deb --> step6upgrade-deb
-            step6upgrade-deb : Test the built container image with api functionality test.
+        upgrade_deb: Upgrade deb
+        state upgrade_deb {
+            [*] --> step4upgrade_deb
+            step4upgrade_deb : generate dockerfile
+            step4upgrade_deb --> step5upgrade_deb
+            step5upgrade_deb : install on ${{ matrix.distro }}
+            step5upgrade_deb --> step6upgrade_deb
+            step6upgrade_deb : Test the built container image with api functionality test.
         }
 
-        upgrade-rpm: upgrade-rpm
-        state upgrade-rpm {
-            [*] --> step3upgrade-rpm
-            step3upgrade-rpm : generate dockerfile
-            step3upgrade-rpm --> step4upgrade-rpm
-            step4upgrade-rpm : install on ${{ matrix.distro }}
-            step4upgrade-rpm --> step5upgrade-rpm
-            step5upgrade-rpm : Test the built container image with api functionality test.
+        upgrade_rpm: Upgrade rpm
+        state upgrade_rpm {
+            [*] --> step3upgrade_rpm
+            step3upgrade_rpm : generate dockerfile
+            step3upgrade_rpm --> step4upgrade_rpm
+            step4upgrade_rpm : install on ${{ matrix.distro }}
+            step4upgrade_rpm --> step5upgrade_rpm
+            step5upgrade_rpm : Test the built container image with api functionality test.
         }
     }
 ```
