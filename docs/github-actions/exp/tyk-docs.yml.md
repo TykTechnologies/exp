@@ -57,5 +57,4 @@ stateDiagram-v2
             step2gateway --> finish
         }
     }
-
 ```

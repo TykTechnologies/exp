@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : plugin-compiler-build.yml - Plugin-compiler build
     state workflow {
-        docker-build: 
+        docker-build: docker-build
         state docker-build {
             [*] --> step0docker-build
             step0docker-build : Checkout
@@ -20,5 +20,4 @@ stateDiagram-v2
             step5docker-build : Build and push to dockerhub/ECR
         }
     }
-
 ```

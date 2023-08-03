@@ -32,5 +32,4 @@ stateDiagram-v2
             step11test : SonarCloud Scan
         }
     }
-
 ```

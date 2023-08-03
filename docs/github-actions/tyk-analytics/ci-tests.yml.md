@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : ci-tests.yml - CI tests
     state workflow {
-        golangci-lint: 
+        golangci-lint: golangci-lint
         state golangci-lint {
             [*] --> step0golangci-lint
             step0golangci-lint : use gh token
@@ -17,7 +17,7 @@ stateDiagram-v2
             step3golangci-lint --> sonar-cloud-analysis
         }
 
-        sonar-cloud-analysis: 
+        sonar-cloud-analysis: sonar-cloud-analysis
         state sonar-cloud-analysis {
             [*] --> step0sonar-cloud-analysis
             step0sonar-cloud-analysis : Checkout Tyk Analytics
@@ -62,5 +62,4 @@ stateDiagram-v2
             step8test --> sonar-cloud-analysis
         }
     }
-
 ```

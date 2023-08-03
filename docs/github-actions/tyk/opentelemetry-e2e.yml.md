@@ -20,5 +20,4 @@ stateDiagram-v2
             step5e2e : Stop e2e
         }
     }
-
 ```

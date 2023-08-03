@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : release.yml - Release
     state workflow {
-        ci: 
+        ci: ci
         state ci {
             [*] --> step0ci
             step0ci : Shallow checkout of tyk
@@ -40,21 +40,15 @@ stateDiagram-v2
             step8goreleaser --> upgrade-rpm
         }
 
-        sbom: 
-        state sbom {
-        }
-
-        smoke-tests: 
+        sbom: sbom
+        smoke-tests: smoke-tests
         state smoke-tests {
             [*] --> step1smoke-tests
             step1smoke-tests : Run tests
         }
 
-        tat: 
-        state tat {
-        }
-
-        upgrade-deb: 
+        tat: tat
+        upgrade-deb: upgrade-deb
         state upgrade-deb {
             [*] --> step4upgrade-deb
             step4upgrade-deb : generate dockerfile
@@ -64,7 +58,7 @@ stateDiagram-v2
             step6upgrade-deb : Test the built container image with api functionality test.
         }
 
-        upgrade-rpm: 
+        upgrade-rpm: upgrade-rpm
         state upgrade-rpm {
             [*] --> step3upgrade-rpm
             step3upgrade-rpm : generate dockerfile
@@ -74,5 +68,4 @@ stateDiagram-v2
             step5upgrade-rpm : Test the built container image with api functionality test.
         }
     }
-
 ```

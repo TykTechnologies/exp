@@ -8,5 +8,4 @@ stateDiagram-v2
         state sync {
         }
     }
-
 ```

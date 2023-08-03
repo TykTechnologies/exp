@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : sync-automation.yml - Sync automation
     state workflow {
-        sync: 
+        sync: sync
         state sync {
             [*] --> step1sync
             step1sync : sync ${{matrix.branch}} from master
@@ -14,5 +14,4 @@ stateDiagram-v2
             step3sync : Enable automerge for the created PR
         }
     }
-
 ```

@@ -14,5 +14,4 @@ stateDiagram-v2
             step2Check-max-levels : Check navigation level does not exceed the defined maximum
         }
     }
-
 ```

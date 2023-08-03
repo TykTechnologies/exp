@@ -4,11 +4,10 @@
 stateDiagram-v2
     workflow : del-env.yml - Retiring dev env
     state workflow {
-        retire: 
+        retire: Tell gromit about deleted branch
         state retire {
             [*] --> step0retire
             step0retire : Tell gromit about deleted branch
         }
     }
-
 ```

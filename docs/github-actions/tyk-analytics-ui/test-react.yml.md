@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : test-react.yml - Test React
     state workflow {
-        test: 
+        test: test
         state test {
             [*] --> step3test
             step3test : Fetch base branch
@@ -14,5 +14,4 @@ stateDiagram-v2
             step5test : SonarCloud Scan
         }
     }
-
 ```

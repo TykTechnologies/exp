@@ -16,5 +16,4 @@ stateDiagram-v2
             step4analyze : Perform CodeQL Analysis
         }
     }
-
 ```

@@ -10,5 +10,4 @@ stateDiagram-v2
             step0pr_agent_job : PR Agent action step
         }
     }
-
 ```

@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : api-tests.yml - API integration Tests
     state workflow {
-        test: 
+        test: test
         state test {
             [*] --> step0test
             step0test : Set up Python 3.7
@@ -42,5 +42,4 @@ stateDiagram-v2
             step16test : Getting gateway logs on failure
         }
     }
-
 ```

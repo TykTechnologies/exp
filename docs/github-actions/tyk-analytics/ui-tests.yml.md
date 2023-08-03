@@ -4,7 +4,7 @@
 stateDiagram-v2
     workflow : ui-tests.yml - UI Tests
     state workflow {
-        test: 
+        test: test
         state test {
             [*] --> step0test
             step0test : Install Node.js ${{ matrix.node-version }}
@@ -44,5 +44,4 @@ stateDiagram-v2
             step17test : Xray update
         }
     }
-
 ```

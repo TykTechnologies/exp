@@ -10,5 +10,4 @@ stateDiagram-v2
             step1test_swagger_editor_validator_remote : Validate OpenAPI definition
         }
     }
-
 ```
