@@ -30,6 +30,17 @@ stateDiagram-v2
             step2dashboard --> finish
         }
 
+        gateway: Gateway docs
+        state gateway {
+            [*] --> step0gateway
+            step0gateway : Checkout Gateway
+            step0gateway --> step1gateway
+            step1gateway : Generate docs
+            step1gateway --> step2gateway
+            step2gateway : Store docs
+            step2gateway --> finish
+        }
+
         finish: Open PR against tyk-docs
         state finish {
             [*] --> step0finish
@@ -46,17 +57,6 @@ stateDiagram-v2
             step5finish : Sanitize JIRA input
             step5finish --> step6finish
             step6finish : Raise docs changes PR
-        }
-
-        gateway: Gateway docs
-        state gateway {
-            [*] --> step0gateway
-            step0gateway : Checkout Gateway
-            step0gateway --> step1gateway
-            step1gateway : Generate docs
-            step1gateway --> step2gateway
-            step2gateway : Store docs
-            step2gateway --> finish
         }
     }
 ```

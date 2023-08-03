@@ -99,8 +99,9 @@ func render(config options, m *model.Workflow, filename string) string {
 	fmt.Fprintf(buf, header, filename, m.Name)
 
 	type wrap struct {
-		K string
-		V *model.Job
+		K     string
+		V     *model.Job
+		Needs []string
 	}
 
 	// map job step onto next jobs if any
@@ -109,7 +110,7 @@ func render(config options, m *model.Workflow, filename string) string {
 	rootJobs := make([]wrap, 0, len(m.Jobs))
 	for key, job := range m.Jobs {
 		needs := job.Needs()
-		rootJobs = append(rootJobs, wrap{key, job})
+		rootJobs = append(rootJobs, wrap{key, job, needs})
 		for _, need := range needs {
 			outputs[need] = append(outputs[need], key)
 		}
@@ -122,9 +123,15 @@ func render(config options, m *model.Workflow, filename string) string {
 	})
 
 	workflows := []string{}
+	workflowsAfter := []string{}
 	for _, v := range rootJobs {
-		workflows = append(workflows, renderJob(v.K, v.V, outputs))
+		if len(v.Needs) == 0 {
+			workflows = append(workflows, renderJob(v.K, v.V, outputs))
+			continue
+		}
+		workflowsAfter = append(workflowsAfter, renderJob(v.K, v.V, outputs))
 	}
+	workflows = append(workflows, workflowsAfter...)
 
 	io.WriteString(buf, strings.Join(workflows, "\n"))
 	io.WriteString(buf, "    }\n\n")
@@ -158,6 +165,26 @@ func render(config options, m *model.Workflow, filename string) string {
 	return buf.String()
 }
 
+func sanitize(s string) string {
+	s = strings.ReplaceAll(s, "-", "_")
+	return s
+}
+
+func ucfirst(s string) string {
+	s1 := strings.ToUpper(s[0:1])
+	return s1 + s[1:]
+}
+
+func toName(s string) string {
+	if strings.Contains(s, " ") {
+		return s
+	}
+
+	s = sanitize(s)
+	s = strings.ReplaceAll(s, "_", " ")
+	return ucfirst(s)
+}
+
 func isset(strs ...string) string {
 	for _, str := range strs {
 		if str != "" {
@@ -169,6 +196,7 @@ func isset(strs ...string) string {
 
 func renderJob(key string, job *model.Job, outputs map[string][]string) string {
 	indent := "        "
+	key = sanitize(key)
 	name := isset(job.Name, key)
 	if job.Name == "" && len(job.Steps) == 1 {
 		name = isset(job.Name, job.Steps[0].Name, key)
@@ -176,16 +204,17 @@ func renderJob(key string, job *model.Job, outputs map[string][]string) string {
 
 	if len(job.Steps) == 0 {
 		result := []string{
-			indent + fmt.Sprintf("%s: %s", key, name),
+			indent + fmt.Sprintf("%s: %s", key, toName(name)),
 			indent + fmt.Sprintf("state %s {", key),
-			indent + "    [*] --> Finish",
+			indent + fmt.Sprintf("    %s_finish: Done", key),
+			indent + fmt.Sprintf("    [*] --> %s_finish", key),
 			indent + "}",
 		}
 		return strings.Join(result, "\n") + "\n"
 	}
 
 	result := []string{
-		fmt.Sprintf("%s: %s", key, name),
+		fmt.Sprintf("%s: %s", key, toName(name)),
 		fmt.Sprintf("state %s {", key),
 	}
 	type wrap struct {
@@ -216,7 +245,7 @@ func renderJob(key string, job *model.Job, outputs map[string][]string) string {
 	if val, ok := outputs[key]; ok {
 		sort.Strings(val)
 		for _, output := range val {
-			result = append(result, fmt.Sprintf("    %s --> %s", to, output))
+			result = append(result, fmt.Sprintf("    %s --> %s", to, sanitize(output)))
 		}
 	}
 
