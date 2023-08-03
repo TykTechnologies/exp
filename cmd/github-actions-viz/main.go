@@ -124,7 +124,7 @@ func render(config options, m *model.Workflow, filename string) string {
 	if config.format == "md" {
 		markdown := []string{}
 		markdown = append(markdown, "# "+m.Name)
-		markdown = append(markdown, fmt.Sprintf("```mermaid\n%s```", buf.String()))
+		markdown = append(markdown, fmt.Sprintf("```mermaid\n%s\n```", strings.TrimSpace(buf.String())))
 
 		if config.writeOut {
 			output := filename + ".md"
@@ -150,9 +150,28 @@ func render(config options, m *model.Workflow, filename string) string {
 	return buf.String()
 }
 
+func isset(strs ...string) string {
+	for _, str := range strs {
+		if str != "" {
+			return str
+		}
+	}
+	return ""
+}
+
 func renderJob(key string, job *model.Job, outputs map[string][]string) string {
+	indent := "        "
+	name := isset(job.Name, key)
+	if job.Name == "" && len(job.Steps) == 1 {
+		name = isset(job.Name, job.Steps[0].Name, key)
+	}
+
+	if len(job.Steps) == 0 {
+		return fmt.Sprintf(indent+"%s: %s", key, name)
+	}
+
 	result := []string{
-		fmt.Sprintf("%s: %s", key, job.Name),
+		fmt.Sprintf("%s: %s", key, name),
 		fmt.Sprintf("state %s {", key),
 	}
 	type wrap struct {
@@ -190,7 +209,6 @@ func renderJob(key string, job *model.Job, outputs map[string][]string) string {
 	result = append(result, "}")
 
 	buf := new(bytes.Buffer)
-	indent := "        "
 	for _, line := range result {
 		io.WriteString(buf, indent+line+"\n")
 	}
