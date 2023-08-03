@@ -151,7 +151,9 @@ func restore(cfg *options) error {
 			return toFilename(name)
 		}
 
-		fmt.Println(t.Signature)
+		if cfg.verbose {
+			fmt.Println(t.Signature)
+		}
 
 		return "funcs.go"
 	}

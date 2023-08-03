@@ -121,9 +121,10 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		}
 
 		def := &Declaration{
-			Names:  names,
-			File:   filename,
-			Source: v.getSource(node),
+			Names:         names,
+			File:          filename,
+			SelfContained: isSelfContainedType(node),
+			Source:        v.getSource(node),
 		}
 
 		for _, name := range names {

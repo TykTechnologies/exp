@@ -8,8 +8,11 @@ type (
 	DeclarationKind string
 
 	Declaration struct {
-		Kind     DeclarationKind
-		File     string
+		Kind DeclarationKind
+		File string
+
+		SelfContained bool
+
 		Imports  []string `json:",omitempty"`
 		Name     string   `json:",omitempty"`
 		Names    []string `json:",omitempty"`

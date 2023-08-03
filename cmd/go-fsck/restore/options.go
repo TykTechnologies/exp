@@ -21,6 +21,7 @@ type options struct {
 	save        bool
 	packageName string
 	statsFiles  bool
+	verbose     bool
 }
 
 func NewOptions() *options {
@@ -40,6 +41,7 @@ func NewOptions() *options {
 
 	flag.BoolVar(&cfg.save, "save", cfg.save, "write out to files")
 	flag.StringVarP(&cfg.packageName, "package-name", "p", cfg.packageName, "package name for --save")
+	flag.BoolVarP(&cfg.verbose, "", "v", cfg.verbose, "verbose output")
 
 	flag.Parse()
 

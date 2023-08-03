@@ -3,6 +3,10 @@
     "Package": "model",
     "Doc": null,
     "Imports": {
+      "ast.go": [
+        "\"go/ast\"",
+        "\"go/token\""
+      ],
       "build_tags.go": [
         "\"regexp\"",
         "\"strings\""
@@ -16,7 +20,6 @@
         "\"log\"",
         "\"os\"",
         "\"path\"",
-        "\"regexp\"",
         "\"strings\""
       ],
       "definition.go": [
@@ -41,33 +44,38 @@
       {
         "Kind": "type",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "DeclarationList",
         "Source": "type DeclarationList []*Declaration"
       },
       {
         "Kind": "type",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Definition",
         "Source": "type (\n\tDefinition struct {\n\t\tPackage\tstring\n\t\tDoc\tStringSet\n\t\tImports\tStringSet\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
       },
       {
         "Kind": "type",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "StringSet",
         "Source": "type StringSet map[string][]string"
       },
       {
         "Kind": "type",
         "File": "definition.go",
+        "SelfContained": false,
         "Names": [
           "DeclarationKind",
           "Declaration"
         ],
-        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\t\tDeclarationKind\n\t\tFile\t\tstring\n\t\tImports\t\t[]string\t`json:\",omitempty\"`\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\t\tArguments\t[]string\t`json:\",omitempty\"`\n\t\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\t\tSignature\tstring\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
+        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\tDeclarationKind\n\t\tFile\tstring\n\n\t\tSelfContained\tbool\n\n\t\tImports\t\t[]string\t`json:\",omitempty\"`\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\t\tArguments\t[]string\t`json:\",omitempty\"`\n\t\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\t\tSignature\tstring\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
       },
       {
         "Kind": "type",
         "File": "collector.go",
+        "SelfContained": true,
         "Name": "collector",
         "Source": "type collector struct {\n\tfset\t*token.FileSet\n\n\tdefinition\tmap[string]*Definition\n\tseen\t\tmap[string]*Declaration\n}"
       }
@@ -76,6 +84,7 @@
       {
         "Kind": "const",
         "File": "definition.go",
+        "SelfContained": false,
         "Names": [
           "StructKind",
           "ImportKind",
@@ -93,6 +102,7 @@
       {
         "Kind": "func",
         "File": "build_tags.go",
+        "SelfContained": false,
         "Name": "BuildTags",
         "Arguments": [
           "[]byte"
@@ -106,6 +116,7 @@
       {
         "Kind": "func",
         "File": "load.go",
+        "SelfContained": false,
         "Name": "Load",
         "Arguments": [
           "string"
@@ -120,6 +131,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "NewCollector",
         "Arguments": [
           "*token.FileSet"
@@ -133,6 +145,7 @@
       {
         "Kind": "func",
         "File": "load.go",
+        "SelfContained": false,
         "Name": "ReadFile",
         "Arguments": [
           "string"
@@ -147,6 +160,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Keys",
         "Receiver": "*Declaration",
         "Returns": [
@@ -158,6 +172,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Append",
         "Receiver": "*DeclarationList",
         "Arguments": [
@@ -169,6 +184,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Sort",
         "Receiver": "*DeclarationList",
         "Signature": "Sort ()",
@@ -177,6 +193,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Fill",
         "Receiver": "*Definition",
         "Signature": "Fill ()",
@@ -185,6 +202,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Order",
         "Receiver": "*Definition",
         "Returns": [
@@ -196,6 +214,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Sort",
         "Receiver": "*Definition",
         "Signature": "Sort ()",
@@ -204,6 +223,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Add",
         "Receiver": "*StringSet",
         "Arguments": [
@@ -215,6 +235,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "Clean",
         "Receiver": "*collector",
         "Signature": "Clean ()",
@@ -223,6 +244,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "Names",
         "Receiver": "*collector",
         "Arguments": [
@@ -237,6 +259,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "Visit",
         "Receiver": "*collector",
         "Arguments": [
@@ -248,11 +271,12 @@
           "bool"
         ],
         "Signature": "Visit (node ast.Node, push bool, stack []ast.Node) bool",
-        "Source": "func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {\n\tfile, ok := (stack[0]).(*ast.File)\n\tif !ok {\n\t\treturn true\n\t}\n\tfilename := path.Base(v.fset.Position(file.Pos()).Filename)\n\n\tpackageName := file.Name.Name\n\n\tpkg, ok := v.definition[packageName]\n\tif !ok {\n\t\tpkg = \u0026Definition{\n\t\t\tPackage: packageName,\n\t\t}\n\t\tv.definition[packageName] = pkg\n\t}\n\n\tif file.Doc != nil {\n\t\tpkg.Doc.Add(filename, v.getSource(file.Doc.List))\n\t}\n\n\tswitch node := node.(type) {\n\tcase *ast.GenDecl:\n\t\tif node.Tok == token.IMPORT {\n\t\t\tv.collectImports(filename, node, pkg)\n\t\t\treturn true\n\t\t}\n\n\t\tfor _, k := range stack {\n\t\t\t_, ok := k.(*ast.FuncDecl)\n\t\t\tif ok {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tnames := v.Names(node)\n\t\tfor _, name := range names {\n\t\t\tif v.isSeen(packageName + \".\" + name) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tdef := \u0026Declaration{\n\t\t\tNames:\tnames,\n\t\t\tFile:\tfilename,\n\t\t\tSource:\tv.getSource(node),\n\t\t}\n\n\t\tfor _, name := range names {\n\t\t\tv.appendSeen(packageName+\".\"+name, def)\n\t\t}\n\n\t\tswitch node.Tok {\n\t\tcase token.CONST:\n\t\t\tdef.Kind = ConstKind\n\t\t\tpkg.Consts.Append(def)\n\t\tcase token.VAR:\n\t\t\tdef.Kind = VarKind\n\t\t\tpkg.Vars.Append(def)\n\t\tcase token.TYPE:\n\t\t\tdef.Kind = TypeKind\n\t\t\tpkg.Types.Append(def)\n\t\t}\n\n\tcase *ast.FuncDecl:\n\t\tdef := v.collectFuncDeclaration(node, filename)\n\t\tif def != nil {\n\t\t\tkey := strings.Trim(packageName+\".\"+def.Receiver+\".\"+def.Name, \"*.\")\n\t\t\tif v.isSeen(key) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\tdefer v.appendSeen(key, def)\n\n\t\t\tpkg.Funcs.Append(def)\n\t\t}\n\n\t}\n\n\treturn true\n}"
+        "Source": "func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {\n\tfile, ok := (stack[0]).(*ast.File)\n\tif !ok {\n\t\treturn true\n\t}\n\tfilename := path.Base(v.fset.Position(file.Pos()).Filename)\n\n\tpackageName := file.Name.Name\n\n\tpkg, ok := v.definition[packageName]\n\tif !ok {\n\t\tpkg = \u0026Definition{\n\t\t\tPackage: packageName,\n\t\t}\n\t\tv.definition[packageName] = pkg\n\t}\n\n\tif file.Doc != nil {\n\t\tpkg.Doc.Add(filename, v.getSource(file.Doc.List))\n\t}\n\n\tswitch node := node.(type) {\n\tcase *ast.GenDecl:\n\t\tif node.Tok == token.IMPORT {\n\t\t\tv.collectImports(filename, node, pkg)\n\t\t\treturn true\n\t\t}\n\n\t\tfor _, k := range stack {\n\t\t\t_, ok := k.(*ast.FuncDecl)\n\t\t\tif ok {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tnames := v.Names(node)\n\t\tfor _, name := range names {\n\t\t\tif v.isSeen(packageName + \".\" + name) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tdef := \u0026Declaration{\n\t\t\tNames:\t\tnames,\n\t\t\tFile:\t\tfilename,\n\t\t\tSelfContained:\tisSelfContainedType(node),\n\t\t\tSource:\t\tv.getSource(node),\n\t\t}\n\n\t\tfor _, name := range names {\n\t\t\tv.appendSeen(packageName+\".\"+name, def)\n\t\t}\n\n\t\tswitch node.Tok {\n\t\tcase token.CONST:\n\t\t\tdef.Kind = ConstKind\n\t\t\tpkg.Consts.Append(def)\n\t\tcase token.VAR:\n\t\t\tdef.Kind = VarKind\n\t\t\tpkg.Vars.Append(def)\n\t\tcase token.TYPE:\n\t\t\tdef.Kind = TypeKind\n\t\t\tpkg.Types.Append(def)\n\t\t}\n\n\tcase *ast.FuncDecl:\n\t\tdef := v.collectFuncDeclaration(node, filename)\n\t\tif def != nil {\n\t\t\tkey := strings.Trim(packageName+\".\"+def.Receiver+\".\"+def.Name, \"*.\")\n\t\t\tif v.isSeen(key) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\tdefer v.appendSeen(key, def)\n\n\t\t\tpkg.Funcs.Append(def)\n\t\t}\n\n\t}\n\n\treturn true\n}"
       },
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "String",
         "Receiver": "DeclarationKind",
         "Returns": [
@@ -264,6 +288,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "FindKind",
         "Receiver": "DeclarationList",
         "Arguments": [
@@ -278,6 +303,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "All",
         "Receiver": "StringSet",
         "Returns": [
@@ -289,6 +315,7 @@
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "Get",
         "Receiver": "StringSet",
         "Arguments": [
@@ -303,6 +330,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "appendIfNotExists",
         "Arguments": [
           "[]string",
@@ -316,20 +344,36 @@
       },
       {
         "Kind": "func",
-        "File": "collector.go",
-        "Name": "getBuildTags",
+        "File": "ast.go",
+        "SelfContained": false,
+        "Name": "containsOtherTypes",
         "Arguments": [
-          "*ast.File"
+          "ast.Expr"
         ],
         "Returns": [
-          "[]string"
+          "bool"
         ],
-        "Signature": "getBuildTags (file *ast.File) []string",
-        "Source": "func getBuildTags(file *ast.File) []string {\n\n\tre := regexp.MustCompile(`^\\s*//\\s*\\+build\\s+(.*)$`)\n\n\tvar buildTags []string\n\n\tif file.Doc != nil {\n\t\tfor _, comment := range file.Doc.List {\n\t\t\tmatch := re.FindStringSubmatch(comment.Text)\n\t\t\tif len(match) \u003e 1 {\n\t\t\t\tbuildTags = append(buildTags, match[1])\n\t\t\t}\n\t\t}\n\t}\n\n\treturn buildTags\n}"
+        "Signature": "containsOtherTypes (expr ast.Expr) bool",
+        "Source": "func containsOtherTypes(expr ast.Expr) bool {\n\tswitch t := expr.(type) {\n\tcase *ast.Ident:\n\n\t\tif t.Obj != nil \u0026\u0026 t.Obj.Kind == ast.Typ {\n\t\t\treturn true\n\t\t}\n\tcase *ast.SelectorExpr:\n\n\t\treturn true\n\n\t}\n\n\treturn false\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "ast.go",
+        "SelfContained": false,
+        "Name": "isSelfContainedType",
+        "Arguments": [
+          "*ast.GenDecl"
+        ],
+        "Returns": [
+          "bool"
+        ],
+        "Signature": "isSelfContainedType (genDecl *ast.GenDecl) bool",
+        "Source": "func isSelfContainedType(genDecl *ast.GenDecl) bool {\n\tswitch genDecl.Tok {\n\tcase token.TYPE:\n\t\tfor _, spec := range genDecl.Specs {\n\t\t\tif typeSpec, ok := spec.(*ast.TypeSpec); ok {\n\t\t\t\tswitch t := typeSpec.Type.(type) {\n\t\t\t\tcase *ast.StructType:\n\n\t\t\t\t\tfor _, f := range t.Fields.List {\n\t\t\t\t\t\tif containsOtherTypes(f.Type) {\n\t\t\t\t\t\t\treturn false\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\tcase *ast.InterfaceType:\n\n\t\t\t\t\tfor _, f := range t.Methods.List {\n\t\t\t\t\t\tif containsOtherTypes(f.Type) {\n\t\t\t\t\t\t\treturn false\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\n\t\t\t\tdefault:\n\t\t\t\t\treturn false\n\t\t\t\t}\n\t\t\t} else {\n\n\t\t\t\treturn false\n\t\t\t}\n\t\t}\n\tcase token.VAR, token.CONST:\n\t\tfor _, spec := range genDecl.Specs {\n\t\t\tif valueSpec, ok := spec.(*ast.ValueSpec); ok {\n\n\t\t\t\tif containsOtherTypes(valueSpec.Type) {\n\t\t\t\t\treturn false\n\t\t\t\t}\n\t\t\t} else {\n\n\t\t\t\treturn false\n\t\t\t}\n\t\t}\n\tdefault:\n\n\t\treturn false\n\t}\n\n\treturn true\n}"
       },
       {
         "Kind": "func",
         "File": "definition.go",
+        "SelfContained": false,
         "Name": "getImports",
         "Receiver": "*Definition",
         "Arguments": [
@@ -344,6 +388,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "appendSeen",
         "Receiver": "*collector",
         "Arguments": [
@@ -356,6 +401,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "collectFuncDeclaration",
         "Receiver": "*collector",
         "Arguments": [
@@ -371,6 +417,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "collectImports",
         "Receiver": "*collector",
         "Arguments": [
@@ -384,6 +431,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "error",
         "Receiver": "*collector",
         "Arguments": [
@@ -396,6 +444,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "functionBindings",
         "Receiver": "*collector",
         "Arguments": [
@@ -410,6 +459,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "functionDef",
         "Receiver": "*collector",
         "Arguments": [
@@ -424,6 +474,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "getSource",
         "Receiver": "*collector",
         "Arguments": [
@@ -438,6 +489,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "identNames",
         "Receiver": "*collector",
         "Arguments": [
@@ -452,6 +504,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "isSeen",
         "Receiver": "*collector",
         "Arguments": [
@@ -466,6 +519,7 @@
       {
         "Kind": "func",
         "File": "collector.go",
+        "SelfContained": false,
         "Name": "symbolType",
         "Receiver": "*collector",
         "Arguments": [
@@ -497,6 +551,7 @@
       {
         "Kind": "func",
         "File": "load_test.go",
+        "SelfContained": false,
         "Name": "TestLoad",
         "Arguments": [
           "*testing.T"
