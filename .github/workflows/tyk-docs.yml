@@ -146,7 +146,7 @@ jobs:
         run: |
           repo=gateway
           branch=$repoBranch
-          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/gateway.md $dest
@@ -157,7 +157,7 @@ jobs:
         run: |
           repo=dashboard
           branch=$repoBranch
-          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -168,7 +168,7 @@ jobs:
         run: |
           repo=pump
           branch=master # Pump doesn't follow releng
-          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -179,7 +179,7 @@ jobs:
         run: |
           repo=mdcb
           branch=master # MDCB doesn't follow releng
-          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -223,7 +223,7 @@ jobs:
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
           commit-message: Import config/docs
-          title: '[${{ needs.sanitize.outputs.jira }}] Update documentation for ${{ github.event.inputs.release }}'
+          title: '[${{ env.jira }}] Update documentation for ${{ github.event.inputs.release }}'
           body: |
             Triggered by: ${{ github.actor }}
 
