@@ -193,7 +193,7 @@ jobs:
   finish:
     name: Open PR against tyk-docs
     needs: [sanitize, configs, dashboard, gateway]
-    if: always
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Restore artifacts
