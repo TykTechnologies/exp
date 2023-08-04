@@ -12,7 +12,7 @@ tasks:
   lint:
     desc: Lint actions
     cmds:
-      - actionlint tyk-docs.yml
+      - actionlint ./workflows/tyk-docs.yml
 
   install:actionlint:
     desc: Install actionlint
