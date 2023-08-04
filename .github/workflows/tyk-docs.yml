@@ -46,27 +46,28 @@ jobs:
              echo "No valid JIRA ID found (no dash in JIRA ID)"
              exit 1
           fi
+          echo "jira=${jira}" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.release == 'master' }}
         run: |
-             echo "docsBranch=master" >> ${GITHUB_ENV}
-             echo "repoBranch=master" >> ${GITHUB_ENV}
+             echo "docsBranch=master" >> $GITHUB_ENV
+             echo "repoBranch=master" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.release == '5.0 LTS' }}
         run: |
-             echo "docsBranch=release-5" >> ${GITHUB_ENV}
-             echo "repoBranch=release-5-lts" >> ${GITHUB_ENV}
+             echo "docsBranch=release-5" >> $GITHUB_ENV
+             echo "repoBranch=release-5-lts" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.release == '5.1' }}
         run: |
-             echo "docsBranch=release-5.1" >> ${GITHUB_ENV}
-             echo "repoBranch=release-5.1" >> ${GITHUB_ENV}
+             echo "docsBranch=release-5.1" >> $GITHUB_ENV
+             echo "repoBranch=release-5.1" >> $GITHUB_ENV
 
       - id: collect
         run: |
-             echo "jira=${jira}" >> ${GITHUB_OUTPUT}
-             echo "docsBranch=${docsBranch}" >> ${GITHUB_OUTPUT}
-             echo "repoBranch=${repoBranch}" >> ${GITHUB_OUTPUT}
+             echo "jira=${jira}" >> $GITHUB_OUTPUT
+             echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
+             echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
 
   gateway:
     needs: [sanitize]
@@ -234,7 +235,7 @@ jobs:
             Tyk Pump ${{ github.event.inputs.sync-pump }}
 
             Intended for: ${{ github.event.inputs.release }}
-            
+
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
           branch: update/${{ env.jira }}/release-${{ github.event.inputs.release }}-docs
           path: ./tyk-docs
