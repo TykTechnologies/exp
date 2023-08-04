@@ -35,9 +35,9 @@ jobs:
     name: Sanitize inputs
     runs-on: ubuntu-latest
     outputs:
-      docsBranch: $${ steps.collect.outputs.docsBranch }}
-      repoBranch: $${ steps.collect.outputs.repoBranch }}
-      jira: $${ steps.collect.outputs.jira }}
+      docsBranch: ${{ steps.collect.outputs.docsBranch }}
+      repoBranch: ${{ steps.collect.outputs.repoBranch }}
+      jira: ${{ steps.collect.outputs.jira }}
     steps:
       - name: Sanitize JIRA input
         run: |
