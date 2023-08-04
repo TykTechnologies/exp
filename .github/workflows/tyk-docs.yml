@@ -219,7 +219,7 @@ jobs:
           cp gateway-docs/* ./tyk-docs/tyk-docs/content/shared/          # x-tyk-gateway.md
 
       - name: Raise tyk-docs PR
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
           commit-message: Import config/docs
