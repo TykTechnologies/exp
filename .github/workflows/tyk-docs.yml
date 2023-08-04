@@ -42,11 +42,11 @@ jobs:
       - name: Sanitize JIRA input
         run: |
           jira=$(echo '${{ github.event.inputs.jira }}' | sed -e 's/?.*//g' | xargs -n1 basename)
-          if [ "${jira}" == *"-"* ]; then
+          if [ "$jira" == *"-"* ]; then
              echo "No valid JIRA ID found (no dash in JIRA ID)"
              exit 1
           fi
-          echo "jira=${jira}" >> $GITHUB_ENV
+          echo "jira=$jira" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.release == 'master' }}
         run: |
@@ -65,7 +65,7 @@ jobs:
 
       - id: collect
         run: |
-             echo "jira=${jira}" >> $GITHUB_OUTPUT
+             echo "jira=${ env.jira }" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
 
@@ -136,7 +136,7 @@ jobs:
 
       - name: Set up env
         run: |
-             mkdir -p ${GITHUB_WORKSPACE}/config-docs/
+             mkdir -p $GITHUB_WORKSPACE/config-docs/
              echo "repoBranch=${{ needs.sanitize.outputs.repoBranch }}" >> $GITHUB_ENV
              echo "docsBranch=${{ needs.sanitize.outputs.repoBranch }}" >> $GITHUB_ENV
 
@@ -145,22 +145,22 @@ jobs:
         if: ${{ github.event.inputs.sync-gateway }}
         run: |
           repo=gateway
-          branch=${repoBranch}
-          dest=${GITHUB_WORKSPACE}/config-docs/{$repo}-config.md
+          branch=$repoBranch
+          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js ${repo}:${branch}
-          cp /node/home/tyk-config-info-generator/info/${branch}/gateway.md ${dest}
+          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          cp /node/home/tyk-config-info-generator/info/$branch/gateway.md $dest
 
       - name: Sync Dashboard
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.sync-dashboard }}
         run: |
           repo=dashboard
-          branch=${repoBranch}
-          dest=${GITHUB_WORKSPACE}/config-docs/{$repo}-config.md
+          branch=$repoBranch
+          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js ${repo}:${branch}
-          cp /node/home/tyk-config-info-generator/info/${branch}/${repo}.md ${dest}
+          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Sync Pump
         working-directory: ./tyk-config-info-generator/src
@@ -168,10 +168,10 @@ jobs:
         run: |
           repo=pump
           branch=master # Pump doesn't follow releng
-          dest=${GITHUB_WORKSPACE}/config-docs/{$repo}-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js ${repo}:${branch}
-          cp /node/home/tyk-config-info-generator/info/${branch}/${repo}.md ${dest}
+          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Sync MDCB
         working-directory: ./tyk-config-info-generator/src
@@ -179,10 +179,10 @@ jobs:
         run: |
           repo=mdcb
           branch=master # MDCB doesn't follow releng
-          dest=${GITHUB_WORKSPACE}/config-docs/{$repo}-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/{$repo}-config.md
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js ${repo}:${branch}
-          cp /node/home/tyk-config-info-generator/info/${branch}/${repo}.md ${dest}
+          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Store docs
         uses: actions/upload-artifact@v3
