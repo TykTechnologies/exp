@@ -65,7 +65,7 @@ jobs:
 
       - id: collect
         run: |
-             echo "jira=${ env.jira }" >> $GITHUB_OUTPUT
+             echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
 
