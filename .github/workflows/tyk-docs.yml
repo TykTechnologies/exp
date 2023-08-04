@@ -26,18 +26,6 @@ on:
           - 'master'
           - '5.1'
           - '5.0 LTS'
-      docsBranch:
-        description: 'Docs PR target branch'
-        required: true
-        default: 'master'
-      repoBranch:
-        description: 'Project source branch'
-        required: true
-        default: 'master'
-      repo:
-        description: 'Project repository. Allowed values: gateway, dashboard, pump, mdcb'
-        required: true
-        default: ''
 
 env:
   GOPRIVATE: github.com/TykTechnologies
