@@ -72,7 +72,7 @@ jobs:
   gateway:
     needs: [sanitize]
     name: Gateway docs
-    if: ${{ github.event.inputs.sync-gateway }}
+    if: ${{ github.event.inputs.sync-gateway == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Gateway
@@ -98,7 +98,7 @@ jobs:
   dashboard:
     needs: [sanitize]
     name: Dashboard docs
-    if: ${{ github.event.inputs.sync-dashboard }}
+    if: ${{ github.event.inputs.sync-dashboard == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Dashboard
@@ -142,7 +142,7 @@ jobs:
 
       - name: Sync Gateway
         working-directory: ./tyk-config-info-generator/src
-        if: ${{ github.event.inputs.sync-gateway }}
+        if: ${{ github.event.inputs.sync-gateway == 'true' }}
         run: |
           repo=gateway
           branch=$repoBranch
@@ -153,7 +153,7 @@ jobs:
 
       - name: Sync Dashboard
         working-directory: ./tyk-config-info-generator/src
-        if: ${{ github.event.inputs.sync-dashboard }}
+        if: ${{ github.event.inputs.sync-dashboard == 'true' }}
         run: |
           repo=dashboard
           branch=$repoBranch
@@ -164,7 +164,7 @@ jobs:
 
       - name: Sync Pump
         working-directory: ./tyk-config-info-generator/src
-        if: ${{ github.event.inputs.sync-pump }}
+        if: ${{ github.event.inputs.sync-pump == 'true' }}
         run: |
           repo=pump
           branch=master # Pump doesn't follow releng
@@ -175,7 +175,7 @@ jobs:
 
       - name: Sync MDCB
         working-directory: ./tyk-config-info-generator/src
-        if: ${{ github.event.inputs.sync-mdcb }}
+        if: ${{ github.event.inputs.sync-mdcb == 'true' }}
         run: |
           repo=mdcb
           branch=master # MDCB doesn't follow releng
