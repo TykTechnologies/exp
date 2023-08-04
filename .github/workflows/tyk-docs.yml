@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Sanitize JIRA input
         run: |
-          jira=$(echo '${{ github.event.inputs.jira }}' | awk -e 's/\?.*//g' | xargs -n1 basename)
+          jira=$(echo '${{ github.event.inputs.jira }}' | sed -e 's/?.*//g' | xargs -n1 basename)
           if [ "${jira}" == *"-"* ]; then
              echo "No valid JIRA ID found (no dash in JIRA ID)"
              exit 1
