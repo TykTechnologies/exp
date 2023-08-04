@@ -1,0 +1,22 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: Local test actions
+    deps:
+      - install:actionlint
+    cmds:
+      - task: lint
+
+  lint:
+    desc: Lint actions
+    cmds:
+      - actionlint tyk-docs.yml
+
+  install:actionlint:
+    desc: Install actionlint
+    status:
+      - type actionlint
+    cmds:
+      - go install github.com/rhysd/actionlint/cmd/actionlint@latest
