@@ -17,6 +17,7 @@ import (
 
 	"github.com/nektos/act/pkg/model"
 	"github.com/spf13/pflag"
+	"golang.org/x/exp/slices"
 )
 
 func main() {
@@ -102,6 +103,7 @@ func render(config options, m *model.Workflow, filename string) string {
 		K     string
 		V     *model.Job
 		Needs []string
+		Next  []string
 	}
 
 	// map job step onto next jobs if any
@@ -110,13 +112,47 @@ func render(config options, m *model.Workflow, filename string) string {
 	rootJobs := make([]wrap, 0, len(m.Jobs))
 	for key, job := range m.Jobs {
 		needs := job.Needs()
-		rootJobs = append(rootJobs, wrap{key, job, needs})
 		for _, need := range needs {
 			outputs[need] = append(outputs[need], key)
 		}
+		rootJobs = append(rootJobs, wrap{key, job, needs, nil})
 	}
+	for _, job := range rootJobs {
+		job.Next = outputs[job.K]
+	}
+
 	sort.SliceStable(rootJobs, func(i, j int) bool {
-		if rootJobs[i].K < rootJobs[j].K {
+		x, y := rootJobs[i], rootJobs[j]
+		// Start with most outputs
+		if len(x.Next) < len(y.Next) {
+			return true
+		}
+		// Sort by key with same outputs
+		if x.K < y.K {
+			return true
+		}
+		return false
+	})
+
+	for k, v := range outputs {
+		fmt.Println(k, "continues into", v)
+	}
+
+	// jobs: 'needs:'
+	//
+	// finish job needs [a,b,c,setupenv]
+	// [a, b, c] need setupenv
+	//
+	// desired order: setupenv (0), a, b, c, finish
+
+	sort.SliceStable(rootJobs, func(i, j int) bool {
+		k, v := rootJobs[i], rootJobs[j]
+		if len(k.Needs) != len(v.Needs) {
+			if slices.Contains(v.Needs, k.K) {
+				return true
+			}
+		}
+		if k.K < v.K {
 			return true
 		}
 		return false

@@ -6,6 +6,7 @@ tasks:
     name: "Run tool"
     cmds:
       - goimports -w .
+      - go mod tidy
       - go fmt .
       - go install .
       - task: example
