@@ -7,8 +7,8 @@ tasks:
     deps: [ clean, fix ]
     cmds:
       - go install .
-      - rm -rf model_restored && mkdir -p model_restored
-      - go-fsck extract -i model/ -o model_restored/go-fsck.json --pretty-json
+      - rm -rf model/restored && mkdir -p model/restored
+      - go-fsck extract -i model/ -o model/restored/go-fsck.json --pretty-json
       - task: restore
       - task: example
 
@@ -25,7 +25,7 @@ tasks:
 
   restore:
     desc: "Restore from model"
-    dir: model_restored
+    dir: model/restored
     cmds:
       - go-fsck restore -p model --save
       - goimports -w .
@@ -41,6 +41,6 @@ tasks:
       - go mod tidy
 
   clean:
-    desc: "{{ .cli}}: Clean model_restored"
+    desc: "{{ .cli}}: Clean model/restored"
     cmds:
-      - rm -rf model_restored && mkdir model_restored
+      - rm -rf model/restored && mkdir model/restored

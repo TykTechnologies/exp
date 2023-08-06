@@ -10,6 +10,8 @@ import (
 	"os"
 	"path"
 	"strings"
+
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal"
 )
 
 type collector struct {
@@ -125,7 +127,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		def := &Declaration{
 			Names:         names,
 			File:          filename,
-			SelfContained: isSelfContainedType(node),
+			SelfContained: internal.IsSelfContainedType(node),
 			Source:        v.getSource(file, node),
 		}
 
@@ -275,14 +277,14 @@ func (p *collector) functionDef(fun *ast.FuncDecl) string {
 
 	paramsString := strings.Join(params, ", ")
 	if returnString != "" {
-		return fmt.Sprintf("%s (%s) %v", name, paramsString, returnString)
+		return fmt.Sprintf("%s (%s) %s", name, paramsString, returnString)
 	}
 	return fmt.Sprintf("%s (%s)", name, paramsString)
 }
 
 func (p *collector) getSource(file *ast.File, node any) string {
 	var buf strings.Builder
-	err := PrintSource(&buf, p.fset, file, node)
+	err := internal.PrintSource(internal.CommentedNode(file, node), p.fset, &buf)
 	if err != nil {
 		return ""
 	}

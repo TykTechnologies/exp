@@ -1,4 +1,4 @@
-package model_test
+package internal_test
 
 import (
 	"go/parser"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal"
 )
 
 const src = `package example
@@ -24,13 +24,13 @@ func GlobalFunc() error {
 	return err
 }`
 
-func TestPrinter(t *testing.T) {
+func TestPrint(t *testing.T) {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "", src, parser.ParseComments)
 	assert.NoError(t, err)
 
 	var out strings.Builder
-	assert.NoError(t, model.PrintSource(&out, fset, f, f))
+	assert.NoError(t, internal.PrintSource(internal.CommentedNode(f, f), fset, &out))
 
 	assert.Equal(t, src, strings.TrimSpace(out.String()))
 }

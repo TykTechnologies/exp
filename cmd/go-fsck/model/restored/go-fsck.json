@@ -3,10 +3,6 @@
     "Package": "model",
     "Doc": null,
     "Imports": {
-      "ast.go": [
-        "\"go/ast\"",
-        "\"go/token\""
-      ],
       "build_tags.go": [
         "\"regexp\"",
         "\"strings\""
@@ -20,7 +16,8 @@
         "\"log\"",
         "\"os\"",
         "\"path\"",
-        "\"strings\""
+        "\"strings\"",
+        "\"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal\""
       ],
       "definition.go": [
         "\"go/ast\"",
@@ -38,12 +35,6 @@
         "\"path\"",
         "\"sort\"",
         "\"golang.org/x/tools/go/ast/inspector\""
-      ],
-      "printer.go": [
-        "\"go/ast\"",
-        "\"go/printer\"",
-        "\"go/token\"",
-        "\"io\""
       ]
     },
     "Types": [
@@ -147,23 +138,6 @@
         ],
         "Signature": "NewCollector (fset *token.FileSet) *collector",
         "Source": "func NewCollector(fset *token.FileSet) *collector {\n\treturn \u0026collector{\n\t\tfset:\t\tfset,\n\t\tdefinition:\tmake(map[string]*Definition),\n\t\tseen:\t\tmake(map[string]*Declaration),\n\t}\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "printer.go",
-        "SelfContained": false,
-        "Name": "PrintSource",
-        "Arguments": [
-          "io.Writer",
-          "*token.FileSet",
-          "*ast.File",
-          "any"
-        ],
-        "Returns": [
-          "error"
-        ],
-        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, file *ast.File, node any) error",
-        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, file *ast.File, node any) error {\n\tval := \u0026printer.CommentedNode{\n\t\tNode:\t\tnode,\n\t\tComments:\tfile.Comments,\n\t}\n\treturn printer.Fprint(out, fset, val)\n}"
       },
       {
         "Kind": "func",
@@ -294,7 +268,7 @@
           "bool"
         ],
         "Signature": "Visit (node ast.Node, push bool, stack []ast.Node) bool",
-        "Source": "func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {\n\tfile, ok := (stack[0]).(*ast.File)\n\tif !ok {\n\t\treturn true\n\t}\n\tfilename := path.Base(v.fset.Position(file.Pos()).Filename)\n\n\tpackageName := file.Name.Name\n\n\tpkg, ok := v.definition[packageName]\n\tif !ok {\n\t\tpkg = \u0026Definition{\n\t\t\tPackage: packageName,\n\t\t}\n\t\tv.definition[packageName] = pkg\n\t}\n\n\tif file.Doc != nil {\n\t\tpkg.Doc.Add(filename, v.getSource(file, file.Doc.List))\n\t}\n\n\tswitch node := node.(type) {\n\tcase *ast.GenDecl:\n\t\tif node.Tok == token.IMPORT {\n\t\t\tv.collectImports(filename, node, pkg)\n\t\t\treturn true\n\t\t}\n\n\t\t// If there's a function declaration in the stack,\n\t\t// the var/const/struct is internal to a function.\n\t\tfor _, k := range stack {\n\t\t\t_, ok := k.(*ast.FuncDecl)\n\t\t\tif ok {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tnames := v.Names(node)\n\t\tfor _, name := range names {\n\t\t\tif v.isSeen(packageName + \".\" + name) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tdef := \u0026Declaration{\n\t\t\tNames:\t\tnames,\n\t\t\tFile:\t\tfilename,\n\t\t\tSelfContained:\tisSelfContainedType(node),\n\t\t\tSource:\t\tv.getSource(file, node),\n\t\t}\n\n\t\tfor _, name := range names {\n\t\t\tv.appendSeen(packageName+\".\"+name, def)\n\t\t}\n\n\t\tswitch node.Tok {\n\t\tcase token.CONST:\n\t\t\tdef.Kind = ConstKind\n\t\t\tpkg.Consts.Append(def)\n\t\tcase token.VAR:\n\t\t\tdef.Kind = VarKind\n\t\t\tpkg.Vars.Append(def)\n\t\tcase token.TYPE:\n\t\t\tdef.Kind = TypeKind\n\t\t\tpkg.Types.Append(def)\n\t\t}\n\n\tcase *ast.FuncDecl:\n\t\tdef := v.collectFuncDeclaration(file, node, filename, stack)\n\t\tif def != nil {\n\t\t\tkey := strings.Trim(packageName+\".\"+def.Receiver+\".\"+def.Name, \"*.\")\n\t\t\tif v.isSeen(key) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\tdefer v.appendSeen(key, def)\n\n\t\t\tpkg.Funcs.Append(def)\n\t\t}\n\n\t}\n\n\treturn true\n}"
+        "Source": "func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {\n\tfile, ok := (stack[0]).(*ast.File)\n\tif !ok {\n\t\treturn true\n\t}\n\tfilename := path.Base(v.fset.Position(file.Pos()).Filename)\n\n\tpackageName := file.Name.Name\n\n\tpkg, ok := v.definition[packageName]\n\tif !ok {\n\t\tpkg = \u0026Definition{\n\t\t\tPackage: packageName,\n\t\t}\n\t\tv.definition[packageName] = pkg\n\t}\n\n\tif file.Doc != nil {\n\t\tpkg.Doc.Add(filename, v.getSource(file, file.Doc.List))\n\t}\n\n\tswitch node := node.(type) {\n\tcase *ast.GenDecl:\n\t\tif node.Tok == token.IMPORT {\n\t\t\tv.collectImports(filename, node, pkg)\n\t\t\treturn true\n\t\t}\n\n\t\t// If there's a function declaration in the stack,\n\t\t// the var/const/struct is internal to a function.\n\t\tfor _, k := range stack {\n\t\t\t_, ok := k.(*ast.FuncDecl)\n\t\t\tif ok {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tnames := v.Names(node)\n\t\tfor _, name := range names {\n\t\t\tif v.isSeen(packageName + \".\" + name) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t}\n\n\t\tdef := \u0026Declaration{\n\t\t\tNames:\t\tnames,\n\t\t\tFile:\t\tfilename,\n\t\t\tSelfContained:\tinternal.IsSelfContainedType(node),\n\t\t\tSource:\t\tv.getSource(file, node),\n\t\t}\n\n\t\tfor _, name := range names {\n\t\t\tv.appendSeen(packageName+\".\"+name, def)\n\t\t}\n\n\t\tswitch node.Tok {\n\t\tcase token.CONST:\n\t\t\tdef.Kind = ConstKind\n\t\t\tpkg.Consts.Append(def)\n\t\tcase token.VAR:\n\t\t\tdef.Kind = VarKind\n\t\t\tpkg.Vars.Append(def)\n\t\tcase token.TYPE:\n\t\t\tdef.Kind = TypeKind\n\t\t\tpkg.Types.Append(def)\n\t\t}\n\n\tcase *ast.FuncDecl:\n\t\tdef := v.collectFuncDeclaration(file, node, filename, stack)\n\t\tif def != nil {\n\t\t\tkey := strings.Trim(packageName+\".\"+def.Receiver+\".\"+def.Name, \"*.\")\n\t\t\tif v.isSeen(key) {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\tdefer v.appendSeen(key, def)\n\n\t\t\tpkg.Funcs.Append(def)\n\t\t}\n\n\t}\n\n\treturn true\n}"
       },
       {
         "Kind": "func",
@@ -364,34 +338,6 @@
         ],
         "Signature": "appendIfNotExists (slice []string, element string) []string",
         "Source": "func appendIfNotExists(slice []string, element string) []string {\n\tfor _, s := range slice {\n\t\tif s == element {\n\t\t\treturn slice\n\t\t}\n\t}\n\treturn append(slice, element)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "ast.go",
-        "SelfContained": false,
-        "Name": "containsOtherTypes",
-        "Arguments": [
-          "ast.Expr"
-        ],
-        "Returns": [
-          "bool"
-        ],
-        "Signature": "containsOtherTypes (expr ast.Expr) bool",
-        "Source": "func containsOtherTypes(expr ast.Expr) bool {\n\tswitch t := expr.(type) {\n\tcase *ast.Ident:\n\t\t// It's an identifier; check if it's referring to another type/package.\n\t\tif t.Obj != nil \u0026\u0026 t.Obj.Kind == ast.Typ {\n\t\t\treturn true\t// It's referring to another type/package.\n\t\t}\n\tcase *ast.SelectorExpr:\n\t\t// It's a selector expression; check if it's referring to another package.\n\t\treturn true\n\t\t// Add cases for other types you want to handle.\n\t}\n\n\treturn false\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "ast.go",
-        "SelfContained": false,
-        "Name": "isSelfContainedType",
-        "Arguments": [
-          "*ast.GenDecl"
-        ],
-        "Returns": [
-          "bool"
-        ],
-        "Signature": "isSelfContainedType (genDecl *ast.GenDecl) bool",
-        "Source": "func isSelfContainedType(genDecl *ast.GenDecl) bool {\n\tswitch genDecl.Tok {\n\tcase token.TYPE:\n\t\tfor _, spec := range genDecl.Specs {\n\t\t\tif typeSpec, ok := spec.(*ast.TypeSpec); ok {\n\t\t\t\tswitch t := typeSpec.Type.(type) {\n\t\t\t\tcase *ast.StructType:\n\t\t\t\t\t// It's a struct type, check if it references other types/packages.\n\t\t\t\t\tfor _, f := range t.Fields.List {\n\t\t\t\t\t\tif containsOtherTypes(f.Type) {\n\t\t\t\t\t\t\treturn false\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\tcase *ast.InterfaceType:\n\t\t\t\t\t// It's an interface type, check if it references other types/packages.\n\t\t\t\t\tfor _, f := range t.Methods.List {\n\t\t\t\t\t\tif containsOtherTypes(f.Type) {\n\t\t\t\t\t\t\treturn false\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t// Add other cases for any other self-contained types you want to support,\n\t\t\t\t// like arrays, slices, etc., or return false if the type is not supported.\n\t\t\t\tdefault:\n\t\t\t\t\treturn false\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\t// There is a non-type spec in the GenDecl (e.g., a variable or constant declaration).\n\t\t\t\treturn false\n\t\t\t}\n\t\t}\n\tcase token.VAR, token.CONST:\n\t\tfor _, spec := range genDecl.Specs {\n\t\t\tif valueSpec, ok := spec.(*ast.ValueSpec); ok {\n\t\t\t\t// Check if the variable/constant type references other types/packages.\n\t\t\t\tif containsOtherTypes(valueSpec.Type) {\n\t\t\t\t\treturn false\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\t// There is a non-value spec in the GenDecl.\n\t\t\t\treturn false\n\t\t\t}\n\t\t}\n\tdefault:\n\t\t// The GenDecl is not a type, variable, or constant declaration.\n\t\treturn false\n\t}\n\n\t// All specs are self-contained types, variables, or constants.\n\treturn true\n}"
       },
       {
         "Kind": "func",
@@ -494,7 +440,7 @@
           "string"
         ],
         "Signature": "functionDef (fun *ast.FuncDecl) string",
-        "Source": "func (p *collector) functionDef(fun *ast.FuncDecl) string {\n\tvar fset = p.fset\n\tname := fun.Name.Name\n\tparams := make([]string, 0)\n\tfor _, p := range fun.Type.Params.List {\n\t\tvar typeNameBuf bytes.Buffer\n\t\terr := printer.Fprint(\u0026typeNameBuf, fset, p.Type)\n\t\tif err != nil {\n\t\t\tlog.Fatalf(\"failed printing %s\", err)\n\t\t}\n\t\tnames := make([]string, 0)\n\t\tfor _, name := range p.Names {\n\t\t\tnames = append(names, name.Name)\n\t\t}\n\t\tparams = append(params, fmt.Sprintf(\"%s %s\", strings.Join(names, \",\"), typeNameBuf.String()))\n\t}\n\treturns := make([]string, 0)\n\tif fun.Type.Results != nil {\n\t\tfor _, r := range fun.Type.Results.List {\n\t\t\tvar typeNameBuf bytes.Buffer\n\t\t\terr := printer.Fprint(\u0026typeNameBuf, fset, r.Type)\n\t\t\tif err != nil {\n\t\t\t\tlog.Fatalf(\"failed printing %s\", err)\n\t\t\t}\n\n\t\t\treturns = append(returns, typeNameBuf.String())\n\t\t}\n\t}\n\treturnString := \"\"\n\tif len(returns) == 1 {\n\t\treturnString = returns[0]\n\t} else if len(returns) \u003e 1 {\n\t\treturnString = fmt.Sprintf(\"(%s)\", strings.Join(returns, \", \"))\n\t}\n\n\tparamsString := strings.Join(params, \", \")\n\tif returnString != \"\" {\n\t\treturn fmt.Sprintf(\"%s (%s) %v\", name, paramsString, returnString)\n\t}\n\treturn fmt.Sprintf(\"%s (%s)\", name, paramsString)\n}"
+        "Source": "func (p *collector) functionDef(fun *ast.FuncDecl) string {\n\tvar fset = p.fset\n\tname := fun.Name.Name\n\tparams := make([]string, 0)\n\tfor _, p := range fun.Type.Params.List {\n\t\tvar typeNameBuf bytes.Buffer\n\t\terr := printer.Fprint(\u0026typeNameBuf, fset, p.Type)\n\t\tif err != nil {\n\t\t\tlog.Fatalf(\"failed printing %s\", err)\n\t\t}\n\t\tnames := make([]string, 0)\n\t\tfor _, name := range p.Names {\n\t\t\tnames = append(names, name.Name)\n\t\t}\n\t\tparams = append(params, fmt.Sprintf(\"%s %s\", strings.Join(names, \",\"), typeNameBuf.String()))\n\t}\n\treturns := make([]string, 0)\n\tif fun.Type.Results != nil {\n\t\tfor _, r := range fun.Type.Results.List {\n\t\t\tvar typeNameBuf bytes.Buffer\n\t\t\terr := printer.Fprint(\u0026typeNameBuf, fset, r.Type)\n\t\t\tif err != nil {\n\t\t\t\tlog.Fatalf(\"failed printing %s\", err)\n\t\t\t}\n\n\t\t\treturns = append(returns, typeNameBuf.String())\n\t\t}\n\t}\n\treturnString := \"\"\n\tif len(returns) == 1 {\n\t\treturnString = returns[0]\n\t} else if len(returns) \u003e 1 {\n\t\treturnString = fmt.Sprintf(\"(%s)\", strings.Join(returns, \", \"))\n\t}\n\n\tparamsString := strings.Join(params, \", \")\n\tif returnString != \"\" {\n\t\treturn fmt.Sprintf(\"%s (%s) %s\", name, paramsString, returnString)\n\t}\n\treturn fmt.Sprintf(\"%s (%s)\", name, paramsString)\n}"
       },
       {
         "Kind": "func",
@@ -510,7 +456,7 @@
           "string"
         ],
         "Signature": "getSource (file *ast.File, node any) string",
-        "Source": "func (p *collector) getSource(file *ast.File, node any) string {\n\tvar buf strings.Builder\n\terr := PrintSource(\u0026buf, p.fset, file, node)\n\tif err != nil {\n\t\treturn \"\"\n\t}\n\treturn buf.String()\n}"
+        "Source": "func (p *collector) getSource(file *ast.File, node any) string {\n\tvar buf strings.Builder\n\terr := internal.PrintSource(internal.CommentedNode(file, node), p.fset, \u0026buf)\n\tif err != nil {\n\t\treturn \"\"\n\t}\n\treturn buf.String()\n}"
       },
       {
         "Kind": "func",
@@ -568,26 +514,10 @@
         "\"github.com/kortschak/utter\"",
         "\"github.com/stretchr/testify/assert\"",
         "\"github.com/TykTechnologies/exp/cmd/go-fsck/model\""
-      ],
-      "printer_test.go": [
-        "\"go/parser\"",
-        "\"go/token\"",
-        "\"strings\"",
-        "\"testing\"",
-        "\"github.com/stretchr/testify/assert\"",
-        "\"github.com/TykTechnologies/exp/cmd/go-fsck/model\""
       ]
     },
     "Types": null,
-    "Consts": [
-      {
-        "Kind": "const",
-        "File": "printer_test.go",
-        "SelfContained": true,
-        "Name": "src",
-        "Source": "const src = `package example\n\n// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}`"
-      }
-    ],
+    "Consts": null,
     "Vars": null,
     "Funcs": [
       {
@@ -600,17 +530,6 @@
         ],
         "Signature": "TestLoad (t *testing.T)",
         "Source": "func TestLoad(t *testing.T) {\n\tutter.Config.IgnoreUnexported = true\n\tutter.Config.OmitZero = true\n\tutter.Config.ElideType = true\n\n\tdefs, err := model.Load(\".\")\n\tassert.NoError(t, err)\n\tassert.NotNil(t, defs)\n\n\t// utter.Dump(defs)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "printer_test.go",
-        "SelfContained": false,
-        "Name": "TestPrinter",
-        "Arguments": [
-          "*testing.T"
-        ],
-        "Signature": "TestPrinter (t *testing.T)",
-        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tf, err := parser.ParseFile(fset, \"\", src, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tvar out strings.Builder\n\tassert.NoError(t, model.PrintSource(\u0026out, fset, f, f))\n\n\tassert.Equal(t, src, strings.TrimSpace(out.String()))\n}"
       }
     ]
   }

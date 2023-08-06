@@ -1,13 +1,24 @@
-package model
+package internal
 
 import (
 	"go/ast"
+	"go/printer"
 	"go/token"
+	"io"
 )
 
-// gpt
+func CommentedNode(file *ast.File, node any) *printer.CommentedNode {
+	return &printer.CommentedNode{
+		Node:     node,
+		Comments: file.Comments,
+	}
+}
 
-func isSelfContainedType(genDecl *ast.GenDecl) bool {
+func PrintSource(val *printer.CommentedNode, fset *token.FileSet, out io.Writer) error {
+	return printer.Fprint(out, fset, val)
+}
+
+func IsSelfContainedType(genDecl *ast.GenDecl) bool {
 	switch genDecl.Tok {
 	case token.TYPE:
 		for _, spec := range genDecl.Specs {
@@ -16,14 +27,14 @@ func isSelfContainedType(genDecl *ast.GenDecl) bool {
 				case *ast.StructType:
 					// It's a struct type, check if it references other types/packages.
 					for _, f := range t.Fields.List {
-						if containsOtherTypes(f.Type) {
+						if ContainsOtherTypes(f.Type) {
 							return false
 						}
 					}
 				case *ast.InterfaceType:
 					// It's an interface type, check if it references other types/packages.
 					for _, f := range t.Methods.List {
-						if containsOtherTypes(f.Type) {
+						if ContainsOtherTypes(f.Type) {
 							return false
 						}
 					}
@@ -41,7 +52,7 @@ func isSelfContainedType(genDecl *ast.GenDecl) bool {
 		for _, spec := range genDecl.Specs {
 			if valueSpec, ok := spec.(*ast.ValueSpec); ok {
 				// Check if the variable/constant type references other types/packages.
-				if containsOtherTypes(valueSpec.Type) {
+				if ContainsOtherTypes(valueSpec.Type) {
 					return false
 				}
 			} else {
@@ -58,7 +69,7 @@ func isSelfContainedType(genDecl *ast.GenDecl) bool {
 	return true
 }
 
-func containsOtherTypes(expr ast.Expr) bool {
+func ContainsOtherTypes(expr ast.Expr) bool {
 	switch t := expr.(type) {
 	case *ast.Ident:
 		// It's an identifier; check if it's referring to another type/package.
