@@ -79,49 +79,45 @@ func restore(cfg *options) error {
 			return filename
 		}
 
+		// Group contructors next to type declaration
+		if strings.HasPrefix(name, "New") {
+			if len(t.Returns) > 0 {
+				first := strings.TrimLeft(t.Returns[0], `[]*`)
+				if strings.Contains(first, ".") {
+					return toFilename(strings.Split(first, ".")[1])
+				}
+				return toFilename(first)
+			}
+			return toFilename(name[3:])
+		}
+
 		// Functions can return (T, error), T, error...
 		// bind those to the type. This catches constructors
 		// based on the return type.
 
-		firstArg := map[string]string{
-			"http.ResponseWriter": "http_handlers.go",
-			"http.Handler":        "http_handlers.go",
-			"http.":               "http_util.go",
-			"jwt.":                "jwt.go",
-			"tls.":                "tls.go",
-			"user.":               "user.go",
-			"testing.":            "testing.go",
-		}
-
 		if len(t.Arguments) > 0 {
-			first := strings.TrimLeft(t.Arguments[0], `*`)
-			for arg, filename := range firstArg {
-				if strings.HasPrefix(first, arg) {
-					return filename
-				}
-			}
+			first := strings.TrimLeft(t.Arguments[0], `[]*`)
 
 			// Group by first argument type
-			if !strings.Contains(first, ".") {
-				if filename, ok := findFile(strings.TrimLeft(first, `*`)); ok {
-					return filename
-				}
+			if strings.Contains(first, ".") {
+				left := strings.Split(first, ".")[0]
+				return toFilename(left)
 			}
 		}
 
 		if len(t.Returns) > 0 {
-			first := strings.TrimLeft(t.Returns[0], `*`)
-			for arg, filename := range firstArg {
-				if strings.HasPrefix(first, arg) {
-					return filename
-				}
-			}
+			first := strings.TrimLeft(t.Returns[0], `[]*`)
 
 			// Group by first return type
-			if !strings.Contains(first, ".") {
-				if filename, ok := findFile(strings.TrimLeft(first, `*`)); ok {
-					return filename
-				}
+			if strings.Contains(first, ".") {
+				left := strings.Split(first, ".")[0]
+				return toFilename(left)
+			}
+
+			// Pointers / slices go to file, the rest is likely
+			// a go built-in type (string, etc.)
+			if ok, _ := builtInTypes[first]; !ok {
+				return toFilename(first)
 			}
 		}
 
