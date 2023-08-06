@@ -5,6 +5,7 @@ tasks:
   default:
     desc: Local test actions
     deps:
+      - install:shellcheck
       - install:actionlint
     cmds:
       - task: lint
@@ -12,7 +13,7 @@ tasks:
   lint:
     desc: Lint actions
     cmds:
-      - actionlint ./workflows/tyk-docs.yml
+      - find ./workflows -name '*.yml' | xargs -n1 actionlint -verbose
 
   install:actionlint:
     desc: Install actionlint
@@ -20,3 +21,10 @@ tasks:
       - type actionlint
     cmds:
       - go install github.com/rhysd/actionlint/cmd/actionlint@latest
+
+  install:shellcheck:
+    desc: Install shellcheck
+    status:
+      - type shellcheck
+    cmds:
+      - apt install shellcheck
