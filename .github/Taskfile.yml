@@ -13,7 +13,7 @@ tasks:
   lint:
     desc: Lint actions
     cmds:
-      - find ./workflows -name '*.yml' | xargs -n1 actionlint -verbose
+      - actionlint
 
   install:actionlint:
     desc: Install actionlint
