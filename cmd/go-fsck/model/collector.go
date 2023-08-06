@@ -115,7 +115,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	}
 
 	if file.Doc != nil {
-		pkg.Doc.Add(filename, v.getSource(file.Doc.List))
+		pkg.Doc.Add(filename, v.getSource(file, file.Doc.List))
 	}
 
 	switch node := node.(type) {
@@ -145,7 +145,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 			Names:         names,
 			File:          filename,
 			SelfContained: isSelfContainedType(node),
-			Source:        v.getSource(node),
+			Source:        v.getSource(file, node),
 		}
 
 		for _, name := range names {
@@ -165,7 +165,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		}
 
 	case *ast.FuncDecl:
-		def := v.collectFuncDeclaration(node, filename)
+		def := v.collectFuncDeclaration(file, node, filename, stack)
 		if def != nil {
 			key := strings.Trim(packageName+"."+def.Receiver+"."+def.Name, "*.")
 			if v.isSeen(key) {
@@ -218,7 +218,7 @@ func (v *collector) identNames(decl []*ast.Ident) []string {
 	return result
 }
 
-func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) *Declaration {
+func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, filename string, stack []ast.Node) *Declaration {
 	args, returns := v.functionBindings(decl)
 
 	declaration := &Declaration{
@@ -228,7 +228,7 @@ func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) 
 		Arguments: args,
 		Returns:   returns,
 		Signature: v.functionDef(decl),
-		Source:    v.getSource(decl),
+		Source:    v.getSource(file, decl),
 	}
 
 	if decl.Recv != nil {
@@ -238,9 +238,9 @@ func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) 
 	return declaration
 }
 
-func (p *collector) getSource(node any) string {
+func (p *collector) getSource(file *ast.File, node any) string {
 	var buf strings.Builder
-	err := printer.Fprint(&buf, p.fset, node)
+	err := PrintSource(&buf, p.fset, file, node)
 	if err != nil {
 		return ""
 	}

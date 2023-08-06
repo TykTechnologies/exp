@@ -27,6 +27,11 @@ const E_WARNING = "warning" // const line comment
 
 // Global func comment
 func GlobalFunc() error {
-	var err error
+	// holds the error
+	var err error // the err var
+
+	// inline comment
+	err = nil
+
 	return err
 }

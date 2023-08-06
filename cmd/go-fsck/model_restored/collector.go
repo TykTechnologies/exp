@@ -96,7 +96,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	}
 
 	if file.Doc != nil {
-		pkg.Doc.Add(filename, v.getSource(file.Doc.List))
+		pkg.Doc.Add(filename, v.getSource(file, file.Doc.List))
 	}
 
 	switch node := node.(type) {
@@ -106,6 +106,8 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 			return true
 		}
 
+		// If there's a function declaration in the stack,
+		// the var/const/struct is internal to a function.
 		for _, k := range stack {
 			_, ok := k.(*ast.FuncDecl)
 			if ok {
@@ -124,7 +126,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 			Names:         names,
 			File:          filename,
 			SelfContained: isSelfContainedType(node),
-			Source:        v.getSource(node),
+			Source:        v.getSource(file, node),
 		}
 
 		for _, name := range names {
@@ -144,7 +146,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		}
 
 	case *ast.FuncDecl:
-		def := v.collectFuncDeclaration(node, filename)
+		def := v.collectFuncDeclaration(file, node, filename, stack)
 		if def != nil {
 			key := strings.Trim(packageName+"."+def.Receiver+"."+def.Name, "*.")
 			if v.isSeen(key) {
@@ -168,7 +170,7 @@ func (v *collector) appendSeen(key string, value *Declaration) {
 	v.seen[key] = value
 }
 
-func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) *Declaration {
+func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, filename string, stack []ast.Node) *Declaration {
 	args, returns := v.functionBindings(decl)
 
 	declaration := &Declaration{
@@ -178,7 +180,7 @@ func (v *collector) collectFuncDeclaration(decl *ast.FuncDecl, filename string) 
 		Arguments: args,
 		Returns:   returns,
 		Signature: v.functionDef(decl),
-		Source:    v.getSource(decl),
+		Source:    v.getSource(file, decl),
 	}
 
 	if decl.Recv != nil {
@@ -204,7 +206,7 @@ func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Defi
 			case base:
 				fmt.Printf("WARN: removing %s alias for %s)\n", alias, importClean)
 			case "_":
-
+				// no warning
 			default:
 				fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
 				importLiteral = alias + " " + importLiteral
@@ -220,12 +222,13 @@ func (v *collector) error(format string, args ...interface{}) {
 }
 
 func (p *collector) functionBindings(decl *ast.FuncDecl) (args []string, returns []string) {
-
+	// Traverse arguments
 	for _, field := range decl.Type.Params.List {
 		argType := p.symbolType(field.Type)
 		args = appendIfNotExists(args, argType)
 	}
 
+	// Traverse return values
 	if decl.Type.Results != nil {
 		for _, field := range decl.Type.Results.List {
 			returnType := p.symbolType(field.Type)
@@ -277,9 +280,9 @@ func (p *collector) functionDef(fun *ast.FuncDecl) string {
 	return fmt.Sprintf("%s (%s)", name, paramsString)
 }
 
-func (p *collector) getSource(node any) string {
+func (p *collector) getSource(file *ast.File, node any) string {
 	var buf strings.Builder
-	err := printer.Fprint(&buf, p.fset, node)
+	err := PrintSource(&buf, p.fset, file, node)
 	if err != nil {
 		return ""
 	}
