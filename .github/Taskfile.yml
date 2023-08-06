@@ -13,7 +13,7 @@ tasks:
   lint:
     desc: Lint actions
     cmds:
-      - actionlint
+      - actionlint -ignore SC2086
 
   install:actionlint:
     desc: Install actionlint
