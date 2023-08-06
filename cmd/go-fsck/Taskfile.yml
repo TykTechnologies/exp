@@ -28,6 +28,7 @@ tasks:
     dir: model/restored
     cmds:
       - go-fsck restore -p model --save
+      - go-fsck restore -p model --stats-files | jq -s .
       - goimports -w .
       - go fmt .
       - go build .
