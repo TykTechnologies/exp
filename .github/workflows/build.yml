@@ -1,0 +1,45 @@
+name: Tyk Build with tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: Note for run
+        required: true
+        default: ''
+      branch:
+        description: Branch to source
+        required: true
+        default: 'master'
+
+env:
+  GOPRIVATE: github.com/TykTechnologies
+
+jobs:
+  test-builds:
+    name: Build release ${{ matrix.tag }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: [ "v50", "v50,v51", "v50,v51,v52", "v60" ]
+        include:
+          - tag: v50
+            container: tykio/golang-cross:1.16-bullseye
+          - tag: v51
+            container: tykio/golang-cross:1.19-bullseye
+          - tag: v52
+            container: tykio/golang-cross:1.19-bullseye
+          - tag: v60
+            container: tykio/golang-cross:1.20-bullseye
+
+    steps:
+      - name: Checkout of tyk
+        uses: actions/checkout@v3
+        with:
+          repository: TykTechnologies/tyk
+          fetch-depth: 1
+
+      - name: Build with tags
+        run: go build -tags "${{ matrix.tag }}" .
