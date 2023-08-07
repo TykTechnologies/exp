@@ -23,7 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         tag: [ 'v50', 'v50,v51', 'v50,v51,v52', 'v60' ]
-        suite: [ 'build gateway', 'build tests' ]
         include:
           - tag: v50
             go-version: '1.16'
@@ -48,9 +47,9 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Build tests
-        if: ${{ matrix.suite }} == 'build tests'
+        if: ${{ always() }}
         run: go test -c -tags '${{ matrix.tag }}' ./gateway
 
       - name: Build gateway
-        if: ${{ matrix.suite }} == 'build tests'
+        if: ${{ always() }}
         run: go build -tags '${{ matrix.tag }}' .
