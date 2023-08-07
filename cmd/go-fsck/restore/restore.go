@@ -73,7 +73,7 @@ func restore(cfg *options) error {
 		if receiver != "" {
 			filename, ok := findFile(receiver)
 			if !ok {
-				fmt.Println("Couldn't find receiver for %q", receiver)
+				fmt.Printf("Couldn't find receiver for %q", receiver)
 				os.Exit(1)
 			}
 			return filename
@@ -82,7 +82,7 @@ func restore(cfg *options) error {
 		// Group contructors next to type declaration
 		if strings.HasPrefix(name, "New") {
 			if len(t.Returns) > 0 {
-				first := strings.TrimLeft(t.Returns[0], `[]*`)
+				first := toType(t.Returns[0])
 				if strings.Contains(first, ".") {
 					return toFilename(strings.Split(first, ".")[1])
 				}
@@ -96,7 +96,7 @@ func restore(cfg *options) error {
 		// based on the return type.
 
 		if len(t.Arguments) > 0 {
-			first := strings.TrimLeft(t.Arguments[0], `[]*`)
+			first := toType(t.Arguments[0])
 
 			// Group by first argument type
 			if strings.Contains(first, ".") {
@@ -106,7 +106,7 @@ func restore(cfg *options) error {
 		}
 
 		if len(t.Returns) > 0 {
-			first := strings.TrimLeft(t.Returns[0], `[]*`)
+			first := toType(t.Returns[0])
 
 			// Group by first return type
 			if strings.Contains(first, ".") {

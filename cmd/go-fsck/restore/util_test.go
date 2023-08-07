@@ -1,6 +1,7 @@
 package restore
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,21 +13,21 @@ func TestIsConflicting(t *testing.T) {
 		want bool
 	}{
 		{
-			in:  []string{`"net/tcp"`},
-			out: false,
+			in:   []string{`"net/tcp"`},
+			want: false,
 		},
 		{
-			in:  []string{`"text/template"`},
-			out: true,
+			in:   []string{`"text/template"`},
+			want: true,
 		},
 		{
-			in:  []string{`alias "text/template"`},
-			out: true,
+			in:   []string{`alias "text/template"`},
+			want: true,
 		},
 	}
 
 	for _, tc := range testcases {
 		got := isConflicting(tc.in)
-		assert.Equal(t, tc.want, got)
+		assert.Equal(t, tc.want, got, "in: "+strings.Join(tc.in, ", "))
 	}
 }

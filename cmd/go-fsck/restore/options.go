@@ -15,8 +15,11 @@ type options struct {
 	ignoreFiles []string
 
 	removeUnexported bool
-	removeTests      bool
-	splitFunctions   bool
+
+	keepTestsOnly bool
+	removeTests   bool
+
+	splitFunctions bool
 
 	save        bool
 	packageName string
@@ -36,7 +39,8 @@ func NewOptions() *options {
 	flag.StringSliceVar(&cfg.ignoreFiles, "ignore-files", cfg.ignoreFiles, "ignore files when writing output")
 
 	flag.BoolVar(&cfg.removeUnexported, "remove-unexported", cfg.removeUnexported, "remove unexported symbols")
-	flag.BoolVar(&cfg.removeTests, "remove-tests", cfg.removeTests, "remove tests")
+	flag.BoolVar(&cfg.removeTests, "remove-tests", cfg.removeTests, "do not restore tests")
+	flag.BoolVar(&cfg.keepTestsOnly, "keep-tests-only", cfg.keepTestsOnly, "restore only tests")
 	flag.BoolVar(&cfg.statsFiles, "stats-files", cfg.statsFiles, "print files stats")
 
 	flag.BoolVar(&cfg.save, "save", cfg.save, "write out to files")

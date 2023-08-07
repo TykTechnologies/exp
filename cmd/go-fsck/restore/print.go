@@ -15,6 +15,9 @@ func printLayout(cfg *options, files map[string]model.DeclarationList, filenames
 		if cfg.removeTests && strings.HasSuffix(filename, "_test.go") {
 			continue
 		}
+		if cfg.keepTestsOnly && !strings.HasSuffix(filename, "_test.go") {
+			continue
+		}
 		decls := files[filename]
 
 		lines := []string{}

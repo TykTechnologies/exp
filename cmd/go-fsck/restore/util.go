@@ -13,6 +13,19 @@ func toFilename(s string) string {
 	return s + ".go"
 }
 
+func toType(s string) string {
+	if strings.Contains(s, "]") {
+		// Handle:
+		// - []V
+		// - map[...]V
+		// - .*]V
+		ss := strings.Split(s, "]")
+		s = ss[len(ss)-1]
+	}
+	// *T to T
+	return strings.TrimLeft(s, "*")
+}
+
 func isConflicting(names []string) bool {
 	// The problem with unexported functions is that their imports,
 	// when merged, would conflict with another function. For example,
@@ -33,7 +46,7 @@ func isConflicting(names []string) bool {
 			clean = strings.Split(name, " ")[1]
 		}
 		clean = strings.Trim(clean, `"`)
-		if ok, _ := conflicting[name]; ok {
+		if ok, _ := conflicting[clean]; ok {
 			return ok
 		}
 	}
