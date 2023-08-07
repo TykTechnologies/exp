@@ -47,7 +47,8 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Reset go.mod/sum
-        if: ${{ matrix.tag == "v50" }}
+        if: ${{ matrix.tag == 'v50' }}
+        run: |
           rm go.mod go.sum
           wget https://raw.githubusercontent.com/TykTechnologies/tyk/release-5-lts/go.mod
           wget https://raw.githubusercontent.com/TykTechnologies/tyk/release-5-lts/go.sum
