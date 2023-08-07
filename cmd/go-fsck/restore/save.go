@@ -13,8 +13,18 @@ import (
 func saveLayout(cfg *options, files map[string]model.DeclarationList, filenames []string) error {
 	for _, filename := range filenames {
 		if cfg.removeTests && strings.HasSuffix(filename, "_test.go") {
+			if cfg.verbose {
+				fmt.Println("Skipping test:", filename)
+			}
 			continue
 		}
+		if cfg.keepTestsOnly && !strings.HasSuffix(filename, "_test.go") {
+			if cfg.verbose {
+				fmt.Println("Skipping non-test:", filename)
+			}
+			continue
+		}
+
 		decls := files[filename]
 		decls.Sort()
 
@@ -26,6 +36,9 @@ func saveLayout(cfg *options, files map[string]model.DeclarationList, filenames 
 			for _, v := range decl.Imports {
 				imports[v] = true
 			}
+		}
+		if cfg.addDotImport != "" {
+			imports[fmt.Sprintf(`%s "%s"`, ".", cfg.addDotImport)] = true
 		}
 		if len(imports) > 0 {
 			lines = append(lines, "", "import (")

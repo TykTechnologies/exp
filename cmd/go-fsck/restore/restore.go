@@ -48,6 +48,8 @@ func restore(cfg *options) error {
 	classifyFunc := func(t *model.Declaration) string {
 		name := t.Name
 
+		isTestScope := strings.HasSuffix(t.File, "_test.go")
+
 		findFile := func(find string) (string, bool) {
 			for filename, f := range files {
 				for _, v := range f {
@@ -77,6 +79,14 @@ func restore(cfg *options) error {
 				os.Exit(1)
 			}
 			return filename
+		}
+
+		// Split tests by test function
+		if cfg.splitTests && isTestScope {
+			if strings.HasPrefix(name, "Test") {
+				return toFilename(name[4:])
+			}
+			return toFilename(name)
 		}
 
 		// Group contructors next to type declaration
@@ -142,7 +152,7 @@ func restore(cfg *options) error {
 			return filename
 		}
 
-		if len(t.Imports) > 0 && isConflicting(t.Imports) {
+		if len(t.Imports) > 0 && IsConflicting(t.Imports) {
 			fmt.Println("WARN: possible conflict over", name)
 			return toFilename(name)
 		}
@@ -157,6 +167,12 @@ func restore(cfg *options) error {
 	var found bool
 	var def *model.Definition
 
+	pkgs := make([]string, 0, len(defs))
+	for _, def = range defs {
+		pkgs = append(pkgs, def.Package)
+	}
+
+	// find the def for restore
 	for _, def = range defs {
 		if cfg.packageName == def.Package {
 			found = true
@@ -164,8 +180,15 @@ func restore(cfg *options) error {
 		}
 	}
 
+	if len(defs) == 1 {
+		cfg.packageName = defs[0].Package
+		def = defs[0]
+		found = true
+	}
+
 	if !found {
-		return fmt.Errorf("no such package: %s", cfg.packageName)
+		pkgList := strings.Join(pkgs, ",")
+		return fmt.Errorf("no such package: %s (have: %s)", cfg.packageName, pkgList)
 	}
 
 	for _, t := range def.Types {
@@ -201,7 +224,7 @@ func restore(cfg *options) error {
 		}
 	}
 	for _, t := range m {
-		if isConflicting(t.Imports) {
+		if IsConflicting(t.Imports) {
 			add("model_rich.go", t)
 		}
 		add("model.go", t)

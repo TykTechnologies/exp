@@ -27,7 +27,7 @@ func TestIsConflicting(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		got := isConflicting(tc.in)
+		got := IsConflicting(tc.in)
 		assert.Equal(t, tc.want, got, "in: "+strings.Join(tc.in, ", "))
 	}
 }

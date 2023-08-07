@@ -26,7 +26,7 @@ func toType(s string) string {
 	return strings.TrimLeft(s, "*")
 }
 
-func isConflicting(names []string) bool {
+func IsConflicting(names []string) bool {
 	// The problem with unexported functions is that their imports,
 	// when merged, would conflict with another function. For example,
 	// when using text/template or html/template, math/rand, crypto/rand,
