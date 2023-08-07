@@ -19,7 +19,6 @@ jobs:
   test-builds:
     name: 'Tags: ${{ matrix.tag }}'
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,13 +26,13 @@ jobs:
         suite: [ 'build gateway', 'build tests' ]
         include:
           - tag: v50
-            container: tykio/golang-cross:1.16-bullseye
+            go-version: '1.16'
           - tag: v50,v51
-            container: tykio/golang-cross:1.19-bullseye
+            go-version: '1.19'
           - tag: v50,v51,v52
-            container: tykio/golang-cross:1.19-bullseye
+            go-version: '1.19'
           - tag: v60
-            container: tykio/golang-cross:1.20-bullseye
+            go-version: '1.20'
 
     steps:
       - name: Checkout of tyk
@@ -42,6 +41,11 @@ jobs:
           repository: TykTechnologies/tyk
           ref: ${{ github.event.inputs.branch }}
           fetch-depth: 1
+
+      - name: Setup Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
 
       - name: Build tests
         if: ${{ matrix.suite }} == 'build tests'
