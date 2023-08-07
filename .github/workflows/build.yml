@@ -17,13 +17,14 @@ env:
 
 jobs:
   test-builds:
-    name: Build release ${{ matrix.tag }}
+    name: 'Tags: ${{ matrix.tag }}'
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix:
-        tag: [ "v50", "v50,v51", "v50,v51,v52", "v60" ]
+        tag: [ 'v50', 'v50,v51', 'v50,v51,v52', 'v60' ]
+        suite: [ 'build gateway', 'build tests' ]
         include:
           - tag: v50
             container: tykio/golang-cross:1.16-bullseye
@@ -39,7 +40,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: TykTechnologies/tyk
+          ref: ${{ github.event.inputs.branch }}
           fetch-depth: 1
 
-      - name: Build with tags
-        run: go build -tags "${{ matrix.tag }}" .
+      - name: Build tests
+        if: ${{ matrix.suite }} == 'build tests'
+        run: go test -c -tags '${{ matrix.tag }}' ./gateway
+
+      - name: Build gateway
+        if: ${{ matrix.suite }} == 'build tests'
+        run: go build -tags '${{ matrix.tag }}' .
