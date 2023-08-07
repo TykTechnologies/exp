@@ -28,9 +28,9 @@ jobs:
         include:
           - tag: v50
             container: tykio/golang-cross:1.16-bullseye
-          - tag: v51
+          - tag: v50,v51
             container: tykio/golang-cross:1.19-bullseye
-          - tag: v52
+          - tag: v50,v51,v52
             container: tykio/golang-cross:1.19-bullseye
           - tag: v60
             container: tykio/golang-cross:1.20-bullseye
