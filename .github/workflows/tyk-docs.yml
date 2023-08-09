@@ -42,7 +42,7 @@ jobs:
       - name: Sanitize JIRA input
         run: |
           jira=$(echo '${{ github.event.inputs.jira }}' | sed -e 's/?.*//g' | xargs -n1 basename)
-          if [ "$jira" == *"-"* ]; then
+          if [[ "$jira" == *"-"* ]]; then
              echo "No valid JIRA ID found (no dash in JIRA ID)"
              exit 1
           fi
@@ -214,7 +214,7 @@ jobs:
       - name: Write out docs
         run: |
              [ -d "gateway-docs" ]   && cp gateway-docs/{x-tyk-gateway.md,*.yml} ./tyk-docs/tyk-docs/assets/others/
-             [ -d "dashboard-docs" ] && cp dashboard-docs}/*.yml ./tyk-docs/tyk-docs/assets/others/
+             [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
 
       - name: Raise tyk-docs PR
