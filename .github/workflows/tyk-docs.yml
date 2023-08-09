@@ -26,6 +26,10 @@ on:
           - 'master'
           - '5.1'
           - '5.0 LTS'
+      note:
+        description: 'Note for PR'
+        required: true
+        default: '<none>'
 
 env:
   GOPRIVATE: github.com/TykTechnologies
@@ -234,6 +238,8 @@ jobs:
             Tyk Pump ${{ github.event.inputs.sync-pump }}
 
             Intended for: ${{ github.event.inputs.release }}
+
+            Note: ${{ github.event.inputs.note }}
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
           branch: update/${{ env.jira }}/release-${{ github.event.inputs.release }}-docs
