@@ -72,11 +72,17 @@
 
             var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
             chart.draw(data, options);
+
+            // Display the custom legend/footnote
+            var legend = document.createElement('div');
+            legend.style.textAlign = 'center';
+            legend.innerHTML = '<p>Legend: Median = ' + jsonData.Median + ' | P80 = ' + jsonData.P80 + ' | Packages = ' + jsonData.Packages + ' | Files = ' + jsonData.Files + '</p>';
+            document.body.appendChild(legend);
         }
     </script>
 </head>
 <body>
     <!-- Display the chart -->
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+    <div id="chart_div" style="width: 900px; height: 500px; margin: 0 auto;"></div>
 </body>
 </html>

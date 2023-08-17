@@ -44,7 +44,7 @@ Example:
 }
 ```
 
-Check out `chart.html` for a visualization of the data.
+Check out `examples/` for a visualization of the data.
 
 ![](examples/gateway.png)
 ![](examples/dashboard.png)
