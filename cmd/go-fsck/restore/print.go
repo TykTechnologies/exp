@@ -57,9 +57,10 @@ func printLayout(cfg *options, files map[string]model.DeclarationList, filenames
 
 		if cfg.statsFiles {
 			_ = json.NewEncoder(os.Stdout).Encode(struct {
-				File  string
-				Count int
-			}{filename, len(lines)})
+				File    string
+				Count   int
+				Symbols []string
+			}{filename, len(lines), lines})
 			continue
 		}
 

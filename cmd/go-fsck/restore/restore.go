@@ -3,6 +3,7 @@ package restore
 import (
 	"fmt"
 	"go/ast"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -83,8 +84,8 @@ func restore(cfg *options) error {
 
 		// Split tests by test function
 		if cfg.splitTests && isTestScope {
-			if strings.HasPrefix(name, "Test") {
-				return toFilename(name[4:])
+			if n, changed := strings.CutPrefix(name, "Test"); changed && n != "" {
+				return toFilename(n)
 			}
 			return toFilename(name)
 		}
@@ -92,11 +93,13 @@ func restore(cfg *options) error {
 		// Group contructors next to type declaration
 		if strings.HasPrefix(name, "New") {
 			if len(t.Returns) > 0 {
-				first := toType(t.Returns[0])
-				if strings.Contains(first, ".") {
-					return toFilename(strings.Split(first, ".")[1])
+				first, ok := toType(t.Returns[0])
+				if ok {
+					if strings.Contains(first, ".") {
+						return toFilename(strings.Split(first, ".")[1])
+					}
+					return toFilename(first)
 				}
-				return toFilename(first)
 			}
 			return toFilename(name[3:])
 		}
@@ -106,29 +109,44 @@ func restore(cfg *options) error {
 		// based on the return type.
 
 		if len(t.Arguments) > 0 {
-			first := toType(t.Arguments[0])
+			first, ok := toType(t.Arguments[0])
+			if ok {
+				// Group by first argument type
+				if strings.Contains(first, ".") {
+					left := strings.Split(first, ".")[0]
+					return toFilename(left)
+				}
 
-			// Group by first argument type
-			if strings.Contains(first, ".") {
-				left := strings.Split(first, ".")[0]
-				return toFilename(left)
+				// Pointers / slices go to file, the rest is likely
+				// a go built-in type (string, etc.)
+				if ok, _ := builtInTypes[first]; !ok {
+					return toFilename(first)
+				}
+
+				return toFilename(first)
 			}
 		}
 
 		if len(t.Returns) > 0 {
-			first := toType(t.Returns[0])
+			first, ok := toType(t.Returns[0])
 
-			// Group by first return type
-			if strings.Contains(first, ".") {
-				left := strings.Split(first, ".")[0]
-				return toFilename(left)
-			}
+			if ok {
+				// Group by first return type package (*http.Response -> http.go)
+				if strings.Contains(first, ".") {
+					left := strings.Split(first, ".")[0]
+					return toFilename(left)
+				}
 
-			// Pointers / slices go to file, the rest is likely
-			// a go built-in type (string, etc.)
-			if ok, _ := builtInTypes[first]; !ok {
+				// Pointers / slices go to file, the rest is likely
+				// a go built-in type (string, etc.)
+				if ok, _ := builtInTypes[first]; !ok {
+					return toFilename(first)
+				}
+
+				// Local types, group to type declaration
 				return toFilename(first)
 			}
+
 		}
 
 		// Test naming conventions:
@@ -152,9 +170,11 @@ func restore(cfg *options) error {
 			return filename
 		}
 
-		if len(t.Imports) > 0 && IsConflicting(t.Imports) {
-			fmt.Println("WARN: possible conflict over", name)
-			return toFilename(name)
+		if len(t.Imports) > 0 {
+			if err := IsConflicting(t.Imports); err != nil {
+				log.Printf("WARN: %s: package name conflict: %s\n", t.File, err)
+				return toFilename(name)
+			}
 		}
 
 		if cfg.verbose {
@@ -224,7 +244,7 @@ func restore(cfg *options) error {
 		}
 	}
 	for _, t := range m {
-		if IsConflicting(t.Imports) {
+		if err := IsConflicting(t.Imports); err != nil {
 			add("model_rich.go", t)
 		}
 		add("model.go", t)
