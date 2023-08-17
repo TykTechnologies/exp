@@ -13,27 +13,27 @@ Example:
   "Package": "github.com/TykTechnologies/tyk",
   "Sizes": [
     {
-      "Size": "<= 4096 KB",
+      "Size": "<= 4 KB",
       "Count": 183
     },
     {
-      "Size": "<= 8192 KB",
+      "Size": "<= 8 KB",
       "Count": 94
     },
     {
-      "Size": "<= 16384 KB",
+      "Size": "<= 16 KB",
       "Count": 70
     },
     {
-      "Size": "<= 32768 KB",
+      "Size": "<= 32 KB",
       "Count": 28
     },
     {
-      "Size": "<= 65536 KB",
+      "Size": "<= 64 KB",
       "Count": 19
     },
     {
-      "Size": "<= 131072 KB",
+      "Size": "<= 128 KB",
       "Count": 3
     }
   ],
