@@ -9,37 +9,41 @@
 
         function drawChart() {
             var jsonData = {
-              "Package": "github.com/TykTechnologies/tyk",
+              "Package": "github.com/TykTechnologies/tyk-analytics",
               "Sizes": [
                 {
                   "Size": "4 KB",
-                  "Count": 183
+                  "Count": 310
                 },
                 {
                   "Size": "8 KB",
-                  "Count": 94
+                  "Count": 43
                 },
                 {
                   "Size": "16 KB",
-                  "Count": 70
+                  "Count": 29
                 },
                 {
                   "Size": "32 KB",
-                  "Count": 28
+                  "Count": 21
                 },
                 {
                   "Size": "64 KB",
-                  "Count": 19
+                  "Count": 10
                 },
                 {
                   "Size": "128 KB",
-                  "Count": 3
+                  "Count": 1
+                },
+                {
+                  "Size": "65536 KB",
+                  "Count": 1
                 }
               ],
-              "Median": 4656,
-              "P80": 11109,
-              "Packages": 48,
-              "Files": 397
+              "Median": 915,
+              "P80": 6081,
+              "Packages": 16,
+              "Files": 415
             };
 
             var data = new google.visualization.DataTable();

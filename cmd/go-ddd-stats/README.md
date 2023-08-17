@@ -46,4 +46,5 @@ Example:
 
 Check out `chart.html` for a visualization of the data.
 
-![An example chart using the data](chart.png)
+![](example/gateway.png)
+![](example/dashboard.png)
