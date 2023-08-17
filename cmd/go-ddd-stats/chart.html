@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Load the Google Charts library -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var jsonData = {
+              "Package": "github.com/TykTechnologies/tyk",
+              "Sizes": [
+                {
+                  "Size": "4 KB",
+                  "Count": 183
+                },
+                {
+                  "Size": "8 KB",
+                  "Count": 94
+                },
+                {
+                  "Size": "16 KB",
+                  "Count": 70
+                },
+                {
+                  "Size": "32 KB",
+                  "Count": 28
+                },
+                {
+                  "Size": "64 KB",
+                  "Count": 19
+                },
+                {
+                  "Size": "128 KB",
+                  "Count": 3
+                }
+              ],
+              "Median": 4656,
+              "P80": 11109,
+              "Packages": 48,
+              "Files": 397
+            };
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Size');
+            data.addColumn('number', 'Count');
+            data.addRows(jsonData.Sizes.length);
+
+            for (var i = 0; i < jsonData.Sizes.length; i++) {
+                data.setValue(i, 0, jsonData.Sizes[i].Size);
+                data.setValue(i, 1, jsonData.Sizes[i].Count);
+            }
+
+            var options = {
+                title: 'File Size Distribution for ' + jsonData.Package,
+                hAxis: {
+                    title: 'File size',
+                    titleTextStyle: {color: '#333'}
+                },
+                vAxis: {
+                    title: 'File count',
+                    minValue: 0
+                },
+                seriesType: 'bars',
+                series: {1: {type: 'line'}}
+            };
+
+            var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+    </script>
+</head>
+<body>
+    <!-- Display the chart -->
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+</body>
+</html>

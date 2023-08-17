@@ -1,0 +1,18 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: "go-fsck: Build, test, install"
+    deps: [ fix ]
+    cmds:
+      - go install .
+      - go-ddd-stats
+
+  fix:
+    desc: "go-fsck: Clean up source tree"
+    aliases: ["fmt"]
+    cmds:
+      - goimports -w -local $(go list .) .
+      - go fmt ./...
+      - go mod tidy
