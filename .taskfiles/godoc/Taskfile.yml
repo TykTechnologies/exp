@@ -4,7 +4,6 @@ version: "3"
 tasks:
   default:
     desc: "Run godoc on all packages"
-    dir: ../..
     vars:
       package:
         sh: go mod edit -json | jq .Module.Path -r
