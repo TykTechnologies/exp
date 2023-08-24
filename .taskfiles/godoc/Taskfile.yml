@@ -13,7 +13,7 @@ tasks:
       package:
         sh: go mod edit -json | jq .Module.Path -r
       packages:
-        sh: go list ./... | sed -e 's|{{.package}}|.|g'
+        sh: go list ./... | grep -v /internal | sed -e 's|{{.package}}|.|g'
     silent: true
     cmds:
       - |
