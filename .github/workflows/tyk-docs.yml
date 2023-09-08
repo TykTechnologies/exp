@@ -24,8 +24,15 @@ on:
         type: choice
         options:
           - 'master'
+          - '5.2'
           - '5.1'
           - '5.0 LTS'
+      source:
+        description: 'Override source branch'
+        default: ''
+      destination:
+        description: 'Override destination branch'
+        default: ''
       note:
         description: 'Note for PR'
         required: true
@@ -66,6 +73,17 @@ jobs:
         run: |
              echo "docsBranch=release-5.1" >> $GITHUB_ENV
              echo "repoBranch=release-5.1" >> $GITHUB_ENV
+
+      - if: ${{ github.event.inputs.release == '5.2' }}
+        run: |
+             echo "docsBranch=release-5.2" >> $GITHUB_ENV
+             echo "repoBranch=release-5.2" >> $GITHUB_ENV
+
+      - if: ${{ github.event.inputs.source != '' }}
+        run: echo "repoBranch=${{ github.event.inputs.source }}" >> $GITHUB_ENV
+
+      - if: ${{ github.event.inputs.destination != '' }}
+        run: echo "docsBranch=${{ github.event.inputs.destination }}" >> $GITHUB_ENV
 
       - id: collect
         run: |
