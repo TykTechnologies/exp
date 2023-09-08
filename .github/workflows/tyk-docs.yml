@@ -59,30 +59,30 @@ jobs:
           fi
           echo "jira=$jira" >> $GITHUB_ENV
 
-      - if: ${{ github.event.inputs.release == 'master' }}
+      - if: github.event.inputs.release == 'master'
         run: |
              echo "docsBranch=master" >> $GITHUB_ENV
              echo "repoBranch=master" >> $GITHUB_ENV
 
-      - if: ${{ github.event.inputs.release == '5.0 LTS' }}
+      - if: github.event.inputs.release == '5.0 LTS'
         run: |
              echo "docsBranch=release-5" >> $GITHUB_ENV
              echo "repoBranch=release-5-lts" >> $GITHUB_ENV
 
-      - if: ${{ github.event.inputs.release == '5.1' }}
+      - if: github.event.inputs.release == '5.1'
         run: |
              echo "docsBranch=release-5.1" >> $GITHUB_ENV
              echo "repoBranch=release-5.1" >> $GITHUB_ENV
 
-      - if: ${{ github.event.inputs.release == '5.2' }}
+      - if: github.event.inputs.release == '5.2'
         run: |
              echo "docsBranch=release-5.2" >> $GITHUB_ENV
              echo "repoBranch=release-5.2" >> $GITHUB_ENV
 
-      - if: ${{ github.event.inputs.source != '' }}
+      - if: github.event.inputs.source != ''
         run: echo "repoBranch=${{ github.event.inputs.source }}" >> $GITHUB_ENV
 
-      - if: ${{ github.event.inputs.destination != '' }}
+      - if: github.event.inputs.destination != ''
         run: echo "docsBranch=${{ github.event.inputs.destination }}" >> $GITHUB_ENV
 
       - id: collect
