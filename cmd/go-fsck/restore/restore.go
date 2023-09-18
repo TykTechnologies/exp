@@ -246,8 +246,9 @@ func restore(cfg *options) error {
 	for _, t := range m {
 		if err := IsConflicting(t.Imports); err != nil {
 			add("model_rich.go", t)
+		} else {
+			add("model.go", t)
 		}
-		add("model.go", t)
 	}
 
 	filenames := maps.Keys(files)
