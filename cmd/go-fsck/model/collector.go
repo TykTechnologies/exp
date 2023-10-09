@@ -56,6 +56,30 @@ func (v *collector) Clean() {
 			}
 			alias(path.Base(imported), strings.Trim(imported, `"`))
 		}
+
+		// Change value to print debug output when cleaning imported
+		// package references for function declarations.
+		debugReferences := false
+
+		referenceNames := map[string]bool{}
+		for _, v := range aliases {
+			referenceNames[path.Base(v)] = true
+		}
+
+		if debugReferences {
+			fmt.Printf("Aliases: %v\n", referenceNames)
+		}
+
+		for _, fv := range def.Funcs {
+			for k, v := range fv.References {
+				if _, ok := referenceNames[k]; !ok {
+					if debugReferences {
+						fmt.Printf("Function %s reference doesn't exist in imports: %s: [%v]\n", fv.Name, k, v)
+					}
+					delete(fv.References, k)
+				}
+			}
+		}
 	}
 }
 
@@ -97,6 +121,33 @@ func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Defi
 
 		def.Imports.Add(filename, importLiteral)
 	}
+}
+
+func collectFuncReferences(funcDecl *ast.FuncDecl) map[string][]string {
+	imports := make(map[string][]string)
+
+	// Traverse the function body and look for package identifiers.
+	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.SelectorExpr:
+			// If it's a SelectorExpr, get the leftmost identifier which is the package name.
+			if ident, ok := n.X.(*ast.Ident); ok {
+				pkgName := ident.Name
+				selName := n.Sel.Name
+				imports[pkgName] = appendIfNotExists(imports[pkgName], selName)
+			}
+		case *ast.Ident:
+			// If it's an identifier, it might be a package name.
+			if obj := n.Obj; obj != nil && obj.Kind == ast.Pkg {
+				pkgName := n.Name
+				imports[pkgName] = nil // No specific symbol, just mark the package as imported.
+			}
+		}
+
+		return true
+	})
+
+	return imports
 }
 
 func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
@@ -224,13 +275,14 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 	args, returns := v.functionBindings(decl)
 
 	declaration := &Declaration{
-		Kind:      FuncKind,
-		File:      filename,
-		Name:      decl.Name.Name,
-		Arguments: args,
-		Returns:   returns,
-		Signature: v.functionDef(decl),
-		Source:    v.getSource(file, decl),
+		Kind:       FuncKind,
+		File:       filename,
+		Name:       decl.Name.Name,
+		Arguments:  args,
+		Returns:    returns,
+		Signature:  v.functionDef(decl),
+		References: collectFuncReferences(decl),
+		Source:     v.getSource(file, decl),
 	}
 
 	if decl.Recv != nil {

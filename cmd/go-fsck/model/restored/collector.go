@@ -56,6 +56,30 @@ func (v *collector) Clean() {
 			}
 			alias(path.Base(imported), strings.Trim(imported, `"`))
 		}
+
+		// Change value to print debug output when cleaning imported
+		// package references for function declarations.
+		debugReferences := false
+
+		referenceNames := map[string]bool{}
+		for _, v := range aliases {
+			referenceNames[path.Base(v)] = true
+		}
+
+		if debugReferences {
+			fmt.Printf("Aliases: %v\n", referenceNames)
+		}
+
+		for _, fv := range def.Funcs {
+			for k, v := range fv.References {
+				if _, ok := referenceNames[k]; !ok {
+					if debugReferences {
+						fmt.Printf("Function %s reference doesn't exist in imports: %s: [%v]\n", fv.Name, k, v)
+					}
+					delete(fv.References, k)
+				}
+			}
+		}
 	}
 }
 
@@ -176,13 +200,14 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 	args, returns := v.functionBindings(decl)
 
 	declaration := &Declaration{
-		Kind:      FuncKind,
-		File:      filename,
-		Name:      decl.Name.Name,
-		Arguments: args,
-		Returns:   returns,
-		Signature: v.functionDef(decl),
-		Source:    v.getSource(file, decl),
+		Kind:       FuncKind,
+		File:       filename,
+		Name:       decl.Name.Name,
+		Arguments:  args,
+		Returns:    returns,
+		Signature:  v.functionDef(decl),
+		References: collectFuncReferences(decl),
+		Source:     v.getSource(file, decl),
 	}
 
 	if decl.Recv != nil {

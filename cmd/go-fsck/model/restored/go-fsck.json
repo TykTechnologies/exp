@@ -67,7 +67,7 @@
           "DeclarationKind",
           "Declaration"
         ],
-        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\tDeclarationKind\n\t\tFile\tstring\n\n\t\tSelfContained\tbool\n\n\t\tImports\t\t[]string\t`json:\",omitempty\"`\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\t\tArguments\t[]string\t`json:\",omitempty\"`\n\t\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\t\tSignature\tstring\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
+        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\tDeclarationKind\n\t\tFile\tstring\n\n\t\tSelfContained\tbool\n\n\t\tImports\t\t[]string\t\t`json:\",omitempty\"`\n\t\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\t\tArguments\t[]string\t`json:\",omitempty\"`\n\t\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\t\tSignature\tstring\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
       },
       {
         "Kind": "type",
@@ -100,6 +100,15 @@
         "Kind": "func",
         "File": "build_tags.go",
         "SelfContained": false,
+        "References": {
+          "regexp": [
+            "MustCompile"
+          ],
+          "strings": [
+            "TrimSpace",
+            "HasPrefix"
+          ]
+        },
         "Name": "BuildTags",
         "Arguments": [
           "[]byte"
@@ -114,6 +123,36 @@
         "Kind": "func",
         "File": "load.go",
         "SelfContained": false,
+        "References": {
+          "ast": [
+            "File"
+          ],
+          "fmt": [
+            "Errorf",
+            "Printf"
+          ],
+          "inspector": [
+            "New"
+          ],
+          "os": [
+            "ReadFile"
+          ],
+          "parser": [
+            "ParseDir",
+            "ParseComments"
+          ],
+          "path": [
+            "Base",
+            "Join"
+          ],
+          "sort": [
+            "Strings",
+            "Slice"
+          ],
+          "token": [
+            "NewFileSet"
+          ]
+        },
         "Name": "Load",
         "Arguments": [
           "string"
@@ -143,6 +182,14 @@
         "Kind": "func",
         "File": "load.go",
         "SelfContained": false,
+        "References": {
+          "json": [
+            "Unmarshal"
+          ],
+          "os": [
+            "ReadFile"
+          ]
+        },
         "Name": "ReadFile",
         "Arguments": [
           "string"
@@ -158,6 +205,11 @@
         "Kind": "func",
         "File": "definition.go",
         "SelfContained": false,
+        "References": {
+          "strings": [
+            "Trim"
+          ]
+        },
         "Name": "Keys",
         "Receiver": "*Declaration",
         "Returns": [
@@ -182,6 +234,14 @@
         "Kind": "func",
         "File": "definition.go",
         "SelfContained": false,
+        "References": {
+          "ast": [
+            "IsExported"
+          ],
+          "sort": [
+            "Slice"
+          ]
+        },
         "Name": "Sort",
         "Receiver": "*DeclarationList",
         "Signature": "Sort ()",
@@ -221,6 +281,11 @@
         "Kind": "func",
         "File": "definition.go",
         "SelfContained": false,
+        "References": {
+          "slices": [
+            "Contains"
+          ]
+        },
         "Name": "Add",
         "Receiver": "*StringSet",
         "Arguments": [
@@ -233,15 +298,34 @@
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "fmt": [
+            "Printf"
+          ],
+          "path": [
+            "Base"
+          ],
+          "strings": [
+            "Contains",
+            "Split",
+            "Trim"
+          ]
+        },
         "Name": "Clean",
         "Receiver": "*collector",
         "Signature": "Clean ()",
-        "Source": "func (v *collector) Clean() {\n\tfor _, def := range v.definition {\n\t\timports := []string{}\n\t\taliases := map[string]string{}\n\n\t\talias := func(alias, dest string) bool {\n\t\t\tval, ok := aliases[alias]\n\t\t\tif ok {\n\t\t\t\tif val != dest {\n\t\t\t\t\tfmt.Printf(\"WARN: Alias mismatch: %s\\n%s (prev) != %s (new)\\n\", alias, val, dest)\n\t\t\t\t\treturn false\n\t\t\t\t}\n\t\t\t}\n\n\t\t\taliases[alias] = dest\n\t\t\timports = append(imports, dest)\n\t\t\treturn true\n\t\t}\n\n\t\tfor _, imported := range def.Imports.All() {\n\t\t\tif strings.Contains(imported, \" \") {\n\t\t\t\tline := strings.Split(imported, \" \")\n\t\t\t\talias(line[0], strings.Trim(line[1], `\"`))\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\talias(path.Base(imported), strings.Trim(imported, `\"`))\n\t\t}\n\t}\n}"
+        "Source": "func (v *collector) Clean() {\n\tfor _, def := range v.definition {\n\t\timports := []string{}\n\t\taliases := map[string]string{}\n\n\t\talias := func(alias, dest string) bool {\n\t\t\tval, ok := aliases[alias]\n\t\t\tif ok {\n\t\t\t\tif val != dest {\n\t\t\t\t\tfmt.Printf(\"WARN: Alias mismatch: %s\\n%s (prev) != %s (new)\\n\", alias, val, dest)\n\t\t\t\t\treturn false\n\t\t\t\t}\n\t\t\t}\n\n\t\t\taliases[alias] = dest\n\t\t\timports = append(imports, dest)\n\t\t\treturn true\n\t\t}\n\n\t\tfor _, imported := range def.Imports.All() {\n\t\t\tif strings.Contains(imported, \" \") {\n\t\t\t\tline := strings.Split(imported, \" \")\n\t\t\t\talias(line[0], strings.Trim(line[1], `\"`))\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\talias(path.Base(imported), strings.Trim(imported, `\"`))\n\t\t}\n\n\t\t// Change value to print debug output when cleaning imported\n\t\t// package references for function declarations.\n\t\tdebugReferences := false\n\n\t\treferenceNames := map[string]bool{}\n\t\tfor _, v := range aliases {\n\t\t\treferenceNames[path.Base(v)] = true\n\t\t}\n\n\t\tif debugReferences {\n\t\t\tfmt.Printf(\"Aliases: %v\\n\", referenceNames)\n\t\t}\n\n\t\tfor _, fv := range def.Funcs {\n\t\t\tfor k, v := range fv.References {\n\t\t\t\tif _, ok := referenceNames[k]; !ok {\n\t\t\t\t\tif debugReferences {\n\t\t\t\t\t\tfmt.Printf(\"Function %s reference doesn't exist in imports: %s: [%v]\\n\", fv.Name, k, v)\n\t\t\t\t\t}\n\t\t\t\t\tdelete(fv.References, k)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
       },
       {
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "ast": [
+            "ValueSpec",
+            "TypeSpec"
+          ]
+        },
         "Name": "Names",
         "Receiver": "*collector",
         "Arguments": [
@@ -257,6 +341,28 @@
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "ast": [
+            "File",
+            "GenDecl",
+            "FuncDecl"
+          ],
+          "internal": [
+            "IsSelfContainedType"
+          ],
+          "path": [
+            "Base"
+          ],
+          "strings": [
+            "Trim"
+          ],
+          "token": [
+            "IMPORT",
+            "CONST",
+            "VAR",
+            "TYPE"
+          ]
+        },
         "Name": "Visit",
         "Receiver": "*collector",
         "Arguments": [
@@ -313,6 +419,11 @@
         "Kind": "func",
         "File": "definition.go",
         "SelfContained": false,
+        "References": {
+          "sort": [
+            "Strings"
+          ]
+        },
         "Name": "Get",
         "Receiver": "StringSet",
         "Arguments": [
@@ -338,6 +449,29 @@
         ],
         "Signature": "appendIfNotExists (slice []string, element string) []string",
         "Source": "func appendIfNotExists(slice []string, element string) []string {\n\tfor _, s := range slice {\n\t\tif s == element {\n\t\t\treturn slice\n\t\t}\n\t}\n\treturn append(slice, element)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "collector.go",
+        "SelfContained": false,
+        "References": {
+          "ast": [
+            "Inspect",
+            "Node",
+            "SelectorExpr",
+            "Ident",
+            "Pkg"
+          ]
+        },
+        "Name": "collectFuncReferences",
+        "Arguments": [
+          "*ast.FuncDecl"
+        ],
+        "Returns": [
+          "map[string][]string"
+        ],
+        "Signature": "collectFuncReferences (funcDecl *ast.FuncDecl) map[string][]string",
+        "Source": "func collectFuncReferences(funcDecl *ast.FuncDecl) map[string][]string {\n\timports := make(map[string][]string)\n\n\t// Traverse the function body and look for package identifiers.\n\tast.Inspect(funcDecl.Body, func(node ast.Node) bool {\n\t\tswitch n := node.(type) {\n\t\tcase *ast.SelectorExpr:\n\t\t\t// If it's a SelectorExpr, get the leftmost identifier which is the package name.\n\t\t\tif ident, ok := n.X.(*ast.Ident); ok {\n\t\t\t\tpkgName := ident.Name\n\t\t\t\tselName := n.Sel.Name\n\t\t\t\timports[pkgName] = appendIfNotExists(imports[pkgName], selName)\n\t\t\t}\n\t\tcase *ast.Ident:\n\t\t\t// If it's an identifier, it might be a package name.\n\t\t\tif obj := n.Obj; obj != nil \u0026\u0026 obj.Kind == ast.Pkg {\n\t\t\t\tpkgName := n.Name\n\t\t\t\timports[pkgName] = nil\t// No specific symbol, just mark the package as imported.\n\t\t\t}\n\t\t}\n\n\t\treturn true\n\t})\n\n\treturn imports\n}"
       },
       {
         "Kind": "func",
@@ -383,12 +517,26 @@
           "*Declaration"
         ],
         "Signature": "collectFuncDeclaration (file *ast.File, decl *ast.FuncDecl, filename string, stack []ast.Node) *Declaration",
-        "Source": "func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, filename string, stack []ast.Node) *Declaration {\n\targs, returns := v.functionBindings(decl)\n\n\tdeclaration := \u0026Declaration{\n\t\tKind:\t\tFuncKind,\n\t\tFile:\t\tfilename,\n\t\tName:\t\tdecl.Name.Name,\n\t\tArguments:\targs,\n\t\tReturns:\treturns,\n\t\tSignature:\tv.functionDef(decl),\n\t\tSource:\t\tv.getSource(file, decl),\n\t}\n\n\tif decl.Recv != nil {\n\t\tdeclaration.Receiver = v.symbolType(decl.Recv.List[0].Type)\n\t}\n\n\treturn declaration\n}"
+        "Source": "func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, filename string, stack []ast.Node) *Declaration {\n\targs, returns := v.functionBindings(decl)\n\n\tdeclaration := \u0026Declaration{\n\t\tKind:\t\tFuncKind,\n\t\tFile:\t\tfilename,\n\t\tName:\t\tdecl.Name.Name,\n\t\tArguments:\targs,\n\t\tReturns:\treturns,\n\t\tSignature:\tv.functionDef(decl),\n\t\tReferences:\tcollectFuncReferences(decl),\n\t\tSource:\t\tv.getSource(file, decl),\n\t}\n\n\tif decl.Recv != nil {\n\t\tdeclaration.Receiver = v.symbolType(decl.Recv.List[0].Type)\n\t}\n\n\treturn declaration\n}"
       },
       {
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "ast": [
+            "ImportSpec"
+          ],
+          "fmt": [
+            "Printf"
+          ],
+          "path": [
+            "Base"
+          ],
+          "strings": [
+            "Trim"
+          ]
+        },
         "Name": "collectImports",
         "Receiver": "*collector",
         "Arguments": [
@@ -403,6 +551,14 @@
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "fmt": [
+            "Fprintf"
+          ],
+          "os": [
+            "Stderr"
+          ]
+        },
         "Name": "error",
         "Receiver": "*collector",
         "Arguments": [
@@ -431,6 +587,23 @@
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "bytes": [
+            "Buffer"
+          ],
+          "fmt": [
+            "Sprintf"
+          ],
+          "log": [
+            "Fatalf"
+          ],
+          "printer": [
+            "Fprint"
+          ],
+          "strings": [
+            "Join"
+          ]
+        },
         "Name": "functionDef",
         "Receiver": "*collector",
         "Arguments": [
@@ -446,6 +619,15 @@
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "internal": [
+            "PrintSource",
+            "CommentedNode"
+          ],
+          "strings": [
+            "Builder"
+          ]
+        },
         "Name": "getSource",
         "Receiver": "*collector",
         "Arguments": [
@@ -492,6 +674,20 @@
         "Kind": "func",
         "File": "collector.go",
         "SelfContained": false,
+        "References": {
+          "ast": [
+            "Ident",
+            "StarExpr",
+            "ArrayType",
+            "Ellipsis",
+            "SelectorExpr",
+            "MapType",
+            "InterfaceType"
+          ],
+          "fmt": [
+            "Sprintf"
+          ]
+        },
         "Name": "symbolType",
         "Receiver": "*collector",
         "Arguments": [
@@ -524,6 +720,18 @@
         "Kind": "func",
         "File": "load_test.go",
         "SelfContained": false,
+        "References": {
+          "assert": [
+            "NoError",
+            "NotNil"
+          ],
+          "model": [
+            "Load"
+          ],
+          "utter": [
+            "Config"
+          ]
+        },
         "Name": "TestLoad",
         "Arguments": [
           "*testing.T"
