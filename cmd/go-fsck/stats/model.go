@@ -5,8 +5,9 @@ type (
 	// the package being imported, the symbol being used and
 	// which function is referencing that symbol.
 	SymbolReference struct {
-		Import string
-		Symbol string
-		UsedBy string
+		Package string
+		Import  string
+		Symbol  string
+		UsedBy  string
 	}
 )

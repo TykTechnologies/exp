@@ -11,6 +11,7 @@ import (
 type options struct {
 	inputFile string
 	filter    string
+	all       bool
 	full      bool
 	json      bool
 	verbose   bool
@@ -23,6 +24,7 @@ func NewOptions() *options {
 
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 	flag.StringVar(&cfg.filter, "filter", cfg.filter, "filter imports that match (sql LIKE)")
+	flag.BoolVar(&cfg.all, "all", cfg.all, "traverse all packages (./...)")
 	flag.BoolVar(&cfg.full, "full", cfg.full, "resolve imports to full path")
 	flag.BoolVar(&cfg.json, "json", cfg.json, "print results as json")
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")

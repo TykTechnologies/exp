@@ -9,12 +9,38 @@ import (
 	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
 	"github.com/go-bridget/mig/db"
 
+	"github.com/TykTechnologies/exp/cmd/go-fsck/internal"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
 
+func getDefinitions(cfg *options) ([]*model.Definition, error) {
+	if !cfg.all {
+		// Read the exported go-fsck.json data.
+		return model.ReadFile(cfg.inputFile)
+	}
+
+	// list current local packages
+	packages, err := internal.ListCurrent()
+	if err != nil {
+		return nil, err
+	}
+
+	defs := []*model.Definition{}
+
+	for _, pkgPath := range packages {
+		d, err := model.Load(pkgPath)
+		if err != nil {
+			return nil, err
+		}
+
+		defs = append(defs, d...)
+	}
+
+	return defs, nil
+}
+
 func stats(cfg *options) error {
-	// Read the exported go-fsck.json data.
-	defs, err := model.ReadFile(cfg.inputFile)
+	defs, err := getDefinitions(cfg)
 	if err != nil {
 		return err
 	}
@@ -27,7 +53,7 @@ func stats(cfg *options) error {
 
 	for _, def := range defs {
 		for _, fn := range def.Funcs {
-			symbols := listUsedSymbols(fn)
+			symbols := listUsedSymbols(fn, def.Package)
 			if len(symbols) > 0 {
 				refs = append(refs, symbols...)
 			}
@@ -63,6 +89,7 @@ func stats(cfg *options) error {
 	createSymbolTables := strings.Join([]string{
 		"CREATE TABLE IF NOT EXISTS symbol_reference (",
 		"id integer primary key,",
+		"package text,",
 		"import text,",
 		"symbol text,",
 		"used_by text",
@@ -85,7 +112,7 @@ func stats(cfg *options) error {
 	}{}
 
 	if cfg.filter != "" {
-		sql = "select import, symbol, count(used_by) ref_count from symbol_reference  where import like ? group by import, symbol order by ref_count desc"
+		sql = "select import, symbol, count(used_by) ref_count from symbol_reference where import like ? group by import, symbol order by ref_count desc"
 		if err := conn.Select(&results, sql, "%"+cfg.filter+"%"); err != nil {
 			return err
 		}
@@ -122,7 +149,7 @@ func stats(cfg *options) error {
 	return nil
 }
 
-func listUsedSymbols(decl *model.Declaration) []SymbolReference {
+func listUsedSymbols(decl *model.Declaration, packageName string) []SymbolReference {
 	if len(decl.References) == 0 {
 		return nil
 	}
@@ -131,9 +158,10 @@ func listUsedSymbols(decl *model.Declaration) []SymbolReference {
 	for pkg, refs := range decl.References {
 		for _, ref := range refs {
 			symbols = append(symbols, SymbolReference{
-				Import: pkg,
-				Symbol: ref,
-				UsedBy: decl.Name,
+				Package: packageName,
+				Import:  pkg,
+				Symbol:  ref,
+				UsedBy:  decl.Name,
 			})
 		}
 	}
