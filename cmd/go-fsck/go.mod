@@ -1,6 +1,6 @@
 module github.com/TykTechnologies/exp/cmd/go-fsck
 
-go 1.19
+go 1.20
 
 require (
 	github.com/fbiville/markdown-table-formatter v0.3.0
