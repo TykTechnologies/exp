@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type collector struct {
@@ -31,48 +32,19 @@ func NewCollector(fset *token.FileSet) *collector {
 
 func (v *collector) Clean() {
 	for _, def := range v.definition {
-		imports := []string{}
-		aliases := map[string]string{}
-
-		alias := func(alias, dest string) bool {
-			val, ok := aliases[alias]
-			if ok {
-				if val != dest {
-					fmt.Printf("WARN: Alias mismatch: %s\n%s (prev) != %s (new)\n", alias, val, dest)
-					return false
-				}
-			}
-
-			aliases[alias] = dest
-			imports = append(imports, dest)
-			return true
-		}
-
-		for _, imported := range def.Imports.All() {
-			if strings.Contains(imported, " ") {
-				line := strings.Split(imported, " ")
-				alias(line[0], strings.Trim(line[1], `"`))
-				continue
-			}
-			alias(path.Base(imported), strings.Trim(imported, `"`))
-		}
+		importMap := def.Imports.Map()
 
 		// Change value to print debug output when cleaning imported
 		// package references for function declarations.
-		debugReferences := false
-
-		referenceNames := map[string]bool{}
-		for _, v := range aliases {
-			referenceNames[path.Base(v)] = true
-		}
+		debugReferences := true
 
 		if debugReferences {
-			fmt.Printf("Aliases: %v\n", referenceNames)
+			fmt.Printf("Imports: %s\n", spew.Sdump(importMap))
 		}
 
 		for _, fv := range def.Funcs {
 			for k, v := range fv.References {
-				if _, ok := referenceNames[k]; !ok {
+				if _, ok := importMap[k]; !ok {
 					if debugReferences {
 						fmt.Printf("Function %s reference doesn't exist in imports: %s: [%v]\n", fv.Name, k, v)
 					}

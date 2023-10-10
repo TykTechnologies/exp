@@ -17,6 +17,7 @@
         "\"os\"",
         "\"path\"",
         "\"strings\"",
+        "\"github.com/davecgh/go-spew/spew\"",
         "\"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal\""
       ],
       "definition.go": [
@@ -304,19 +305,14 @@
           "fmt": [
             "Printf"
           ],
-          "path": [
-            "Base"
-          ],
-          "strings": [
-            "Contains",
-            "Split",
-            "Trim"
+          "spew": [
+            "Sdump"
           ]
         },
         "Name": "Clean",
         "Receiver": "*collector",
         "Signature": "Clean ()",
-        "Source": "func (v *collector) Clean() {\n\tfor _, def := range v.definition {\n\t\timports := []string{}\n\t\taliases := map[string]string{}\n\n\t\talias := func(alias, dest string) bool {\n\t\t\tval, ok := aliases[alias]\n\t\t\tif ok {\n\t\t\t\tif val != dest {\n\t\t\t\t\tfmt.Printf(\"WARN: Alias mismatch: %s\\n%s (prev) != %s (new)\\n\", alias, val, dest)\n\t\t\t\t\treturn false\n\t\t\t\t}\n\t\t\t}\n\n\t\t\taliases[alias] = dest\n\t\t\timports = append(imports, dest)\n\t\t\treturn true\n\t\t}\n\n\t\tfor _, imported := range def.Imports.All() {\n\t\t\tif strings.Contains(imported, \" \") {\n\t\t\t\tline := strings.Split(imported, \" \")\n\t\t\t\talias(line[0], strings.Trim(line[1], `\"`))\n\t\t\t\tcontinue\n\t\t\t}\n\t\t\talias(path.Base(imported), strings.Trim(imported, `\"`))\n\t\t}\n\n\t\t// Change value to print debug output when cleaning imported\n\t\t// package references for function declarations.\n\t\tdebugReferences := false\n\n\t\treferenceNames := map[string]bool{}\n\t\tfor _, v := range aliases {\n\t\t\treferenceNames[path.Base(v)] = true\n\t\t}\n\n\t\tif debugReferences {\n\t\t\tfmt.Printf(\"Aliases: %v\\n\", referenceNames)\n\t\t}\n\n\t\tfor _, fv := range def.Funcs {\n\t\t\tfor k, v := range fv.References {\n\t\t\t\tif _, ok := referenceNames[k]; !ok {\n\t\t\t\t\tif debugReferences {\n\t\t\t\t\t\tfmt.Printf(\"Function %s reference doesn't exist in imports: %s: [%v]\\n\", fv.Name, k, v)\n\t\t\t\t\t}\n\t\t\t\t\tdelete(fv.References, k)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+        "Source": "func (v *collector) Clean() {\n\tfor _, def := range v.definition {\n\t\timportMap := def.Imports.Map()\n\n\t\t// Change value to print debug output when cleaning imported\n\t\t// package references for function declarations.\n\t\tdebugReferences := true\n\n\t\tif debugReferences {\n\t\t\tfmt.Printf(\"Imports: %s\\n\", spew.Sdump(importMap))\n\t\t}\n\n\t\tfor _, fv := range def.Funcs {\n\t\t\tfor k, v := range fv.References {\n\t\t\t\tif _, ok := importMap[k]; !ok {\n\t\t\t\t\tif debugReferences {\n\t\t\t\t\t\tfmt.Printf(\"Function %s reference doesn't exist in imports: %s: [%v]\\n\", fv.Name, k, v)\n\t\t\t\t\t}\n\t\t\t\t\tdelete(fv.References, k)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
       },
       {
         "Kind": "func",

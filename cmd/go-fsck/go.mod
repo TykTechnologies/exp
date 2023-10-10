@@ -3,6 +3,7 @@ module github.com/TykTechnologies/exp/cmd/go-fsck
 go 1.20
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/fbiville/markdown-table-formatter v0.3.0
 	github.com/go-bridget/mig v0.0.0-20230727211837-a3b5a2787f94
 	github.com/kortschak/utter v1.5.0
@@ -17,7 +18,6 @@ require (
 require (
 	github.com/SentimensRG/sigctx v0.0.0-20171003180858-c19b774db63b // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/elastic/go-licenser v0.4.0 // indirect
 	github.com/elastic/go-sysinfo v1.7.1 // indirect
