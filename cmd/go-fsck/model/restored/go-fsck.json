@@ -345,9 +345,6 @@
             "GenDecl",
             "FuncDecl"
           ],
-          "internal": [
-            "IsSelfContainedType"
-          ],
           "path": [
             "Base"
           ],
@@ -483,7 +480,8 @@
             "Node",
             "SelectorExpr",
             "Ident",
-            "Pkg"
+            "Pkg",
+            "IsExported"
           ]
         },
         "Name": "collectFuncReferences",
@@ -494,7 +492,7 @@
           "map[string][]string"
         ],
         "Signature": "collectFuncReferences (funcDecl *ast.FuncDecl) map[string][]string",
-        "Source": "func collectFuncReferences(funcDecl *ast.FuncDecl) map[string][]string {\n\timports := make(map[string][]string)\n\n\t// Traverse the function body and look for package identifiers.\n\tast.Inspect(funcDecl.Body, func(node ast.Node) bool {\n\t\tswitch n := node.(type) {\n\t\tcase *ast.SelectorExpr:\n\t\t\t// If it's a SelectorExpr, get the leftmost identifier which is the package name.\n\t\t\tif ident, ok := n.X.(*ast.Ident); ok {\n\t\t\t\tpkgName := ident.Name\n\t\t\t\tselName := n.Sel.Name\n\t\t\t\timports[pkgName] = appendIfNotExists(imports[pkgName], selName)\n\t\t\t}\n\t\tcase *ast.Ident:\n\t\t\t// If it's an identifier, it might be a package name.\n\t\t\tif obj := n.Obj; obj != nil \u0026\u0026 obj.Kind == ast.Pkg {\n\t\t\t\tpkgName := n.Name\n\t\t\t\timports[pkgName] = nil\t// No specific symbol, just mark the package as imported.\n\t\t\t}\n\t\t}\n\n\t\treturn true\n\t})\n\n\treturn imports\n}"
+        "Source": "func collectFuncReferences(funcDecl *ast.FuncDecl) map[string][]string {\n\timports := make(map[string][]string)\n\n\t// Traverse the function body and look for package identifiers.\n\tast.Inspect(funcDecl.Body, func(node ast.Node) bool {\n\t\tswitch n := node.(type) {\n\t\tcase *ast.SelectorExpr:\n\t\t\t// If it's a SelectorExpr, get the leftmost identifier which is the package name.\n\t\t\tif ident, ok := n.X.(*ast.Ident); ok {\n\t\t\t\tpkgName := ident.Name\n\n\t\t\t\tif ident.Obj != nil {\n\t\t\t\t\tif ident.Obj.Kind != ast.Pkg {\n\t\t\t\t\t\t// pkgName is not a package\n\t\t\t\t\t\treturn true\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tselName := n.Sel.Name\n\t\t\t\tif pkgName != \"internal\" \u0026\u0026 ast.IsExported(selName) {\n\t\t\t\t\timports[pkgName] = appendIfNotExists(imports[pkgName], selName)\n\t\t\t\t}\n\t\t\t}\n\t\tcase *ast.Ident:\n\t\t\t// If it's an identifier, it might be a package name.\n\t\t\tif obj := n.Obj; obj != nil \u0026\u0026 obj.Kind == ast.Pkg {\n\t\t\t\tpkgName := n.Name\n\t\t\t\timports[pkgName] = nil\t// No specific symbol, just mark the package as imported.\n\t\t\t}\n\t\t}\n\n\t\treturn true\n\t})\n\n\treturn imports\n}"
       },
       {
         "Kind": "func",
@@ -643,10 +641,6 @@
         "File": "collector.go",
         "SelfContained": false,
         "References": {
-          "internal": [
-            "PrintSource",
-            "CommentedNode"
-          ],
           "strings": [
             "Builder"
           ]

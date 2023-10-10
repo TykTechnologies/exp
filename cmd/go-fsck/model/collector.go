@@ -106,8 +106,18 @@ func collectFuncReferences(funcDecl *ast.FuncDecl) map[string][]string {
 			// If it's a SelectorExpr, get the leftmost identifier which is the package name.
 			if ident, ok := n.X.(*ast.Ident); ok {
 				pkgName := ident.Name
+
+				if ident.Obj != nil {
+					if ident.Obj.Kind != ast.Pkg {
+						// pkgName is not a package
+						return true
+					}
+				}
+
 				selName := n.Sel.Name
-				imports[pkgName] = appendIfNotExists(imports[pkgName], selName)
+				if pkgName != "internal" && ast.IsExported(selName) {
+					imports[pkgName] = appendIfNotExists(imports[pkgName], selName)
+				}
 			}
 		case *ast.Ident:
 			// If it's an identifier, it might be a package name.
