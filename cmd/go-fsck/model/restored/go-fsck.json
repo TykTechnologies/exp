@@ -20,7 +20,9 @@
         "\"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal\""
       ],
       "definition.go": [
+        "\"fmt\"",
         "\"go/ast\"",
+        "\"path\"",
         "\"sort\"",
         "\"strings\"",
         "\"golang.org/x/exp/slices\""
@@ -434,6 +436,31 @@
         ],
         "Signature": "Get (key string) []string",
         "Source": "func (i StringSet) Get(key string) []string {\n\tval, _ := i[key]\n\tif val != nil {\n\t\tsort.Strings(val)\n\t}\n\treturn val\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "SelfContained": false,
+        "References": {
+          "fmt": [
+            "Printf"
+          ],
+          "path": [
+            "Base"
+          ],
+          "strings": [
+            "Contains",
+            "Split",
+            "Trim"
+          ]
+        },
+        "Name": "Map",
+        "Receiver": "StringSet",
+        "Returns": [
+          "map[string]string"
+        ],
+        "Signature": "Map () map[string]string",
+        "Source": "// Map returns a map with the short package name as the key\n// and the full import path as the value.\nfunc (i StringSet) Map() map[string]string {\n\tresult := map[string]string{}\n\timports := i.All()\n\n\tfor _, imported := range imports {\n\t\tvar short, long string\n\n\t\t// aliased package\n\t\tif strings.Contains(imported, \" \") {\n\t\t\tline := strings.Split(imported, \" \")\n\t\t\tshort, long = line[0], strings.Trim(line[1], `\"`)\n\t\t} else {\n\t\t\tlong = strings.Trim(imported, `\"`)\n\t\t\tshort = path.Base(long)\n\t\t}\n\n\t\tval, ok := result[short]\n\t\tif ok \u0026\u0026 val != long {\n\t\t\tfmt.Printf(\"WARN: Import path conflict: %s\\n%s (prev) != %s (new)\\n\", short, val, long)\n\t\t}\n\n\t\tresult[short] = long\n\t}\n\n\treturn result\n}"
       },
       {
         "Kind": "func",

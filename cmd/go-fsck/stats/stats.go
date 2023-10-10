@@ -2,6 +2,7 @@ package stats
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -12,10 +13,15 @@ import (
 )
 
 func stats(cfg *options) error {
+	// Read the exported go-fsck.json data.
 	defs, err := model.ReadFile(cfg.inputFile)
 	if err != nil {
 		return err
 	}
+
+	// Loop through function definitions and collect referenced
+	// symbols from imported packages. Globals may also reference
+	// imported packages so this is incomplete at the moment.
 
 	refs := []SymbolReference{}
 
@@ -26,10 +32,23 @@ func stats(cfg *options) error {
 				refs = append(refs, symbols...)
 			}
 		}
+
+		// Convert package refs into full import paths.
+		if cfg.full {
+			importMap := def.Imports.Map()
+			for k, v := range refs {
+				long, ok := importMap[v.Import]
+				if ok {
+					refs[k].Import = long
+				}
+			}
+		}
 	}
 
 	ctx := context.Background()
 
+	// Aggregations are easier in SQL... the following block of
+	// code uses an sqlite in-memory database to do some math.
 	conn, err := db.ConnectWithOptions(ctx, db.Options{
 		Credentials: db.Credentials{
 			DSN:    ":memory:",
@@ -60,20 +79,37 @@ func stats(cfg *options) error {
 	}
 
 	results := []struct {
-		Import     string
-		Symbol     string
-		References int `db:"ref_count"`
+		Import string
+		Symbol string
+		Used   int `db:"ref_count"`
 	}{}
 
-	sql = "select import, symbol, count(used_by) ref_count from symbol_reference group by import, symbol order by ref_count desc"
-
-	if err := conn.Select(&results, sql); err != nil {
-		return err
+	if cfg.filter != "" {
+		sql = "select import, symbol, count(used_by) ref_count from symbol_reference  where import like ? group by import, symbol order by ref_count desc"
+		if err := conn.Select(&results, sql, "%"+cfg.filter+"%"); err != nil {
+			return err
+		}
+	} else {
+		sql = "select import, symbol, count(used_by) ref_count from symbol_reference group by import, symbol order by ref_count desc"
+		if err := conn.Select(&results, sql); err != nil {
+			return err
+		}
 	}
 
+	// Encode aggregated results as json.
+	if cfg.json {
+		b, err := json.Marshal(results)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(b))
+		return nil
+	}
+
+	// Encode aggregated results as markdown.
 	table := [][]string{}
 	for _, result := range results {
-		table = append(table, []string{result.Import, result.Symbol, fmt.Sprint(result.References)})
+		table = append(table, []string{result.Import, result.Symbol, fmt.Sprint(result.Used)})
 	}
 
 	t, err := markdown.NewTableFormatterBuilder().WithPrettyPrint().Build("Import", "Symbol", "Used").Format(table)

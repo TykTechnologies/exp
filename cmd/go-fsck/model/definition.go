@@ -1,7 +1,9 @@
 package model
 
 import (
+	"fmt"
 	"go/ast"
+	"path"
 	"sort"
 	"strings"
 
@@ -133,6 +135,35 @@ func (i StringSet) All() []string {
 	for _, set := range i {
 		result = append(result, set...)
 	}
+	return result
+}
+
+// Map returns a map with the short package name as the key
+// and the full import path as the value.
+func (i StringSet) Map() map[string]string {
+	result := map[string]string{}
+	imports := i.All()
+
+	for _, imported := range imports {
+		var short, long string
+
+		// aliased package
+		if strings.Contains(imported, " ") {
+			line := strings.Split(imported, " ")
+			short, long = line[0], strings.Trim(line[1], `"`)
+		} else {
+			long = strings.Trim(imported, `"`)
+			short = path.Base(long)
+		}
+
+		val, ok := result[short]
+		if ok && val != long {
+			fmt.Printf("WARN: Import path conflict: %s\n%s (prev) != %s (new)\n", short, val, long)
+		}
+
+		result[short] = long
+	}
+
 	return result
 }
 
