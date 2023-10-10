@@ -111,13 +111,26 @@ func stats(cfg *options) error {
 		Used   int `db:"ref_count"`
 	}{}
 
-	if cfg.filter != "" {
-		sql = "select import, symbol, count(used_by) ref_count from symbol_reference where import like ? group by import, symbol order by ref_count desc"
+	sql = "select import, symbol, count(used_by) ref_count from symbol_reference "
+
+	switch {
+	case cfg.filter != "" && cfg.exclude != "":
+		sql += "where import like ? and import not like ? group by import, symbol order by ref_count desc"
+		if err := conn.Select(&results, sql, "%"+cfg.filter+"%", "%"+cfg.exclude+"%"); err != nil {
+			return err
+		}
+	case cfg.filter != "":
+		sql += "where import like ? group by import, symbol order by ref_count desc"
 		if err := conn.Select(&results, sql, "%"+cfg.filter+"%"); err != nil {
 			return err
 		}
-	} else {
-		sql = "select import, symbol, count(used_by) ref_count from symbol_reference group by import, symbol order by ref_count desc"
+	case cfg.exclude != "":
+		sql += "where import not like ? group by import, symbol order by ref_count desc"
+		if err := conn.Select(&results, sql, "%"+cfg.exclude+"%"); err != nil {
+			return err
+		}
+	default:
+		sql += "group by import, symbol order by ref_count desc"
 		if err := conn.Select(&results, sql); err != nil {
 			return err
 		}
