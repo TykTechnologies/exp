@@ -6,10 +6,13 @@ import (
 	"sort"
 	"strings"
 
+	_ "modernc.org/sqlite"
+
 	"golang.org/x/exp/maps"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/extract"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/restore"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/stats"
 )
 
 func main() {
@@ -23,6 +26,7 @@ func start() (err error) {
 	commands := map[string]func() error{
 		"extract": extract.Run,
 		"restore": restore.Run,
+		"stats":   stats.Run,
 	}
 	commandList := maps.Keys(commands)
 	sort.Strings(commandList)

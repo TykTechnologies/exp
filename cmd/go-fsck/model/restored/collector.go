@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type collector struct {
@@ -31,30 +32,25 @@ func NewCollector(fset *token.FileSet) *collector {
 
 func (v *collector) Clean() {
 	for _, def := range v.definition {
-		imports := []string{}
-		aliases := map[string]string{}
+		importMap := def.Imports.Map()
 
-		alias := func(alias, dest string) bool {
-			val, ok := aliases[alias]
-			if ok {
-				if val != dest {
-					fmt.Printf("WARN: Alias mismatch: %s\n%s (prev) != %s (new)\n", alias, val, dest)
-					return false
-				}
-			}
+		// Change value to print debug output when cleaning imported
+		// package references for function declarations.
+		debugReferences := true
 
-			aliases[alias] = dest
-			imports = append(imports, dest)
-			return true
+		if debugReferences {
+			fmt.Printf("Imports: %s\n", spew.Sdump(importMap))
 		}
 
-		for _, imported := range def.Imports.All() {
-			if strings.Contains(imported, " ") {
-				line := strings.Split(imported, " ")
-				alias(line[0], strings.Trim(line[1], `"`))
-				continue
+		for _, fv := range def.Funcs {
+			for k, v := range fv.References {
+				if _, ok := importMap[k]; !ok {
+					if debugReferences {
+						fmt.Printf("Function %s reference doesn't exist in imports: %s: [%v]\n", fv.Name, k, v)
+					}
+					delete(fv.References, k)
+				}
 			}
-			alias(path.Base(imported), strings.Trim(imported, `"`))
 		}
 	}
 }
@@ -176,13 +172,14 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 	args, returns := v.functionBindings(decl)
 
 	declaration := &Declaration{
-		Kind:      FuncKind,
-		File:      filename,
-		Name:      decl.Name.Name,
-		Arguments: args,
-		Returns:   returns,
-		Signature: v.functionDef(decl),
-		Source:    v.getSource(file, decl),
+		Kind:       FuncKind,
+		File:       filename,
+		Name:       decl.Name.Name,
+		Arguments:  args,
+		Returns:    returns,
+		Signature:  v.functionDef(decl),
+		References: collectFuncReferences(decl),
+		Source:     v.getSource(file, decl),
 	}
 
 	if decl.Recv != nil {
