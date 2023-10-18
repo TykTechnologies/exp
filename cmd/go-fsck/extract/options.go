@@ -13,6 +13,7 @@ type options struct {
 	outputFile string
 
 	prettyJSON bool
+	verbose    bool
 }
 
 func NewOptions() *options {
@@ -23,6 +24,7 @@ func NewOptions() *options {
 	flag.StringVarP(&cfg.outputFile, "output-file", "o", cfg.outputFile, "output file")
 	flag.StringVarP(&cfg.sourcePath, "source-path", "i", cfg.sourcePath, "source path")
 	flag.BoolVar(&cfg.prettyJSON, "pretty-json", cfg.prettyJSON, "print pretty json")
+	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
 	flag.Parse()
 
 	return cfg

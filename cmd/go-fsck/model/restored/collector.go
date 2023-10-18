@@ -30,22 +30,18 @@ func NewCollector(fset *token.FileSet) *collector {
 	}
 }
 
-func (v *collector) Clean() {
+func (v *collector) Clean(verbose bool) {
 	for _, def := range v.definition {
 		importMap := def.Imports.Map()
 
-		// Change value to print debug output when cleaning imported
-		// package references for function declarations.
-		debugReferences := true
-
-		if debugReferences {
+		if verbose {
 			fmt.Printf("Imports: %s\n", spew.Sdump(importMap))
 		}
 
 		for _, fv := range def.Funcs {
 			for k, v := range fv.References {
 				if _, ok := importMap[k]; !ok {
-					if debugReferences {
+					if verbose {
 						fmt.Printf("Function %s reference doesn't exist in imports: %s: [%v]\n", fv.Name, k, v)
 					}
 					delete(fv.References, k)
@@ -203,11 +199,11 @@ func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Defi
 			base := path.Base(importClean)
 			switch alias {
 			case base:
-				fmt.Printf("WARN: removing %s alias for %s)\n", alias, importClean)
+				fmt.Fprintf(os.Stderr, "WARN: removing %s alias for %s)\n", alias, importClean)
 			case "_":
 				// no warning
 			default:
-				fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
+				// fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
 				importLiteral = alias + " " + importLiteral
 			}
 		}

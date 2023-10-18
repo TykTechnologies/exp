@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"go/ast"
+	"os"
 	"path"
 	"sort"
 	"strings"
@@ -158,7 +159,7 @@ func (i StringSet) Map() map[string]string {
 
 		val, ok := result[short]
 		if ok && val != long {
-			fmt.Printf("WARN: Import path conflict: %s\n%s (prev) != %s (new)\n", short, val, long)
+			fmt.Fprintf(os.Stderr, "WARN: Import path conflict: %s, %s (prev) != %s (new)\n", short, val, long)
 		}
 
 		result[short] = long

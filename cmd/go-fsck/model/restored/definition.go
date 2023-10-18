@@ -26,7 +26,7 @@ type (
 )
 
 // Load definitions from package located in sourcePath.
-func Load(sourcePath string) ([]*Definition, error) {
+func Load(sourcePath string, verbose bool) ([]*Definition, error) {
 	fset := token.NewFileSet()
 
 	packages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
@@ -50,7 +50,7 @@ func Load(sourcePath string) ([]*Definition, error) {
 				continue
 			}
 
-			fmt.Printf("WARN: Skipping file %s with build tags: %v\n", filename, tags)
+			fmt.Fprintf(os.Stderr, "WARN: Skipping file %s with build tags: %v\n", filename, tags)
 		}
 	}
 
@@ -59,7 +59,7 @@ func Load(sourcePath string) ([]*Definition, error) {
 	insp := inspector.New(files)
 	insp.WithStack(nil, collector.Visit)
 
-	collector.Clean()
+	collector.Clean(verbose)
 
 	results := make([]*Definition, 0, len(collector.definition))
 	pkgNames := make([]string, 0, len(collector.definition))

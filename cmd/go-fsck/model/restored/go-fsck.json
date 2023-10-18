@@ -23,6 +23,7 @@
       "definition.go": [
         "\"fmt\"",
         "\"go/ast\"",
+        "\"os\"",
         "\"path\"",
         "\"sort\"",
         "\"strings\"",
@@ -132,13 +133,14 @@
           ],
           "fmt": [
             "Errorf",
-            "Printf"
+            "Fprintf"
           ],
           "inspector": [
             "New"
           ],
           "os": [
-            "ReadFile"
+            "ReadFile",
+            "Stderr"
           ],
           "parser": [
             "ParseDir",
@@ -158,14 +160,15 @@
         },
         "Name": "Load",
         "Arguments": [
-          "string"
+          "string",
+          "bool"
         ],
         "Returns": [
           "[]*Definition",
           "error"
         ],
-        "Signature": "Load (sourcePath string) ([]*Definition, error)",
-        "Source": "// Load definitions from package located in sourcePath.\nfunc Load(sourcePath string) ([]*Definition, error) {\n\tfset := token.NewFileSet()\n\n\tpackages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tfiles := []*ast.File{}\n\tfor _, pkg := range packages {\n\t\tfor _, file := range pkg.Files {\n\t\t\tfilename := path.Base(fset.Position(file.Pos()).Filename)\n\n\t\t\tsrc, err := os.ReadFile(path.Join(sourcePath, filename))\n\t\t\tif err != nil {\n\t\t\t\treturn nil, fmt.Errorf(\"Error reading in source file: %s\", filename)\n\t\t\t}\n\n\t\t\ttags := BuildTags(src)\n\t\t\tif len(tags) == 0 {\n\t\t\t\tfiles = append(files, file)\n\t\t\t\tcontinue\n\t\t\t}\n\n\t\t\tfmt.Printf(\"WARN: Skipping file %s with build tags: %v\\n\", filename, tags)\n\t\t}\n\t}\n\n\tcollector := NewCollector(fset)\n\n\tinsp := inspector.New(files)\n\tinsp.WithStack(nil, collector.Visit)\n\n\tcollector.Clean()\n\n\tresults := make([]*Definition, 0, len(collector.definition))\n\tpkgNames := make([]string, 0, len(collector.definition))\n\tfor _, pkg := range collector.definition {\n\t\tpkg.Sort()\n\t\tpkgNames = append(pkgNames, pkg.Package)\n\t}\n\tsort.Strings(pkgNames)\n\n\tfor _, pkg := range collector.definition {\n\t\tfor _, name := range pkgNames {\n\t\t\tif pkg.Package == name {\n\t\t\t\tresults = append(results, pkg)\n\t\t\t}\n\t\t}\n\t}\n\n\tsort.Slice(results, func(i, j int) bool {\n\t\treturn results[i].Package \u003c results[j].Package\n\t})\n\n\treturn results, nil\n}"
+        "Signature": "Load (sourcePath string, verbose bool) ([]*Definition, error)",
+        "Source": "// Load definitions from package located in sourcePath.\nfunc Load(sourcePath string, verbose bool) ([]*Definition, error) {\n\tfset := token.NewFileSet()\n\n\tpackages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tfiles := []*ast.File{}\n\tfor _, pkg := range packages {\n\t\tfor _, file := range pkg.Files {\n\t\t\tfilename := path.Base(fset.Position(file.Pos()).Filename)\n\n\t\t\tsrc, err := os.ReadFile(path.Join(sourcePath, filename))\n\t\t\tif err != nil {\n\t\t\t\treturn nil, fmt.Errorf(\"Error reading in source file: %s\", filename)\n\t\t\t}\n\n\t\t\ttags := BuildTags(src)\n\t\t\tif len(tags) == 0 {\n\t\t\t\tfiles = append(files, file)\n\t\t\t\tcontinue\n\t\t\t}\n\n\t\t\tfmt.Fprintf(os.Stderr, \"WARN: Skipping file %s with build tags: %v\\n\", filename, tags)\n\t\t}\n\t}\n\n\tcollector := NewCollector(fset)\n\n\tinsp := inspector.New(files)\n\tinsp.WithStack(nil, collector.Visit)\n\n\tcollector.Clean(verbose)\n\n\tresults := make([]*Definition, 0, len(collector.definition))\n\tpkgNames := make([]string, 0, len(collector.definition))\n\tfor _, pkg := range collector.definition {\n\t\tpkg.Sort()\n\t\tpkgNames = append(pkgNames, pkg.Package)\n\t}\n\tsort.Strings(pkgNames)\n\n\tfor _, pkg := range collector.definition {\n\t\tfor _, name := range pkgNames {\n\t\t\tif pkg.Package == name {\n\t\t\t\tresults = append(results, pkg)\n\t\t\t}\n\t\t}\n\t}\n\n\tsort.Slice(results, func(i, j int) bool {\n\t\treturn results[i].Package \u003c results[j].Package\n\t})\n\n\treturn results, nil\n}"
       },
       {
         "Kind": "func",
@@ -311,8 +314,11 @@
         },
         "Name": "Clean",
         "Receiver": "*collector",
-        "Signature": "Clean ()",
-        "Source": "func (v *collector) Clean() {\n\tfor _, def := range v.definition {\n\t\timportMap := def.Imports.Map()\n\n\t\t// Change value to print debug output when cleaning imported\n\t\t// package references for function declarations.\n\t\tdebugReferences := true\n\n\t\tif debugReferences {\n\t\t\tfmt.Printf(\"Imports: %s\\n\", spew.Sdump(importMap))\n\t\t}\n\n\t\tfor _, fv := range def.Funcs {\n\t\t\tfor k, v := range fv.References {\n\t\t\t\tif _, ok := importMap[k]; !ok {\n\t\t\t\t\tif debugReferences {\n\t\t\t\t\t\tfmt.Printf(\"Function %s reference doesn't exist in imports: %s: [%v]\\n\", fv.Name, k, v)\n\t\t\t\t\t}\n\t\t\t\t\tdelete(fv.References, k)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+        "Arguments": [
+          "bool"
+        ],
+        "Signature": "Clean (verbose bool)",
+        "Source": "func (v *collector) Clean(verbose bool) {\n\tfor _, def := range v.definition {\n\t\timportMap := def.Imports.Map()\n\n\t\tif verbose {\n\t\t\tfmt.Printf(\"Imports: %s\\n\", spew.Sdump(importMap))\n\t\t}\n\n\t\tfor _, fv := range def.Funcs {\n\t\t\tfor k, v := range fv.References {\n\t\t\t\tif _, ok := importMap[k]; !ok {\n\t\t\t\t\tif verbose {\n\t\t\t\t\t\tfmt.Printf(\"Function %s reference doesn't exist in imports: %s: [%v]\\n\", fv.Name, k, v)\n\t\t\t\t\t}\n\t\t\t\t\tdelete(fv.References, k)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
       },
       {
         "Kind": "func",
@@ -436,7 +442,10 @@
         "SelfContained": false,
         "References": {
           "fmt": [
-            "Printf"
+            "Fprintf"
+          ],
+          "os": [
+            "Stderr"
           ],
           "path": [
             "Base"
@@ -453,7 +462,7 @@
           "map[string]string"
         ],
         "Signature": "Map () map[string]string",
-        "Source": "// Map returns a map with the short package name as the key\n// and the full import path as the value.\nfunc (i StringSet) Map() map[string]string {\n\tresult := map[string]string{}\n\timports := i.All()\n\n\tfor _, imported := range imports {\n\t\tvar short, long string\n\n\t\t// aliased package\n\t\tif strings.Contains(imported, \" \") {\n\t\t\tline := strings.Split(imported, \" \")\n\t\t\tshort, long = line[0], strings.Trim(line[1], `\"`)\n\t\t} else {\n\t\t\tlong = strings.Trim(imported, `\"`)\n\t\t\tshort = path.Base(long)\n\t\t}\n\n\t\tval, ok := result[short]\n\t\tif ok \u0026\u0026 val != long {\n\t\t\tfmt.Printf(\"WARN: Import path conflict: %s\\n%s (prev) != %s (new)\\n\", short, val, long)\n\t\t}\n\n\t\tresult[short] = long\n\t}\n\n\treturn result\n}"
+        "Source": "// Map returns a map with the short package name as the key\n// and the full import path as the value.\nfunc (i StringSet) Map() map[string]string {\n\tresult := map[string]string{}\n\timports := i.All()\n\n\tfor _, imported := range imports {\n\t\tvar short, long string\n\n\t\t// aliased package\n\t\tif strings.Contains(imported, \" \") {\n\t\t\tline := strings.Split(imported, \" \")\n\t\t\tshort, long = line[0], strings.Trim(line[1], `\"`)\n\t\t} else {\n\t\t\tlong = strings.Trim(imported, `\"`)\n\t\t\tshort = path.Base(long)\n\t\t}\n\n\t\tval, ok := result[short]\n\t\tif ok \u0026\u0026 val != long {\n\t\t\tfmt.Fprintf(os.Stderr, \"WARN: Import path conflict: %s, %s (prev) != %s (new)\\n\", short, val, long)\n\t\t}\n\n\t\tresult[short] = long\n\t}\n\n\treturn result\n}"
       },
       {
         "Kind": "func",
@@ -549,7 +558,10 @@
             "ImportSpec"
           ],
           "fmt": [
-            "Printf"
+            "Fprintf"
+          ],
+          "os": [
+            "Stderr"
           ],
           "path": [
             "Base"
@@ -566,7 +578,7 @@
           "*Definition"
         ],
         "Signature": "collectImports (filename string, decl *ast.GenDecl, def *Definition)",
-        "Source": "func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {\n\tfor _, spec := range decl.Specs {\n\t\timported, ok := spec.(*ast.ImportSpec)\n\t\tif !ok {\n\t\t\tcontinue\n\t\t}\n\n\t\timportLiteral := imported.Path.Value\n\t\timportClean := strings.Trim(importLiteral, `*`)\n\t\tif imported.Name != nil {\n\t\t\talias := imported.Name.Name\n\t\t\tbase := path.Base(importClean)\n\t\t\tswitch alias {\n\t\t\tcase base:\n\t\t\t\tfmt.Printf(\"WARN: removing %s alias for %s)\\n\", alias, importClean)\n\t\t\tcase \"_\":\n\t\t\t\t// no warning\n\t\t\tdefault:\n\t\t\t\tfmt.Printf(\"WARN: package %s is aliased to %s\\n\", importLiteral, alias)\n\t\t\t\timportLiteral = alias + \" \" + importLiteral\n\t\t\t}\n\t\t}\n\n\t\tdef.Imports.Add(filename, importLiteral)\n\t}\n}"
+        "Source": "func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {\n\tfor _, spec := range decl.Specs {\n\t\timported, ok := spec.(*ast.ImportSpec)\n\t\tif !ok {\n\t\t\tcontinue\n\t\t}\n\n\t\timportLiteral := imported.Path.Value\n\t\timportClean := strings.Trim(importLiteral, `*`)\n\t\tif imported.Name != nil {\n\t\t\talias := imported.Name.Name\n\t\t\tbase := path.Base(importClean)\n\t\t\tswitch alias {\n\t\t\tcase base:\n\t\t\t\tfmt.Fprintf(os.Stderr, \"WARN: removing %s alias for %s)\\n\", alias, importClean)\n\t\t\tcase \"_\":\n\t\t\t\t// no warning\n\t\t\tdefault:\n\t\t\t\t// fmt.Printf(\"WARN: package %s is aliased to %s\\n\", importLiteral, alias)\n\t\t\t\timportLiteral = alias + \" \" + importLiteral\n\t\t\t}\n\t\t}\n\n\t\tdef.Imports.Add(filename, importLiteral)\n\t}\n}"
       },
       {
         "Kind": "func",
@@ -754,7 +766,7 @@
           "*testing.T"
         ],
         "Signature": "TestLoad (t *testing.T)",
-        "Source": "func TestLoad(t *testing.T) {\n\tutter.Config.IgnoreUnexported = true\n\tutter.Config.OmitZero = true\n\tutter.Config.ElideType = true\n\n\tdefs, err := model.Load(\".\")\n\tassert.NoError(t, err)\n\tassert.NotNil(t, defs)\n\n\t// utter.Dump(defs)\n}"
+        "Source": "func TestLoad(t *testing.T) {\n\tutter.Config.IgnoreUnexported = true\n\tutter.Config.OmitZero = true\n\tutter.Config.ElideType = true\n\n\tdefs, err := model.Load(\".\", false)\n\tassert.NoError(t, err)\n\tassert.NotNil(t, defs)\n\n\t// utter.Dump(defs)\n}"
       }
     ]
   }

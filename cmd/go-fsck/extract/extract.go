@@ -8,7 +8,7 @@ import (
 )
 
 func extract(cfg *options) error {
-	definitions, err := model.Load(cfg.sourcePath)
+	definitions, err := model.Load(cfg.sourcePath, cfg.verbose)
 	if err != nil {
 		return err
 	}

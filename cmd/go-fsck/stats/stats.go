@@ -28,7 +28,7 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 	defs := []*model.Definition{}
 
 	for _, pkgPath := range packages {
-		d, err := model.Load(pkgPath)
+		d, err := model.Load(pkgPath, cfg.verbose)
 		if err != nil {
 			return nil, err
 		}
