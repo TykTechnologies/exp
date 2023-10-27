@@ -33,7 +33,7 @@ func NewCollector(fset *token.FileSet) *collector {
 
 func (v *collector) Clean(verbose bool) {
 	for _, def := range v.definition {
-		importMap := def.Imports.Map()
+		importMap, _ := def.Imports.Map()
 
 		if verbose {
 			fmt.Printf("Imports: %s\n", spew.Sdump(importMap))

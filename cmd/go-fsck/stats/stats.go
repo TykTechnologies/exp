@@ -61,7 +61,7 @@ func stats(cfg *options) error {
 
 		// Convert package refs into full import paths.
 		if cfg.full {
-			importMap := def.Imports.Map()
+			importMap, _ := def.Imports.Map()
 			for k, v := range refs {
 				long, ok := importMap[v.Import]
 				if ok {

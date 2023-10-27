@@ -23,7 +23,6 @@
       "definition.go": [
         "\"fmt\"",
         "\"go/ast\"",
-        "\"os\"",
         "\"path\"",
         "\"sort\"",
         "\"strings\"",
@@ -71,7 +70,7 @@
           "DeclarationKind",
           "Declaration"
         ],
-        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\tDeclarationKind\n\t\tFile\tstring\n\n\t\tSelfContained\tbool\n\n\t\tImports\t\t[]string\t\t`json:\",omitempty\"`\n\t\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\t\tArguments\t[]string\t`json:\",omitempty\"`\n\t\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\t\tSignature\tstring\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
+        "Source": "type (\n\tDeclarationKind\tstring\n\n\tDeclaration\tstruct {\n\t\tKind\tDeclarationKind\n\t\tFile\tstring\n\n\t\tSelfContained\tbool\n\n\t\tImports\t[]string\t`json:\",omitempty\"`\n\n\t\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\t\tName\t\tstring\t\t`json:\",omitempty\"`\n\t\tNames\t\t[]string\t`json:\",omitempty\"`\n\t\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\t\tArguments\t[]string\t`json:\",omitempty\"`\n\t\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\t\tSignature\tstring\t`json:\",omitempty\"`\n\t\tSource\t\tstring\n\t}\n)"
       },
       {
         "Kind": "type",
@@ -318,7 +317,7 @@
           "bool"
         ],
         "Signature": "Clean (verbose bool)",
-        "Source": "func (v *collector) Clean(verbose bool) {\n\tfor _, def := range v.definition {\n\t\timportMap := def.Imports.Map()\n\n\t\tif verbose {\n\t\t\tfmt.Printf(\"Imports: %s\\n\", spew.Sdump(importMap))\n\t\t}\n\n\t\tfor _, fv := range def.Funcs {\n\t\t\tfor k, v := range fv.References {\n\t\t\t\tif _, ok := importMap[k]; !ok {\n\t\t\t\t\tif verbose {\n\t\t\t\t\t\tfmt.Printf(\"Function %s reference doesn't exist in imports: %s: [%v]\\n\", fv.Name, k, v)\n\t\t\t\t\t}\n\t\t\t\t\tdelete(fv.References, k)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+        "Source": "func (v *collector) Clean(verbose bool) {\n\tfor _, def := range v.definition {\n\t\timportMap, _ := def.Imports.Map()\n\n\t\tif verbose {\n\t\t\tfmt.Printf(\"Imports: %s\\n\", spew.Sdump(importMap))\n\t\t}\n\n\t\tfor _, fv := range def.Funcs {\n\t\t\tfor k, v := range fv.References {\n\t\t\t\tif _, ok := importMap[k]; !ok {\n\t\t\t\t\tif verbose {\n\t\t\t\t\t\tfmt.Printf(\"Function %s reference doesn't exist in imports: %s: [%v]\\n\", fv.Name, k, v)\n\t\t\t\t\t}\n\t\t\t\t\tdelete(fv.References, k)\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
       },
       {
         "Kind": "func",
@@ -442,10 +441,7 @@
         "SelfContained": false,
         "References": {
           "fmt": [
-            "Fprintf"
-          ],
-          "os": [
-            "Stderr"
+            "Errorf"
           ],
           "path": [
             "Base"
@@ -459,10 +455,11 @@
         "Name": "Map",
         "Receiver": "StringSet",
         "Returns": [
-          "map[string]string"
+          "map[string]string",
+          "[]error"
         ],
-        "Signature": "Map () map[string]string",
-        "Source": "// Map returns a map with the short package name as the key\n// and the full import path as the value.\nfunc (i StringSet) Map() map[string]string {\n\tresult := map[string]string{}\n\timports := i.All()\n\n\tfor _, imported := range imports {\n\t\tvar short, long string\n\n\t\t// aliased package\n\t\tif strings.Contains(imported, \" \") {\n\t\t\tline := strings.Split(imported, \" \")\n\t\t\tshort, long = line[0], strings.Trim(line[1], `\"`)\n\t\t} else {\n\t\t\tlong = strings.Trim(imported, `\"`)\n\t\t\tshort = path.Base(long)\n\t\t}\n\n\t\tval, ok := result[short]\n\t\tif ok \u0026\u0026 val != long {\n\t\t\tfmt.Fprintf(os.Stderr, \"WARN: Import path conflict: %s, %s (prev) != %s (new)\\n\", short, val, long)\n\t\t}\n\n\t\tresult[short] = long\n\t}\n\n\treturn result\n}"
+        "Signature": "Map () (map[string]string, []error)",
+        "Source": "// Map returns a map with the short package name as the key\n// and the full import path as the value.\nfunc (i StringSet) Map() (map[string]string, []error) {\n\twarnings := []error{}\n\twarningSeen := map[string]bool{}\n\n\tresult := map[string]string{}\n\timports := i.All()\n\n\tfor _, imported := range imports {\n\t\tvar short, long string\n\n\t\t// aliased package\n\t\tif strings.Contains(imported, \" \") {\n\t\t\tline := strings.Split(imported, \" \")\n\t\t\tshort, long = line[0], strings.Trim(line[1], `\"`)\n\t\t} else {\n\t\t\tlong = strings.Trim(imported, `\"`)\n\t\t\tshort = path.Base(long)\n\t\t}\n\n\t\tval, ok := result[short]\n\n\t\tif ok \u0026\u0026 val != long {\n\t\t\twarning := \"Import conflict for %s, \"\n\t\t\t// Sort val/long so shorter is left hand side\n\t\t\tif len(val) \u003c len(long) {\n\t\t\t\twarning += val + \" != \" + long\n\t\t\t} else {\n\t\t\t\twarning += long + \" != \" + val\n\t\t\t}\n\t\t\tif _, seen := warningSeen[warning]; !seen {\n\t\t\t\twarningSeen[warning] = true\n\t\t\t\twarnings = append(warnings, fmt.Errorf(warning, short))\n\t\t\t}\n\t\t}\n\n\t\tresult[short] = long\n\t}\n\n\treturn result, warnings\n}"
       },
       {
         "Kind": "func",

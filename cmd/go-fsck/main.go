@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/extract"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/lint"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/restore"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/stats"
 )
@@ -27,6 +28,7 @@ func start() (err error) {
 		"extract": extract.Run,
 		"restore": restore.Run,
 		"stats":   stats.Run,
+		"lint":    lint.Run,
 	}
 	commandList := maps.Keys(commands)
 	sort.Strings(commandList)

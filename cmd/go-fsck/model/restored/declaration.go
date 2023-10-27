@@ -13,7 +13,8 @@ type (
 
 		SelfContained bool
 
-		Imports    []string            `json:",omitempty"`
+		Imports []string `json:",omitempty"`
+
 		References map[string][]string `json:",omitempty"`
 
 		Name     string   `json:",omitempty"`

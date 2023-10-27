@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"go/ast"
-	"os"
 	"path"
 	"sort"
 	"strings"
@@ -34,7 +33,8 @@ type (
 
 		SelfContained bool
 
-		Imports    []string            `json:",omitempty"`
+		Imports []string `json:",omitempty"`
+
 		References map[string][]string `json:",omitempty"`
 
 		Name     string   `json:",omitempty"`
@@ -141,7 +141,10 @@ func (i StringSet) All() []string {
 
 // Map returns a map with the short package name as the key
 // and the full import path as the value.
-func (i StringSet) Map() map[string]string {
+func (i StringSet) Map() (map[string]string, []error) {
+	warnings := []error{}
+	warningSeen := map[string]bool{}
+
 	result := map[string]string{}
 	imports := i.All()
 
@@ -158,14 +161,25 @@ func (i StringSet) Map() map[string]string {
 		}
 
 		val, ok := result[short]
+
 		if ok && val != long {
-			fmt.Fprintf(os.Stderr, "WARN: Import path conflict: %s, %s (prev) != %s (new)\n", short, val, long)
+			warning := "Import conflict for %s, "
+			// Sort val/long so shorter is left hand side
+			if len(val) < len(long) {
+				warning += val + " != " + long
+			} else {
+				warning += long + " != " + val
+			}
+			if _, seen := warningSeen[warning]; !seen {
+				warningSeen[warning] = true
+				warnings = append(warnings, fmt.Errorf(warning, short))
+			}
 		}
 
 		result[short] = long
 	}
 
-	return result
+	return result, warnings
 }
 
 type DeclarationList []*Declaration
