@@ -105,7 +105,7 @@ Fields holds information of the fields, if this object is a struct.
 
 
 
-**Field: `-`** (StructObj, `ast.StructType`)
+**Field: ``** (StructObj, `ast.StructType`)
 
 StructObj is the (optionally present) raw ast.StructType value
 
@@ -140,6 +140,7 @@ Tag is the go tag, unmodified.
 **Field: `json_name`** (JSONName, `string`)
 
 JSONName is the corresponding json name of the field.
+It's cleared if it's set to `-` (unexported).
 
 **Field: `map_key`** (MapKey, `string`)
 

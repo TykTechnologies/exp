@@ -14,8 +14,9 @@ import (
 	"sort"
 	"strings"
 
-	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
 	"golang.org/x/exp/slices"
+
+	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
 )
 
 // ExtractOptions contains options for extraction
@@ -331,10 +332,17 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, optio
 			// fields without json tag encode to field name
 			jsonName = goName
 		}
+		if jsonName == "-" {
+			// fields with json `-` don't get encoded
+			jsonName = ""
+		}
 
 		fieldPath := goName
 		if goPath != "" {
-			fieldPath = goPath + "." + goName
+			fieldPath = goPath
+			if goName != "" {
+				fieldPath += "." + goName
+			}
 		}
 
 		fieldInfo := &FieldInfo{

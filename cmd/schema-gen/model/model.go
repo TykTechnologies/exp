@@ -149,6 +149,7 @@ type FieldInfo struct {
 	Tag string `json:"tag"`
 
 	// JSONName is the corresponding json name of the field.
+	// It's cleared if it's set to `-` (unexported).
 	JSONName string `json:"json_name"`
 
 	// MapKey is the map key type, if this field is a map.

@@ -8,9 +8,10 @@ import (
 	"sort"
 	"strings"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
-	"golang.org/x/exp/slices"
 )
 
 func listStructures(cfg *options) error {
@@ -44,31 +45,48 @@ func listStructures(cfg *options) error {
 				got := find(all, sym.Path)
 				if got != nil {
 					got.Doc = sym.Doc
-					got.Seen = append(got.Seen, filename)
+					got.Type = sym.Type
+					got.AddedFiles = append(got.AddedFiles, filename)
 					continue
 				}
-				sym.Seen = []string{filename}
+				sym.AddedFiles = []string{filename}
 				all = append(all, sym)
+			}
+		}
+
+		for _, sym := range all {
+			if len(sym.AddedFiles) > 0 {
+				isRemoved := !slices.Contains(sym.AddedFiles, filename)
+				if isRemoved {
+					sym.RemovedFiles = append(sym.RemovedFiles, filename)
+				}
 			}
 		}
 	}
 
 	for _, sym := range all {
-		sym.Versions = sym.GetVersions(sym.Seen)
+		sym.Added = sym.GetVersions(sym.AddedFiles)
+		sym.Removed = sym.GetVersions(sym.RemovedFiles)
+
+		sym.Removed = SanitizeSet(sym.Added, sym.Removed)
 	}
 
 	return printSymbols(cfg, all)
 }
 
 type TypeDeclaration struct {
-	Seen []string `json:"-"`
+	AddedFiles   []string `json:"-"`
+	RemovedFiles []string `json:"-"`
 
-	Versions []string `json:"versions"`
+	Added   []string `json:"added"`
+	Removed []string `json:"removed,omitempty"`
 
-	Path string `json:"path"`
-	Type string `json:"type"`
-	Tag  string `json:"tag"`
-	Doc  string `json:"doc"`
+	Name     string `json:"name"`
+	Path     string `json:"path"`
+	Type     string `json:"type"`
+	Tag      string `json:"tag"`
+	JSONName string `json:"json_name"`
+	Doc      string `json:"doc"`
 }
 
 var (
@@ -116,14 +134,24 @@ func (t *TypeDeclaration) GetVersions(from []string) []string {
 		return []string{patches[0]}
 	}
 
-	return patches
+	return SanitizeList(patches)
 }
 
 func (t *TypeDeclaration) String() string {
+	var result string
 	if t.Tag != "" {
-		return t.Path + " " + t.Type + " " + t.Tag + " " + fmt.Sprint(t.Versions)
+		result = t.Path + " " + t.Type + " " + t.Tag
 	}
-	return t.Path + " " + t.Type + " " + fmt.Sprint(t.Versions)
+	result = t.Path + " " + t.Type
+
+	if len(t.Added) > 0 {
+		result += " added " + fmt.Sprint(t.Added)
+		if len(t.Removed) > 0 {
+			result += " removed " + fmt.Sprint(t.Removed)
+		}
+	}
+
+	return result
 }
 
 // PackageFileMap key is symbol Path for the struct ordered into a file.
@@ -161,18 +189,22 @@ func listSymbols(cfg *options, pkgInfo *PackageInfo) []*TypeDeclaration {
 		for _, typeDecl := range decls.Types {
 			for _, field := range typeDecl.Fields {
 				files = append(files, &TypeDeclaration{
-					Path: field.Path,
-					Type: field.Type,
-					Tag:  field.Tag,
-					Doc:  field.Doc,
+					Name:     field.Name,
+					Path:     field.Path,
+					Type:     field.Type,
+					Tag:      field.Tag,
+					Doc:      field.Doc,
+					JSONName: field.JSONName,
 				})
 			}
 		}
 	}
 
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].Path < files[j].Path
-	})
+	if cfg.sorted {
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Path < files[j].Path
+		})
+	}
 
 	return files
 }

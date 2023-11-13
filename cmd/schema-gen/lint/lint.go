@@ -3,9 +3,10 @@ package lint
 import (
 	"fmt"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
-	"golang.org/x/exp/slices"
 )
 
 func lint(cfg *options) error {

@@ -23,14 +23,14 @@
               {
                 "name": "",
                 "type": "KeyRequest",
-                "path": "Key.",
+                "path": "Key",
                 "tag": "json:\"\"",
                 "json_name": ""
               },
               {
                 "name": "",
                 "type": "KeyResponse",
-                "path": "Key.",
+                "path": "Key",
                 "tag": "json:\"\"",
                 "json_name": ""
               }
@@ -69,7 +69,7 @@
                 "type": "string",
                 "path": "KeyResponse.id",
                 "tag": "json:\"-\"",
-                "json_name": "-"
+                "json_name": ""
               },
               {
                 "name": "Status",
