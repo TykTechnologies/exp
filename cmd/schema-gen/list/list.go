@@ -43,7 +43,7 @@ func listStructures(cfg *options) error {
 			for _, sym := range pkg {
 				got := find(all, sym.Path)
 				if got != nil {
-					got.Doc = got.Doc
+					got.Doc = sym.Doc
 					got.Seen = append(got.Seen, filename)
 					continue
 				}
