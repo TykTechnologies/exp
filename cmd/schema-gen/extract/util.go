@@ -100,15 +100,27 @@ func write(cfg *options) error {
 		return err
 	}
 
-	return dump(cfg.outputFile, sts)
+	return dump(cfg, sts)
 }
 
-func dump(filename string, data interface{}) error {
-	println(filename)
+func dump(cfg *options, data interface{}) error {
+	var (
+		filename = cfg.outputFile
+		pretty   = cfg.prettyJSON
 
-	dataBytes, err := json.MarshalIndent(data, "", "  ")
+		dataBytes []byte
+		err       error
+	)
+
+	if pretty {
+		dataBytes, err = json.MarshalIndent(data, "", "  ")
+	} else {
+		dataBytes, err = json.Marshal(data)
+	}
+
 	if err != nil {
 		return err
 	}
+
 	return os.WriteFile(filename, dataBytes, 0644) //nolint:gosec
 }
