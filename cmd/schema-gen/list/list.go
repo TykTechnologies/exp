@@ -61,7 +61,7 @@ func listStructures(cfg *options) error {
 }
 
 type TypeDeclaration struct {
-	Seen []string `json:"seen"`
+	Seen []string `json:"-"`
 
 	Versions []string `json:"versions"`
 
