@@ -14,32 +14,39 @@ tasks:
         cmd: task release={{.release}} extract:fsck
       - for: { var: releases, as: release }
         cmd: task release={{.release}} extract:schema
+      - task: summary:schema
 
   extract:fsck:
     require: [ release ]
     desc: "Extract release info"
     cmds:
       - cd git/tyk && git checkout {{ .release }} && cd -
-      - cd git/tyk-analytics && git checkout {{ .release }} && cd -
-      - for: [ 'git/tyk', 'git/tyk-analytics' ]
-        cmd: go-fsck extract -i git/tyk/config/ -o docs/{{ .ITEM | base }}-{{ .release }}-config.json --pretty-json
       - for: [ 'git/tyk' ]
-        cmd: go-fsck extract -i git/tyk/apidef/ -o docs/{{ .ITEM | base }}-{{ .release }}-apidef.json --pretty-json
+        cmd: go-fsck extract -i git/tyk/config/ -o docs/{{ .ITEM | base }}-config-{{ .release }}.json --pretty-json
       - for: [ 'git/tyk' ]
-        cmd: go-fsck extract -i git/tyk/apidef/oas/ -o docs/{{ .ITEM | base }}-{{ .release }}-oas.json --pretty-json
+        cmd: go-fsck extract -i git/tyk/apidef/ -o docs/{{ .ITEM | base }}-apidef-{{ .release }}.json --pretty-json
+#      - for: [ 'git/tyk' ]
+#        cmd: go-fsck extract -i git/tyk/apidef/oas/ -o docs/{{ .ITEM | base }}-oas-{{ .release }}.json --pretty-json
 
   extract:schema:
     require: [ release ]
     desc: "Extract release info"
     cmds:
       - cd git/tyk && git checkout {{ .release }} && cd -
-      - cd git/tyk-analytics && git checkout {{ .release }} && cd -
-      - for: [ 'git/tyk', 'git/tyk-analytics' ]
-        cmd: schema-gen extract -i git/tyk/config/ -o schema/{{ .ITEM | base }}-{{ .release }}-config.json --pretty-json
       - for: [ 'git/tyk' ]
-        cmd: schema-gen extract -i git/tyk/apidef/ -o schema/{{ .ITEM | base }}-{{ .release }}-apidef.json --pretty-json
+        cmd: schema-gen extract -i git/tyk/config/ -o schema/{{ .ITEM | base }}-config-{{ .release }}.json --pretty-json
       - for: [ 'git/tyk' ]
-        cmd: schema-gen extract -i git/tyk/apidef/oas/ -o schema/{{ .ITEM | base }}-{{ .release }}-oas.json --pretty-json
+        cmd: schema-gen extract -i git/tyk/apidef/ -o schema/{{ .ITEM | base }}-apidef-{{ .release }}.json --pretty-json
+#      - for: [ 'git/tyk' ]
+#        cmd: schema-gen extract -i git/tyk/apidef/oas/ -o schema/{{ .ITEM | base }}-oas-{{ .release }}.json --pretty-json
+
+  summary:schema:
+    desc: "Summarize schema-gen outputs"
+    cmds:
+      - schema-gen list -i 'schema/tyk-config-v*.json' > summary/tyk-config-index.txt
+      - schema-gen list -i 'schema/tyk-config-v*.json' --pretty-json > summary/tyk-config-index.json
+      - schema-gen list -i 'schema/tyk-apidef-v*.json' > summary/tyk-apidef-index.txt
+      - schema-gen list -i 'schema/tyk-apidef-v*.json' --pretty-json > summary/tyk-apidef-index.json
 
   releases:
     desc: "Fetch release info from gateway"
@@ -48,7 +55,7 @@ tasks:
     silent: true
     cmds:
       - git fetch --all -q
-      - git ls-remote -q origin | grep refs/tags/v5 | grep -v '\-' | awk '{print $2}' | xargs -n1 basename
+      - git ls-remote -q origin | grep refs/tags/v | egrep -e 'v[3-9]+\.[0-9]+\.[0-9]+$' | awk '{print $2}' | xargs -n1 basename
 
   git:checkout:
     desc: "Checkout the tyk repositories"
