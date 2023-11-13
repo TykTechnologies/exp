@@ -510,7 +510,7 @@
     "path": "APIDefinition.PinnedPublicKeys",
     "type": "map[string]string",
     "tag": "bson:\"pinned_public_keys\" json:\"pinned_public_keys\"",
-    "doc": ""
+    "doc": "PinnedPublicKeys stores the public key pinning details"
   },
   {
     "versions": [
@@ -609,7 +609,7 @@
     "path": "APIDefinition.UpstreamCertificates",
     "type": "map[string]string",
     "tag": "bson:\"upstream_certificates\" json:\"upstream_certificates\"",
-    "doc": ""
+    "doc": "UpstreamCertificates stores the domain to certificate mapping for upstream mutualTLS"
   },
   {
     "versions": [
@@ -1032,7 +1032,7 @@
     "path": "EndPointMeta.MethodActions",
     "type": "map[string]EndpointMethodMeta",
     "tag": "bson:\"method_actions\" json:\"method_actions\"",
-    "doc": ""
+    "doc": "Deprecated. Use Method instead."
   },
   {
     "versions": [
@@ -2907,7 +2907,7 @@
     "path": "GraphQLConfig.LastSchemaUpdate",
     "type": "time.Time",
     "tag": "bson:\"last_schema_update\" json:\"last_schema_update,omitempty\"",
-    "doc": "LastSchemaUpdate contains the date and time of the last triggered schema update to the upstream"
+    "doc": "LastSchemaUpdate contains the date and time of the last triggered schema update to the upstream."
   },
   {
     "versions": [

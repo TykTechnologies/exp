@@ -6,7 +6,7 @@
     "path": "AnalyticsConfigConfig.EnableDetailedRecording",
     "type": "bool",
     "tag": "json:\"enable_detailed_recording\"",
-    "doc": ""
+    "doc": "Set this value to `true` to have Tyk store the inbound request and outbound response data in HTTP Wire format as part of the Analytics data.\nPlease note, this will greatly increase your analytics DB size and can cause performance degradation on analytics processing by the Dashboard.\nThis setting can be overridden with an organisation flag, enabed at an API level, or on individual Key level."
   },
   {
     "versions": [
@@ -15,7 +15,7 @@
     "path": "AnalyticsConfigConfig.EnableGeoIP",
     "type": "bool",
     "tag": "json:\"enable_geo_ip\"",
-    "doc": ""
+    "doc": "Tyk can store GeoIP information based on MaxMind DB’s to enable GeoIP tracking on inbound request analytics. Set this value to `true` and assign a DB using the `geo_ip_db_path` setting."
   },
   {
     "versions": [
@@ -24,7 +24,7 @@
     "path": "AnalyticsConfigConfig.GeoIPDBLocation",
     "type": "string",
     "tag": "json:\"geo_ip_db_path\"",
-    "doc": ""
+    "doc": "Path to a MaxMind GeoIP database\nThe analytics GeoIP DB can be replaced on disk. It will cleanly auto-reload every hour."
   },
   {
     "versions": [
@@ -33,7 +33,7 @@
     "path": "AnalyticsConfigConfig.IgnoredIPs",
     "type": "[]string",
     "tag": "json:\"ignored_ips\"",
-    "doc": ""
+    "doc": "Adding IP addresses to this list will cause Tyk to ignore these IPs in the analytics data. These IP addresses will not produce an analytics log record.\nThis is useful for health checks and other samplers that might skew usage data.\nThe IP addresses must be provided as a JSON array, with the values being single IPs. CIDR values are not supported."
   },
   {
     "versions": [
@@ -42,7 +42,7 @@
     "path": "AnalyticsConfigConfig.NormaliseUrls",
     "type": "NormalisedURLConfig",
     "tag": "json:\"normalise_urls\"",
-    "doc": ""
+    "doc": "This section describes methods that enable you to normalise inbound URLs in your analytics to have more meaningful per-path data."
   },
   {
     "versions": [
@@ -51,7 +51,7 @@
     "path": "AnalyticsConfigConfig.PoolSize",
     "type": "int",
     "tag": "json:\"pool_size\"",
-    "doc": ""
+    "doc": "Number of workers used to process analytics. Defaults to number of CPU cores."
   },
   {
     "versions": [
@@ -60,7 +60,7 @@
     "path": "AnalyticsConfigConfig.RecordsBufferSize",
     "type": "uint64",
     "tag": "json:\"records_buffer_size\"",
-    "doc": ""
+    "doc": "Number of records in analytics queue, per worker. Default: 1000."
   },
   {
     "versions": [
@@ -69,7 +69,7 @@
     "path": "AnalyticsConfigConfig.StorageExpirationTime",
     "type": "int",
     "tag": "json:\"storage_expiration_time\"",
-    "doc": ""
+    "doc": "You can set a time (in seconds) to configure how long analytics are kept if they are not processed. The default is 60 seconds.\nThis is used to prevent the potential infinite growth of Redis analytics storage."
   },
   {
     "versions": [
@@ -78,7 +78,7 @@
     "path": "AnalyticsConfigConfig.Type",
     "type": "string",
     "tag": "json:\"type\"",
-    "doc": ""
+    "doc": "Set empty for a Self-Managed installation or `rpc` for multi-cloud."
   },
   {
     "versions": [
@@ -123,7 +123,7 @@
     "path": "CertData.CertFile",
     "type": "string",
     "tag": "json:\"cert_file\"",
-    "doc": ""
+    "doc": "Path to certificate file"
   },
   {
     "versions": [
@@ -132,7 +132,7 @@
     "path": "CertData.KeyFile",
     "type": "string",
     "tag": "json:\"key_file\"",
-    "doc": ""
+    "doc": "Path to private key file"
   },
   {
     "versions": [
@@ -141,7 +141,7 @@
     "path": "CertData.Name",
     "type": "string",
     "tag": "json:\"domain_name\"",
-    "doc": ""
+    "doc": "Domain name"
   },
   {
     "versions": [
@@ -159,7 +159,7 @@
     "path": "CertificatesConfig.ControlAPI",
     "type": "[]string",
     "tag": "json:\"control_api\"",
-    "doc": ""
+    "doc": "Certificates used for Control API Mutual TLS"
   },
   {
     "versions": [
@@ -168,7 +168,7 @@
     "path": "CertificatesConfig.Dashboard",
     "type": "[]string",
     "tag": "json:\"dashboard_api\"",
-    "doc": ""
+    "doc": "Used for communicating with the Dashboard if it is configured to use Mutual TLS"
   },
   {
     "versions": [
@@ -177,7 +177,7 @@
     "path": "CertificatesConfig.MDCB",
     "type": "[]string",
     "tag": "json:\"mdcb_api\"",
-    "doc": ""
+    "doc": "Certificates used for MDCB Mutual TLS"
   },
   {
     "versions": [
@@ -186,7 +186,7 @@
     "path": "CertificatesConfig.Upstream",
     "type": "map[string]string",
     "tag": "json:\"upstream\"",
-    "doc": ""
+    "doc": "Specify upstream mutual TLS certificates at a global level in the following format: `{ \"\u003chost\u003e\": \"\u003ccert\u003e\" }``"
   },
   {
     "versions": [
@@ -195,7 +195,7 @@
     "path": "CoProcessConfig.CoProcessGRPCServer",
     "type": "string",
     "tag": "json:\"coprocess_grpc_server\"",
-    "doc": ""
+    "doc": "Address of gRPC user"
   },
   {
     "versions": [
@@ -204,7 +204,7 @@
     "path": "CoProcessConfig.EnableCoProcess",
     "type": "bool",
     "tag": "json:\"enable_coprocess\"",
-    "doc": ""
+    "doc": "Enable gRPC and Python plugins"
   },
   {
     "versions": [
@@ -213,7 +213,7 @@
     "path": "CoProcessConfig.GRPCRecvMaxSize",
     "type": "int",
     "tag": "json:\"grpc_recv_max_size\"",
-    "doc": ""
+    "doc": "Maximum message which can be received from a gRPC server"
   },
   {
     "versions": [
@@ -222,7 +222,7 @@
     "path": "CoProcessConfig.GRPCSendMaxSize",
     "type": "int",
     "tag": "json:\"grpc_send_max_size\"",
-    "doc": ""
+    "doc": "Maximum message which can be sent to gRPC server"
   },
   {
     "versions": [
@@ -231,7 +231,7 @@
     "path": "CoProcessConfig.PythonPathPrefix",
     "type": "string",
     "tag": "json:\"python_path_prefix\"",
-    "doc": ""
+    "doc": "Sets the path to built-in Tyk modules. This will be part of the Python module lookup path. The value used here is the default one for most installations."
   },
   {
     "versions": [
@@ -240,7 +240,7 @@
     "path": "CoProcessConfig.PythonVersion",
     "type": "string",
     "tag": "json:\"python_version\"",
-    "doc": ""
+    "doc": "If you have multiple Python versions installed you can specify your version."
   },
   {
     "versions": [
@@ -249,7 +249,7 @@
     "path": "Config.AllowInsecureConfigs",
     "type": "bool",
     "tag": "json:\"allow_insecure_configs\"",
-    "doc": ""
+    "doc": "Can be set to disable Dashboard message signature verification. When set to `true`, `public_key_path` can be ignored."
   },
   {
     "versions": [
@@ -267,7 +267,7 @@
     "path": "Config.AllowRemoteConfig",
     "type": "bool",
     "tag": "bson:\"allow_remote_config\" json:\"allow_remote_config\"",
-    "doc": ""
+    "doc": "Allow your Dashboard to remotely set Gateway configuration via the Nodes screen."
   },
   {
     "versions": [
@@ -276,7 +276,7 @@
     "path": "Config.AnalyticsConfig",
     "type": "AnalyticsConfigConfig",
     "tag": "json:\"analytics_config\"",
-    "doc": ""
+    "doc": "This section defines options on what analytics data to store."
   },
   {
     "versions": [
@@ -285,7 +285,7 @@
     "path": "Config.AppPath",
     "type": "string",
     "tag": "json:\"app_path\"",
-    "doc": "CE Configurations"
+    "doc": "If Tyk is being used in its standard configuration (Open Source installations), then API definitions are stored in the apps folder (by default in /opt/tyk-gateway/apps).\nThis location is scanned for .json files and re-scanned at startup or reload.\nSee the API section of the Tyk Gateway API for more details."
   },
   {
     "versions": [
@@ -294,7 +294,7 @@
     "path": "Config.AuthOverride",
     "type": "AuthOverrideConf",
     "tag": "json:\"auth_override\"",
-    "doc": ""
+    "doc": "This is used as part of the RPC / Hybrid back-end configuration in a Tyk Enterprise installation and isn’t used anywhere else."
   },
   {
     "versions": [
@@ -303,7 +303,7 @@
     "path": "Config.BundleBaseURL",
     "type": "string",
     "tag": "bson:\"bundle_base_url\" json:\"bundle_base_url\"",
-    "doc": ""
+    "doc": "Is a base URL that will be used to download the bundle. In this example we have `bundle-latest.zip` specified in the API settings, Tyk will fetch the following URL: http://my-bundle-server.com/bundles/bundle-latest.zip (see the next section for details)."
   },
   {
     "versions": [
@@ -312,7 +312,7 @@
     "path": "Config.BundleInsecureSkipVerify",
     "type": "bool",
     "tag": "bson:\"bundle_insecure_skip_verify\" json:\"bundle_insecure_skip_verify\"",
-    "doc": ""
+    "doc": "Disable TLS validation for bundle URLs"
   },
   {
     "versions": [
@@ -330,7 +330,7 @@
     "path": "Config.CloseConnections",
     "type": "bool",
     "tag": "json:\"close_connections\"",
-    "doc": ""
+    "doc": "If set, disable keepalive between User and Tyk"
   },
   {
     "versions": [
@@ -348,7 +348,7 @@
     "path": "Config.Cloud",
     "type": "bool",
     "tag": "json:\"cloud\"",
-    "doc": "Cloud flag shows that gateway runs in Tyk-cloud."
+    "doc": "Cloud flag shows the Gateway runs in Tyk-cloud."
   },
   {
     "versions": [
@@ -357,7 +357,7 @@
     "path": "Config.CoProcessOptions",
     "type": "CoProcessConfig",
     "tag": "json:\"coprocess_options\"",
-    "doc": ""
+    "doc": "Configuration options for Python and gRPC plugins."
   },
   {
     "versions": [
@@ -366,7 +366,7 @@
     "path": "Config.ControlAPIHostname",
     "type": "string",
     "tag": "json:\"control_api_hostname\"",
-    "doc": ""
+    "doc": "Custom hostname for the Control API"
   },
   {
     "versions": [
@@ -375,7 +375,7 @@
     "path": "Config.ControlAPIPort",
     "type": "int",
     "tag": "json:\"control_api_port\"",
-    "doc": ""
+    "doc": "Set to run your Gateway Control API on a separate port, and protect it behind a firewall if needed. Please make sure you follow this guide when setting the control port https://tyk.io/docs/planning-for-production/#change-your-control-port."
   },
   {
     "versions": [
@@ -384,7 +384,7 @@
     "path": "Config.DBAppConfOptions",
     "type": "DBAppConfOptionsConfig",
     "tag": "json:\"db_app_conf_options\"",
-    "doc": ""
+    "doc": "This section defines API loading and shard options. Enable these settings to selectively load API definitions on a node from your Dashboard service."
   },
   {
     "versions": [
@@ -393,7 +393,7 @@
     "path": "Config.DRLNotificationFrequency",
     "type": "int",
     "tag": "json:\"drl_notification_frequency\"",
-    "doc": ""
+    "doc": "How frequently a distributed rate limiter synchronises information between the Gateway nodes. Default: 2 seconds."
   },
   {
     "versions": [
@@ -402,7 +402,7 @@
     "path": "Config.DRLThreshold",
     "type": "float64",
     "tag": "json:\"drl_threshold\"",
-    "doc": ""
+    "doc": "A distributed rate limiter is inaccurate on small rate limits, and it will fallback to a Redis or Sentinel rate limiter on an individual user basis, if its rate limiter lower then threshold.\nA Rate limiter threshold calculated using the following formula: `rate_threshold = drl_threshold * number_of_gateways`.\nSo you have 2 Gateways, and your threshold is set to 5, if a user rate limit is larger than 10, it will use the distributed rate limiter algorithm.\nDefault: 5"
   },
   {
     "versions": [
@@ -411,7 +411,7 @@
     "path": "Config.DisableDashboardZeroConf",
     "type": "bool",
     "tag": "json:\"disable_dashboard_zeroconf\"",
-    "doc": ""
+    "doc": "Disable the capability of the Gateway to `autodiscover` the Dashboard through heartbeat messages via Redis.\nThe goal of zeroconf is auto-discovery, so you do not have to specify the Tyk Dashboard address in your Gateway`tyk.conf` file.\nIn some specific cases, for example, when the Dashboard is bound to a public domain, not accessible inside an internal network, or similar, `disable_dashboard_zeroconf` can be set to `true`, in favour of directly specifying a Tyk Dashboard address."
   },
   {
     "versions": [
@@ -420,7 +420,7 @@
     "path": "Config.DisablePortWhiteList",
     "type": "bool",
     "tag": "json:\"disable_ports_whitelist\"",
-    "doc": ""
+    "doc": "Disable port whilisting, essentially allowing you to use any port for your API."
   },
   {
     "versions": [
@@ -429,7 +429,7 @@
     "path": "Config.DisableRegexpCache",
     "type": "bool",
     "tag": "json:\"disable_regexp_cache\"",
-    "doc": ""
+    "doc": "If set to `true` this allows you to disable the regular expression cache. The default setting is `false`."
   },
   {
     "versions": [
@@ -438,7 +438,7 @@
     "path": "Config.DisableVirtualPathBlobs",
     "type": "bool",
     "tag": "json:\"disable_virtual_path_blobs\"",
-    "doc": ""
+    "doc": "Disable virtual endpoints and the code will not be loaded into the VM when the API definition initialises.\nThis is useful for systems where you want to avoid having third-party code run."
   },
   {
     "versions": [
@@ -447,7 +447,7 @@
     "path": "Config.DnsCache",
     "type": "DnsCacheConfig",
     "tag": "json:\"dns_cache\"",
-    "doc": "Cache"
+    "doc": "This section enables the global configuration of the expireable DNS records caching for your Gateway API endpoints.\nBy design caching affects only http(s), ws(s) protocols APIs and doesn’t affect any plugin/middleware DNS queries.\n\n```\n\"dns_cache\": {\n  \"enabled\": true, //Turned off by default\n  \"ttl\": 60, //Time in seconds before the record will be removed from cache\n  \"multiple_ips_handle_strategy\": \"random\" //A strategy, which will be used when dns query will reply with more than 1 ip address per single host.\n}\n```"
   },
   {
     "versions": [
@@ -465,7 +465,7 @@
     "path": "Config.EnableAnalytics",
     "type": "bool",
     "tag": "json:\"enable_analytics\"",
-    "doc": "Proxy analytics configuration"
+    "doc": "Tyk is capable of recording every hit to your API to a database with various filtering parameters. Set this value to `true` and fill in the sub-section below to enable logging.\n\nNote:\n  For performance reasons, Tyk will store traffic data to Redis initially and then purge the data from Redis to MongoDB or other data stores on a regular basis as determined by the purge_delay setting in your Tyk Pump configuration."
   },
   {
     "versions": [
@@ -474,7 +474,7 @@
     "path": "Config.EnableBundleDownloader",
     "type": "bool",
     "tag": "bson:\"enable_bundle_downloader\" json:\"enable_bundle_downloader\"",
-    "doc": "Middleware/Plugin Configuration"
+    "doc": "Enable downloading Plugin bundles\nExample:\n```\n\"enable_bundle_downloader\": true,\n\"bundle_base_url\": \"http://my-bundle-server.com/bundles/\",\n\"public_key_path\": \"/path/to/my/pubkey\",\n```"
   },
   {
     "versions": [
@@ -483,7 +483,7 @@
     "path": "Config.EnableCustomDomains",
     "type": "bool",
     "tag": "json:\"enable_custom_domains\"",
-    "doc": ""
+    "doc": "Allows you to use custom domains"
   },
   {
     "versions": [
@@ -492,7 +492,7 @@
     "path": "Config.EnableHashedKeysListing",
     "type": "bool",
     "tag": "json:\"enable_hashed_keys_listing\"",
-    "doc": ""
+    "doc": "Allows the listing of hashed API keys"
   },
   {
     "versions": [
@@ -501,7 +501,7 @@
     "path": "Config.EnableJSVM",
     "type": "bool",
     "tag": "json:\"enable_jsvm\"",
-    "doc": ""
+    "doc": "Set to true if you are using JSVM custom middleware or virtual endpoints."
   },
   {
     "versions": [
@@ -510,7 +510,7 @@
     "path": "Config.EnableKeyLogging",
     "type": "bool",
     "tag": "json:\"enable_key_logging\"",
-    "doc": ""
+    "doc": "By default all key IDs in logs are hidden. Set to `true` if you want to see them for debugging reasons."
   },
   {
     "versions": [
@@ -519,7 +519,7 @@
     "path": "Config.EnableNonTransactionalRateLimiter",
     "type": "bool",
     "tag": "json:\"enable_non_transactional_rate_limiter\"",
-    "doc": "Rate Limiting Strategy"
+    "doc": "An enhancement for the Redis and Sentinel rate limiters, that offers a significant improvement in performance by not using transactions on Redis rate-limit buckets."
   },
   {
     "versions": [
@@ -528,7 +528,7 @@
     "path": "Config.EnableRedisRollingLimiter",
     "type": "bool",
     "tag": "json:\"enable_redis_rolling_limiter\"",
-    "doc": ""
+    "doc": "Redis based rate limiter with fixed window. Provides 100% rate limiting accuracy, but require two additional Redis roundtrip for each request."
   },
   {
     "versions": [
@@ -537,7 +537,7 @@
     "path": "Config.EnableSentinelRateLimiter",
     "type": "bool",
     "tag": "json:\"enable_sentinel_rate_limiter\"",
-    "doc": ""
+    "doc": "To enable, set to `true`. The sentinel-based rate limiter delivers a smoother performance curve as rate-limit calculations happen off-thread, but a stricter time-out based cool-down for clients. For example, when a throttling action is triggered, they are required to cool-down for the period of the rate limit.\nDisabling the sentinel based rate limiter will make rate-limit calculations happen on-thread and therefore offers a staggered cool-down and a smoother rate-limit experience for the client.\nFor example, you can slow your connection throughput to regain entry into your rate limit. This is more of a “throttle” than a “block”.\nThe standard rate limiter offers similar performance as the sentinel-based limiter. This is disabled by default."
   },
   {
     "versions": [
@@ -546,7 +546,7 @@
     "path": "Config.EnableSeperateCacheStore",
     "type": "bool",
     "tag": "json:\"enable_separate_cache_store\"",
-    "doc": ""
+    "doc": "Enable to use a separate Redis for cache storage"
   },
   {
     "versions": [
@@ -555,7 +555,7 @@
     "path": "Config.EnforceOrgDataAge",
     "type": "bool",
     "tag": "json:\"enforce_org_data_age\"",
-    "doc": "Organization configurations"
+    "doc": "Allows you to dynamically configure analytics expiration on a per organisation level"
   },
   {
     "versions": [
@@ -564,7 +564,7 @@
     "path": "Config.EnforceOrgDataDetailLogging",
     "type": "bool",
     "tag": "json:\"enforce_org_data_detail_logging\"",
-    "doc": ""
+    "doc": "Allows you to dynamically configure detailed logging on a per organisation level"
   },
   {
     "versions": [
@@ -573,7 +573,7 @@
     "path": "Config.EnforceOrgQuotas",
     "type": "bool",
     "tag": "json:\"enforce_org_quotas\"",
-    "doc": ""
+    "doc": "Allows you to dynamically configure organisation quotas on a per organisation level"
   },
   {
     "versions": [
@@ -618,7 +618,7 @@
     "path": "Config.ForceGlobalSessionLifetime",
     "type": "bool",
     "tag": "bson:\"force_global_session_lifetime\" json:\"force_global_session_lifetime\"",
-    "doc": ""
+    "doc": "Enable global API token expiration. Can be needed if all your APIs using JWT or oAuth 2.0 auth methods with dynamically generated keys."
   },
   {
     "versions": [
@@ -627,7 +627,7 @@
     "path": "Config.GlobalSessionLifetime",
     "type": "int64",
     "tag": "bson:\"global_session_lifetime\" json:\"global_session_lifetime\"",
-    "doc": ""
+    "doc": "global session lifetime, in seconds."
   },
   {
     "versions": [
@@ -636,7 +636,7 @@
     "path": "Config.GraylogNetworkAddr",
     "type": "string",
     "tag": "json:\"graylog_network_addr\"",
-    "doc": ""
+    "doc": "Graylog server address"
   },
   {
     "versions": [
@@ -645,7 +645,7 @@
     "path": "Config.HTTPProfile",
     "type": "bool",
     "tag": "json:\"enable_http_profiler\"",
-    "doc": ""
+    "doc": "Enable debugging of your Tyk Gateway by exposing profiling information through https://tyk.io/docs/troubleshooting/tyk-gateway/profiling/"
   },
   {
     "versions": [
@@ -654,7 +654,7 @@
     "path": "Config.HashKeyFunction",
     "type": "string",
     "tag": "json:\"hash_key_function\"",
-    "doc": ""
+    "doc": "Specify the Key hashing algorithm. Possible values: murmur64, murmur128, sha256."
   },
   {
     "versions": [
@@ -663,7 +663,7 @@
     "path": "Config.HashKeys",
     "type": "bool",
     "tag": "json:\"hash_keys\"",
-    "doc": "Gateway Security Policies"
+    "doc": "Enable Key hashing"
   },
   {
     "versions": [
@@ -672,7 +672,7 @@
     "path": "Config.HealthCheck",
     "type": "HealthCheckConfig",
     "tag": "json:\"health_check\"",
-    "doc": ""
+    "doc": "This section enables the configuration of the health-check API endpoint and the size of the sample data cache (in seconds)."
   },
   {
     "versions": [
@@ -681,7 +681,7 @@
     "path": "Config.HealthCheckEndpointName",
     "type": "string",
     "tag": "json:\"health_check_endpoint_name\"",
-    "doc": ""
+    "doc": "Enables you to rename the /hello endpoint"
   },
   {
     "versions": [
@@ -690,7 +690,7 @@
     "path": "Config.HideGeneratorHeader",
     "type": "bool",
     "tag": "json:\"hide_generator_header\"",
-    "doc": ""
+    "doc": "HideGeneratorHeader will mask the 'X-Generator' and 'X-Mascot-...' headers, if set to true."
   },
   {
     "versions": [
@@ -699,7 +699,7 @@
     "path": "Config.HostName",
     "type": "string",
     "tag": "json:\"hostname\"",
-    "doc": ""
+    "doc": "Force your Gateway to work only on a specific domain name. Can be overridden by API custom domain."
   },
   {
     "versions": [
@@ -708,7 +708,7 @@
     "path": "Config.HttpServerOptions",
     "type": "HttpServerOptionsConfig",
     "tag": "json:\"http_server_options\"",
-    "doc": ""
+    "doc": "Gateway HTTP server configuration"
   },
   {
     "versions": [
@@ -717,7 +717,7 @@
     "path": "Config.IgnoreEndpointCase",
     "type": "bool",
     "tag": "json:\"ignore_endpoint_case\"",
-    "doc": ""
+    "doc": "Ignore the case of any endpoints for APIs managed by Tyk. Setting this to `true` will override any individual API and Ignore, Blacklist and Whitelist plugin endpoint settings."
   },
   {
     "versions": [
@@ -726,7 +726,7 @@
     "path": "Config.JSVMTimeout",
     "type": "int",
     "tag": "json:\"jsvm_timeout\"",
-    "doc": ""
+    "doc": "Set the execution timeout for JSVM plugins and virtal endpoints"
   },
   {
     "versions": [
@@ -735,7 +735,7 @@
     "path": "Config.KV",
     "type": "struct{}",
     "tag": "json:\"kv\"",
-    "doc": ""
+    "doc": "This section enables the use of the KV capabilities to substitute configuration values.\nSee more details https://tyk.io/docs/tyk-configuration-reference/kv-store/"
   },
   {
     "versions": [
@@ -753,7 +753,7 @@
     "path": "Config.ListenAddress",
     "type": "string",
     "tag": "json:\"listen_address\"",
-    "doc": ""
+    "doc": "If your machine has multiple network devices or IPs you can force the Gateway to use the IP address you want."
   },
   {
     "versions": [
@@ -762,7 +762,7 @@
     "path": "Config.ListenPort",
     "type": "int",
     "tag": "json:\"listen_port\"",
-    "doc": ""
+    "doc": "Setting this value will change the port that Tyk listens on. Default: 8080."
   },
   {
     "versions": [
@@ -780,7 +780,7 @@
     "path": "Config.LocalSessionCache",
     "type": "LocalSessionCacheConf",
     "tag": "json:\"local_session_cache\"",
-    "doc": ""
+    "doc": "Tyk can cache some data locally, this can speed up lookup times on a single node and lower the number of connections and operations being done on Redis. It will however introduce a slight delay when updating or modifying keys as the cache must expire.\nThis does not affect rate limiting."
   },
   {
     "versions": [
@@ -789,7 +789,7 @@
     "path": "Config.LogLevel",
     "type": "string",
     "tag": "json:\"log_level\"",
-    "doc": "Monitoring, Logging \u0026 Profiling"
+    "doc": "You can now set a logging level (log_level). The following levels can be set: debug, info, warn, error.\nIf not set or left empty, it will default to `info`."
   },
   {
     "versions": [
@@ -798,7 +798,7 @@
     "path": "Config.LogstashNetworkAddr",
     "type": "string",
     "tag": "json:\"logstash_network_addr\"",
-    "doc": ""
+    "doc": "Logstash server address"
   },
   {
     "versions": [
@@ -807,7 +807,7 @@
     "path": "Config.LogstashTransport",
     "type": "string",
     "tag": "json:\"logstash_transport\"",
-    "doc": ""
+    "doc": "Logstash network transport. Values: tcp or udp."
   },
   {
     "versions": [
@@ -816,7 +816,7 @@
     "path": "Config.ManagementNode",
     "type": "bool",
     "tag": "json:\"management_node\"",
-    "doc": ""
+    "doc": "If set to `true`, distributed rate limiter will be disabled for this node, and it will be excluded from any rate limit calculation.\n\nNote:\n  If you set `db_app_conf_options.node_is_segmented` to `true` for multiple Gateway nodes, you should ensure that `management_node` is set to `false`.\n  This is to ensure visibility for the management node across all APIs."
   },
   {
     "versions": [
@@ -825,7 +825,7 @@
     "path": "Config.MaxConnTime",
     "type": "int64",
     "tag": "json:\"max_conn_time\"",
-    "doc": ""
+    "doc": "Maximum connection time. If set it will force gateway reconnect to the upstream."
   },
   {
     "versions": [
@@ -834,7 +834,7 @@
     "path": "Config.MaxIdleConns",
     "type": "int",
     "tag": "bson:\"max_idle_connections\" json:\"max_idle_connections\"",
-    "doc": "Client-Gateway Configuration"
+    "doc": "Maximum idle connections, per API, between Tyk and Upstream. By default not limited."
   },
   {
     "versions": [
@@ -843,7 +843,7 @@
     "path": "Config.MaxIdleConnsPerHost",
     "type": "int",
     "tag": "bson:\"max_idle_connections_per_host\" json:\"max_idle_connections_per_host\"",
-    "doc": ""
+    "doc": "Maximum idle connections, per API, per upstream, between Tyk and Upstream. Default:100"
   },
   {
     "versions": [
@@ -852,7 +852,7 @@
     "path": "Config.MiddlewarePath",
     "type": "string",
     "tag": "json:\"middleware_path\"",
-    "doc": ""
+    "doc": "Path to the plugins dirrectory. By default is ``./middleware`."
   },
   {
     "versions": [
@@ -861,7 +861,7 @@
     "path": "Config.MinTokenLength",
     "type": "int",
     "tag": "json:\"min_token_length\"",
-    "doc": ""
+    "doc": "Minimum API token length"
   },
   {
     "versions": [
@@ -870,7 +870,7 @@
     "path": "Config.Monitor",
     "type": "MonitorConfig",
     "tag": "json:\"monitor\"",
-    "doc": ""
+    "doc": "The monitor section is useful if you wish to enforce a global trigger limit on organisation and user quotas.\nThis feature will trigger a webhook event to fire when specific triggers are reached.\nTriggers can be global (set in the node), by organisation (set in the organisation session object) or by key (set in the key session object)\n\nWhile Organisation-level and Key-level triggers can be tiered (e.g. trigger at 10%, trigger at 20%, trigger at 80%), in the node-level configuration only a global value can be set.\nIf a global value and specific trigger level are the same the trigger will only fire once:\n\n```\n\"monitor\": {\n  \"enable_trigger_monitors\": true,\n  \"configuration\": {\n   \"method\": \"POST\",\n   \"target_path\": \"http://domain.com/notify/quota-trigger\",\n   \"template_path\": \"templates/monitor_template.json\",\n   \"header_map\": {\n     \"some-secret\": \"89787855\"\n   },\n   \"event_timeout\": 10\n },\n \"global_trigger_limit\": 80.0,\n \"monitor_user_keys\": false,\n \"monitor_org_keys\": true\n},\n```"
   },
   {
     "versions": [
@@ -888,7 +888,7 @@
     "path": "Config.NodeSecret",
     "type": "string",
     "tag": "json:\"node_secret\"",
-    "doc": ""
+    "doc": "The shared secret between the Gateway and the Dashboard to ensure that API Definition downloads, heartbeat and Policy loads are from a valid source."
   },
   {
     "versions": [
@@ -897,7 +897,7 @@
     "path": "Config.OauthErrorStatusCode",
     "type": "int",
     "tag": "json:\"oauth_error_status_code\"",
-    "doc": ""
+    "doc": "Configures the OAuth error status code returned. If not set, it defaults to a 403 error."
   },
   {
     "versions": [
@@ -906,7 +906,7 @@
     "path": "Config.OauthRedirectUriSeparator",
     "type": "string",
     "tag": "json:\"oauth_redirect_uri_separator\"",
-    "doc": ""
+    "doc": "Character which should be used as a separator for OAuth redirect URI URLs. Default: ;."
   },
   {
     "versions": [
@@ -915,7 +915,7 @@
     "path": "Config.OauthRefreshExpire",
     "type": "int64",
     "tag": "json:\"oauth_refresh_token_expire\"",
-    "doc": ""
+    "doc": "Change the expiry time of a refresh token. By default 14 days (in seconds)."
   },
   {
     "versions": [
@@ -924,7 +924,7 @@
     "path": "Config.OauthTokenExpire",
     "type": "int32",
     "tag": "json:\"oauth_token_expire\"",
-    "doc": ""
+    "doc": "Change the expiry time of OAuth tokens (in seconds)."
   },
   {
     "versions": [
@@ -933,7 +933,7 @@
     "path": "Config.OauthTokenExpiredRetainPeriod",
     "type": "int32",
     "tag": "json:\"oauth_token_expired_retain_period\"",
-    "doc": ""
+    "doc": "Specifies how long expired tokens are stored in Redis. The value is in seconds and the default is 0. Using the default means expired tokens are never removed from Redis."
   },
   {
     "versions": [
@@ -942,7 +942,7 @@
     "path": "Config.OriginalPath",
     "type": "string",
     "tag": "json:\"-\"",
-    "doc": "OriginalPath is the path to the config file that was read. If\nnone was found, it's the path to the default config file that\nwas written."
+    "doc": "OriginalPath is the path to the config file that is read. If\nnone was found, it's the path to the default config file that\nwas written."
   },
   {
     "versions": [
@@ -951,7 +951,7 @@
     "path": "Config.OverrideMessages",
     "type": "map[string]TykError",
     "tag": "bson:\"override_messages\" json:\"override_messages\"",
-    "doc": "OverrideMessages is used to override returned API error codes and messages."
+    "doc": "Override the default error code and or message returned by middleware.\nThe following message IDs can be used to override the message and error codes:\n\nAuthToken message IDs\n* `auth.auth_field_missing`\n* `auth.key_not_found`\n\nOIDC message IDs\n* `oauth.auth_field_missing`\n* `oauth.auth_field_malformed`\n* `oauth.key_not_found`\n* `oauth.client_deleted`\n\nSample Override Message Setting\n```\n\"override_messages\": {\n  \"oauth.auth_field_missing\" : {\n   \"code\": 401,\n   \"message\": \"Token is not authorised\"\n }\n}\n```"
   },
   {
     "versions": [
@@ -960,7 +960,7 @@
     "path": "Config.PIDFileLocation",
     "type": "string",
     "tag": "json:\"pid_file_location\"",
-    "doc": ""
+    "doc": "Linux PID file location. Do not change unless you know what you are doing. Default: /var/run/tyk/tyk-gateway.pid"
   },
   {
     "versions": [
@@ -969,7 +969,7 @@
     "path": "Config.Policies",
     "type": "PoliciesConfig",
     "tag": "json:\"policies\"",
-    "doc": ""
+    "doc": "The policies section allows you to define where Tyk can find its policy templates. Policy templates are similar to key definitions in that they allow you to set quotas, access rights and rate limits for keys.\nPolicies are loaded when Tyk starts and if changed require a hot-reload so they are loaded into memory.\nA policy can be defined in a file (Open Source installations) or from the same database as the Dashboard."
   },
   {
     "versions": [
@@ -978,7 +978,7 @@
     "path": "Config.PortWhiteList",
     "type": "map[string]PortWhiteList",
     "tag": "json:\"ports_whitelist\"",
-    "doc": "Defines the ports that will be available for the api services to bind to.\nThis is a map of protocol to PortWhiteList. This allows per protocol\nconfigurations."
+    "doc": "Defines the ports that will be available for the API services to bind to in the following format: `\"{“\":“”}\"`. Remember to escape JSON strings.\nThis is a map of protocol to PortWhiteList. This allows per protocol\nconfigurations."
   },
   {
     "versions": [
@@ -987,7 +987,7 @@
     "path": "Config.ProxyCloseConnections",
     "type": "bool",
     "tag": "json:\"proxy_close_connections\"",
-    "doc": ""
+    "doc": "Disable keepalives between Tyk and your upstream service.\nSet this value to `true` to force Tyk to close the connection with the server, otherwise the connections will remain open for as long as your OS keeps TCP connections open.\nThis can cause a file-handler limit to be exceeded. Setting to false can have performance benefits as the connection can be reused."
   },
   {
     "versions": [
@@ -996,7 +996,7 @@
     "path": "Config.ProxyDefaultTimeout",
     "type": "float64",
     "tag": "json:\"proxy_default_timeout\"",
-    "doc": ""
+    "doc": "This can specify a default timeout in seconds for upstream API requests."
   },
   {
     "versions": [
@@ -1005,7 +1005,7 @@
     "path": "Config.ProxyEnableHttp2",
     "type": "bool",
     "tag": "json:\"proxy_enable_http2\"",
-    "doc": ""
+    "doc": "Enable HTTP2 support between Tyk and your upstream service. Required for gRPC."
   },
   {
     "versions": [
@@ -1014,7 +1014,7 @@
     "path": "Config.ProxySSLCipherSuites",
     "type": "[]string",
     "tag": "json:\"proxy_ssl_ciphers\"",
-    "doc": ""
+    "doc": "Whitelist ciphers for connection between Tyk and your upstream service."
   },
   {
     "versions": [
@@ -1023,7 +1023,7 @@
     "path": "Config.ProxySSLDisableRenegotiation",
     "type": "bool",
     "tag": "json:\"proxy_ssl_disable_renegotiation\"",
-    "doc": ""
+    "doc": "Disable TLS renegotiation."
   },
   {
     "versions": [
@@ -1032,7 +1032,7 @@
     "path": "Config.ProxySSLInsecureSkipVerify",
     "type": "bool",
     "tag": "json:\"proxy_ssl_insecure_skip_verify\"",
-    "doc": ""
+    "doc": "Globally ignore TLS verification between Tyk and your Upstream services"
   },
   {
     "versions": [
@@ -1041,7 +1041,7 @@
     "path": "Config.ProxySSLMinVersion",
     "type": "uint16",
     "tag": "json:\"proxy_ssl_min_version\"",
-    "doc": ""
+    "doc": "Minimum TLS version for connection between Tyk and your upstream service."
   },
   {
     "versions": [
@@ -1050,7 +1050,7 @@
     "path": "Config.PublicKeyPath",
     "type": "string",
     "tag": "json:\"public_key_path\"",
-    "doc": ""
+    "doc": "While communicating with the Dashboard. By default, all messages are signed by a private/public key pair. Set path to public key."
   },
   {
     "versions": [
@@ -1059,7 +1059,7 @@
     "path": "Config.RegexpCacheExpire",
     "type": "int32",
     "tag": "json:\"regexp_cache_expire\"",
-    "doc": ""
+    "doc": "If you set `disable_regexp_cache` to `false`, you can use this setting to limit how long the regular expression cache is kept for in seconds.\nThe default is 60 seconds. This must be a positive value. If you set to 0 this uses the default value."
   },
   {
     "versions": [
@@ -1077,7 +1077,7 @@
     "path": "Config.SSLForceCommonNameCheck",
     "type": "bool",
     "tag": "json:\"ssl_force_common_name_check\"",
-    "doc": ""
+    "doc": "Force the validation of the hostname against the common name, even if TLS verification is disabled."
   },
   {
     "versions": [
@@ -1086,7 +1086,7 @@
     "path": "Config.Secret",
     "type": "string",
     "tag": "json:\"secret\"",
-    "doc": ""
+    "doc": "This should be changed as soon as Tyk is installed on your system.\nThis value is used in every interaction with the Tyk Gateway API. It should be passed along as the X-Tyk-Authorization header in any requests made.\nTyk assumes that you are sensible enough not to expose the management endpoints publicly and to keep this configuration value to yourself."
   },
   {
     "versions": [
@@ -1104,7 +1104,7 @@
     "path": "Config.Security",
     "type": "SecurityConfig",
     "tag": "json:\"security\"",
-    "doc": ""
+    "doc": "Global Certificate configuration"
   },
   {
     "versions": [
@@ -1113,7 +1113,7 @@
     "path": "Config.SentryCode",
     "type": "string",
     "tag": "json:\"sentry_code\"",
-    "doc": ""
+    "doc": "Sentry API code"
   },
   {
     "versions": [
@@ -1122,7 +1122,7 @@
     "path": "Config.SentryLogLevel",
     "type": "string",
     "tag": "json:\"sentry_log_level\"",
-    "doc": ""
+    "doc": "Log verbosity for Sentry logging"
   },
   {
     "versions": [
@@ -1131,7 +1131,7 @@
     "path": "Config.ServiceDiscovery",
     "type": "ServiceDiscoveryConf",
     "tag": "json:\"service_discovery\"",
-    "doc": "Gateway-Service Configuration"
+    "doc": ""
   },
   {
     "versions": [
@@ -1158,7 +1158,7 @@
     "path": "Config.SlaveOptions",
     "type": "SlaveOptionsConfig",
     "tag": "json:\"slave_options\"",
-    "doc": "Slave Configurations"
+    "doc": "The `slave_options` allow you to configure the RPC slave connection required for MDCB installations.\nThese settings must be configured for every RPC slave/worker node."
   },
   {
     "versions": [
@@ -1167,7 +1167,7 @@
     "path": "Config.StatsdConnectionString",
     "type": "string",
     "tag": "json:\"statsd_connection_string\"",
-    "doc": ""
+    "doc": "Address of StatsD server. If set enable statsd monitoring."
   },
   {
     "versions": [
@@ -1176,7 +1176,7 @@
     "path": "Config.StatsdPrefix",
     "type": "string",
     "tag": "json:\"statsd_prefix\"",
-    "doc": ""
+    "doc": "StatsD prefix"
   },
   {
     "versions": [
@@ -1185,7 +1185,7 @@
     "path": "Config.Storage",
     "type": "StorageOptionsConf",
     "tag": "json:\"storage\"",
-    "doc": ""
+    "doc": "This section defines your Redis configuration."
   },
   {
     "versions": [
@@ -1194,7 +1194,7 @@
     "path": "Config.SuppressRedisSignalReload",
     "type": "bool",
     "tag": "json:\"suppress_redis_signal_reload\"",
-    "doc": ""
+    "doc": "Disable dynamic API and Policy reloads, e.g. it will load new changes only on procecss start."
   },
   {
     "versions": [
@@ -1212,7 +1212,7 @@
     "path": "Config.SyslogNetworkAddr",
     "type": "string",
     "tag": "json:\"syslog_network_addr\"",
-    "doc": ""
+    "doc": "Graylog server address"
   },
   {
     "versions": [
@@ -1221,7 +1221,7 @@
     "path": "Config.SyslogTransport",
     "type": "string",
     "tag": "json:\"syslog_transport\"",
-    "doc": ""
+    "doc": "Syslong transport to use. Values: tcp or udp."
   },
   {
     "versions": [
@@ -1230,7 +1230,7 @@
     "path": "Config.TemplatePath",
     "type": "string",
     "tag": "json:\"template_path\"",
-    "doc": ""
+    "doc": "Path to error and webhook templates. Defaults to the current binary path."
   },
   {
     "versions": [
@@ -1239,7 +1239,7 @@
     "path": "Config.Tracer",
     "type": "Tracer",
     "tag": "json:\"tracing\"",
-    "doc": ""
+    "doc": "Section for configuring OpenTracing support\nDeprecated: use OpenTelemetry instead."
   },
   {
     "versions": [
@@ -1248,7 +1248,7 @@
     "path": "Config.Track404Logs",
     "type": "bool",
     "tag": "json:\"track_404_logs\"",
-    "doc": ""
+    "doc": "Show 404 HTTP errors in your Gateway application logs"
   },
   {
     "versions": [
@@ -1257,7 +1257,7 @@
     "path": "Config.TykJSPath",
     "type": "string",
     "tag": "json:\"tyk_js_path\"",
-    "doc": ""
+    "doc": "Path to the JavaScript file which will be pre-loaded for any JSVM middleware or virtual endpoint. Useful for defining global shared functions."
   },
   {
     "versions": [
@@ -1266,7 +1266,7 @@
     "path": "Config.UptimeTests",
     "type": "UptimeTestsConfig",
     "tag": "json:\"uptime_tests\"",
-    "doc": ""
+    "doc": "Tyk nodes can provide uptime awareness, uptime testing and analytics for your underlying APIs uptime and availability.\nTyk can also notify you when a service goes down."
   },
   {
     "versions": [
@@ -1284,7 +1284,7 @@
     "path": "Config.UseDBAppConfigs",
     "type": "bool",
     "tag": "json:\"use_db_app_configs\"",
-    "doc": "Dashboard Configurations"
+    "doc": "If you are a Tyk Pro user, this option will enable polling the Dashboard service for API definitions.\nOn startup Tyk will attempt to connect and download any relevant application configurations from from your Dashboard instance.\nThe files are exactly the same as the JSON files on disk with the exception of a BSON ID supplied by the Dashboard service."
   },
   {
     "versions": [
@@ -1293,7 +1293,7 @@
     "path": "Config.UseGraylog",
     "type": "bool",
     "tag": "json:\"use_graylog\"",
-    "doc": ""
+    "doc": "Use Graylog log output"
   },
   {
     "versions": [
@@ -1302,7 +1302,7 @@
     "path": "Config.UseLogstash",
     "type": "bool",
     "tag": "json:\"use_logstash\"",
-    "doc": ""
+    "doc": "Use logstash log output"
   },
   {
     "versions": [
@@ -1311,7 +1311,7 @@
     "path": "Config.UseRedisLog",
     "type": "bool",
     "tag": "json:\"use_redis_log\"",
-    "doc": ""
+    "doc": "Enables the real-time Gateway log view in the Dashboard."
   },
   {
     "versions": [
@@ -1320,7 +1320,7 @@
     "path": "Config.UseSentry",
     "type": "bool",
     "tag": "json:\"use_sentry\"",
-    "doc": ""
+    "doc": "Enable Sentry logging"
   },
   {
     "versions": [
@@ -1329,7 +1329,7 @@
     "path": "Config.UseSyslog",
     "type": "bool",
     "tag": "json:\"use_syslog\"",
-    "doc": ""
+    "doc": "Enable Syslog log output"
   },
   {
     "versions": [
@@ -1338,7 +1338,7 @@
     "path": "Config.VersionHeader",
     "type": "string",
     "tag": "json:\"version_header\"",
-    "doc": ""
+    "doc": "Expose version header with a given name. Works only for versioned APIs."
   },
   {
     "versions": [
@@ -1356,7 +1356,7 @@
     "path": "ConsulConfig.Datacenter",
     "type": "string",
     "tag": "json:\"datacenter\"",
-    "doc": "Datacenter to use. If not provided, the default agent datacenter is used."
+    "doc": "The datacenter to use. If not provided, the default agent datacenter is used."
   },
   {
     "versions": [
@@ -1383,7 +1383,7 @@
     "path": "ConsulConfig.TLSConfig",
     "type": "struct{}",
     "tag": "json:\"tls_config\"",
-    "doc": ""
+    "doc": "TLS configuration"
   },
   {
     "versions": [
@@ -1410,7 +1410,7 @@
     "path": "DBAppConfOptionsConfig.ConnectionString",
     "type": "string",
     "tag": "json:\"connection_string\"",
-    "doc": ""
+    "doc": "Set the URL to your Dashboard instance (or a load balanced instance). The URL needs to be formatted as: `http://dashboard_host:port`"
   },
   {
     "versions": [
@@ -1419,7 +1419,7 @@
     "path": "DBAppConfOptionsConfig.NodeIsSegmented",
     "type": "bool",
     "tag": "json:\"node_is_segmented\"",
-    "doc": ""
+    "doc": "Set to `true` to enable filtering (sharding) of APIs."
   },
   {
     "versions": [
@@ -1428,7 +1428,7 @@
     "path": "DBAppConfOptionsConfig.Tags",
     "type": "[]string",
     "tag": "json:\"tags\"",
-    "doc": ""
+    "doc": "The tags to use when filtering (sharding) Tyk Gateway nodes. Tags are processed as `OR` operations.\nIf you include a non-filter tag (e.g. an identifier such as `node-id-1`, this will become available to your Dashboard analytics)."
   },
   {
     "versions": [
@@ -1446,7 +1446,7 @@
     "path": "DnsCacheConfig.Enabled",
     "type": "bool",
     "tag": "json:\"enabled\"",
-    "doc": ""
+    "doc": "Setting this value to `true` will enable caching of DNS queries responses used for API endpoint’s host names. By default caching is disabled."
   },
   {
     "versions": [
@@ -1455,7 +1455,7 @@
     "path": "DnsCacheConfig.MultipleIPsHandleStrategy",
     "type": "IPsHandleStrategy",
     "tag": "json:\"multiple_ips_handle_strategy\"",
-    "doc": ""
+    "doc": "A strategy which will be used when a DNS query will reply with more than 1 IP Address per single host.\nAs a DNS query response IP Addresses can have a changing order depending on DNS server balancing strategy (eg: round robin, geographically dependent origin-ip ordering, etc) this option allows you to not to limit the connection to the first host in a cached response list or prevent response caching.\n\n* `pick_first` will instruct your Tyk Gateway to connect to the first IP in a returned IP list and cache the response.\n* `random` will instruct your Tyk Gateway to connect to a random IP in a returned IP list and cache the response.\n* `no_cache` will instruct your Tyk Gateway to connect to the first IP in a returned IP list and fetch each addresses list without caching on each API endpoint DNS query."
   },
   {
     "versions": [
@@ -1464,7 +1464,7 @@
     "path": "DnsCacheConfig.TTL",
     "type": "int64",
     "tag": "json:\"ttl\"",
-    "doc": ""
+    "doc": "This setting allows you to specify a duration in seconds before the record will be removed from cache after being added to it on the first DNS query resolution of API endpoints.\nSetting `ttl` to `-1` prevents record from being expired and removed from cache on next check interval."
   },
   {
     "versions": [
@@ -1500,7 +1500,7 @@
     "path": "HealthCheckConfig.EnableHealthChecks",
     "type": "bool",
     "tag": "json:\"enable_health_checks\"",
-    "doc": ""
+    "doc": "Setting this value to `true` will enable the health-check endpoint on /Tyk/health."
   },
   {
     "versions": [
@@ -1509,7 +1509,7 @@
     "path": "HealthCheckConfig.HealthCheckValueTimeout",
     "type": "int64",
     "tag": "json:\"health_check_value_timeouts\"",
-    "doc": ""
+    "doc": "This setting defaults to 60 seconds. This is the time window that Tyk uses to sample health-check data.\nYou can set a higher value for more accurate data (a larger sample period), or a lower value for less accurate data.\nThe reason this value is configurable is because sample data takes up space in your Redis DB to store the data to calculate samples. On high-availability systems this may not be desirable and smaller values may be preferred."
   },
   {
     "versions": [
@@ -1518,7 +1518,7 @@
     "path": "HttpServerOptionsConfig.Certificates",
     "type": "[]CertData",
     "tag": "json:\"certificates\"",
-    "doc": ""
+    "doc": "Deprecated. SSL certificates used by Gateway server."
   },
   {
     "versions": [
@@ -1527,7 +1527,7 @@
     "path": "HttpServerOptionsConfig.Ciphers",
     "type": "[]string",
     "tag": "json:\"ssl_ciphers\"",
-    "doc": ""
+    "doc": "Custom SSL ciphers. See list of ciphers here https://tyk.io/docs/basic-config-and-security/security/tls-and-ssl/#specify-tls-cipher-suites-for-tyk-gateway--tyk-dashboard"
   },
   {
     "versions": [
@@ -1536,7 +1536,7 @@
     "path": "HttpServerOptionsConfig.EnableHttp2",
     "type": "bool",
     "tag": "json:\"enable_http2\"",
-    "doc": ""
+    "doc": "Enable HTTP2 protocol handling"
   },
   {
     "versions": [
@@ -1545,7 +1545,7 @@
     "path": "HttpServerOptionsConfig.EnableWebSockets",
     "type": "bool",
     "tag": "json:\"enable_websockets\"",
-    "doc": ""
+    "doc": "Enabled WebSockets and server side events support"
   },
   {
     "versions": [
@@ -1554,7 +1554,7 @@
     "path": "HttpServerOptionsConfig.FlushInterval",
     "type": "int",
     "tag": "json:\"flush_interval\"",
-    "doc": ""
+    "doc": "Set this to the number of seconds that Tyk uses to flush content from the proxied upstream connection to the open downstream connection.\nThis option needed be set for streaming protocols like Server Side Events, or gRPC streaming."
   },
   {
     "versions": [
@@ -1563,7 +1563,7 @@
     "path": "HttpServerOptionsConfig.MinVersion",
     "type": "uint16",
     "tag": "json:\"min_version\"",
-    "doc": ""
+    "doc": "Minimum TLS version. Possible values: https://tyk.io/docs/basic-config-and-security/security/tls-and-ssl/#values-for-tls-versions"
   },
   {
     "versions": [
@@ -1572,7 +1572,7 @@
     "path": "HttpServerOptionsConfig.OverrideDefaults",
     "type": "bool",
     "tag": "json:\"override_defaults\"",
-    "doc": ""
+    "doc": "No longer used"
   },
   {
     "versions": [
@@ -1581,7 +1581,7 @@
     "path": "HttpServerOptionsConfig.ReadTimeout",
     "type": "int",
     "tag": "json:\"read_timeout\"",
-    "doc": ""
+    "doc": "API Consumer -\u003e Gateway network read timeout. Not setting this config, or setting this to 0, defaults to 120 seconds"
   },
   {
     "versions": [
@@ -1590,7 +1590,7 @@
     "path": "HttpServerOptionsConfig.SSLCertificates",
     "type": "[]string",
     "tag": "json:\"ssl_certificates\"",
-    "doc": ""
+    "doc": "SSL certificates used by your Gateway server. A list of certificate IDs or path to files."
   },
   {
     "versions": [
@@ -1599,7 +1599,7 @@
     "path": "HttpServerOptionsConfig.SSLInsecureSkipVerify",
     "type": "bool",
     "tag": "json:\"ssl_insecure_skip_verify\"",
-    "doc": ""
+    "doc": "Disable TLS verification. Required if you are using self-signed certificates."
   },
   {
     "versions": [
@@ -1608,7 +1608,7 @@
     "path": "HttpServerOptionsConfig.ServerName",
     "type": "string",
     "tag": "json:\"server_name\"",
-    "doc": ""
+    "doc": "Start your Gateway HTTP server on specific server name"
   },
   {
     "versions": [
@@ -1617,7 +1617,7 @@
     "path": "HttpServerOptionsConfig.SkipTargetPathEscaping",
     "type": "bool",
     "tag": "json:\"skip_target_path_escaping\"",
-    "doc": ""
+    "doc": "Disable automatic character escaping, allowing to path original URL data to the upstream."
   },
   {
     "versions": [
@@ -1626,7 +1626,7 @@
     "path": "HttpServerOptionsConfig.SkipURLCleaning",
     "type": "bool",
     "tag": "json:\"skip_url_cleaning\"",
-    "doc": ""
+    "doc": "Allow the use of a double slash in a URL path. This can be useful if you need to pass raw URLs to your API endpoints.\nFor example: `http://myapi.com/get/http://example.com`."
   },
   {
     "versions": [
@@ -1635,7 +1635,7 @@
     "path": "HttpServerOptionsConfig.UseLE_SSL",
     "type": "bool",
     "tag": "json:\"use_ssl_le\"",
-    "doc": ""
+    "doc": "Enable Lets-Encrypt support"
   },
   {
     "versions": [
@@ -1644,7 +1644,7 @@
     "path": "HttpServerOptionsConfig.UseSSL",
     "type": "bool",
     "tag": "json:\"use_ssl\"",
-    "doc": ""
+    "doc": "Set to true to enable SSL connections"
   },
   {
     "versions": [
@@ -1653,7 +1653,7 @@
     "path": "HttpServerOptionsConfig.WriteTimeout",
     "type": "int",
     "tag": "json:\"write_timeout\"",
-    "doc": ""
+    "doc": "API Consumer -\u003e Gateway network write timeout. Not setting this config, or setting this to 0, defaults to 120 seconds"
   },
   {
     "versions": [
@@ -1662,7 +1662,7 @@
     "path": "LivenessCheckConfig.CheckDuration",
     "type": "time.Duration",
     "tag": "json:\"check_duration\"",
-    "doc": ""
+    "doc": "Frequencies of performing interval healthchecks for Redis, Dashboard, and RPC layer. Default: 10 seconds."
   },
   {
     "versions": [
@@ -1689,7 +1689,7 @@
     "path": "LocalSessionCacheConf.DisableCacheSessionState",
     "type": "bool",
     "tag": "json:\"disable_cached_session_state\"",
-    "doc": ""
+    "doc": "By default sessions are set to cache. Set this to `true` to stop Tyk from caching keys locally on the node."
   },
   {
     "versions": [
@@ -1707,7 +1707,7 @@
     "path": "MonitorConfig.EnableTriggerMonitors",
     "type": "bool",
     "tag": "json:\"enable_trigger_monitors\"",
-    "doc": ""
+    "doc": "Set this to `true` to have monitors enabled in your configuration for the node."
   },
   {
     "versions": [
@@ -1716,7 +1716,7 @@
     "path": "MonitorConfig.GlobalTriggerLimit",
     "type": "float64",
     "tag": "json:\"global_trigger_limit\"",
-    "doc": ""
+    "doc": "The trigger limit, as a percentage of the quota that must be reached in order to trigger the event, any time the quota percentage is increased the event will trigger."
   },
   {
     "versions": [
@@ -1725,7 +1725,7 @@
     "path": "MonitorConfig.MonitorOrgKeys",
     "type": "bool",
     "tag": "json:\"monitor_org_keys\"",
-    "doc": ""
+    "doc": "Apply the monitoring subsystem to organisation keys."
   },
   {
     "versions": [
@@ -1734,7 +1734,7 @@
     "path": "MonitorConfig.MonitorUserKeys",
     "type": "bool",
     "tag": "json:\"monitor_user_keys\"",
-    "doc": ""
+    "doc": "Apply the monitoring subsystem to user keys."
   },
   {
     "versions": [
@@ -1743,7 +1743,7 @@
     "path": "NewRelicConfig.AppName",
     "type": "string",
     "tag": "json:\"app_name\"",
-    "doc": ""
+    "doc": "New Relic Application name"
   },
   {
     "versions": [
@@ -1752,7 +1752,7 @@
     "path": "NewRelicConfig.LicenseKey",
     "type": "string",
     "tag": "json:\"license_key\"",
-    "doc": ""
+    "doc": "New Relic License key"
   },
   {
     "versions": [
@@ -1797,7 +1797,7 @@
     "path": "NormalisedURLConfig.Custom",
     "type": "[]string",
     "tag": "json:\"custom_patterns\"",
-    "doc": ""
+    "doc": "This is a list of custom patterns you can add. These must be valid regex strings. Tyk will replace these values with a {var} placeholder."
   },
   {
     "versions": [
@@ -1806,7 +1806,7 @@
     "path": "NormalisedURLConfig.Enabled",
     "type": "bool",
     "tag": "json:\"enabled\"",
-    "doc": ""
+    "doc": "Set this to `true` to enable normalisation."
   },
   {
     "versions": [
@@ -1815,7 +1815,7 @@
     "path": "NormalisedURLConfig.NormaliseNumbers",
     "type": "bool",
     "tag": "json:\"normalise_numbers\"",
-    "doc": ""
+    "doc": "Set this to true to have Tyk automatically match for numeric IDs, it will match with a preceding slash so as not to capture actual numbers:"
   },
   {
     "versions": [
@@ -1824,7 +1824,7 @@
     "path": "NormalisedURLConfig.NormaliseUUIDs",
     "type": "bool",
     "tag": "json:\"normalise_uuids\"",
-    "doc": ""
+    "doc": "Each UUID will be replaced with a placeholder {uuid}"
   },
   {
     "versions": [
@@ -1833,7 +1833,7 @@
     "path": "PoliciesConfig.AllowExplicitPolicyID",
     "type": "bool",
     "tag": "json:\"allow_explicit_policy_id\"",
-    "doc": ""
+    "doc": "In a Pro installation, Tyk will load Policy IDs and use the internal object-ID as the ID of the policy.\nThis is not portable in cases where the data needs to be moved from installation to installation.\n\nIf you set this value to `true`, then the id parameter in a stored policy (or imported policy using the Dashboard API), will be used instead of the internal ID.\n\nThis option should only be used when moving an installation to a new database."
   },
   {
     "versions": [
@@ -1842,7 +1842,7 @@
     "path": "PoliciesConfig.PolicyConnectionString",
     "type": "string",
     "tag": "json:\"policy_connection_string\"",
-    "doc": ""
+    "doc": "This option is required if `policies.policy_source` is set to `service`.\nSet this to the URL of your Tyk Dashboard installation. The URL needs to be formatted as: http://dashboard_host:port."
   },
   {
     "versions": [
@@ -1851,7 +1851,7 @@
     "path": "PoliciesConfig.PolicyRecordName",
     "type": "string",
     "tag": "json:\"policy_record_name\"",
-    "doc": ""
+    "doc": "This option is required if `policies.policy_source` is set to `file`.\nSpecifies the path of your JSON file containing the available policies."
   },
   {
     "versions": [
@@ -1860,7 +1860,7 @@
     "path": "PoliciesConfig.PolicySource",
     "type": "string",
     "tag": "json:\"policy_source\"",
-    "doc": ""
+    "doc": "Set this value to `file` to look in the file system for a definition file. Set to `service` to use the Dashboard service."
   },
   {
     "versions": [
@@ -1977,7 +1977,7 @@
     "path": "SecurityConfig.ControlAPIUseMutualTLS",
     "type": "bool",
     "tag": "json:\"control_api_use_mutual_tls\"",
-    "doc": ""
+    "doc": "Enable Gateway Control API to use Mutual TLS. Certificates can be set via `security.certificates.control_api` section"
   },
   {
     "versions": [
@@ -1986,7 +1986,7 @@
     "path": "SecurityConfig.PinnedPublicKeys",
     "type": "map[string]string",
     "tag": "json:\"pinned_public_keys\"",
-    "doc": ""
+    "doc": "Specify public keys used for Certificate Pinning on global level."
   },
   {
     "versions": [
@@ -1995,7 +1995,7 @@
     "path": "SecurityConfig.PrivateCertificateEncodingSecret",
     "type": "string",
     "tag": "json:\"private_certificate_encoding_secret\"",
-    "doc": ""
+    "doc": "Set the AES256 secret which is used to encode certificate private keys when they uploaded via certificate storage"
   },
   {
     "versions": [
@@ -2004,7 +2004,7 @@
     "path": "ServiceDiscoveryConf.DefaultCacheTimeout",
     "type": "int",
     "tag": "json:\"default_cache_timeout\"",
-    "doc": ""
+    "doc": "Service discovery cache timeout"
   },
   {
     "versions": [
@@ -2031,7 +2031,7 @@
     "path": "SlaveOptionsConfig.APIKey",
     "type": "string",
     "tag": "json:\"api_key\"",
-    "doc": ""
+    "doc": "This the API key of a user used to authenticate and authorise the Gateway’s access through MDCB.\nThe user should be a standard Dashboard user with minimal privileges so as to reduce any risk if the user is compromised.\nThe suggested security settings are read for Real-time notifications and the remaining options set to deny."
   },
   {
     "versions": [
@@ -2040,7 +2040,7 @@
     "path": "SlaveOptionsConfig.BindToSlugsInsteadOfListenPaths",
     "type": "bool",
     "tag": "json:\"bind_to_slugs\"",
-    "doc": ""
+    "doc": "For an Self-Managed installation this can be left at `false` (the default setting). For Legacy Cloud Gateways it must be set to ‘true’."
   },
   {
     "versions": [
@@ -2049,7 +2049,7 @@
     "path": "SlaveOptionsConfig.CallTimeout",
     "type": "int",
     "tag": "json:\"call_timeout\"",
-    "doc": ""
+    "doc": "Call Timeout allows to specify a time in seconds for the maximum allowed duration of a RPC call."
   },
   {
     "versions": [
@@ -2058,7 +2058,7 @@
     "path": "SlaveOptionsConfig.ConnectionString",
     "type": "string",
     "tag": "json:\"connection_string\"",
-    "doc": ""
+    "doc": "Use this setting to add the URL for your MDCB or load balancer host."
   },
   {
     "versions": [
@@ -2067,7 +2067,7 @@
     "path": "SlaveOptionsConfig.DisableKeySpaceSync",
     "type": "bool",
     "tag": "json:\"disable_keyspace_sync\"",
-    "doc": ""
+    "doc": "Set this option to `true` if you don’t want to monitor changes in the keys from a master Gateway."
   },
   {
     "versions": [
@@ -2076,7 +2076,7 @@
     "path": "SlaveOptionsConfig.EnableRPCCache",
     "type": "bool",
     "tag": "json:\"enable_rpc_cache\"",
-    "doc": ""
+    "doc": "Set this option to `true` to enable RPC caching for keys."
   },
   {
     "versions": [
@@ -2085,7 +2085,7 @@
     "path": "SlaveOptionsConfig.GroupID",
     "type": "string",
     "tag": "json:\"group_id\"",
-    "doc": ""
+    "doc": "This is the `zone` that this instance inhabits, e.g. the cluster/data-centre the Gateway lives in.\nThe group ID must be the same across all the Gateways of a data-centre/cluster which are also sharing the same Redis instance.\nThis ID should also be unique per cluster (otherwise another Gateway cluster can pick up your keyspace events and your cluster will get zero updates)."
   },
   {
     "versions": [
@@ -2094,7 +2094,7 @@
     "path": "SlaveOptionsConfig.PingTimeout",
     "type": "int",
     "tag": "json:\"ping_timeout\"",
-    "doc": ""
+    "doc": "The maximum time in seconds that a RPC ping can last."
   },
   {
     "versions": [
@@ -2103,7 +2103,7 @@
     "path": "SlaveOptionsConfig.RPCKey",
     "type": "string",
     "tag": "json:\"rpc_key\"",
-    "doc": ""
+    "doc": "Your organisation ID to connect to the MDCB installation."
   },
   {
     "versions": [
@@ -2112,7 +2112,7 @@
     "path": "SlaveOptionsConfig.RPCPoolSize",
     "type": "int",
     "tag": "json:\"rpc_pool_size\"",
-    "doc": ""
+    "doc": "The number of RPC connections in the pool. Basically it creates a set of connections that you can re-use as needed. Defaults to 5."
   },
   {
     "versions": [
@@ -2121,7 +2121,7 @@
     "path": "SlaveOptionsConfig.SSLInsecureSkipVerify",
     "type": "bool",
     "tag": "json:\"ssl_insecure_skip_verify\"",
-    "doc": ""
+    "doc": "Set this option to `true` to allow the certificate validation (certificate chain and hostname) to be skipped.\nThis can be useful if you use a self-signed certificate."
   },
   {
     "versions": [
@@ -2130,7 +2130,7 @@
     "path": "SlaveOptionsConfig.UseRPC",
     "type": "bool",
     "tag": "json:\"use_rpc\"",
-    "doc": ""
+    "doc": "Set to `true` to connect a worker Gateway using RPC."
   },
   {
     "versions": [
@@ -2139,7 +2139,7 @@
     "path": "SlaveOptionsConfig.UseSSL",
     "type": "bool",
     "tag": "json:\"use_ssl\"",
-    "doc": ""
+    "doc": "Set this option to `true` to use an SSL RPC connection."
   },
   {
     "versions": [
@@ -2148,7 +2148,7 @@
     "path": "StorageOptionsConf.Addrs",
     "type": "[]string",
     "tag": "json:\"addrs\"",
-    "doc": ""
+    "doc": "If you have multi-node setup, you should use this field instead. For example: [\"host1:port1\", \"host2:port2\"]."
   },
   {
     "versions": [
@@ -2157,7 +2157,7 @@
     "path": "StorageOptionsConf.Database",
     "type": "int",
     "tag": "json:\"database\"",
-    "doc": ""
+    "doc": "Redis database"
   },
   {
     "versions": [
@@ -2166,7 +2166,7 @@
     "path": "StorageOptionsConf.EnableCluster",
     "type": "bool",
     "tag": "json:\"enable_cluster\"",
-    "doc": ""
+    "doc": "Enable Redis Cluster support"
   },
   {
     "versions": [
@@ -2175,7 +2175,7 @@
     "path": "StorageOptionsConf.Host",
     "type": "string",
     "tag": "json:\"host\"",
-    "doc": ""
+    "doc": "The Redis host, by default this is set to `localhost`, but for production this should be set to a cluster."
   },
   {
     "versions": [
@@ -2193,7 +2193,7 @@
     "path": "StorageOptionsConf.MasterName",
     "type": "string",
     "tag": "json:\"master_name\"",
-    "doc": ""
+    "doc": "Redis sentinel master name"
   },
   {
     "versions": [
@@ -2202,7 +2202,7 @@
     "path": "StorageOptionsConf.MaxActive",
     "type": "int",
     "tag": "json:\"optimisation_max_active\"",
-    "doc": ""
+    "doc": "Set the number of maximum connections in the Redis connection pool, which defaults to 500. Set to a higher value if you are expecting more traffic."
   },
   {
     "versions": [
@@ -2211,7 +2211,7 @@
     "path": "StorageOptionsConf.MaxIdle",
     "type": "int",
     "tag": "json:\"optimisation_max_idle\"",
-    "doc": ""
+    "doc": "Set the number of maximum idle connections in the Redis connection pool, which defaults to 100. Set to a higher value if you are expecting more traffic."
   },
   {
     "versions": [
@@ -2220,7 +2220,7 @@
     "path": "StorageOptionsConf.Password",
     "type": "string",
     "tag": "json:\"password\"",
-    "doc": ""
+    "doc": "If your Redis instance has a password set for access, you can set it here."
   },
   {
     "versions": [
@@ -2229,7 +2229,7 @@
     "path": "StorageOptionsConf.Port",
     "type": "int",
     "tag": "json:\"port\"",
-    "doc": ""
+    "doc": "The Redis instance port."
   },
   {
     "versions": [
@@ -2238,7 +2238,7 @@
     "path": "StorageOptionsConf.SSLInsecureSkipVerify",
     "type": "bool",
     "tag": "json:\"ssl_insecure_skip_verify\"",
-    "doc": ""
+    "doc": "Disable TLS verification"
   },
   {
     "versions": [
@@ -2247,7 +2247,7 @@
     "path": "StorageOptionsConf.Timeout",
     "type": "int",
     "tag": "json:\"timeout\"",
-    "doc": ""
+    "doc": "Set a custom timeout for Redis network operations. Default value 5 seconds."
   },
   {
     "versions": [
@@ -2256,7 +2256,7 @@
     "path": "StorageOptionsConf.Type",
     "type": "string",
     "tag": "json:\"type\"",
-    "doc": ""
+    "doc": "This should be set to `redis` (lowercase)"
   },
   {
     "versions": [
@@ -2265,7 +2265,7 @@
     "path": "StorageOptionsConf.UseSSL",
     "type": "bool",
     "tag": "json:\"use_ssl\"",
-    "doc": ""
+    "doc": "Enable SSL/TLS connection between your Tyk Gateway \u0026 Redis."
   },
   {
     "versions": [
@@ -2274,7 +2274,7 @@
     "path": "StorageOptionsConf.Username",
     "type": "string",
     "tag": "json:\"username\"",
-    "doc": ""
+    "doc": "Redis user name"
   },
   {
     "versions": [
@@ -2283,7 +2283,7 @@
     "path": "Tracer.Enabled",
     "type": "bool",
     "tag": "json:\"enabled\"",
-    "doc": "If true then this tracer will be activated and all tracing data will be sent\nto this tracer.NoOp tracer is used otherwise which collects traces but\ndiscard them."
+    "doc": "Enable tracing"
   },
   {
     "versions": [
@@ -2292,7 +2292,7 @@
     "path": "Tracer.Name",
     "type": "string",
     "tag": "json:\"name\"",
-    "doc": "The name of the tracer to initialize. For instance appdash, to use appdash\ntracer"
+    "doc": "The name of the tracer to initialize. For instance appdash, to use appdash tracer"
   },
   {
     "versions": [
@@ -2301,7 +2301,7 @@
     "path": "Tracer.Options",
     "type": "map[string]interface{}",
     "tag": "json:\"options\"",
-    "doc": "Key value pairs used to initialize the tracer. These are tracer specific,\neach tracer requires different options to operate. Please see trace package\nfor options required by supported tracer implementation."
+    "doc": "Tracing configuration. Refer to the Tracing Docs for the full list of options."
   },
   {
     "versions": [
@@ -2337,7 +2337,7 @@
     "path": "UptimeTestsConfig.Disable",
     "type": "bool",
     "tag": "json:\"disable\"",
-    "doc": ""
+    "doc": "To disable uptime tests on this node, set this value to `true`."
   },
   {
     "versions": [
@@ -2346,7 +2346,7 @@
     "path": "UptimeTestsConfigDetail.CheckerPoolSize",
     "type": "int",
     "tag": "json:\"checker_pool_size\"",
-    "doc": ""
+    "doc": "The goroutine pool size to keep idle for uptime tests. If you have many uptime tests running at a high time period, then increase this value."
   },
   {
     "versions": [
@@ -2355,7 +2355,7 @@
     "path": "UptimeTestsConfigDetail.EnableUptimeAnalytics",
     "type": "bool",
     "tag": "json:\"enable_uptime_analytics\"",
-    "doc": ""
+    "doc": "Set this value to `true` to have the node capture and record analytics data regarding the uptime tests."
   },
   {
     "versions": [
@@ -2364,7 +2364,7 @@
     "path": "UptimeTestsConfigDetail.FailureTriggerSampleSize",
     "type": "int",
     "tag": "json:\"failure_trigger_sample_size\"",
-    "doc": ""
+    "doc": "The sample size to trigger a `HostUp` or `HostDown` event. For example, a setting of 3 will require at least three failures to occur before the uptime test is triggered."
   },
   {
     "versions": [
@@ -2373,7 +2373,7 @@
     "path": "UptimeTestsConfigDetail.TimeWait",
     "type": "int",
     "tag": "json:\"time_wait\"",
-    "doc": ""
+    "doc": "The value in seconds between tests runs. All tests will run simultaneously. This value will set the time between those tests. So a value of 60 will run all uptime tests every 60 seconds."
   },
   {
     "versions": [
@@ -2436,7 +2436,7 @@
     "path": "WebHookHandlerConf.EventTimeout",
     "type": "int64",
     "tag": "bson:\"event_timeout\" json:\"event_timeout\"",
-    "doc": ""
+    "doc": "The cool-down for the event so it does not trigger again (in seconds)."
   },
   {
     "versions": [
@@ -2445,7 +2445,7 @@
     "path": "WebHookHandlerConf.HeaderList",
     "type": "map[string]string",
     "tag": "bson:\"header_map\" json:\"header_map\"",
-    "doc": ""
+    "doc": "Headers to set when firing the webhook."
   },
   {
     "versions": [
@@ -2454,7 +2454,7 @@
     "path": "WebHookHandlerConf.Method",
     "type": "string",
     "tag": "bson:\"method\" json:\"method\"",
-    "doc": ""
+    "doc": "The method to use for the webhook."
   },
   {
     "versions": [
@@ -2463,7 +2463,7 @@
     "path": "WebHookHandlerConf.TargetPath",
     "type": "string",
     "tag": "bson:\"target_path\" json:\"target_path\"",
-    "doc": ""
+    "doc": "The target path on which to send the request."
   },
   {
     "versions": [
@@ -2472,7 +2472,7 @@
     "path": "WebHookHandlerConf.TemplatePath",
     "type": "string",
     "tag": "bson:\"template_path\" json:\"template_path\"",
-    "doc": ""
+    "doc": "The template to load in order to format the request."
   },
   {
     "versions": [
@@ -2650,7 +2650,7 @@
     "path": "Config.JWTSSLInsecureSkipVerify",
     "type": "bool",
     "tag": "json:\"jwt_ssl_insecure_skip_verify\"",
-    "doc": "SSL options for JWT middleware."
+    "doc": "Skip TLS verification for JWT JWKs url validation"
   },
   {
     "versions": [
@@ -2659,7 +2659,7 @@
     "path": "Config.ProxySSLMaxVersion",
     "type": "uint16",
     "tag": "json:\"proxy_ssl_max_version\"",
-    "doc": ""
+    "doc": "Maximum TLS version for connection between Tyk and your upstream service."
   },
   {
     "versions": [
@@ -2668,7 +2668,7 @@
     "path": "HttpServerOptionsConfig.MaxVersion",
     "type": "uint16",
     "tag": "json:\"max_version\"",
-    "doc": ""
+    "doc": "Maximum TLS version."
   },
   {
     "versions": [
@@ -2741,7 +2741,7 @@
     "path": "DBAppConfOptionsConfig.ConnectionTimeout",
     "type": "int",
     "tag": "json:\"connection_timeout\"",
-    "doc": "Set the timeout for your Dashboard connection. Defaults to 30 seconds. In seconds."
+    "doc": "Set a timeout value, in seconds, for your Dashboard connection. Default value is 30."
   },
   {
     "versions": [
@@ -2801,7 +2801,7 @@
     "path": "Config.DisableKeyActionsByUsername",
     "type": "bool",
     "tag": "json:\"disable_key_actions_by_username\"",
-    "doc": "DisableKeyActionsByUsername disables key search by username."
+    "doc": "DisableKeyActionsByUsername disables key search by username.\nWhen this is set to `true` you are able to search for keys only by keyID or key hash (if `hash_keys` is also set to `true`)\nNote that if `hash_keys` is also set to `true` then the keyID will not be provided for APIs secured using basic auth. In this scenario the only search option would be to use key hash\nIf you are using the Tyk Dashboard, you must configure this setting with the same value in both Gateway and Dashboard"
   },
   {
     "versions": [
@@ -2849,7 +2849,7 @@
     "path": "Config.OpenTelemetry",
     "type": "otel.OpenTelemetry",
     "tag": "json:\"opentelemetry\"",
-    "doc": "Section for configuring Opentelemetry"
+    "doc": "Section for configuring OpenTelemetry."
   },
   {
     "versions": [
