@@ -13,7 +13,7 @@ func Run() (err error) {
 	cfg := NewOptions()
 
 	if slices.Contains(os.Args, "help") {
-		fmt.Println("Usage: schema-gen lint <options>:")
+		fmt.Println("Usage: schema-gen list <options>:")
 		fmt.Println()
 		flag.PrintDefaults()
 		return nil

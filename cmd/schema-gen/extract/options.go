@@ -38,7 +38,7 @@ func NewOptions() *options {
 }
 
 func PrintHelp() {
-	fmt.Println("Usage: schema-gen restore <options>:")
+	fmt.Println("Usage: schema-gen extract <options>:")
 	fmt.Println()
 	flag.PrintDefaults()
 }
