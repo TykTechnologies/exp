@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/format"
 	"os"
+	"sort"
 	"strings"
 
 	"golang.org/x/exp/slices"
@@ -98,6 +99,8 @@ func restorePackageInfo(pkgInfo *model.PackageInfo, cfg *options) ([]byte, error
 	if len(typeDecls) == 0 {
 		return nil, errors.New("No types to render")
 	}
+
+	sort.Stable(typeDecls)
 
 	if len(typeDecls) == 1 && typeDecls[0].Doc == "" {
 		typeDecl := typeDecls[0]
