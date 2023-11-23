@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout PR
-        uses: TykTechnologies/github-actions/.github/actions/checkout-pr@main
+        uses: TykTechnologies/exp/.github/actions/checkout-pr@ci/build-cmds-in-github-actions
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
 
