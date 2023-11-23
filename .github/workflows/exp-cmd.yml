@@ -1,0 +1,30 @@
+name: Exp repo cmd/ builds
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  exp-cmd-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR
+        uses: TykTechnologies/github-actions/.github/actions/checkout-pr@main
+        with:
+          token: ${{ secrets.ORG_GH_TOKEN }}
+
+      - name: Setup Golang
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
+
+      - working-directory: ./cmd/go-fsck
+        run: go build .
+
+      - working-directory: ./cmd/schema-gen
+        run: go build .
