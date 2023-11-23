@@ -23,4 +23,8 @@ jobs:
         with:
           go-version: '1.21.x'
 
-      - run: go build ./cmd/...
+      - working-directory: ./cmd/go-fsck
+        run: go build .
+
+      - working-directory: ./cmd/schema-gen
+        run: go build .
