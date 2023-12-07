@@ -27,6 +27,11 @@ func start() error {
 		gomodPath = "go.mod"
 	)
 
+	vulns, err := getVulns()
+	if err != nil {
+		return err
+	}
+
 	content, err := os.ReadFile(gomodPath)
 	if err != nil {
 		return err
@@ -47,7 +52,7 @@ func start() error {
 	output := &strings.Builder{}
 
 	w := tablewriter.NewWriter(output)
-	w.SetHeader([]string{"import", "version", "latest", "warnings"})
+	w.SetHeader([]string{"import", "version", "latest", "warnings", "cves"})
 	w.SetAutoWrapText(false)
 	w.SetAutoFormatHeaders(true)
 	w.SetTablePadding(" ")
@@ -75,6 +80,10 @@ func start() error {
 		}
 
 		warnings := lintImport(name, version, latest)
+		var cves string
+		if m := vulns.Find(name); m != nil {
+			cves = m.String(version)
+		}
 
 		if latest == version {
 			latest = "✓ Up to date"
@@ -90,7 +99,7 @@ func start() error {
 		// strip github.com for less data
 		name = strings.ReplaceAll(name, "github.com/", "")
 
-		w.Append(toStringSlice(name, version, latest, warnings))
+		w.Append(toStringSlice(name, version, latest, warnings, cves))
 	}
 
 	w.Render()

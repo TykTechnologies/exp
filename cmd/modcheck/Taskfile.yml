@@ -7,6 +7,7 @@ env:
 tasks:
   default:
     desc: "Build, run tests, build examples"
+    deps: [ cve ]
     cmds:
       - task: build
 
@@ -17,6 +18,12 @@ tasks:
       - go fmt ./...
       - go mod tidy
       - go clean -cache
-      - go build .
       - go install .
       - modcheck
+
+  cve:
+    desc: "Fetch Go CVE list json"
+    status:
+      - test -f modules.json
+    cmds:
+      - wget https://vuln.go.dev/index/modules.json
