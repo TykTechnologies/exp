@@ -10,7 +10,8 @@ Changes:
 - Removed all etcd, consul, dynamodb implementations,
 - Added an errorsWrap function to use the standar lib errors pkg,
 - Updated code to use stdlib errors over github.com/pkg/errors,
-- Removed SystemClock.Sleep
+- Removed SystemClock.Sleep,
+- Added per-key local storage constructors
 
 Ultimately the fork contains redis and local implementations for:
 
