@@ -8,7 +8,7 @@ Run `modcheck` in your repo where `go.mod` exists.
 Install:
 
 ```
-go install github.com/TykTechnologies/exp/cmd/gomod@main
+go install github.com/TykTechnologies/exp/cmd/modcheck@main
 ```
 
 The report is provided in markdown output, suitable for github issues.
