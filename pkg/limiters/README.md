@@ -12,6 +12,7 @@ Changes:
 - Updated code to use stdlib errors over github.com/pkg/errors,
 - Removed SystemClock.Sleep,
 - Added per-key local storage constructors
+- Used `redis.UniversalClient` instead of `*redis.Client` to support cluster
 
 Ultimately the fork contains redis and local implementations for:
 

@@ -10,7 +10,7 @@ import (
 
 // LeakyBucketRedis is a Redis implementation of a LeakyBucketStateBackend.
 type LeakyBucketRedis struct {
-	cli         *redis.Client
+	cli         redis.UniversalClient
 	prefix      string
 	ttl         time.Duration
 	raceCheck   bool
@@ -23,7 +23,7 @@ type LeakyBucketRedis struct {
 //
 // If raceCheck is true and the keys in Redis are modified in between State() and SetState() calls then
 // ErrRaceCondition is returned.
-func NewLeakyBucketRedis(cli *redis.Client, prefix string, ttl time.Duration, raceCheck bool) *LeakyBucketRedis {
+func NewLeakyBucketRedis(cli redis.UniversalClient, prefix string, ttl time.Duration, raceCheck bool) *LeakyBucketRedis {
 	return &LeakyBucketRedis{cli: cli, prefix: prefix, ttl: ttl, raceCheck: raceCheck}
 }
 
