@@ -13,6 +13,8 @@ Changes:
 - Removed SystemClock.Sleep,
 - Added per-key local storage constructors
 - Used `redis.UniversalClient` instead of `*redis.Client` to support cluster
+- Adjusted RedisLock to use Lock/UnlockContext functions from redsync
+- Wrote test for RedisLock
 
 Ultimately the fork contains redis and local implementations for:
 
