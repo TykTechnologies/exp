@@ -28,3 +28,21 @@ Usage of ./httpbin-logserver:
   -output string
     	output, 'stdout' or file (default "stdout")
 ```
+
+## Docker compose example
+
+Use the following snippet to spin up a docker compose service:
+
+```
+  httpbin:
+    image: tykio/ci-tools
+    volumes:
+      - ./logs:/logs:rw
+    entrypoint:
+      - /usr/local/bin/httpbin-logserver
+    command:
+      - '-output'
+      - '/logs/service.json'
+```
+
+This way you get the access log for any processing or test assertions.
