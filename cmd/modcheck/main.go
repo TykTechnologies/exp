@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -22,24 +23,47 @@ func main() {
 	}
 }
 
-func start() error {
+type Dependency struct {
+	Name     string
+	Version  string
+	Latest   string
+	Upgrade  bool
+	Warnings string
+	CVEs     string
+}
+
+func (d *Dependency) StringSlice() []string {
 	var (
-		gomodPath = "go.mod"
+		version = d.Version
+		name    = d.Name
 	)
+
+	// nicer word wrap for github markdown
+	version = strings.ReplaceAll(version, "-", " ")
+	version = strings.ReplaceAll(version, "+", " +")
+
+	// strip github.com for less data
+	name = strings.ReplaceAll(name, "github.com/", "")
+
+	return toStringSlice(name, version, d.Latest, d.Warnings, d.CVEs)
+}
+
+func load(gomodPath string) ([]*Dependency, error) {
+	var result []*Dependency
 
 	vulns, err := getVulns()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	content, err := os.ReadFile(gomodPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	f, err := modfile.ParseLax(gomodPath, content, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Exclude org-wide version checks
@@ -49,67 +73,102 @@ func start() error {
 	pkg := f.Module.Mod.String()
 	pkg = path.Dir(pkg)
 
-	output := &strings.Builder{}
-
-	w := tablewriter.NewWriter(output)
-	w.SetHeader([]string{"import", "version", "latest", "warnings", "cves"})
-	w.SetAutoWrapText(false)
-	w.SetAutoFormatHeaders(true)
-	w.SetTablePadding(" ")
-	w.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	w.SetAlignment(tablewriter.ALIGN_LEFT)
-	w.SetRowSeparator("")
-	w.SetHeaderLine(true)
-	w.SetCenterSeparator("|")
-	//	w.EnableBorder(true)
-	w.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-
 	for _, r := range f.Require {
 		if r.Indirect {
 			continue
 		}
 
-		var err error
-		name, version, latest := r.Mod.Path, r.Mod.Version, "Skipped"
+		dep := &Dependency{
+			Name:    r.Mod.Path,
+			Version: r.Mod.Version,
+			Upgrade: false,
+			Latest:  "Skipped",
+		}
 
-		if !strings.HasPrefix(name, pkg) {
-			latest, err = getLatestVersion(name)
+		if !strings.HasPrefix(dep.Name, pkg) {
+			latest, err := getLatestVersion(dep.Name)
 			if err != nil {
-				latest = err.Error()
+				dep.Latest = err.Error()
+			} else {
+				dep.Latest = latest
 			}
 		}
 
-		warnings := lintImport(name, version, latest)
-		var cves string
-		if m := vulns.Find(name); m != nil {
-			cves = m.String(version)
+		dep.Warnings = lintImport(dep.Name, dep.Version, dep.Latest)
+
+		if m := vulns.Find(dep.Name); m != nil {
+			dep.CVEs = m.String(dep.Version)
 		}
 
-		if latest == version {
-			latest = "✓ Up to date"
+		switch {
+		case dep.Latest == dep.Version:
+			dep.Latest = "✓ Up to date"
+		case strings.HasPrefix(dep.Latest, "bad request:"):
+			dep.Latest = "✖ No info"
+		default:
+			if dep.Warnings == "" && semver.IsValid(dep.Version) && semver.IsValid(dep.Latest) {
+				if semver.Compare(dep.Version, dep.Latest) < 0 {
+					dep.Upgrade = true
+				}
+			}
 		}
-		if strings.HasPrefix(latest, "bad request:") {
-			latest = "✖ No info"
-		}
 
-		// nicer word wrap for github markdown
-		version = strings.ReplaceAll(version, "-", " ")
-		version = strings.ReplaceAll(version, "+", " +")
-
-		// strip github.com for less data
-		name = strings.ReplaceAll(name, "github.com/", "")
-
-		w.Append(toStringSlice(name, version, latest, warnings, cves))
+		result = append(result, dep)
 	}
 
-	w.Render()
+	return result, nil
+}
 
-	tableString := output.String()
-	for strings.Contains(tableString, "||") {
-		tableString = strings.Replace(tableString, "||", "|:---|", 1)
+func start() error {
+	var (
+		gomodPath = "go.mod"
+
+		suggest bool
+	)
+
+	flag.BoolVar(&suggest, "suggest", suggest, "suggest go get commands to update dependencies")
+	flag.Parse()
+
+	deps, err := load(gomodPath)
+	if err != nil {
+		return nil
 	}
 
-	fmt.Print(tableString)
+	switch {
+	case suggest:
+		for _, dep := range deps {
+			if dep.Upgrade {
+				fmt.Printf("go get %s@%s\t\t# upgrade from %s\n", dep.Name, dep.Latest, dep.Version)
+			}
+		}
+	default:
+		output := &strings.Builder{}
+
+		w := tablewriter.NewWriter(output)
+		w.SetHeader([]string{"import", "version", "latest", "warnings", "cves"})
+		w.SetAutoWrapText(false)
+		w.SetAutoFormatHeaders(true)
+		w.SetTablePadding(" ")
+		w.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+		w.SetAlignment(tablewriter.ALIGN_LEFT)
+		w.SetRowSeparator("")
+		w.SetHeaderLine(true)
+		w.SetCenterSeparator("|")
+		w.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+
+		for _, dep := range deps {
+			w.Append(dep.StringSlice())
+		}
+
+		w.Render()
+
+		tableString := output.String()
+		for strings.Contains(tableString, "||") {
+			tableString = strings.Replace(tableString, "||", "|:---|", 1)
+		}
+
+		fmt.Print(tableString)
+	}
 
 	return nil
 }
@@ -117,7 +176,7 @@ func start() error {
 func getLatestVersion(name string) (string, error) {
 	var result string
 
-	res, err := http.Get("https://proxy.golang.org/" + url.QueryEscape(name) + "/@v/list")
+	res, err := http.Get("https://proxy.golang.org/" + url.QueryEscape(strings.ToLower(name)) + "/@v/list")
 	if err != nil {
 		return result, err
 	}
