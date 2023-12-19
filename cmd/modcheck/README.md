@@ -5,6 +5,8 @@ official go proxy to get a list of versions for each of the imports.
 
 Run `modcheck` in your repo where `go.mod` exists.
 
+Run `modcheck -suggest` for a list of dependencies that are versioned and upgradeable.
+
 Install:
 
 ```
