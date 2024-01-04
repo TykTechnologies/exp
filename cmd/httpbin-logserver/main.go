@@ -20,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/SentimensRG/ctx/sigctx"
@@ -35,6 +36,11 @@ func main() {
 
 		log.Fatal(err)
 	}
+}
+
+type logEntry struct {
+	Time time.Time
+	httpbin.Result
 }
 
 func start() error {
@@ -62,11 +68,11 @@ func start() error {
 
 		encoder = json.NewEncoder(f)
 	}
+
+	var observerMu sync.Mutex
 	observer := func(res httpbin.Result) {
-		type logEntry struct {
-			Time time.Time
-			httpbin.Result
-		}
+		observerMu.Lock()
+		defer observerMu.Unlock()
 
 		encoder.Encode(logEntry{
 			Time:   time.Now(),
