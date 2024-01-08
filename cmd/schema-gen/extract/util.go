@@ -53,7 +53,7 @@ func getTypeDeclarationsForArrayType(arrayType *ast.ArrayType) string {
 func getTypeDeclarationsForMapType(mapType *ast.MapType) string {
 	keyIdent, ok := mapType.Key.(*ast.Ident)
 	if !ok {
-		fmt.Println("WARN: unsupported key type in map")
+		fmt.Fprintln(os.Stderr, "WARN: unsupported key type in map")
 		return "any"
 	}
 	keyType := getTypeDeclaration(keyIdent)
