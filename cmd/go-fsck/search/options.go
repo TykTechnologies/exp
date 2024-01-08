@@ -1,4 +1,4 @@
-package stats
+package search
 
 import (
 	"fmt"
@@ -11,12 +11,10 @@ import (
 type options struct {
 	inputFile string
 
-	filter    string
-	exclude   string
+	name      string
 	reference string
 
 	all     bool
-	full    bool
 	json    bool
 	verbose bool
 }
@@ -28,11 +26,10 @@ func NewOptions() *options {
 
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 
-	flag.StringVar(&cfg.filter, "filter", cfg.filter, "filter imports that match (sql LIKE)")
-	flag.StringVar(&cfg.exclude, "exclude", cfg.exclude, "exclude imports that match (sql NOT LIKE)")
+	flag.StringVar(&cfg.name, "name", cfg.name, "function name match (case sensitive)")
+	flag.StringVar(&cfg.reference, "reference", cfg.reference, "reference symbol (e.g. 'oas', or 'oas.OAS')")
 
 	flag.BoolVar(&cfg.all, "all", cfg.all, "traverse all packages (./...)")
-	flag.BoolVar(&cfg.full, "full", cfg.full, "resolve imports to full path")
 	flag.BoolVar(&cfg.json, "json", cfg.json, "print results as json")
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
 	flag.Parse()
@@ -41,6 +38,6 @@ func NewOptions() *options {
 }
 
 func PrintHelp() {
-	fmt.Printf("Usage: %s stats <options>:\n\n", path.Base(os.Args[0]))
+	fmt.Printf("Usage: %s search <options>:\n\n", path.Base(os.Args[0]))
 	flag.PrintDefaults()
 }
