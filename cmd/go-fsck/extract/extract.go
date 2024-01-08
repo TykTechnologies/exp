@@ -13,17 +13,21 @@ func extract(cfg *options) error {
 		return err
 	}
 
-	encode := func(in interface{}) ([]byte, error) {
-		if cfg.prettyJSON {
-			return json.MarshalIndent(in, "", "  ")
+	output := os.Stdout
+	switch cfg.outputFile {
+	case "", "-":
+	default:
+		var err error
+		output, err = os.Create(cfg.outputFile)
+		if err != nil {
+			return err
 		}
-		return json.Marshal(in)
 	}
 
-	body, err := encode(definitions)
-	if err != nil {
-		return err
+	encoder := json.NewEncoder(output)
+	if cfg.prettyJSON {
+		encoder.SetIndent("", "  ")
 	}
 
-	return os.WriteFile(cfg.outputFile, body, 0644)
+	return encoder.Encode(definitions)
 }
