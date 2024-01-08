@@ -95,32 +95,26 @@ func jsonTag(tag string) string {
 func write(cfg *options) error {
 	opts := NewExtractOptions(cfg)
 
-	sts, err := Extract(cfg.sourcePath, opts)
+	definitions, err := Extract(cfg.sourcePath, opts)
 	if err != nil {
 		return err
 	}
 
-	return dump(cfg, sts)
-}
-
-func dump(cfg *options, data interface{}) error {
-	var (
-		filename = cfg.outputFile
-		pretty   = cfg.prettyJSON
-
-		dataBytes []byte
-		err       error
-	)
-
-	if pretty {
-		dataBytes, err = json.MarshalIndent(data, "", "  ")
-	} else {
-		dataBytes, err = json.Marshal(data)
+	output := os.Stdout
+	switch cfg.outputFile {
+	case "", "-":
+	default:
+		var err error
+		output, err = os.Create(cfg.outputFile)
+		if err != nil {
+			return err
+		}
 	}
 
-	if err != nil {
-		return err
+	encoder := json.NewEncoder(output)
+	if cfg.prettyJSON {
+		encoder.SetIndent("", "  ")
 	}
 
-	return os.WriteFile(filename, dataBytes, 0644) //nolint:gosec
+	return encoder.Encode(definitions)
 }
