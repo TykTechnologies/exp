@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"go/ast"
+	"io"
 	"os"
 	"strings"
 )
@@ -24,7 +25,16 @@ type PackageInfo struct {
 
 // Load reads and decodes a json file to produce a `*PackageInfo`.
 func Load(filename string) ([]*PackageInfo, error) {
-	body, err := os.ReadFile(filename)
+	var body []byte
+	var err error
+
+	switch filename {
+	case "-":
+		body, err = io.ReadAll(os.Stdin)
+	default:
+		body, err = os.ReadFile(filename)
+	}
+
 	if err != nil {
 		return nil, err
 	}
