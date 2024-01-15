@@ -12,6 +12,9 @@ type options struct {
 	packageName string
 	rootElement string
 
+	keep []string
+	skip []string
+
 	trim         string
 	fieldSpacing bool
 }
@@ -25,6 +28,8 @@ func NewOptions() *options {
 	flag.StringVarP(&cfg.outputFile, "output-file", "o", cfg.outputFile, "output file")
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 	flag.StringVarP(&cfg.packageName, "package-name", "p", cfg.packageName, "package name")
+	flag.StringSliceVar(&cfg.keep, "keep", cfg.keep, "type definition names to keep (default: all)")
+	flag.StringSliceVar(&cfg.skip, "skip", cfg.skip, "type definition names to skip (default: none)")
 	flag.StringVar(&cfg.trim, "trim", cfg.trim, "trim lines from docs output")
 	flag.StringVar(&cfg.rootElement, "root", cfg.rootElement, "root type to put first in output")
 	flag.Parse()

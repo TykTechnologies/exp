@@ -77,6 +77,22 @@ func renderMarkdown(cfg *options, schema model.DeclarationList, order []string) 
 }
 
 func renderMarkdownType(cfg *options, w io.Writer, decl *model.TypeInfo, allTypes []string) error {
+	canRender := func(name string) bool {
+		if len(cfg.keep) > 0 {
+			return slices.Contains(cfg.keep, name)
+		}
+
+		if len(cfg.skip) > 0 {
+			return !slices.Contains(cfg.skip, name)
+		}
+
+		return true
+	}
+
+	if !canRender(decl.Name) {
+		return nil
+	}
+
 	fmt.Fprintf(w, "# %s\n\n", decl.Name)
 	if decl.Doc != "" {
 		fmt.Fprintf(w, "%s\n\n", decl.Doc)
