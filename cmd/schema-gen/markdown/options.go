@@ -11,6 +11,9 @@ type options struct {
 	outputFile  string
 	packageName string
 	rootElement string
+
+	trim         string
+	fieldSpacing bool
 }
 
 func NewOptions() *options {
@@ -22,6 +25,7 @@ func NewOptions() *options {
 	flag.StringVarP(&cfg.outputFile, "output-file", "o", cfg.outputFile, "output file")
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 	flag.StringVarP(&cfg.packageName, "package-name", "p", cfg.packageName, "package name")
+	flag.StringVar(&cfg.trim, "trim", cfg.trim, "trim lines from docs output")
 	flag.StringVar(&cfg.rootElement, "root", cfg.rootElement, "root type to put first in output")
 	flag.Parse()
 

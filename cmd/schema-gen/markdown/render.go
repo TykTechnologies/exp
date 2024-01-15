@@ -48,7 +48,7 @@ func render(cfg *options) error {
 
 		switch kind {
 		case "markdown":
-			body, err := renderMarkdown(sanitize(pkgInfo.Declarations), order)
+			body, err := renderMarkdown(cfg, sanitize(pkgInfo.Declarations), order)
 			if err != nil {
 				return err
 			}
@@ -59,7 +59,7 @@ func render(cfg *options) error {
 	return fmt.Errorf("Uknown package name: %q", packageName)
 }
 
-func renderMarkdown(schema model.DeclarationList, order []string) ([]byte, error) {
+func renderMarkdown(cfg *options, schema model.DeclarationList, order []string) ([]byte, error) {
 	output := new(bytes.Buffer)
 	decls := schema.Find(order)
 
@@ -69,23 +69,23 @@ func renderMarkdown(schema model.DeclarationList, order []string) ([]byte, error
 	}
 
 	for _, decl := range decls {
-		if err := renderMarkdownType(output, decl, allTypes); err != nil {
+		if err := renderMarkdownType(cfg, output, decl, allTypes); err != nil {
 			return nil, err
 		}
 	}
 	return output.Bytes(), nil
 }
 
-func renderMarkdownType(w io.Writer, decl *model.TypeInfo, allTypes []string) error {
+func renderMarkdownType(cfg *options, w io.Writer, decl *model.TypeInfo, allTypes []string) error {
 	fmt.Fprintf(w, "# %s\n\n", decl.Name)
 	if decl.Doc != "" {
 		fmt.Fprintf(w, "%s\n\n", decl.Doc)
 	}
-	renderMarkdownFields(w, decl, allTypes)
+	renderMarkdownFields(cfg, w, decl, allTypes)
 	return nil
 }
 
-func renderMarkdownFields(w io.Writer, decl *model.TypeInfo, allTypes []string) {
+func renderMarkdownFields(cfg *options, w io.Writer, decl *model.TypeInfo, allTypes []string) {
 	for _, field := range decl.Fields {
 		jsonTag := strings.Split(field.JSONName, ",")
 
@@ -94,21 +94,60 @@ func renderMarkdownFields(w io.Writer, decl *model.TypeInfo, allTypes []string) 
 
 		if isKnown {
 			// Link the known type
-			fmt.Fprintf(w, "**Field: `%s`** (%s, [%s](#%s))\n\n", jsonTag[0], field.Name, field.Type, sanitizedType)
+			if strings.HasPrefix(field.Type, "[]") {
+				fmt.Fprintf(w, "**Field: `%s` (`[]`[%s](#%s))**\n", jsonTag[0], field.Type[2:], strings.ToLower(sanitizedType))
+			} else {
+				fmt.Fprintf(w, "**Field: `%s` ([%s](#%s))**\n", jsonTag[0], field.Type, strings.ToLower(sanitizedType))
+			}
+
+			// This prints the go field name as well.
+			// fmt.Fprintf(w, "**Field: `%s` (%s, [%s](#%s))**\n", jsonTag[0], field.Name, field.Type, sanitizedType)
 		} else {
-			fmt.Fprintf(w, "**Field: `%s`** (%s, `%s`)\n\n", jsonTag[0], field.Name, field.Type)
+			fieldType := fmt.Sprint(field.Type)
+			if fieldType == "bool" {
+				fieldType = "boolean"
+			}
+
+			fmt.Fprintf(w, "**Field: `%s` (`%s`)**\n", jsonTag[0], fieldType)
+
+			// This prints the go field name as well.
+			// fmt.Fprintf(w, "**Field: `%s` (%s, `%s`)**\n", jsonTag[0], field.Name, field.Type)
+		}
+		if cfg.fieldSpacing {
+			fmt.Fprintln(w)
 		}
 
-		fmt.Fprintf(w, "%s\n\n", field.Doc)
-		if field.Comment != "" {
-			fmt.Fprintf(w, "> %s\n\n", field.Comment)
+		if cfg.trim != "" {
+			doclines := strings.Split(field.Doc, "\n")
+			for _, v := range doclines {
+				if strings.HasPrefix(v, cfg.trim) {
+					fmt.Fprintln(w)
+					fmt.Fprintf(w, "%s\n", docString(v))
+					continue
+				}
+				fmt.Fprintf(w, "%s\n", v)
+			}
+			fmt.Fprintln(w)
+		} else {
+			fmt.Fprintf(w, "%s\n\n", field.Doc)
 		}
+
+		// This adds the line-level comment to the doc.
+		// We don't need it but should likely put it behind a config option in the future.
+		//	if field.Comment != "" {
+		//		fmt.Fprintf(w, "> %s\n\n", field.Comment)
+		//	}
 	}
 
 	if len(decl.Fields) == 0 {
 		sanitizedType := strings.TrimLeft(decl.Type, "[]*")
 		fmt.Fprintf(w, "Type defined as `%s`, see [%s](%s) definition.\n\n", decl.Type, sanitizedType, sanitizedType)
 	}
+}
+
+func docString(in string) string {
+	out := strings.Trim(in, ".")
+	return out + "."
 }
 
 func sanitize(x model.DeclarationList) model.DeclarationList {
