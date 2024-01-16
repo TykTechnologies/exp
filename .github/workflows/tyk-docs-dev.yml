@@ -105,7 +105,7 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk
 
-      - name: 'Extract tykio/ci-tools:${{ matrix.tag }}'
+      - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3
         with:
           image: tykio/ci-tools:${{ matrix.tag }}
