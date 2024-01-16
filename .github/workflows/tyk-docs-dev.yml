@@ -105,6 +105,13 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk
 
+      - name: 'Extract tykio/ci-tools:${{ matrix.tag }}'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: tykio/ci-tools:${{ matrix.tag }}
+          path: /usr/local/bin/.
+          destination: /usr/local/bin
+
       - name: Generate x-tyk-gateway docs
         run: |
           cd tyk/apidef/oas
