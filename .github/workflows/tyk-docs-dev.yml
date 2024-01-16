@@ -108,7 +108,7 @@ jobs:
       - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3
         with:
-          image: tykio/ci-tools:${{ matrix.tag }}
+          image: tykio/ci-tools:latest
           path: /usr/local/bin/.
           destination: /usr/local/bin
 
