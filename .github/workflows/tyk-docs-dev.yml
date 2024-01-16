@@ -112,6 +112,8 @@ jobs:
           path: /usr/local/bin/.
           destination: /usr/local/bin
 
+      - run: mkdir -p gateway-docs/
+
       - name: Generate x-tyk-gateway docs
         working-directory: ./tyk/apidef/oas
         run: |
@@ -119,7 +121,6 @@ jobs:
 
       - name: Generate docs
         run: |
-          mkdir -p gateway-docs/
           cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
 
       - name: Store docs
