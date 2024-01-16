@@ -33,6 +33,9 @@ on:
       destination:
         description: 'Override destination branch'
         default: ''
+      config-info-branch:
+        description: 'Config info generator branch'
+        default: 'master'
       note:
         description: 'Note for PR'
         required: true
@@ -167,6 +170,7 @@ jobs:
           repository: TykTechnologies/tyk-config-info-generator
           path: ./tyk-config-info-generator
           token: ${{ secrets.ORG_GH_TOKEN }}
+          ref: ${{ github.event.inputs.config-info-branch }}
 
       - name: Set up env
         run: |
