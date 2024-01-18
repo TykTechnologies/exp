@@ -11,7 +11,7 @@ Imports holds a list of imported packages.
 **Field: `declarations` ([DeclarationList](#declarationlist))**
 Declarations within the package.
 
-**Field: `functions` (`[]`[*FuncInfo](#funcinfo))**
+**Field: `functions` ([[]*FuncInfo](#funcinfo))**
 Functions within the package, enabled with `--include-functions`.
 
 # DeclarationList
@@ -80,10 +80,10 @@ Comment is the struct comment.
 **Field: `type` (`string`)**
 Type is an optional type if the declaration is a type alias or similar.
 
-**Field: `fields` (`[]`[*FieldInfo](#fieldinfo))**
+**Field: `fields` ([[]*FieldInfo](#fieldinfo))**
 Fields holds information of the fields, if this object is a struct.
 
-**Field: `functions` (`[]`[*FuncInfo](#funcinfo))**
+**Field: `functions` ([[]*FuncInfo](#funcinfo))**
 
 
 **Field: `` (`ast.StructType`)**
