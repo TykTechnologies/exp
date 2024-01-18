@@ -1,4 +1,25 @@
+# yamllint disable rule:line-length
+---
 name: Tyk Docs sync (development)
+
+# This workflow builds the documentation for a release.
+# It uses the following external dependencies:
+#
+# Generator: tyk-config-info-generator
+# Provides: tyk-docs/content/shared/gateway-config.md
+# Source: https://github.com/TykTechnologies/tyk-config-info-generator
+#
+# Generator: schema-gen markdown
+# Provides: tyk-docs/content/shared/x-tyk-gateway.md
+# Source: https://github.com/TykTechnologies/exp/tree/main/cmd/schema-gen
+#
+# The schema-gen tool is provided using the tykio/ci-tools docker image.
+# To rebuild that docker image if required, trigger an update via:
+#
+# https://github.com/TykTechnologies/tyk-github-actions/actions/workflows/ci-docker-tools.yml
+#
+# You can test the schema-gen docs generator in this repo: pkg/model/Taskfile.yml;
+# Running the taskfile with `task` will generate gateway/README.md, among other files.
 
 on:
   workflow_dispatch:
