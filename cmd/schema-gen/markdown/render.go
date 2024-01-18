@@ -93,7 +93,13 @@ func renderMarkdownType(cfg *options, w io.Writer, decl *model.TypeInfo, allType
 		return nil
 	}
 
-	fmt.Fprintf(w, "# %s\n\n", decl.Name)
+	if decl.Name == cfg.rootElement && cfg.title != "" {
+		// Override root element with title if provided
+		fmt.Fprint(w, cfg.title+"\n\n")
+	} else {
+		fmt.Fprintf(w, cfg.headingFormat+"\n\n", decl.Name)
+	}
+
 	if decl.Doc != "" {
 		fmt.Fprintf(w, "%s\n\n", decl.Doc)
 	}
@@ -110,21 +116,20 @@ func renderMarkdownFields(cfg *options, w io.Writer, decl *model.TypeInfo, allTy
 
 		if isKnown {
 			// Link the known type
-			if strings.HasPrefix(field.Type, "[]") {
-				fmt.Fprintf(w, "**Field: `%s` (`[]`[%s](#%s))**\n", jsonTag[0], field.Type[2:], strings.ToLower(sanitizedType))
-			} else {
-				fmt.Fprintf(w, "**Field: `%s` ([%s](#%s))**\n", jsonTag[0], field.Type, strings.ToLower(sanitizedType))
-			}
+			fmt.Fprintf(w, cfg.fieldFormat+"\n", jsonTag[0], field.Type, strings.ToLower(sanitizedType))
 
 			// This prints the go field name as well.
 			// fmt.Fprintf(w, "**Field: `%s` (%s, [%s](#%s))**\n", jsonTag[0], field.Name, field.Type, sanitizedType)
 		} else {
 			fieldType := fmt.Sprint(field.Type)
-			if fieldType == "bool" {
+			switch fieldType {
+			case "bool":
 				fieldType = "boolean"
+			case "interface{}", "map[string]interface{}":
+				fieldType = "any"
 			}
 
-			fmt.Fprintf(w, "**Field: `%s` (`%s`)**\n", jsonTag[0], fieldType)
+			fmt.Fprintf(w, cfg.fieldFormatKnown+"\n", jsonTag[0], fieldType)
 
 			// This prints the go field name as well.
 			// fmt.Fprintf(w, "**Field: `%s` (%s, `%s`)**\n", jsonTag[0], field.Name, field.Type)
