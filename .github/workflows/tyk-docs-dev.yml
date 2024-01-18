@@ -141,7 +141,13 @@ jobs:
       - name: Generate x-tyk-gateway docs
         working-directory: ./tyk/apidef/oas
         run: |
-          schema-gen extract -o - | schema-gen markdown -i - --skip "OldOAS" --trim "Tyk classic API definition" -o ../../../gateway-docs/x-tyk-gateway.md --root XTykAPIGateway
+          schema-gen extract -o - | schema-gen markdown -i - \
+                                                        --root XTykAPIGateway \
+                                                        --skip "OldOAS,APIDef" \
+                                                        --title "## Tyk OAS API Definition Object" \
+                                                        --heading-format "### **%s**" \
+                                                        --trim "Tyk classic API definition" \
+                                                        -o ../../../gateway-docs/x-tyk-gateway.md
 
       - name: Generate docs
         run: |
