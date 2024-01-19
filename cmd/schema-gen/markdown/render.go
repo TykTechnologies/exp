@@ -191,7 +191,8 @@ func renderMarkdownFields(cfg *options, w io.Writer, decl *model.TypeInfo, allTy
 
 		isKnown := slices.Contains(allTypes, sanitizedType)
 		if isKnown {
-			fmt.Fprintf(w, typeFormat+", see [%s](%s) definition.\n\n", originalType, sanitizedType, sanitizedType)
+			anchor := "#" + strings.ToLower(sanitizedType)
+			fmt.Fprintf(w, typeFormat+", see [%s](%s) definition.\n\n", originalType, sanitizedType, anchor)
 		}
 	}
 }
