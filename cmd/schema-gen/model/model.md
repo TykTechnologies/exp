@@ -18,7 +18,7 @@ Functions within the package, enabled with `--include-functions`.
 
 DeclarationList implements list operations over a `*DeclarationInfo` slice.
 
-Type defined as `[]*DeclarationInfo`, see [DeclarationInfo](DeclarationInfo) definition.
+Type defined as array of `[]*DeclarationInfo` values, see [DeclarationInfo](DeclarationInfo) definition.
 
 # FuncInfo
 
@@ -62,7 +62,7 @@ Types are all the type declarations in the block.
 
 TypeList implements list operations over a *TypeInfo slice.
 
-Type defined as `[]*TypeInfo`, see [TypeInfo](TypeInfo) definition.
+Type defined as array of `[]*TypeInfo` values, see [TypeInfo](TypeInfo) definition.
 
 # TypeInfo
 
