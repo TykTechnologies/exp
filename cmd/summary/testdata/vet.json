@@ -1,0 +1,894 @@
+# github.com/TykTechnologies/tyk/header
+{}
+# github.com/TykTechnologies/tyk/internal/build
+{}
+# github.com/TykTechnologies/tyk/templates
+{}
+# github.com/TykTechnologies/tyk/internal/cache
+{}
+# github.com/TykTechnologies/tyk/internal/uuid
+{}
+# github.com/TykTechnologies/tyk/internal/maps
+{}
+# github.com/TykTechnologies/tyk/log
+{}
+# github.com/TykTechnologies/tyk/cli/version
+{}
+# github.com/TykTechnologies/tyk/internal/cache_test
+{}
+# github.com/TykTechnologies/tyk/internal/errors
+{}
+# github.com/TykTechnologies/tyk/internal/reflect
+{}
+# github.com/TykTechnologies/tyk/internal/httputil
+{}
+# github.com/TykTechnologies/tyk/internal/crypto
+{}
+# github.com/TykTechnologies/tyk/internal/rate/limiter
+{}
+# github.com/TykTechnologies/tyk/checkup
+{}
+# github.com/TykTechnologies/tyk/cli/plugin
+{}
+# github.com/TykTechnologies/tyk/cli/importer
+{}
+# github.com/TykTechnologies/tyk/internal/rate
+{}
+# github.com/TykTechnologies/tyk/ctx
+{}
+# github.com/TykTechnologies/tyk/coprocess
+{}
+# github.com/TykTechnologies/tyk/cli
+{}
+# github.com/TykTechnologies/tyk/apidef/importer
+{}
+# github.com/TykTechnologies/tyk/certs/mock
+{}
+# github.com/TykTechnologies/tyk/apidef/adapter
+{}
+# github.com/TykTechnologies/tyk/apidef/adapter/gqlengineadapter
+{}
+# github.com/TykTechnologies/tyk/apidef
+{}
+# github.com/TykTechnologies/tyk/cli/bundler
+{}
+# github.com/TykTechnologies/tyk/certs
+{}
+# github.com/TykTechnologies/tyk/cli/linter
+{}
+# github.com/TykTechnologies/tyk/config
+{}
+# github.com/TykTechnologies/tyk/dlpython
+{}
+# github.com/TykTechnologies/tyk
+{}
+# github.com/TykTechnologies/tyk/dnscache
+{}
+# github.com/TykTechnologies/tyk/goplugin
+{}
+# github.com/TykTechnologies/tyk/internal/httputil_test
+{}
+# github.com/TykTechnologies/tyk/internal/middleware
+{}
+# github.com/TykTechnologies/tyk/internal/uuid_test
+{}
+# github.com/TykTechnologies/tyk/coprocess/python
+{}
+# github.com/TykTechnologies/tyk/apidef/oas
+{
+	"github.com/TykTechnologies/tyk/apidef/oas": {
+		"loopclosure": [
+			{
+				"posn": "tyk/apidef/oas/server_test.go:249:16",
+				"message": "loop variable tc captured by func literal"
+			},
+			{
+				"posn": "tyk/apidef/oas/server_test.go:251:20",
+				"message": "loop variable tc captured by func literal"
+			}
+		]
+	}
+}
+# github.com/TykTechnologies/tyk/regexp
+{}
+# github.com/TykTechnologies/tyk/coprocess/grpc
+{
+	"github.com/TykTechnologies/tyk/coprocess/grpc": {
+		"copylocks": [
+			{
+				"posn": "tyk/coprocess/grpc/coprocess_grpc_test.go:683:20",
+				"message": "literal copies lock value from baseMW: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/coprocess/grpc/coprocess_grpc_test.go:685:63",
+				"message": "call of baseExtractor.GenerateSessionID copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			}
+		]
+	}
+}
+# github.com/TykTechnologies/tyk/request
+{}
+# github.com/TykTechnologies/tyk/internal/otel
+{}
+# github.com/TykTechnologies/tyk/signature_validator
+{}
+# github.com/TykTechnologies/tyk/internal/graphql
+{}
+# github.com/TykTechnologies/tyk/apidef/oas_test
+{}
+# github.com/TykTechnologies/tyk/storage/kv
+{}
+# github.com/TykTechnologies/tyk/tcp
+{}
+# github.com/TykTechnologies/tyk/trace
+{}
+# github.com/TykTechnologies/tyk/rpc
+{}
+# github.com/TykTechnologies/tyk/test/goplugins
+{}
+# github.com/TykTechnologies/tyk/storage
+{}
+# github.com/TykTechnologies/tyk/trace/jaeger
+{}
+# github.com/TykTechnologies/tyk/trace/openzipkin
+{}
+# github.com/TykTechnologies/tyk/test
+{
+	"github.com/TykTechnologies/tyk/test": {
+		"loopclosure": [
+			{
+				"posn": "tyk/test/util_test.go:57:4",
+				"message": "loop variable tc captured by func literal"
+			}
+		]
+	}
+}
+# github.com/TykTechnologies/tyk/user
+{}
+# github.com/TykTechnologies/tyk/gateway
+{
+	"github.com/TykTechnologies/tyk/gateway": {
+		"copylocks": [
+			{
+				"posn": "tyk/gateway/api_definition.go:254:10",
+				"message": "range var urlSpec copies lock: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:739:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:770:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:788:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:805:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:820:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:889:30",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:919:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:939:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:960:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:977:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1057:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1075:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1101:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1128:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1148:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1170:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1190:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1204:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_definition.go:1218:29",
+				"message": "call of append copies lock value: github.com/TykTechnologies/tyk/gateway.URLSpec contains github.com/TykTechnologies/tyk/gateway.GoPluginMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:320:64",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:327:22",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:335:57",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:337:99",
+				"message": "call of gw.createDynamicMiddleware copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:341:63",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:342:73",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:343:73",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:344:70",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:345:71",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:346:62",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:347:73",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:348:59",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:352:54",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:356:62",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:360:58",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:364:88",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:368:52",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:372:63",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:383:27",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:392:23",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:401:24",
+				"message": "call of newExtractor copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:402:57",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:408:63",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:418:23",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:426:58",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:430:46",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:431:47",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:432:54",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:433:61",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:434:59",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:437:67",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:438:69",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:440:80",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:441:84",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:444:64",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:445:67",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:446:85",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:447:55",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:448:57",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:449:68",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:450:72",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:451:67",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:454:72",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:456:67",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:457:66",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:458:70",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:465:22",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:473:57",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:475:100",
+				"message": "call of gw.createDynamicMiddleware copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:479:78",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:483:59",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:484:75",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:485:73",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:486:66",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:488:48",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/api_loader.go:489:55",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess.go:46:120",
+				"message": "CreateCoProcessMiddleware passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess.go:48:21",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess.go:52:37",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess.go:310:37",
+				"message": "literal copies lock value from m.BaseMiddleware: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess.go:549:26",
+				"message": "literal copies lock value from h.mw.BaseMiddleware: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:89:60",
+				"message": "GenerateSessionID passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:120:51",
+				"message": "call of e.GenerateSessionID copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:176:84",
+				"message": "call of e.GenerateSessionID copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:239:42",
+				"message": "call of e.GenerateSessionID copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:256:46",
+				"message": "newExtractor passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:275:22",
+				"message": "literal copies lock value from mw: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:282:31",
+				"message": "literal copies lock value from baseExtractor: github.com/TykTechnologies/tyk/gateway.BaseExtractor contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:284:31",
+				"message": "literal copies lock value from baseExtractor: github.com/TykTechnologies/tyk/gateway.BaseExtractor contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor.go:286:31",
+				"message": "literal copies lock value from baseExtractor: github.com/TykTechnologies/tyk/gateway.BaseExtractor contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:101:89",
+				"message": "createDynamicMiddleware passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:103:24",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:285:9",
+				"message": "Init passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:286:9",
+				"message": "EnabledForSpec passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:289:9",
+				"message": "Config passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:293:9",
+				"message": "OrgSession passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:314:9",
+				"message": "SetOrgExpiry passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:318:9",
+				"message": "OrgSessionExpiry passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:344:9",
+				"message": "UpdateRequestSession passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:375:9",
+				"message": "clearSession passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:407:9",
+				"message": "ApplyPolicies passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:813:9",
+				"message": "CheckSessionAndIdentityForValidKey passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:910:9",
+				"message": "FireEvent passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:914:9",
+				"message": "getAuthType passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:918:9",
+				"message": "getAuthToken passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware.go:975:9",
+				"message": "generateSessionID passes lock by value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_go_plugin.go:167:53",
+				"message": "literal copies lock value from m.BaseMiddleware: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_go_plugin.go:191:53",
+				"message": "literal copies lock value from m.BaseMiddleware: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation.go:253:10",
+				"message": "checkClockSkew passes lock by value: github.com/TykTechnologies/tyk/gateway.HTTPSignatureValidationMiddleware contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_redis_cache.go:43:24",
+				"message": "literal copies lock value from m.BaseMiddleware: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_version_check.go:25:24",
+				"message": "literal copies lock value from v.BaseMiddleware: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_virtual_endpoint.go:97:24",
+				"message": "literal copies lock value from d.BaseMiddleware: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/testutil.go:398:29",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/coprocess_id_extractor_test.go:60:21",
+				"message": "call of newExtractor copies lock value: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/handler_success_test.go:173:25",
+				"message": "func passes lock by value: github.com/TykTechnologies/tyk/gateway.APISpec"
+			},
+			{
+				"posn": "tyk/gateway/handler_success_test.go:197:25",
+				"message": "func passes lock by value: github.com/TykTechnologies/tyk/gateway.APISpec"
+			},
+			{
+				"posn": "tyk/gateway/handler_success_test.go:219:25",
+				"message": "call of tc.reloadAPI copies lock value: github.com/TykTechnologies/tyk/gateway.APISpec"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:94:38",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:95:48",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:96:52",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:97:61",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:98:40",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:99:44",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:100:36",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:144:39",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:172:39",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:197:39",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:222:39",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/middleware_test.go:247:39",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:86:26",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:87:42",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:88:24",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:89:12",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:90:33",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:91:15",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:92:22",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/multiauth_test.go:93:27",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:40:26",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:41:42",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:42:33",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:43:36",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:55:26",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:56:42",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:57:12",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:58:33",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:59:15",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:60:22",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:61:36",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_api_rate_limit_test.go:62:27",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_auth_key_test.go:329:26",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_auth_key_test.go:330:42",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_auth_key_test.go:331:12",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_auth_key_test.go:332:33",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_auth_key_test.go:333:15",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_auth_key_test.go:334:22",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_auth_key_test.go:335:27",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation_test.go:90:26",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation_test.go:91:42",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation_test.go:92:54",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation_test.go:93:33",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation_test.go:94:15",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation_test.go:95:22",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_http_signature_validation_test.go:96:27",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_request_signing_test.go:34:26",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_request_signing_test.go:35:42",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_request_signing_test.go:36:35",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_request_signing_test.go:37:54",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_request_signing_test.go:38:33",
+				"message": "literal copies lock value from baseMid: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_strip_auth_test.go:83:36",
+				"message": "call of stripFromCookieTest copies lock value: github.com/TykTechnologies/tyk/gateway.StripAuth contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_strip_auth_test.go:84:36",
+				"message": "call of stripFromCookieTest copies lock value: github.com/TykTechnologies/tyk/gateway.StripAuth contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_strip_auth_test.go:85:36",
+				"message": "call of stripFromCookieTest copies lock value: github.com/TykTechnologies/tyk/gateway.StripAuth contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_strip_auth_test.go:86:36",
+				"message": "call of stripFromCookieTest copies lock value: github.com/TykTechnologies/tyk/gateway.StripAuth contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_strip_auth_test.go:92:36",
+				"message": "call of stripFromCookieTest copies lock value: github.com/TykTechnologies/tyk/gateway.StripAuth contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_strip_auth_test.go:94:36",
+				"message": "call of stripFromCookieTest copies lock value: github.com/TykTechnologies/tyk/gateway.StripAuth contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_strip_auth_test.go:98:74",
+				"message": "stripFromCookieTest passes lock by value: github.com/TykTechnologies/tyk/gateway.StripAuth contains github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:45:35",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:70:35",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:97:35",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:152:35",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:179:35",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:218:35",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:242:35",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			},
+			{
+				"posn": "tyk/gateway/mw_transform_test.go:264:36",
+				"message": "literal copies lock value from base: github.com/TykTechnologies/tyk/gateway.BaseMiddleware contains sync.Mutex"
+			}
+		],
+		"stdmethods": [
+			{
+				"posn": "tyk/gateway/reverse_proxy.go:1929:27",
+				"message": "method Seek(offset int64, whence int64) (int64, error) should have signature Seek(int64, int) (int64, error)"
+			}
+		]
+	}
+}
+# github.com/TykTechnologies/tyk/gateway_test
+{}

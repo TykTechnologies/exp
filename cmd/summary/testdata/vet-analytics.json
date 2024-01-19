@@ -1,0 +1,108 @@
+# github.com/TykTechnologies/tyk-analytics/internal/build
+{}
+# github.com/TykTechnologies/tyk-analytics/cli/version
+{}
+# github.com/TykTechnologies/tyk-analytics/internal/time
+{}
+# github.com/TykTechnologies/tyk-analytics/tls
+{}
+# github.com/TykTechnologies/tyk-analytics/oauth2/dcrp
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/model
+{}
+# github.com/TykTechnologies/tyk-analytics/cli/bootstrapper
+{}
+# github.com/TykTechnologies/tyk-analytics/cli
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/repository
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/repository/system
+{}
+# github.com/TykTechnologies/tyk-analytics/config
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/model/mock
+{}
+# github.com/TykTechnologies/tyk-analytics/internal/uuid
+{}
+# github.com/TykTechnologies/tyk-analytics/cli/linter
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/repository/system/mock
+{}
+# github.com/TykTechnologies/tyk-analytics/internal/uuid_test
+{}
+# github.com/TykTechnologies/tyk-analytics/internal/time_test
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/repository/system/internal
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/repository/mock
+{}
+# github.com/TykTechnologies/tyk-analytics/cli/bootstrapper_test
+{}
+# github.com/TykTechnologies/tyk-analytics
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/repository_test
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard/repository/system_test
+{}
+# github.com/TykTechnologies/tyk-analytics/dashboard
+{
+	"github.com/TykTechnologies/tyk-analytics/dashboard": {
+		"composites": [
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/api_api_management_test.go:2172:12",
+				"message": "github.com/TykTechnologies/tyk/apidef/oas.OAS struct literal uses unkeyed fields",
+				"suggested_fixes": [
+					{
+						"message": "Add field names to struct literal",
+						"edits": [
+							{
+								"filename": "/root/tyk/tyk-analytics/dashboard/api_api_management_test.go",
+								"start": 67650,
+								"end": 67650,
+								"new": "T: "
+							}
+						]
+					}
+				]
+			}
+		],
+		"copylocks": [
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/config_loader.go:27:9",
+				"message": "return copies lock value: github.com/TykTechnologies/tyk-analytics/dashboard.GatewayConfigMap contains sync.Mutex"
+			}
+		],
+		"loopclosure": [
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/api_keys.go:99:18",
+				"message": "loop variable i captured by func literal"
+			},
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/api_keys.go:99:23",
+				"message": "loop variable opt captured by func literal"
+			},
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/api_system_stats_test.go:159:23",
+				"message": "loop variable tt captured by func literal"
+			},
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/api_system_stats_test.go:162:20",
+				"message": "loop variable tt captured by func literal"
+			},
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/api_system_stats_test.go:163:20",
+				"message": "loop variable tt captured by func literal"
+			}
+		],
+		"unusedresult": [
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/model_key_analytics.go:270:15",
+				"message": "result of fmt.Sprintf call not used"
+			},
+			{
+				"posn": "/root/tyk/tyk-analytics/dashboard/model_key_analytics.go:278:15",
+				"message": "result of fmt.Sprintf call not used"
+			}
+		]
+	}
+}

@@ -1,0 +1,51 @@
+---
+version: "3"
+
+env:
+  GOBIN: /usr/local/bin
+  CGO_ENABLED: 0
+
+tasks:
+  default:
+    desc: "Run default (install)"
+    cmds:
+      - task: install
+
+  test:
+    desc: "Run tests"
+    cmds:
+      - task: test:vet
+
+  test:vet:
+    desc: "Run tests for vet"
+    cmds:
+      - cat testdata/vet.json | summary vet
+      - cat testdata/vet-analytics.json | summary vet
+
+  build:
+    desc: "Build from source"
+    deps: [ fmt ]
+    cmds:
+      - go build .
+
+  install:
+    desc: "Install from source"
+    deps: [ fmt ]
+    cmds:
+      - go install .
+
+  fmt:
+    internal: true
+    cmds:
+      - goimports -w -local=$(go list .) .
+      - go fmt ./...
+      - go mod tidy
+
+  docker:
+    desc: "Build docker image"
+    deps: [ build ]
+    vars:
+      image: internal/summary
+    cmds:
+      - docker build -t {{.image}} .
+      - docker run --rm {{.image}} -? || true
