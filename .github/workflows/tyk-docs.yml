@@ -1,6 +1,25 @@
 # yamllint disable rule:line-length
 ---
-name: Tyk Docs sync for release
+name: Tyk Docs sync
+
+# This workflow builds the documentation for a release.
+# It uses the following external dependencies:
+#
+# Generator: tyk-config-info-generator
+# Provides: tyk-docs/content/shared/gateway-config.md
+# Source: https://github.com/TykTechnologies/tyk-config-info-generator
+#
+# Generator: schema-gen markdown
+# Provides: tyk-docs/content/shared/x-tyk-gateway.md
+# Source: https://github.com/TykTechnologies/exp/tree/main/cmd/schema-gen
+#
+# The schema-gen tool is provided using the tykio/ci-tools docker image.
+# To rebuild that docker image if required, trigger an update via:
+#
+# https://github.com/TykTechnologies/tyk-github-actions/actions/workflows/ci-docker-tools.yml
+#
+# You can test the schema-gen docs generator in this repo: pkg/model/Taskfile.yml;
+# Running the taskfile with `task` will generate gateway/README.md, among other files.
 
 on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -35,6 +54,9 @@ on:  # yamllint disable-line rule:truthy
       destination:
         description: 'Override destination branch'
         default: ''
+      config-info-branch:
+        description: 'Config info generator branch'
+        default: 'keep-sorting-fix-env'
       note:
         description: 'Note for PR'
         required: true
@@ -107,10 +129,29 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk
 
+      - name: 'Extract tykio/ci-tools:latest'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: tykio/ci-tools:latest
+          path: /usr/local/bin/.
+          destination: /usr/local/bin
+
+      - run: mkdir -p gateway-docs/
+
+      - name: Generate x-tyk-gateway docs
+        working-directory: ./tyk/apidef/oas
+        run: |
+          schema-gen extract -o - | schema-gen markdown -i - \
+                                                        --root XTykAPIGateway \
+                                                        --skip "OldOAS,APIDef,OAS" \
+                                                        --title "## Tyk OAS API Definition Object" \
+                                                        --replace "model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
+                                                        --heading-format "### **%s**" \
+                                                        --trim "Tyk classic API definition" \
+                                                        -o ../../../gateway-docs/x-tyk-gateway.md
+
       - name: Generate docs
         run: |
-          mkdir -p gateway-docs/
-          cp ./tyk/apidef/oas/schema/x-tyk-gateway.md gateway-docs/
           cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
 
       - name: Store docs
@@ -157,6 +198,7 @@ jobs:
           repository: TykTechnologies/tyk-config-info-generator
           path: ./tyk-config-info-generator
           token: ${{ secrets.ORG_GH_TOKEN }}
+          ref: ${{ github.event.inputs.config-info-branch }}
 
       - name: Set up env
         run: |
@@ -260,6 +302,7 @@ jobs:
             Tyk Pump ${{ github.event.inputs.sync-pump }}
 
             Intended for: ${{ github.event.inputs.release }}
+            Config info generator branch: ${{ github.event.inputs.config-info-branch }}
 
             Note: ${{ github.event.inputs.note }}
 
