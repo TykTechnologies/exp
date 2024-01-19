@@ -1,6 +1,8 @@
+# yamllint disable rule:line-length
+---
 name: Tyk master LTS acceptance test
 
-on:
+on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
     inputs:
       note:
@@ -31,7 +33,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v4
         with:
-          go-version: 1.16 # LTS (replace with golang-cross)
+          go-version: 1.16   # LTS (replace with golang-cross)
 
       - name: Source go.mod/sum from 5-lts
         working-directory: tyk

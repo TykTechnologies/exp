@@ -1,6 +1,8 @@
+# yamllint disable rule:line-length
+---
 name: Exp repo cmd/ builds
 
-on:
+on:  # yamllint disable-line rule:truthy
   pull_request:
     branches:
       - main

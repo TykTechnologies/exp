@@ -1,6 +1,8 @@
+# yamllint disable rule:line-length
+---
 name: Tyk cross-release build
 
-on:
+on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
     inputs:
       note:
@@ -22,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tag: [ 'v50', 'v50,v51', 'v50,v51,v52', 'v60' ]
+        tag: ['v50', 'v50,v51', 'v50,v51,v52', 'v60']
         include:
           - tag: v50
             go-version: '1.16'
