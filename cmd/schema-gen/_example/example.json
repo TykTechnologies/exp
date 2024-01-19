@@ -86,6 +86,10 @@
                 "json_name": "message"
               }
             ]
+          },
+          {
+            "name": "NamedRequests",
+            "type": "map[string]KeyRequest"
           }
         ]
       },

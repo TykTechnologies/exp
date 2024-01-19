@@ -60,6 +60,11 @@ func getTypeDeclarationsForMapType(mapType *ast.MapType) string {
 
 	valueIdent, ok := mapType.Value.(*ast.Ident)
 	if !ok {
+		if pointerType, isPointerType := mapType.Value.(*ast.StarExpr); isPointerType {
+			// If Value is a pointer type, get the underlying type name
+			valueType := getTypeDeclaration(pointerType.X.(*ast.Ident))
+			return fmt.Sprintf("map[%s]%s", keyType, valueType)
+		}
 		return fmt.Sprintf("map[%s]interface{}", keyType)
 	}
 	valueType := getTypeDeclaration(valueIdent)

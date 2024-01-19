@@ -29,6 +29,8 @@ type (
 		KeyRequest  `json:""`
 		KeyResponse `json:""`
 	}
+
+	NamedRequests map[string]*KeyRequest
 )
 
 const foo = "bar"

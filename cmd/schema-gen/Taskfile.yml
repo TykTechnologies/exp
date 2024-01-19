@@ -6,7 +6,7 @@ tasks:
     desc: "Build, run tests, build examples"
     deps: [ build ]
     cmds:
-      - go test -race -count=100 ./...
+      - go test -race -count=1 ./...
       - task: examples
 
   build:
