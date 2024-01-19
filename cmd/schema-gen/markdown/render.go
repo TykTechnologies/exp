@@ -122,6 +122,15 @@ func renderMarkdownFields(cfg *options, w io.Writer, decl *model.TypeInfo, allTy
 			// fmt.Fprintf(w, "**Field: `%s` (%s, [%s](#%s))**\n", jsonTag[0], field.Name, field.Type, sanitizedType)
 		} else {
 			fieldType := fmt.Sprint(field.Type)
+
+			if repl, ok := cfg.replace[fieldType]; ok {
+				fieldType = repl
+			}
+
+			if strings.Contains(fieldType, ".") {
+				fmt.Fprintf(os.Stderr, "WARN: field %s is not a JSON type (use --replace)\n", fieldType)
+			}
+
 			switch fieldType {
 			case "bool":
 				fieldType = "boolean"

@@ -2,6 +2,8 @@ package markdown
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	flag "github.com/spf13/pflag"
 )
@@ -18,11 +20,43 @@ type options struct {
 	fieldFormat      string
 	fieldFormatKnown string
 
-	keep []string
-	skip []string
+	keep    []string
+	skip    []string
+	replace map[string]string
 
 	trim         string
 	fieldSpacing bool
+}
+
+func flagNameFromEnvironmentName(s string) string {
+	s = strings.ToLower(s)
+	s = strings.Replace(s, "_", "-", -1)
+	return s
+}
+
+func containsFlag(haystack []string, needle string) bool {
+	for _, v := range haystack {
+		if strings.HasPrefix(v, needle) {
+			return true
+		}
+	}
+	return false
+}
+
+func Parse() {
+	for _, v := range os.Environ() {
+		vals := strings.SplitN(v, "=", 2)
+		flagName := flagNameFromEnvironmentName(vals[0])
+		if fn := flag.CommandLine.Lookup(flagName); fn == nil {
+			continue
+		}
+		flagOption := "--" + flagName
+		if containsFlag(os.Args, flagOption) {
+			continue
+		}
+		os.Args = append(os.Args, flagOption, vals[1])
+	}
+	flag.Parse()
 }
 
 func NewOptions() *options {
@@ -32,8 +66,10 @@ func NewOptions() *options {
 		headingFormat:    "# %s",
 		fieldFormat:      "**Field: `%s` ([%s](#%s))**",
 		fieldFormatKnown: "**Field: `%s` (`%s`)**",
+		replace:          make(map[string]string),
 		rootElement:      "",
 	}
+
 	flag.StringVarP(&cfg.outputFile, "output-file", "o", cfg.outputFile, "output file")
 	flag.StringVarP(&cfg.inputFile, "input-file", "i", cfg.inputFile, "input file")
 	flag.StringVarP(&cfg.packageName, "package-name", "p", cfg.packageName, "package name")
@@ -45,9 +81,12 @@ func NewOptions() *options {
 
 	flag.StringSliceVar(&cfg.keep, "keep", cfg.keep, "type definition names to keep (default: all)")
 	flag.StringSliceVar(&cfg.skip, "skip", cfg.skip, "type definition names to skip (default: none)")
+	flag.StringToStringVar(&cfg.replace, "replace", cfg.replace, "type replacement string to string csv (default: none)")
+
 	flag.StringVar(&cfg.trim, "trim", cfg.trim, "trim lines from docs output")
 	flag.StringVar(&cfg.rootElement, "root", cfg.rootElement, "root type to put first in output")
-	flag.Parse()
+
+	Parse()
 
 	return cfg
 }
