@@ -170,8 +170,29 @@ func renderMarkdownFields(cfg *options, w io.Writer, decl *model.TypeInfo, allTy
 	}
 
 	if len(decl.Fields) == 0 {
-		sanitizedType := strings.TrimLeft(decl.Type, "[]*")
-		fmt.Fprintf(w, "Type defined as `%s`, see [%s](%s) definition.\n\n", decl.Type, sanitizedType, sanitizedType)
+		var (
+			originalType  = decl.Type
+			sanitizedType = decl.Type
+			typeFormat    = "Type defined as `%s`"
+		)
+		switch {
+		case strings.HasPrefix(sanitizedType, "[]"):
+			sanitizedType = strings.TrimLeft(decl.Type, "[]*")
+			originalType = sanitizedType
+			typeFormat = "Type defined as array of `%s` values"
+		case strings.HasPrefix(sanitizedType, "map["):
+			typeFormat = "Type defined as object of `%s` values"
+			sanitizedType = strings.Split(sanitizedType, "]")[1]
+			if sanitizedType == "interface{}" {
+				sanitizedType = "object"
+			}
+			originalType = sanitizedType
+		}
+
+		isKnown := slices.Contains(allTypes, sanitizedType)
+		if isKnown {
+			fmt.Fprintf(w, typeFormat+", see [%s](%s) definition.\n\n", originalType, sanitizedType, sanitizedType)
+		}
 	}
 }
 
