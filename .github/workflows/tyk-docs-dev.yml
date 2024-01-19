@@ -56,7 +56,7 @@ on:
         default: ''
       config-info-branch:
         description: 'Config info generator branch'
-        default: 'implement-embedded-fields'
+        default: 'keep-sorting-fix-env'
       note:
         description: 'Note for PR'
         required: true
@@ -143,8 +143,9 @@ jobs:
         run: |
           schema-gen extract -o - | schema-gen markdown -i - \
                                                         --root XTykAPIGateway \
-                                                        --skip "OldOAS,APIDef" \
+                                                        --skip "OldOAS,APIDef,OAS" \
                                                         --title "## Tyk OAS API Definition Object" \
+							--replace "model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
                                                         --heading-format "### **%s**" \
                                                         --trim "Tyk classic API definition" \
                                                         -o ../../../gateway-docs/x-tyk-gateway.md
