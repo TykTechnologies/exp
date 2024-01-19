@@ -56,7 +56,7 @@ on:  # yamllint disable-line rule:truthy
         default: ''
       config-info-branch:
         description: 'Config info generator branch'
-        default: 'keep-sorting-fix-env'
+        default: 'main'
       note:
         description: 'Note for PR'
         required: true
