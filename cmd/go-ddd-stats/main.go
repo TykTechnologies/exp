@@ -26,6 +26,7 @@ func main() {
 
 type File struct {
 	Name string
+	Package string
 	Size int64
 }
 
@@ -42,14 +43,19 @@ func start(_ context.Context) error {
 
 	records := []File{}
 	for _, filename := range files {
+		packageName := path.Base(filename)
+
 		size, _ := filesize(filename)
+
 		records = append(records, File{
 			Name: filename,
+			Package: packageName,
 			Size: size,
 		})
 	}
 
 	asJSON := slices.Contains(os.Args, "--json")
+	groupByPackage := slieces.Contains(os.Args, "--group")
 	printStats := slices.Contains(os.Args, "--stats")
 
 	grouped := map[string][]File{}
