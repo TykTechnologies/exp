@@ -310,6 +310,7 @@ jobs:
             Tyk Pump ${{ github.event.inputs.sync-pump }}
 
             Intended for: ${{ github.event.inputs.release }}
+            Changes sourced from: ${{ needs.sanitize.outputs.repoBranch }}
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
