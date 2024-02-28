@@ -304,7 +304,7 @@ jobs:
             Tyk Pump ${{ github.event.inputs.sync-pump }}
 
             Intended for: ${{ github.event.inputs.release }}
-            Config info generator branch: ${{ github.event.inputs.config-info-branch }}
+            Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: $${ github.event.inputs.branch-suffix }})
 
