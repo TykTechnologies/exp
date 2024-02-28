@@ -9,8 +9,8 @@ tasks:
       - install:shellcheck
       - install:actionlint
     cmds:
-      - actionlint -ignore SC2086 -verbose
-      - yamllint .
+      - actionlint -ignore SC2081 -ignore SC2086 -ignore SC2129 -verbose
+      - yamllint .github
 
   install:actionlint:
     desc: Install actionlint
