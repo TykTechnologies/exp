@@ -12,6 +12,11 @@ tasks:
       - task: docs:sync
       - task: docs:gen
 
+  clean:
+    desc: "Clean git folders"
+    cmds:
+      - rm -rf git/*
+
   docs:fetch:
     desc: "Fetch projects"
     cmds:
