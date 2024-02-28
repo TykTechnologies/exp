@@ -294,7 +294,7 @@ jobs:
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
 
       - name: Raise tyk-docs PR
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
           commit-message: Import config/docs
