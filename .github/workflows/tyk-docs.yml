@@ -66,6 +66,7 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   GOPRIVATE: github.com/TykTechnologies
+  configInfoGeneratorBranch: main
 
 jobs:
   sanitize:
@@ -84,7 +85,6 @@ jobs:
              exit 1
           fi
           echo "jira=$jira" >> $GITHUB_ENV
-          echo "configInfoGeneratorBranch=main" >> $GITHUB_ENV
 
       - if: github.event.inputs.release == 'master'
         run: |
