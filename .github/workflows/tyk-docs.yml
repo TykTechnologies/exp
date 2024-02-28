@@ -312,9 +312,9 @@ jobs:
             Intended for: ${{ github.event.inputs.release }}
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
-            Note: ${{ github.event.inputs.note }} (branch suffix: $${ github.event.inputs.branch-suffix }})
+            Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
-          branch: update/${{ env.jira }}/release-${{ env.target }}-$${ github.event.inputs.branch-suffix }}
+          branch: update/${{ env.jira }}/release-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
           path: ./tyk-docs
           delete-branch: true
