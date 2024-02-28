@@ -45,6 +45,7 @@ on:  # yamllint disable-line rule:truthy
         type: choice
         options:
           - 'master'
+          - '5.3'
           - '5.2'
           - '5.1'
           - '5.0 LTS'
@@ -104,6 +105,11 @@ jobs:
         run: |
              echo "docsBranch=release-5.2" >> $GITHUB_ENV
              echo "repoBranch=release-5.2" >> $GITHUB_ENV
+
+      - if: github.event.inputs.release == '5.3'
+        run: |
+             echo "docsBranch=release-5.3" >> $GITHUB_ENV
+             echo "repoBranch=release-5.3" >> $GITHUB_ENV
 
       - if: github.event.inputs.source != ''
         run: echo "repoBranch=${{ github.event.inputs.source }}" >> $GITHUB_ENV
