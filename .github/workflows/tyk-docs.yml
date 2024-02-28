@@ -57,6 +57,10 @@ on:  # yamllint disable-line rule:truthy
       config-info-branch:
         description: 'Config info generator branch'
         default: 'main'
+      branch-suffix:
+        description: 'Branch suffix to append to PR branch name (to prevent collisions on multiple PRs/ticket)'
+        required: true
+        default: 'docs'
       note:
         description: 'Note for PR'
         required: true
@@ -304,9 +308,9 @@ jobs:
             Intended for: ${{ github.event.inputs.release }}
             Config info generator branch: ${{ github.event.inputs.config-info-branch }}
 
-            Note: ${{ github.event.inputs.note }}
+            Note: ${{ github.event.inputs.note }} (branch suffix: $${ github.event.inputs.branch-suffix }})
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
-          branch: update/${{ env.jira }}/release-${{ env.target }}-docs
+          branch: update/${{ env.jira }}/release-${{ env.target }}-$${ github.event.inputs.branch-suffix }}
           path: ./tyk-docs
           delete-branch: true
