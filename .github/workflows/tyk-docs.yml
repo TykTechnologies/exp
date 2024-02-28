@@ -54,9 +54,6 @@ on:  # yamllint disable-line rule:truthy
       destination:
         description: 'Override destination branch'
         default: ''
-      config-info-branch:
-        description: 'Config info generator branch'
-        default: 'main'
       branch-suffix:
         description: 'Branch suffix to append to PR branch name (to prevent collisions on multiple PRs/ticket)'
         required: true
@@ -86,6 +83,7 @@ jobs:
              exit 1
           fi
           echo "jira=$jira" >> $GITHUB_ENV
+          echo "configInfoGeneratorBranch=main" >> $GITHUB_ENV
 
       - if: github.event.inputs.release == 'master'
         run: |
@@ -202,7 +200,7 @@ jobs:
           repository: TykTechnologies/tyk-config-info-generator
           path: ./tyk-config-info-generator
           token: ${{ secrets.ORG_GH_TOKEN }}
-          ref: ${{ github.event.inputs.config-info-branch }}
+          ref: ${{ env.configInfoGeneratorBranch }}
 
       - name: Set up env
         run: |
