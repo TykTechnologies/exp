@@ -1,4 +1,4 @@
-package vet
+package lsof
 
 import (
 	"fmt"
@@ -20,6 +20,6 @@ func NewOptions() *options {
 }
 
 func PrintHelp() {
-	fmt.Printf("Usage: %s vet <options>:\n\n", path.Base(os.Args[0]))
+	fmt.Printf("Usage: %s lsof <options>:\n\n", path.Base(os.Args[0]))
 	flag.PrintDefaults()
 }
