@@ -241,7 +241,7 @@ jobs:
         if: ${{ github.event.inputs.sync-pump == 'true' }}
         run: |
           repo=pump
-          branch=master # Pump doesn't follow releng
+          branch=${{ github.event.inputs.source || 'master' }}
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
@@ -252,7 +252,7 @@ jobs:
         if: ${{ github.event.inputs.sync-mdcb == 'true' }}
         run: |
           repo=mdcb
-          branch=master # MDCB doesn't follow releng
+          branch=${{ github.event.inputs.source || 'master' }}
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
