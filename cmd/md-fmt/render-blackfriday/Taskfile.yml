@@ -1,0 +1,18 @@
+---
+version: "3"
+
+env:
+  GOBIN: /usr/local/bin
+
+tasks:
+  default:
+    desc: "Build, run tests, build examples"
+    cmds:
+      - task: build
+
+  build:
+    desc: "Build and install"
+    cmds:
+      - goimports -w -local=$(go list .) .
+      - go fmt ./...
+      - go test -v -count 1 .
