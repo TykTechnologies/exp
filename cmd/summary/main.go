@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/exp/maps"
 
+	"github.com/TykTechnologies/exp/cmd/summary/golangcilint"
 	"github.com/TykTechnologies/exp/cmd/summary/lsof"
 	"github.com/TykTechnologies/exp/cmd/summary/vet"
 )
@@ -23,8 +24,9 @@ func main() {
 
 func start() (err error) {
 	commands := map[string]func() error{
-		"vet":  vet.Run,
-		"lsof": lsof.Run,
+		"vet":          vet.Run,
+		"lsof":         lsof.Run,
+		"golangcilint": golangcilint.Run,
 	}
 	commandList := maps.Keys(commands)
 	sort.Strings(commandList)
