@@ -12,6 +12,7 @@ import (
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/extract"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/lint"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/query"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/restore"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/search"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/stats"
@@ -31,6 +32,7 @@ func start() (err error) {
 		"stats":   stats.Run,
 		"lint":    lint.Run,
 		"search":  search.Run,
+		"query":   query.Run,
 	}
 	commandList := maps.Keys(commands)
 	sort.Strings(commandList)
