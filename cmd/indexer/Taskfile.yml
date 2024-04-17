@@ -1,0 +1,13 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: "Install indexer to environment"
+    sources:
+      - '**.go'
+      - 'index.tpl'
+    cmds:
+      - goimports -w .
+      - go fmt .
+      - go install .
