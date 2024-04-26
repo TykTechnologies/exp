@@ -3,11 +3,17 @@ version: "3"
 
 tasks:
   default:
+    desc: "Run tests, install indexer"
+    cmds:
+      - goimports -w .
+      - go fmt ./...
+      - go test -count 1 -cover ./...
+      - task: install
+
+  install:
     desc: "Install indexer to environment"
     sources:
       - '**.go'
       - 'index.tpl'
     cmds:
-      - goimports -w .
-      - go fmt .
       - go install .

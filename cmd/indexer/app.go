@@ -2,23 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 )
-
-func openOutput(config *flags) (io.WriteCloser, error) {
-	if config.output == "" {
-		return os.Stdout, nil
-	}
-	if filepath.IsAbs(config.output) {
-		return os.Create(config.output)
-	}
-	return os.Create(path.Join(config.input, config.output))
-}
 
 type fileRecord struct {
 	Name     string
@@ -45,6 +35,7 @@ func isImageExtension(filename string) bool {
 
 var ignoredFiles = map[string]bool{
 	"index.html":   true,
+	"index.json":   true,
 	"Taskfile.yml": true,
 }
 
@@ -100,16 +91,20 @@ func start(ctx context.Context, config *flags) error {
 		return err
 	}
 
-	out, err := openOutput(config)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
 	templateData, err := templateData(config)
 	if err != nil {
 		return fmt.Errorf("error decoding template data: %w", err)
 	}
 
-	return RenderTemplate(out, config.template, templateData)
+	templateOutput, err := RenderTemplate(config.template, templateData)
+	if err := WriteFile(path.Join(config.input, config.output), templateOutput, err); err != nil {
+		return err
+	}
+
+	jsonOutput, err := json.MarshalIndent(templateData, "", "  ")
+	if err := WriteFile(path.Join(config.input, config.outputJSON), jsonOutput, err); err != nil {
+		return err
+	}
+
+	return nil
 }

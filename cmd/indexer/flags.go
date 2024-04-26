@@ -8,14 +8,17 @@ import (
 type flags struct {
 	input    string
 	title    string
-	output   string
 	template string
+
+	output     string
+	outputJSON string
 }
 
 func (f *flags) Bind() {
 	flag.StringVar(&f.title, "t", "", "Title of index page to render")
 	flag.StringVar(&f.input, "i", ".", "Input folder (default: current folder)")
 	flag.StringVar(&f.output, "o", "index.html", "Output filename or absolute filepath")
+	flag.StringVar(&f.outputJSON, "json", "index.json", "Output json directory listing")
 	flag.StringVar(&f.template, "template", "index.tpl", "Template to render (index.tpl is bundled)")
 }
 

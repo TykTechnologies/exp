@@ -5,5 +5,5 @@ import (
 )
 
 func TestNewFileRecord(t *testing.T) {
-	_ := newFileRecord("file.txt")
+	_ = newFileRecord("file.txt")
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"html/template"
-	"io"
 )
 
 var (
@@ -56,12 +55,4 @@ func loadTemplate(name string) (*template.Template, error) {
 	}
 
 	return nil, errors.New("no such template: " + name)
-}
-
-func RenderTemplate(w io.Writer, templateName string, data map[string]interface{}) error {
-	t, err := loadTemplate(templateName)
-	if err != nil {
-		return err
-	}
-	return t.Execute(w, data)
 }
