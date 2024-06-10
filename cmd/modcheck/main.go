@@ -140,6 +140,7 @@ func start() error {
 			if dep.Upgrade {
 				if isSkipped(conf, dep.Name) {
 					log.Println(dep.Name, "held back from upgrade")
+					continue
 				}
 				fmt.Printf("go get %s@%s\t\t# upgrade from %s\n", dep.Name, dep.Latest, dep.Version)
 			}
