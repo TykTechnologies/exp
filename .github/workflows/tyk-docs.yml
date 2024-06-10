@@ -257,7 +257,17 @@ jobs:
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
-
+          
+          mkdir -p mdcb-docs
+          cp ./tyk-sink/swagger.yml mdcb-docs/mdcb-swagger.yml
+          
+      - name: Upload MDCB Swagger Docs
+        if: ${{ github.event.inputs.sync-mdcb == 'true' }}
+        uses: actions/upload-artifact@v3
+        with:
+          path: mdcb-docs
+          name: mdcb-docs
+            
       - name: Store docs
         uses: actions/upload-artifact@v3
         with:
@@ -292,6 +302,7 @@ jobs:
              [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.md ./tyk-docs/tyk-docs/content/shared/
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
+             [ -d "mdcb-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
 
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@v6
