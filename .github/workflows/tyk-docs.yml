@@ -319,9 +319,6 @@ jobs:
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
-      
-      - name: List config-docs contents
-        run: ls -R config-docs
         
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@v6
