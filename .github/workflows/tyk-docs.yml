@@ -194,7 +194,7 @@ jobs:
         with:
           name: dashboard-docs
           path: dashboard-docs
-
+  
   configs:
     needs: [sanitize]
     name: Configuration docs
@@ -246,7 +246,16 @@ jobs:
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
-
+      
+      - name: Checkout MDCB
+        if: ${{ github.event.inputs.sync-mdcb == 'true' }}
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 1
+            repository: TykTechnologies/tyk-sink
+            ref: ${{ needs.sanitize.outputs.repoBranch }}
+            path: ./tyk-sink
+            
       - name: Sync MDCB
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.sync-mdcb == 'true' }}
