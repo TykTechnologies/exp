@@ -194,7 +194,33 @@ jobs:
         with:
           name: dashboard-docs
           path: dashboard-docs
-  
+          
+  mdcb:
+    needs: [ sanitize ]
+    name: MDCB docs
+    if: ${{ github.event.inputs.sync-mdcb == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout MDCB
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.ORG_GH_TOKEN }}
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-sink
+          ref: ${{ needs.sanitize.outputs.repoBranch }}
+          path: ./tyk-sink
+      
+      - name: Generate docs
+        run: |
+          mkdir -p mdcb-docs/
+          cp ./tyk-sink/swagger.yml mdcb-docs/mdcb-swagger.yml
+        
+      - name: Store docs
+        uses: actions/upload-artifact@v3
+        with:
+          name: mdcb-docs
+          path: mdcb-docs
+          
   configs:
     needs: [sanitize]
     name: Configuration docs
@@ -246,17 +272,7 @@ jobs:
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
-      
-      - name: Checkout MDCB
-        if: ${{ github.event.inputs.sync-mdcb == 'true' }}
-        uses: actions/checkout@v3
-        with:
-            token: ${{ secrets.ORG_GH_TOKEN }}
-            fetch-depth: 1
-            repository: TykTechnologies/tyk-sink
-            ref: ${{ needs.sanitize.outputs.repoBranch }}
-            path: ./tyk-sink
-            
+          
       - name: Sync MDCB
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.sync-mdcb == 'true' }}
@@ -267,16 +283,6 @@ jobs:
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
-          
-          mkdir -p mdcb-docs
-          cp ./tyk-sink/swagger.yml mdcb-docs/mdcb-swagger.yml
-          
-      - name: Upload MDCB Swagger Docs
-        if: ${{ github.event.inputs.sync-mdcb == 'true' }}
-        uses: actions/upload-artifact@v3
-        with:
-          path: mdcb-docs
-          name: mdcb-docs
             
       - name: Store docs
         uses: actions/upload-artifact@v3
