@@ -116,12 +116,12 @@ jobs:
           body: |
             Triggered by: ${{ github.actor }}
 
-            {{ steps.modcheck.outputs.report }}
+            ${{ steps.modcheck.outputs.report }}
 
             Steps performed:
 
             ~~~
-            {{ steps.modcheck_upgrade.outputs.report }}
+            ${{ steps.modcheck_upgrade.outputs.report }}
             ~~~
 
             Mod tidy output:
