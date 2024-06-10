@@ -72,7 +72,7 @@ jobs:
       - name: Checkout Tyk Gateway
         uses: actions/checkout@v4
         with:
-          repository: TykTechnologies/tyk
+          repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}
           branch: master
           path: ./tyk
