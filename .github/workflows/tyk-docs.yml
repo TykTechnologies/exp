@@ -251,6 +251,7 @@ jobs:
         if: ${{ github.event.inputs.sync-mdcb == 'true' }}
         uses: actions/checkout@v3
         with:
+            token: ${{ secrets.ORG_GH_TOKEN }}
             fetch-depth: 1
             repository: TykTechnologies/tyk-sink
             ref: ${{ needs.sanitize.outputs.repoBranch }}
