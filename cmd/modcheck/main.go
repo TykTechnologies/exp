@@ -212,7 +212,7 @@ func getLatestVersion(name string) (string, error) {
 	semver.Sort(cleanParts)
 
 	if len(parts) > 0 {
-		result = cleanParts[len(parts)-1]
+		result = cleanParts[len(cleanParts)-1]
 	}
 	if len(result) == 0 {
 		err = errors.New("No versions available")
