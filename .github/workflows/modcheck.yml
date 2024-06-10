@@ -50,6 +50,13 @@ jobs:
         with:
           go-version: '1.21.x'
 
+      - name: 'Extract tykio/ci-tools:latest'
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: tykio/ci-tools:latest
+          path: /usr/local/bin/.
+          destination: /usr/local/bin
+
       # Build and install modcheck
       - working-directory: ./cmd/modcheck
         run: task
