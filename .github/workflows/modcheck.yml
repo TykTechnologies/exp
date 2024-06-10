@@ -6,7 +6,7 @@ name: Modcheck
 # It holds some packages back due to the grep rules below in the modcheck_upgrade step.
 # It will attempt to open a PR with the automated upgrades.
 
-run-name: '[${{ inputs.jira }}] modcheck update by ${{ github.actor }}'
+run-name: '[${{ inputs.jira }}] ${{ inputs.repository }}: ${{ github.actor }} running modcheck'
 
 on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -15,6 +15,12 @@ on:  # yamllint disable-line rule:truthy
         description: JIRA ID (MM-NNNN or permalink)
         required: true
         default: ''
+      repository:
+        description: 'Release version'
+        type: choice
+        options:
+          - 'TykTechnologies/tyk'
+          - 'TykTechnologies/tyk-analytics'
 
 jobs:
   sanitize:
@@ -31,7 +37,7 @@ jobs:
              echo "No valid JIRA ID found (no dash in JIRA ID)"
              exit 1
           fi
-          echo "jira=$jira" >> $GITHUB_ENV
+          echo "jira=$jira" >> $GITHUB_OUTPUT
 
   modcheck:
     runs-on: ubuntu-latest
@@ -72,7 +78,7 @@ jobs:
           path: ./tyk
 
       - working-directory: ./tyk
-        run: go mod download
+        run: go mod tidy
 
       - working-directory: ./tyk
         id: modcheck
