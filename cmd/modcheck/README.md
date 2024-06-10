@@ -3,15 +3,14 @@
 This tool will go through the imports in go.mod and check with the
 official go proxy to get a list of versions for each of the imports.
 
-Run `modcheck` in your repo where `go.mod` exists.
-
-Run `modcheck -suggest` for a list of dependencies that are versioned and upgradeable.
-
-Install:
-
 ```
-go install github.com/TykTechnologies/exp/cmd/modcheck@main
+Usage of modcheck:
+      --for-upgrade    only list packages for upgrade
+      --skip strings   skip packages
+      --suggest        print go get commands to update dependencies
 ```
+
+Run `modcheck` in your repo where `go.mod` exists. Build/install by running `task` here.
 
 The report is provided in markdown output, suitable for github issues.
 
