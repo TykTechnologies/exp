@@ -211,7 +211,7 @@ func getLatestVersion(name string) (string, error) {
 
 	semver.Sort(cleanParts)
 
-	if len(parts) > 0 {
+	if len(cleanParts) > 0 {
 		result = cleanParts[len(cleanParts)-1]
 	}
 	if len(result) == 0 {
