@@ -51,7 +51,8 @@ jobs:
 
       - name: Set up env
         run: |
-             echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+          echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+          echo "hold=github.com/go-redsync,github.com/newrelic,go.opentelemetry.io,github/getkin/kin-openapi" >> $GITHUB_ENV
 
       - name: Setup Golang
         uses: actions/setup-go@v4
@@ -83,7 +84,7 @@ jobs:
       - working-directory: ./tyk
         id: modcheck
         run: |
-          modcheck | tee -a /tmp/modcheck.md
+          modcheck --for-upgrade --skip "${{ env.hold }}" | tee -a /tmp/modcheck.md
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/modcheck.md >> $GITHUB_OUTPUT
@@ -92,7 +93,7 @@ jobs:
       - working-directory: ./tyk
         id: modcheck_upgrade
         run: |
-          modcheck -suggest | grep -v -E '(github.com/go-redsync/redsync/v4|github.com/newrelic|go.opentelemetry.io/|github.com/getkin/kin-openapi)' | sh -x 2>&1 | tee -a /tmp/modcheck.log
+          modcheck --suggest --skip "${{ env.hold }}" | sh -x 2>&1 | tee -a /tmp/modcheck.log
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/modcheck.log >> $GITHUB_OUTPUT
