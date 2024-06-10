@@ -302,7 +302,7 @@ jobs:
              [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.md ./tyk-docs/tyk-docs/content/shared/
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
-             [ -d "mdcb-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
+             [ -d "mdcb-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/assets/others/
 
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@v6
