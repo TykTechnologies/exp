@@ -200,11 +200,19 @@ func getLatestVersion(name string) (string, error) {
 	}
 
 	parts := strings.Split(strings.TrimSpace(string(body)), "\n")
+	cleanParts := []string{}
+	for _, part := range parts {
+		// Skip `-rc`, `-dev` and similar suffixes
+		if strings.Contains(part, "-") {
+			continue
+		}
+		cleanParts = append(cleanParts, part)
+	}
 
-	semver.Sort(parts)
+	semver.Sort(cleanParts)
 
 	if len(parts) > 0 {
-		result = parts[len(parts)-1]
+		result = cleanParts[len(parts)-1]
 	}
 	if len(result) == 0 {
 		err = errors.New("No versions available")
