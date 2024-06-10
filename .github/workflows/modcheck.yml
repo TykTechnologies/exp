@@ -78,7 +78,7 @@ jobs:
           path: ./tyk
 
       - working-directory: ./tyk
-        run: go mod tidy
+        run: go mod download
 
       - working-directory: ./tyk
         id: modcheck
@@ -92,7 +92,7 @@ jobs:
       - working-directory: ./tyk
         id: modcheck_upgrade
         run: |
-          modcheck -suggest | grep -v -E '(github.com/newrelic|go.opentelemetry.io/|github.com/getkin/kin-openapi)' | sh -x | tee -a /tmp/modcheck.log
+          modcheck -suggest | grep -v -E '(github.com/newrelic|go.opentelemetry.io/|github.com/getkin/kin-openapi)' | sh -x 2>&1 | tee -a /tmp/modcheck.log
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/modcheck.log >> $GITHUB_OUTPUT
@@ -101,7 +101,7 @@ jobs:
       - working-directory: ./tyk
         id: mod_tidy
         run: |
-          go mod tidy 2>&1 | tee -a /tmp/go-mod.txt
+          GOTOOLCHAIN=local go mod tidy 2>&1 | tee -a /tmp/go-mod.txt
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/go-mod.txt >> $GITHUB_OUTPUT
