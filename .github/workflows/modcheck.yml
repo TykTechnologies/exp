@@ -70,6 +70,9 @@ jobs:
           path: ./tyk
 
       - working-directory: ./tyk
+        run: go mod download
+
+      - working-directory: ./tyk
         id: modcheck
         run: |
           modcheck | tee -a /tmp/modcheck.md
@@ -81,10 +84,10 @@ jobs:
       - working-directory: ./tyk
         id: modcheck_upgrade
         run: |
-          modcheck -suggest | grep -v -E '(github.com/newrelic|go.opentelemetry.io/|github.com/getkin/kin-openapi)' | sh -x | tee -a /tmp/modcheck-upgrade.log
+          modcheck -suggest | grep -v -E '(github.com/newrelic|go.opentelemetry.io/|github.com/getkin/kin-openapi)' | sh -x | tee -a /tmp/modcheck.log
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
-          cat /tmp/modcheck-upgrade.log >> $GITHUB_OUTPUT
+          cat /tmp/modcheck.log >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - working-directory: ./tyk
@@ -93,7 +96,7 @@ jobs:
           go mod tidy 2>&1 | tee -a /tmp/go-mod.txt
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
-          cat /tmp/go-mod-modcheck-upgrade.log >> $GITHUB_OUTPUT
+          cat /tmp/go-mod.txt >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Raise PR in Gateway
