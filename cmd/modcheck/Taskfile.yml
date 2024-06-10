@@ -19,7 +19,6 @@ tasks:
       - go mod tidy
       - go clean -cache
       - go install .
-      - modcheck
 
   cve:
     desc: "Fetch Go CVE list json"
