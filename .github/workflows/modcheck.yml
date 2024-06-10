@@ -75,7 +75,7 @@ jobs:
         with:
           repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}
-          branch: master
+          ref: master
           path: ./tyk
 
       - working-directory: ./tyk
