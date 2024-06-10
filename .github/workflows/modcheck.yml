@@ -55,10 +55,11 @@ jobs:
         run: task
 
       - name: Checkout Tyk Gateway
-        uses: TykTechnologies/exp/.github/actions/checkout@main
+        uses: actions/checkout@v4
         with:
           repository: TykTechnologies/tyk
           token: ${{ secrets.ORG_GH_TOKEN }}
+          branch: master
           path: ./tyk
 
       - working-directory: ./tyk
