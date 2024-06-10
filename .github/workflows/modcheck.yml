@@ -52,7 +52,7 @@ jobs:
       - name: Set up env
         run: |
           echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
-          echo "hold=github.com/go-redsync,github.com/newrelic,go.opentelemetry.io,github/getkin/kin-openapi" >> $GITHUB_ENV
+          echo "hold=github.com/go-redsync,github.com/newrelic,go.opentelemetry.io,github.com/getkin/kin-openapi" >> $GITHUB_ENV
 
       - name: Setup Golang
         uses: actions/setup-go@v4
