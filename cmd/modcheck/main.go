@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -119,25 +118,29 @@ func load(gomodPath string) ([]*Dependency, error) {
 	return result, nil
 }
 
+func isSkipped(conf *options, name string) bool {
+	for _, skipped := range conf.skip {
+		if strings.HasPrefix(name, skipped) {
+			return true
+		}
+	}
+	return false
+}
+
 func start() error {
-	var (
-		gomodPath = "go.mod"
-
-		suggest bool
-	)
-
-	flag.BoolVar(&suggest, "suggest", suggest, "suggest go get commands to update dependencies")
-	flag.Parse()
-
-	deps, err := load(gomodPath)
+	conf := NewOptions()
+	deps, err := load(conf.goModPath)
 	if err != nil {
 		return nil
 	}
 
 	switch {
-	case suggest:
+	case conf.suggest:
 		for _, dep := range deps {
 			if dep.Upgrade {
+				if isSkipped(conf, dep.Name) {
+					log.Println(dep.Name, "held back from upgrade")
+				}
 				fmt.Printf("go get %s@%s\t\t# upgrade from %s\n", dep.Name, dep.Latest, dep.Version)
 			}
 		}
@@ -157,6 +160,14 @@ func start() error {
 		w.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 
 		for _, dep := range deps {
+			if isSkipped(conf, dep.Name) {
+				dep.Warnings = "Held back from upgrade"
+			}
+
+			if conf.forUpgrade && !dep.Upgrade {
+				continue
+			}
+
 			w.Append(dep.StringSlice())
 		}
 
