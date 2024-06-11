@@ -119,17 +119,21 @@ jobs:
 
             ${{ steps.modcheck.outputs.report }}
 
-            Steps performed:
+            <details>
+              <summary>Steps performed</summary>
 
-            ~~~
-            ${{ steps.modcheck_upgrade.outputs.report }}
-            ~~~
+              ~~~
+              ${{ steps.modcheck_upgrade.outputs.report }}
+              ~~~
+            </details>
 
-            Mod tidy output:
+            <details>
+              <summary>go mod tidy output</summary>
 
-            ```
-            ${{ steps.mod_tidy.outputs.report }}
-            ```
+              ```
+              ${{ steps.mod_tidy.outputs.report }}
+              ```
+            </details>
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
           branch: update/${{ env.jira }}/update-go-mod-dependencies
