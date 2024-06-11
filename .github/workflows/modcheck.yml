@@ -73,13 +73,19 @@ jobs:
       - working-directory: ./cmd/modcheck
         run: task
 
-      - name: Checkout Tyk Gateway
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}
           ref: master
           path: ./tyk
+
+      - name: Install Dependencies
+        env:
+          TOKEN: '${{ secrets.ORG_GH_TOKEN }}'
+        run: >
+          git config --global url."https://${TOKEN}@github.com/TykTechnologies".insteadOf "https://github.com/TykTechnologies"
 
       - working-directory: ./tyk
         run: go mod download
