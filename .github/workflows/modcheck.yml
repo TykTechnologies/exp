@@ -22,6 +22,9 @@ on:  # yamllint disable-line rule:truthy
           - 'TykTechnologies/tyk'
           - 'TykTechnologies/tyk-analytics'
 
+env:
+  GOPRIVATE: github.com/TykTechnologies
+
 jobs:
   sanitize:
     name: Sanitize inputs
