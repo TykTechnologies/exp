@@ -12,11 +12,11 @@ on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
     inputs:
       jira:
-        description: JIRA ID (MM-NNNN or permalink)
+        description: 'JIRA ID (MM-NNNN or permalink)'
         required: true
         default: ''
       repository:
-        description: 'Release version'
+        description: 'Repository'
         type: choice
         options:
           - 'TykTechnologies/tyk'
