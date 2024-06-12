@@ -15,6 +15,10 @@ on:  # yamllint disable-line rule:truthy
         description: 'JIRA ID (MM-NNNN or permalink)'
         required: true
         default: ''
+      branch:
+        description: 'Base branch'
+        required: true
+        default: 'master'
       repository:
         description: 'Repository'
         type: choice
@@ -80,7 +84,7 @@ jobs:
         with:
           repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}
-          ref: master
+          ref: ${{ github.event.inputs.branch }}
           path: ./tyk
 
       - name: Install Dependencies
