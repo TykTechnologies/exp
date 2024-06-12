@@ -21,6 +21,8 @@ on:  # yamllint disable-line rule:truthy
         options:
           - 'TykTechnologies/tyk'
           - 'TykTechnologies/tyk-analytics'
+          - 'TykTechnologies/tyk-identity-broker'
+          - 'TykTechnologies/storage'
 
 env:
   GOPRIVATE: github.com/TykTechnologies
