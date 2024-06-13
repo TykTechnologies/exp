@@ -1,0 +1,40 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: "Run"
+    deps: [collect]
+    cmds:
+      - goimports -w .
+      - go mod tidy
+      - go fmt .
+      - task: test
+
+  collect:
+    desc: "Collect swagger spec state"
+    internal: true
+    vars:
+      dir:
+        sh: git rev-parse --show-toplevel
+    cmds:
+      - rm -f data/input.yml
+      - for: ['Policy', 'SessionState', 'RateLimitSmoothing']
+        cmd: yq eval '.components.schemas | with_entries(select(.key == "{{.ITEM}}"))' data/gateway-swagger.yml >> data/input.yml
+
+  test:
+    desc: "Test"
+    cmds:
+      - go run . data/gateway-user.json Policy SessionState > data/output.yml
+      - go run . data/gateway-apidef.json RateLimitSmoothing >> data/output.yml
+      - dyff between -i -c off data/input.yml data/output.yml
+
+  schema:
+    desc: "Print consolidated input.yml schema with indent"
+    cmds:
+      - cat input.yml | awk '{print "    " $0}'
+
+  install:
+    desc: "Install deps"
+    cmds:
+      - go install github.com/homeport/dyff/cmd/dyff@latest
