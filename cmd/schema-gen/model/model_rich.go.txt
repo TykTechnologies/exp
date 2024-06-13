@@ -13,6 +13,7 @@ import (
 )
 
 type (
+	// DeclarationInfo holds the declarations block for an exposed value or type.
 	DeclarationInfo struct {
 		// Doc is the declaration doc comment. It usually
 		// occurs just before a *ast.TypeDecl, but may be
@@ -27,8 +28,11 @@ type (
 		Types TypeList `json:"types,omitempty"`
 	}
 
+	// DeclarationList implements list operations over a `*DeclarationInfo` slice.
+
 	DeclarationList = []*DeclarationInfo
 
+	// FieldInfo holds details about a field definition.
 	FieldInfo struct {
 		// Name is the name of the field.
 		Name string `json:"name"`
@@ -56,6 +60,7 @@ type (
 		MapKey string `json:"map_key,omitempty"`
 	}
 
+	// FuncInfo holds details about a function definition.
 	FuncInfo struct {
 		// Name holds the name of the function.
 		Name string `json:"name"`
@@ -76,6 +81,7 @@ type (
 		Source string `json:"source"`
 	}
 
+	// PackageInfo holds all the declarations for a package scope.
 	PackageInfo struct {
 		// Name is the package name.
 		Name string `json:"name"`
@@ -90,6 +96,7 @@ type (
 		Functions []*FuncInfo `json:"functions,omitempty"`
 	}
 
+	// TypeInfo holds details about a type definition.
 	TypeInfo struct {
 		// Name is struct go name.
 		Name string `json:"name"`
@@ -111,6 +118,8 @@ type (
 		// StructObj is the (optionally present) raw ast.StructType value
 		StructObj ast.StructType `json:"-"`
 	}
+
+	// TypeList implements list operations over a *TypeInfo slice.
 
 	TypeList = []*TypeInfo
 )

@@ -69,6 +69,9 @@ func (x DeclarationList) Find(order []string) TypeList {
 	// Step 1: Create a map of type names to TypeInfo objects for fast lookup
 	for _, decl := range x {
 		for _, t := range decl.Types {
+			if t.Doc == "" && strings.HasPrefix(decl.Doc, t.Name) {
+				t.Doc = decl.Doc
+			}
 			typeInfoMap[t.Name] = t
 		}
 	}
