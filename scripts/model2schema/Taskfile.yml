@@ -11,23 +11,52 @@ tasks:
       - go fmt .
       - task: test
 
+  # collect desired output from gateway data models
   collect:
+    deps: [collect:gateway, collect:dashboard]
+    cmds:
+      - go run . data/gateway-user.json APILimit Policy SessionState > data/output.yml
+      - go run . data/gateway-apidef.json RateLimitSmoothing >> data/output.yml
+
+  # collect swagger schema for definitions from gateway swagger
+  collect:gateway:
     desc: "Collect swagger spec state"
     internal: true
     vars:
       dir:
         sh: git rev-parse --show-toplevel
     cmds:
-      - rm -f data/input.yml
-      - for: ['Policy', 'SessionState', 'RateLimitSmoothing']
-        cmd: yq eval '.components.schemas | with_entries(select(.key == "{{.ITEM}}"))' data/gateway-swagger.yml >> data/input.yml
+      - rm -f data/input-gateway.yml
+      - for: ['APILimit', 'Policy', 'SessionState', 'RateLimitSmoothing']
+        cmd: yq eval '.components.schemas | with_entries(select(.key == "{{.ITEM}}"))' data/gateway-swagger.yml >> data/input-gateway.yml
+
+  # collect swagger schema for definitions from dashboard swagger
+  collect:dashboard:
+    desc: "Collect swagger spec state"
+    internal: true
+    vars:
+      dir:
+        sh: git rev-parse --show-toplevel
+    cmds:
+      - rm -f data/input-dashboard.yml
+      - for: ['APILimit', 'Policy', 'SessionState', 'RateLimitSmoothing']
+        cmd: yq eval '.components.schemas | with_entries(select(.key == "{{.ITEM}}"))' data/dashboard-swagger.yml >> data/input-dashboard.yml
 
   test:
     desc: "Test"
     cmds:
-      - go run . data/gateway-user.json Policy SessionState > data/output.yml
-      - go run . data/gateway-apidef.json RateLimitSmoothing >> data/output.yml
-      - dyff between -i -c off data/input.yml data/output.yml
+      - task: test:gateway
+      - task: test:dashboard
+
+  test:gateway:
+    desc: "Test gateway"
+    cmds:
+      - dyff between -i data/input-gateway.yml data/output.yml
+
+  test:dashboard:
+    desc: "Test dashboard"
+    cmds:
+      - dyff between -i data/input-dashboard.yml data/output.yml
 
   schema:
     desc: "Print consolidated input.yml schema with indent"

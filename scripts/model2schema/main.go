@@ -25,7 +25,7 @@ func start() error {
 	models := schema[0].Declarations.Find(os.Args[2:])
 
 	for _, model := range models {
-		def := Convert("github.com/TykTechnologies/tyk/user", model)
+		def := Convert("github.com/TykTechnologies/tyk/"+schema[0].Name, model)
 		b, _ := yaml.Marshal(def)
 
 		lines := strings.Split(string(b), "\n")

@@ -3,9 +3,10 @@
 The motivation behind this is to validate the data model against the
 swagger specification, validating that all fields are covered in schema.
 
-It currently validates only three definitions:
+It currently validates these definitions:
 
 - Policy
+- APILimit
 - SessionState
 - RateLimitSmoothing
 

@@ -13,6 +13,7 @@ func TypeAlias(kind string) (TypeInfo, bool) {
 	if ok {
 		return typeInfo, ok
 	}
+	typeInfo.Type = kind
 
 	if strings.HasPrefix(kind, "[]") {
 		format := kind[2:]
