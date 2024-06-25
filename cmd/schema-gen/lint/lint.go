@@ -22,6 +22,7 @@ func lint(cfg *options) error {
 		errs := NewLintError()
 		errs.Combine(runLinter(cfg, NewLinter("require-no-globals", linterNoGlobals), pkgInfo))
 
+		errs.Combine(runLinter(cfg, NewLinter("require-struct-comment", linterStructs), pkgInfo))
 		errs.Combine(runLinter(cfg, NewLinter("require-field-comment", linterFields), pkgInfo))
 		errs.Combine(runLinter(cfg, NewLinter("require-dot-or-backtick", linterFields), pkgInfo))
 		errs.Combine(runLinter(cfg, NewLinter("require-field-prefix", linterFields), pkgInfo))

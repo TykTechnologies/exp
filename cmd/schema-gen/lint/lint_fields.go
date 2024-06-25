@@ -43,7 +43,7 @@ func lintField(cfg *options, decl *DeclarationInfo, typeDecl *TypeInfo, fieldDec
 
 func validateRule(rule, field, name, doc string) string {
 	switch rule {
-	case "require-field-comment":
+	case "require-field-comment", "require-struct-comment":
 		if doc == "" {
 			return fmt.Sprintf("[%s] No comment on exposed field.", field)
 		}

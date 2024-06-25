@@ -14,6 +14,7 @@ func NewOptions() *options {
 	cfg := &options{
 		inputFile: "schema.json",
 		rules: []string{
+			"require-struct-comment",
 			"require-field-comment",
 			"require-dot-or-backtick",
 			"require-field-prefix",
