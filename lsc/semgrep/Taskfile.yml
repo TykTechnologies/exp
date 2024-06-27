@@ -4,20 +4,19 @@ version: '3'
 tasks:
   default:
     desc: "Run semgrep"
+    deps: [pull]
     vars:
       absPath:
         sh: readlink -f .
-    deps:
-      - returntocorp
-      - semgrep-go
     cmds:
-      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan --verbose --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json
-      - jq . reports/semgrep.tyk.json
+      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan --verbose --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json || true
+#      - cd src && git diff .
+#      - jq . reports/semgrep.tyk.json
 
   pull:
     desc: "Pull latest returntocorp/semgrep"
     cmds:
-      - docker pull returntocorp/semgrep
+      - docker pull returntocorp/semgrep -q
 
   scan:
     desc: Scan with upstream rules
