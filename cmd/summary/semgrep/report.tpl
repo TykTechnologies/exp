@@ -12,7 +12,7 @@ Results: {{ .results | len }}
   example: |
     {{ .extra.lines }}
 
-{{- end }}
+{{ end }}
 ~~~
 
 Checks by occurence:

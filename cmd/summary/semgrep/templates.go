@@ -2,8 +2,9 @@ package semgrep
 
 import (
 	"errors"
-	"html/template"
 	"io"
+
+	"text/template"
 )
 
 var (
