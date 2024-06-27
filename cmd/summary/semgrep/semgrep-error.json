@@ -1,0 +1,60 @@
+{
+  "errors": [
+    {
+      "code": 2,
+      "level": "error",
+      "message": "Pattern parse error in rule host.rules.tyk.log.coprocessLog.remove.withField:\n Invalid pattern for Go:\n--- pattern ---\nlog.WithField(\"prefix\", \"coprocess\"})\n--- end pattern ---\nPattern error: Parsing_error.Syntax_error (<file>:1:35 \"}\")\n",
+      "rule_id": "host.rules.tyk.log.coprocessLog.remove.withField",
+      "spans": [
+        {
+          "config_end": {
+            "col": 44,
+            "line": 0,
+            "offset": -1
+          },
+          "config_path": [
+            "rules",
+            "0",
+            "pattern"
+          ],
+          "config_start": {
+            "col": 1,
+            "line": 0,
+            "offset": -1
+          },
+          "end": {
+            "col": 61,
+            "line": 10,
+            "offset": 289
+          },
+          "file": "/tmp/tmpz48awv5y.json",
+          "start": {
+            "col": 18,
+            "line": 10,
+            "offset": 246
+          }
+        }
+      ],
+      "type": [
+        "PatternParseError",
+        [
+          "pattern",
+          "0",
+          "rules"
+        ]
+      ]
+    }
+  ],
+  "paths": {
+    "scanned": [],
+    "skipped": [
+      {
+        "path": "/tmp/tmpz48awv5y.json",
+        "reason": "analysis_failed_parser_or_internal_error"
+      }
+    ]
+  },
+  "results": [],
+  "skipped_rules": [],
+  "version": "1.76.0"
+}
