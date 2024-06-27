@@ -9,6 +9,11 @@ name: Semgrep
 #
 # It's a way to enforce small patterns for consistency, bug avoidance,
 # and other purposes aimed at style and stability.
+#
+# For local development:
+# - navigate to lsc/semgrep/
+# - check out repository under `src`
+# - run `task`
 
 run-name: '[${{ inputs.jira }}] ${{ inputs.repository }}: ${{ github.actor }} running semgrep'
 
@@ -75,10 +80,6 @@ jobs:
           image: tykio/ci-tools:latest
           path: /usr/local/bin/.
           destination: /usr/local/bin
-
-      # Build and install semgrep
-      - working-directory: ./cmd/semgrep
-        run: task
 
       - name: Checkout repository
         uses: actions/checkout@v4
