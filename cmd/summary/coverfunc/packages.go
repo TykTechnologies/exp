@@ -36,7 +36,10 @@ func ByPackage(coverageInfos []CoverageInfo) []PackageInfo {
 	}
 
 	sort.Slice(packageInfos, func(i, j int) bool {
-		return packageInfos[i].Coverage > packageInfos[j].Coverage
+		if packageInfos[i].Coverage != packageInfos[j].Coverage {
+			return packageInfos[i].Coverage > packageInfos[j].Coverage
+		}
+		return packageInfos[i].Package > packageInfos[j].Package
 	})
 
 	return cleanPackageNames(packageInfos)
