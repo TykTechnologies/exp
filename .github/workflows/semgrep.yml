@@ -113,6 +113,9 @@ jobs:
           cat /tmp/output.log >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
+      - working-directory: ./lsc/semgrep/src/ci/tests
+        run: echo "Last ran on $(date) by @${{ github.actor }}" > ci-semgrep.txt
+
       - name: Raise PR
         uses: peter-evans/create-pull-request@v6
         with:
