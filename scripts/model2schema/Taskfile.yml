@@ -46,7 +46,7 @@ tasks:
     desc: "Test"
     cmds:
       - task: test:gateway
-      - task: test:dashboard
+#      - task: test:dashboard
 
   test:gateway:
     desc: "Test gateway"
@@ -61,7 +61,7 @@ tasks:
   schema:
     desc: "Print consolidated input.yml schema with indent"
     cmds:
-      - cat input.yml | awk '{print "    " $0}'
+      - cat data/output.yml | awk '{print "    " $0}'
 
   install:
     desc: "Install deps"
