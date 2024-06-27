@@ -98,15 +98,19 @@ jobs:
       - working-directory: ./lsc/semgrep
         id: semgrep_run
         run: |
+          task 2>&1 | tee -a /tmp/output.log
+
           echo 'report<<EOF' >> $GITHUB_OUTPUT
-          task >> $GITHUB_OUTPUT
+          cat /tmp/output.log >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - working-directory: ./lsc/semgrep
         id: semgrep_report
         run: |
+          task report | tee -a /tmp/output.log
+
           echo 'report<<EOF' >> $GITHUB_OUTPUT
-          task report >> $GITHUB_OUTPUT
+          cat /tmp/output.log >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Raise PR
