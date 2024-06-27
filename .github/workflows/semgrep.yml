@@ -96,12 +96,17 @@ jobs:
           git config --global url."https://${TOKEN}@github.com/TykTechnologies".insteadOf "https://github.com/TykTechnologies"
 
       - working-directory: ./lsc/semgrep
-        id: semgrep
+        id: semgrep_run
         run: |
-          task | tee -a /tmp/semgrep.md
-
           echo 'report<<EOF' >> $GITHUB_OUTPUT
-          cat /tmp/semgrep.md >> $GITHUB_OUTPUT
+          task >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+      - working-directory: ./lsc/semgrep
+        id: semgrep_report
+        run: |
+          echo 'report<<EOF' >> $GITHUB_OUTPUT
+          task report >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Raise PR
@@ -113,9 +118,15 @@ jobs:
           body: |
             Triggered by: ${{ github.actor }}
 
-            ~~~
-            ${{ steps.semgrep.outputs.report }}
-            ~~~
+            ${{ steps.semgrep_report.outputs.report }}
+
+            <details>
+              <summary>Steps performed</summary>
+
+              ~~~
+              ${{ steps.semgrep_run.outputs.report }}
+              ~~~
+            </details>
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
           branch: update/${{ env.jira }}/semgrep-check
