@@ -23,3 +23,8 @@ The renderer is incomplete/unfinished/abandoned. It's missing support for
 tables at the very least, and likely several other items.
 
 Try not to use it.
+
+This is a more complete renderer, but still uses blackfriday:
+
+https://github.com/shurcooL/markdownfmt/blob/main/markdown/main.go
+
