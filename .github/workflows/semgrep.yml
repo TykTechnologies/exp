@@ -1,12 +1,16 @@
 # yamllint disable rule:line-length
 ---
-name: Modcheck
+name: Semgrep
 
-# This action runs modcheck to produce an automated upgrade PR.
-# It holds some packages back due to the grep rules below in the modcheck_upgrade step.
-# It will attempt to open a PR with the automated upgrades.
+# The intent of the action is two fold:
+#
+# - Scan repositories for violations
+# - Heal existing state with semgrep refactoring rules
+#
+# It's a way to enforce small patterns for consistency, bug avoidance,
+# and other purposes aimed at style and stability.
 
-run-name: '[${{ inputs.jira }}] ${{ inputs.repository }}: ${{ github.actor }} running modcheck'
+run-name: '[${{ inputs.jira }}] ${{ inputs.repository }}: ${{ github.actor }} running semgrep'
 
 on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -25,8 +29,6 @@ on:  # yamllint disable-line rule:truthy
         options:
           - 'TykTechnologies/tyk'
           - 'TykTechnologies/tyk-analytics'
-          - 'TykTechnologies/tyk-identity-broker'
-          - 'TykTechnologies/storage'
 
 env:
   GOPRIVATE: github.com/TykTechnologies
@@ -48,7 +50,7 @@ jobs:
           fi
           echo "jira=$jira" >> $GITHUB_OUTPUT
 
-  modcheck:
+  semgrep:
     runs-on: ubuntu-latest
     needs: [sanitize]
 
@@ -61,7 +63,6 @@ jobs:
       - name: Set up env
         run: |
           echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
-          echo "hold=gorm.io,github.com/go-redsync,github.com/newrelic,go.opentelemetry.io,github.com/getkin/kin-openapi" >> $GITHUB_ENV
 
       - name: Setup Golang
         uses: actions/setup-go@v4
@@ -75,8 +76,8 @@ jobs:
           path: /usr/local/bin/.
           destination: /usr/local/bin
 
-      # Build and install modcheck
-      - working-directory: ./cmd/modcheck
+      # Build and install semgrep
+      - working-directory: ./cmd/semgrep
         run: task
 
       - name: Checkout repository
@@ -85,7 +86,7 @@ jobs:
           repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}
           ref: ${{ github.event.inputs.branch }}
-          path: ./tyk
+          path: ./lsc/semgrep/src
 
       - name: Install Dependencies
         env:
@@ -93,64 +94,29 @@ jobs:
         run: >
           git config --global url."https://${TOKEN}@github.com/TykTechnologies".insteadOf "https://github.com/TykTechnologies"
 
-      - working-directory: ./tyk
-        run: go mod download
-
-      - working-directory: ./tyk
-        id: modcheck
+      - working-directory: ./lsc/semgrep
+        id: semgrep
         run: |
-          modcheck --for-upgrade --skip "${{ env.hold }}" | tee -a /tmp/modcheck.md
+          task | tee -a /tmp/semgrep.md
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
-          cat /tmp/modcheck.md >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
-
-      - working-directory: ./tyk
-        id: modcheck_upgrade
-        run: |
-          modcheck --suggest --skip "${{ env.hold }}" | sh -x 2>&1 | tee -a /tmp/modcheck.log
-
-          echo 'report<<EOF' >> $GITHUB_OUTPUT
-          cat /tmp/modcheck.log >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
-
-      - working-directory: ./tyk
-        id: mod_tidy
-        run: |
-          GOTOOLCHAIN=local go mod tidy 2>&1 | tee -a /tmp/go-mod.txt
-
-          echo 'report<<EOF' >> $GITHUB_OUTPUT
-          cat /tmp/go-mod.txt >> $GITHUB_OUTPUT
+          cat /tmp/semgrep.md >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Raise PR
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
-          commit-message: Import updated go.mod/go.sum
-          title: '[${{ env.jira }}] exp/modcheck: Update go.mod dependencies'
+          commit-message: Semgrep scan result
+          title: '[${{ env.jira }}] exp/semgrep: Update from LSC semgrep rule'
           body: |
             Triggered by: ${{ github.actor }}
 
-            ${{ steps.modcheck.outputs.report }}
-
-            <details>
-              <summary>Steps performed</summary>
-
-              ~~~
-              ${{ steps.modcheck_upgrade.outputs.report }}
-              ~~~
-            </details>
-
-            <details>
-              <summary>go mod tidy output</summary>
-
-              ```
-              ${{ steps.mod_tidy.outputs.report }}
-              ```
-            </details>
+            ~~~
+            ${{ steps.semgrep.outputs.report }}
+            ~~~
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
-          branch: update/${{ env.jira }}/update-go-mod-dependencies
-          path: ./tyk
+          branch: update/${{ env.jira }}/semgrep-check
+          path: ./lsc/semgrep/src
           delete-branch: true
