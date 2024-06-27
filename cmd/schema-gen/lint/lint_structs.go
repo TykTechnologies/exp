@@ -15,8 +15,8 @@ func linterStructs(cfg *options, pkgInfo *model.PackageInfo) *LintError {
 				doc = typeDecl.Doc
 			}
 
-			for _, rule := range cfg.rules {
-				errs.Append(validateRule(rule, name, name, doc))
+			for _, rule := range cfg.GetRules() {
+				errs.Append(validateRule("struct", rule, name, name, doc))
 			}
 		}
 	}

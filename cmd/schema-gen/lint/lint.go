@@ -10,8 +10,6 @@ import (
 )
 
 func lint(cfg *options) error {
-	fmt.Println(cfg.inputFile)
-
 	pkgInfos, err := model.Load(cfg.inputFile)
 	if err != nil {
 		return fmt.Errorf("Error loading package info: %w", err)
@@ -20,12 +18,11 @@ func lint(cfg *options) error {
 	for _, pkgInfo := range pkgInfos {
 
 		errs := NewLintError()
-		errs.Combine(runLinter(cfg, NewLinter("require-no-globals", linterNoGlobals), pkgInfo))
-
-		errs.Combine(runLinter(cfg, NewLinter("require-struct-comment", linterStructs), pkgInfo))
+		errs.Combine(runLinter(cfg, NewLinter("require-comment", linterStructs), pkgInfo))
 		errs.Combine(runLinter(cfg, NewLinter("require-field-comment", linterFields), pkgInfo))
+		errs.Combine(runLinter(cfg, NewLinter("require-no-globals", linterNoGlobals), pkgInfo))
 		errs.Combine(runLinter(cfg, NewLinter("require-dot-or-backtick", linterFields), pkgInfo))
-		errs.Combine(runLinter(cfg, NewLinter("require-field-prefix", linterFields), pkgInfo))
+		errs.Combine(runLinter(cfg, NewLinter("require-prefix", linterFields), pkgInfo))
 
 		if errs.Empty() {
 			return nil
@@ -37,7 +34,7 @@ func lint(cfg *options) error {
 }
 
 func runLinter(cfg *options, linter Linter, pkgInfo *PackageInfo) *LintError {
-	if !slices.Contains(cfg.rules, linter.GetName()) {
+	if !slices.Contains(cfg.GetRules(), linter.GetName()) {
 		return nil
 	}
 

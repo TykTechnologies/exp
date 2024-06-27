@@ -16,7 +16,6 @@ tasks:
       - go fmt ./...
       - go mod tidy
       - go clean -cache
-      - go build .
       - go install .
 
   gen:model:

@@ -22,7 +22,8 @@ func linterFields(cfg *options, pkgInfo *model.PackageInfo) *LintError {
 }
 
 func lintField(cfg *options, decl *DeclarationInfo, typeDecl *TypeInfo, fieldDecl *FieldInfo) []string {
-	result := make([]string, 0, len(cfg.rules))
+	rules := cfg.GetRules()
+	result := make([]string, 0, len(rules))
 
 	var (
 		name  = fieldDecl.Name
@@ -35,19 +36,21 @@ func lintField(cfg *options, decl *DeclarationInfo, typeDecl *TypeInfo, fieldDec
 		fmt.Printf("%s\n\n", field)
 	}
 
-	for _, rule := range cfg.rules {
-		result = append(result, validateRule(rule, field, name, doc))
+	for _, rule := range rules {
+		result = append(result, validateRule("field", rule, field, name, doc))
 	}
 	return result
 }
 
-func validateRule(rule, field, name, doc string) string {
-	switch rule {
-	case "require-field-comment", "require-struct-comment":
+func validateRule(scope, rule, field, name, doc string) string {
+	switch {
+	case scope == "field" && rule == "require-field-comment":
+		fallthrough
+	case scope == "struct" && rule == "require-comment":
 		if doc == "" {
-			return fmt.Sprintf("[%s] No comment on exposed field.", field)
+			return fmt.Sprintf("[%s] No comment on exposed symbol.", field)
 		}
-	case "require-dot-or-backtick":
+	case rule == "require-dot-or-backtick":
 		if doc == "" {
 			return ""
 		}
@@ -55,8 +58,8 @@ func validateRule(rule, field, name, doc string) string {
 			return ""
 		}
 
-		return fmt.Sprintf("[%s] Field comment must end with dot or `.\nGot:  %s\n", field, doc)
-	case "require-field-prefix":
+		return fmt.Sprintf("[%s] Symbol comment must end with dot or `.\nGot:  %s\n", field, doc)
+	case rule == "require-prefix":
 		if doc == "" {
 			return ""
 		}
@@ -74,7 +77,7 @@ func validateRule(rule, field, name, doc string) string {
 		}(doc, prefixes)
 
 		if !hasPrefix {
-			return fmt.Sprintf("[%s] Comment must start with field name.\nGot:  %s\n", field, doc)
+			return fmt.Sprintf("[%s] Comment must start with symbol name.\nGot:  %s\n", field, doc)
 		}
 	default:
 	}
