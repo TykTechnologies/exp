@@ -5,6 +5,11 @@ This repository mimics a subset of
 
 - `/cmd` - various development tooling and experiments
 
+In particular tools like `go-fsck`, `schema-gen` are usable for code
+analysis and linting with an extended godoc ruleset applying to fields.
+This is used to lint our data model in several places. The `summary` tool
+summarizes various things and also has some adoption.
+
 ## Aim of the repository
 
 The aim of the repository is to provide a space for the development of tooling
