@@ -1,0 +1,751 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.use-write-not-fprint",
+      "end": {
+        "col": 42,
+        "line": 111,
+        "offset": 2535
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "c21f8e4d05ce616db70a74443e8c8c23e3a61cef16b58185f1e5610e90b6899ca319d292d6603f69cf0b5c800d421bbaf67f5f30650ed0df76a74fad7fc2f647_0",
+        "is_ignored": false,
+        "lines": "\tfmt.Fprint(rw, string(nodeResponseJSON))",
+        "message": "use rw.Write(nodeResponseJSON) instead of fmt.Fprint when nodeResponseJSON is []byte",
+        "metadata": {},
+        "metavars": {
+          "$VAR": {
+            "abstract_content": "nodeResponseJSON",
+            "end": {
+              "col": 40,
+              "line": 111,
+              "offset": 2533
+            },
+            "start": {
+              "col": 24,
+              "line": 111,
+              "offset": 2517
+            }
+          },
+          "$W": {
+            "abstract_content": "rw",
+            "end": {
+              "col": 15,
+              "line": 111,
+              "offset": 2508
+            },
+            "start": {
+              "col": 13,
+              "line": 111,
+              "offset": 2506
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/service_loader.go",
+      "start": {
+        "col": 2,
+        "line": 111,
+        "offset": 2495
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.use-fprintf-not-write-fsprint",
+      "end": {
+        "col": 72,
+        "line": 136,
+        "offset": 3643
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "b67e183887414289b8a4ec0a302f5f072cef1e6ad70c8989acbee5e1af795844399f3b24db52c1be3c2008786d287c38a7d8a9e74bf74e50f6372840fb4619c7_0",
+        "is_ignored": false,
+        "lines": "\t\t\t\treturn w.Write([]byte(fmt.Sprintf(\"%s/?%s\", q.Key, data.Encode())))",
+        "message": "use fmt.Fprintf(w, \"%s/?%s\", q.Key, data.Encode()) instead of fmt.Sprintf and []byte conversion",
+        "metadata": {},
+        "metavars": {
+          "$...VALS": {
+            "abstract_content": "\"%s/?%s\"q.Key data.Encode()",
+            "end": {
+              "col": 69,
+              "line": 136,
+              "offset": 3640
+            },
+            "start": {
+              "col": 39,
+              "line": 136,
+              "offset": 3610
+            }
+          },
+          "$W": {
+            "abstract_content": "w",
+            "end": {
+              "col": 13,
+              "line": 136,
+              "offset": 3584
+            },
+            "start": {
+              "col": 12,
+              "line": 136,
+              "offset": 3583
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/server_graphql.go",
+      "start": {
+        "col": 12,
+        "line": 136,
+        "offset": 3583
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.err-nil-check",
+      "end": {
+        "col": 12,
+        "line": 206,
+        "offset": 5429
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "4b5248fb83e4c89ab1e6258b692b8e9b10bfb2656f3c46ebdcd1dc8376151fc068f2cd859b5f431dc7a72ae3a89f31d37498ebccf09f6a11bb4eedf10a967a5a_0",
+        "is_ignored": false,
+        "lines": "\tif err != nil {\n\t\treturn err\n\t}\n\n\treturn nil",
+        "message": "superfluous nil err check before return",
+        "metadata": {},
+        "metavars": {},
+        "severity": "ERROR"
+      },
+      "path": "dashboard/model_api_register.go",
+      "start": {
+        "col": 2,
+        "line": 202,
+        "offset": 5385
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.err-nil-check",
+      "end": {
+        "col": 12,
+        "line": 264,
+        "offset": 9583
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "1ac77c7655de0589b9045021a59c935f3f51d72680297f385dbf7a96be2d8b28808706502aa625fa852acb22592439aaf8a4d478a55749a0f05960f7818ab861_0",
+        "is_ignored": false,
+        "lines": "\tif err != nil {\n\t\treturn err\n\t}\n\treturn nil",
+        "message": "superfluous nil err check before return",
+        "metadata": {},
+        "metavars": {},
+        "severity": "ERROR"
+      },
+      "path": "oauth2/dcrp/dcrp.go",
+      "start": {
+        "col": 2,
+        "line": 261,
+        "offset": 9540
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.marshal-json-pointer-receiver",
+      "end": {
+        "col": 53,
+        "line": 116,
+        "offset": 3566
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "a55771cb13568bba872bea87f10136150cd6c6f955db1068a1ad95e4a53ff6f17d46c88b5c191f7ae24e6e7ee1c1bce1e2e1993738629b82e6bd705e254de1fe_0",
+        "is_ignored": false,
+        "lines": "func (a *ApiDefinition) MarshalJSON() ([]byte, error) {",
+        "message": "MarshalJSON with a pointer receiver has surprising results: https://github.com/golang/go/issues/22967",
+        "metadata": {},
+        "metavars": {
+          "$T": {
+            "abstract_content": "a",
+            "end": {
+              "col": 8,
+              "line": 116,
+              "offset": 3521
+            },
+            "start": {
+              "col": 7,
+              "line": 116,
+              "offset": 3520
+            }
+          },
+          "$TYPE": {
+            "abstract_content": "ApiDefinition",
+            "end": {
+              "col": 23,
+              "line": 116,
+              "offset": 3536
+            },
+            "start": {
+              "col": 10,
+              "line": 116,
+              "offset": 3523
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/model_api_definition.go",
+      "start": {
+        "col": 1,
+        "line": 116,
+        "offset": 3514
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.marshal-json-pointer-receiver",
+      "end": {
+        "col": 50,
+        "line": 61,
+        "offset": 1606
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "05e9ea8d2683df9934148098cf69a012362f207659161ef0c66aa7d0af2cc7d79cbd33aa7602f4c3b4d1ef4b436611b139353b707e9f6fc5c0e7e4155836c56a_0",
+        "is_ignored": false,
+        "lines": "func (r *ResultUnit) MarshalJSON() ([]byte, error) {",
+        "message": "MarshalJSON with a pointer receiver has surprising results: https://github.com/golang/go/issues/22967",
+        "metadata": {},
+        "metavars": {
+          "$T": {
+            "abstract_content": "r",
+            "end": {
+              "col": 8,
+              "line": 61,
+              "offset": 1564
+            },
+            "start": {
+              "col": 7,
+              "line": 61,
+              "offset": 1563
+            }
+          },
+          "$TYPE": {
+            "abstract_content": "ResultUnit",
+            "end": {
+              "col": 20,
+              "line": 61,
+              "offset": 1576
+            },
+            "start": {
+              "col": 10,
+              "line": 61,
+              "offset": 1566
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/model_key_analytics.go",
+      "start": {
+        "col": 1,
+        "line": 61,
+        "offset": 1557
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.marshal-json-pointer-receiver",
+      "end": {
+        "col": 46,
+        "line": 281,
+        "offset": 7990
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "caac03b8b383915a33e0c72e273bb815c1f82b5e968e2d86580508584fdcbce932ec5d9a0afbf2efca8e78373c49ff41f16bfeb4248b11bc9db103761bf188dc_0",
+        "is_ignored": false,
+        "lines": "func (a *Policy) MarshalJSON() ([]byte, error) {",
+        "message": "MarshalJSON with a pointer receiver has surprising results: https://github.com/golang/go/issues/22967",
+        "metadata": {},
+        "metavars": {
+          "$T": {
+            "abstract_content": "a",
+            "end": {
+              "col": 8,
+              "line": 281,
+              "offset": 7952
+            },
+            "start": {
+              "col": 7,
+              "line": 281,
+              "offset": 7951
+            }
+          },
+          "$TYPE": {
+            "abstract_content": "Policy",
+            "end": {
+              "col": 16,
+              "line": 281,
+              "offset": 7960
+            },
+            "start": {
+              "col": 10,
+              "line": 281,
+              "offset": 7954
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/policy_model.go",
+      "start": {
+        "col": 1,
+        "line": 281,
+        "offset": 7945
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.marshal-json-pointer-receiver",
+      "end": {
+        "col": 52,
+        "line": 160,
+        "offset": 3963
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "56fbea1718e4b33da48956f843358f5da71673b3a67e42f0fe43bbee7ce5db45f4727428cad5c0999ae6f1e3006642e90653ef2b67a1126ccf972e98d5ef8c86_0",
+        "is_ignored": false,
+        "lines": "func (a *ApiCatalogue) MarshalJSON() ([]byte, error) {",
+        "message": "MarshalJSON with a pointer receiver has surprising results: https://github.com/golang/go/issues/22967",
+        "metadata": {},
+        "metavars": {
+          "$T": {
+            "abstract_content": "a",
+            "end": {
+              "col": 8,
+              "line": 160,
+              "offset": 3919
+            },
+            "start": {
+              "col": 7,
+              "line": 160,
+              "offset": 3918
+            }
+          },
+          "$TYPE": {
+            "abstract_content": "ApiCatalogue",
+            "end": {
+              "col": 22,
+              "line": 160,
+              "offset": 3933
+            },
+            "start": {
+              "col": 10,
+              "line": 160,
+              "offset": 3921
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/portal_model_api_catalogue.go",
+      "start": {
+        "col": 1,
+        "line": 160,
+        "offset": 3912
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.marshal-json-pointer-receiver",
+      "end": {
+        "col": 55,
+        "line": 189,
+        "offset": 5783
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "766aea98e7183d993b889bcad9d7135aef6b54ebb9a7988f1548ff2d13d3f1ff64646ed84dfbb3dbd4b89596090c44b1bbf9bfe04bb4530d2fc9ed56c2e45c4f_0",
+        "is_ignored": false,
+        "lines": "func (p *PortalDeveloper) MarshalJSON() ([]byte, error) {",
+        "message": "MarshalJSON with a pointer receiver has surprising results: https://github.com/golang/go/issues/22967",
+        "metadata": {},
+        "metavars": {
+          "$T": {
+            "abstract_content": "p",
+            "end": {
+              "col": 8,
+              "line": 189,
+              "offset": 5736
+            },
+            "start": {
+              "col": 7,
+              "line": 189,
+              "offset": 5735
+            }
+          },
+          "$TYPE": {
+            "abstract_content": "PortalDeveloper",
+            "end": {
+              "col": 25,
+              "line": 189,
+              "offset": 5753
+            },
+            "start": {
+              "col": 10,
+              "line": 189,
+              "offset": 5738
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/portal_model_developer.go",
+      "start": {
+        "col": 1,
+        "line": 189,
+        "offset": 5729
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.context-todo",
+      "end": {
+        "col": 22,
+        "line": 137,
+        "offset": 3372
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "9b6a99a40c7f1a9ab04fc569324eca4830684818a38653a348710abc2eb6ef58f26af83847a472c682e3745bf4a3f91881f0e0cc6e214c0500c2d7a67952c72b_0",
+        "is_ignored": false,
+        "lines": "\tctx = context.TODO()",
+        "message": "Consider to use well-defined context",
+        "metadata": {},
+        "metavars": {},
+        "severity": "WARNING"
+      },
+      "path": "dashboard/user_permissions_opa.go",
+      "start": {
+        "col": 8,
+        "line": 137,
+        "offset": 3358
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.use-strings-join-path",
+      "end": {
+        "col": 37,
+        "line": 45,
+        "offset": 729
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "09b88ac51fef29456399f15a17616ec5bf47525e78ea213822b7f3a1adb8c320d5bdff5b42604c902244963a8808f4cd936bcbbfe8ed68fb9d518fecc9543e31_0",
+        "is_ignored": false,
+        "lines": "\tpath := strings.Join(pathElem, \"/\")",
+        "message": "did you want path.Join() or filepath.Join()?",
+        "metadata": {},
+        "metavars": {},
+        "severity": "ERROR"
+      },
+      "path": "dashboard/api_external_identity_broker.go",
+      "start": {
+        "col": 10,
+        "line": 45,
+        "offset": 702
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.err-todo",
+      "end": {
+        "col": 51,
+        "line": 106,
+        "offset": 2559
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "d7719fc880cc9b2259f17fcadc049d1cff16268362b889c659d563525f66a630bfcfda9ddfe021b5b87d926cb3a1ce8dcaca906e439e71aa886cfc94f4d784f5_0",
+        "is_ignored": false,
+        "lines": "\t\t// TODO - Wrong status code - OK to change this?",
+        "message": "TODO in error handling code",
+        "metadata": {},
+        "metavars": {
+          "$1": {
+            "abstract_content": "TODO",
+            "end": {
+              "col": 10,
+              "line": 106,
+              "offset": 2518
+            },
+            "start": {
+              "col": 6,
+              "line": 106,
+              "offset": 2514
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/api_admin_methods.go",
+      "start": {
+        "col": 3,
+        "line": 106,
+        "offset": 2511
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.err-todo",
+      "end": {
+        "col": 51,
+        "line": 207,
+        "offset": 5178
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "d7719fc880cc9b2259f17fcadc049d1cff16268362b889c659d563525f66a630bfcfda9ddfe021b5b87d926cb3a1ce8dcaca906e439e71aa886cfc94f4d784f5_1",
+        "is_ignored": false,
+        "lines": "\t\t// TODO - Wrong Status Code - ok to change this?",
+        "message": "TODO in error handling code",
+        "metadata": {},
+        "metavars": {
+          "$1": {
+            "abstract_content": "TODO",
+            "end": {
+              "col": 10,
+              "line": 207,
+              "offset": 5137
+            },
+            "start": {
+              "col": 6,
+              "line": 207,
+              "offset": 5133
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/api_admin_methods.go",
+      "start": {
+        "col": 3,
+        "line": 207,
+        "offset": 5130
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.err-todo",
+      "end": {
+        "col": 30,
+        "line": 400,
+        "offset": 10779
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "d7719fc880cc9b2259f17fcadc049d1cff16268362b889c659d563525f66a630bfcfda9ddfe021b5b87d926cb3a1ce8dcaca906e439e71aa886cfc94f4d784f5_2",
+        "is_ignored": false,
+        "lines": "\t\t// TODO - Wrong status code",
+        "message": "TODO in error handling code",
+        "metadata": {},
+        "metavars": {
+          "$1": {
+            "abstract_content": "TODO",
+            "end": {
+              "col": 10,
+              "line": 400,
+              "offset": 10759
+            },
+            "start": {
+              "col": 6,
+              "line": 400,
+              "offset": 10755
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/api_admin_methods.go",
+      "start": {
+        "col": 3,
+        "line": 400,
+        "offset": 10752
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.err-todo",
+      "end": {
+        "col": 91,
+        "line": 72,
+        "offset": 1883
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "d60643e478eec2e154d827a1e77dcfab913e223e95e82412fbac1569da363f56d43e0a9bde036bb4a37113d5ad0994b5884730f743d19449bd38d9b67f8fc26f_0",
+        "is_ignored": false,
+        "lines": "\t\t// TODO - Confirm reason CSRF errors return HTTP error rather than web request response.",
+        "message": "TODO in error handling code",
+        "metadata": {},
+        "metavars": {
+          "$1": {
+            "abstract_content": "TODO",
+            "end": {
+              "col": 10,
+              "line": 72,
+              "offset": 1802
+            },
+            "start": {
+              "col": 6,
+              "line": 72,
+              "offset": 1798
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/portal_login_handler.go",
+      "start": {
+        "col": 3,
+        "line": 72,
+        "offset": 1795
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.sprintf-host-port",
+      "end": {
+        "col": 19,
+        "line": 59,
+        "offset": 1660
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "cc3510833310872f611eea506afa542f1ec27abc026c0a053d7815e2f9aa8e2e63f54ce9d13d09fabc784c8b86f5c94804dafa6700656de84e96d604fdf79144_0",
+        "is_ignored": false,
+        "lines": "\t\tu.Host = fmt.Sprintf(\"%s:%d\",\n\t\t\tgetDomainFromHost(config.Global().HostConfig.Hostname),\n\t\t\tcfg.ListenPort)",
+        "message": "use net.JoinHostPort instead of fmt.Sprintf($XX, u.Host)\n",
+        "metadata": {},
+        "metavars": {
+          "$NET": {
+            "abstract_content": "u.Host",
+            "end": {
+              "col": 9,
+              "line": 57,
+              "offset": 1559
+            },
+            "start": {
+              "col": 3,
+              "line": 57,
+              "offset": 1553
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/server_graphql.go",
+      "start": {
+        "col": 3,
+        "line": 57,
+        "offset": 1553
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.sprintf-host-port",
+      "end": {
+        "col": 19,
+        "line": 59,
+        "offset": 1660
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "847d437ef0cde2b85d927eb5fb088fc22a736d7fe7d747fffe31d5a26145e2f02a1a6158e86eaf6ca7f3eb19f6e602e09761d7caab1a1f5f5150784c916f4bff_0",
+        "is_ignored": false,
+        "lines": "\t\tu.Host = fmt.Sprintf(\"%s:%d\",\n\t\t\tgetDomainFromHost(config.Global().HostConfig.Hostname),\n\t\t\tcfg.ListenPort)",
+        "message": "use net.JoinHostPort instead of fmt.Sprintf(cfg.ListenPort, getDomainFromHost(config.Global().HostConfig.Hostname))\n",
+        "metadata": {},
+        "metavars": {
+          "$NET": {
+            "abstract_content": "getDomainFromHost(config.Global().HostConfig.Hostname)",
+            "end": {
+              "col": 58,
+              "line": 58,
+              "offset": 1640
+            },
+            "start": {
+              "col": 4,
+              "line": 58,
+              "offset": 1586
+            }
+          },
+          "$XX": {
+            "abstract_content": "cfg.ListenPort",
+            "end": {
+              "col": 18,
+              "line": 59,
+              "offset": 1659
+            },
+            "start": {
+              "col": 4,
+              "line": 59,
+              "offset": 1645
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/server_graphql.go",
+      "start": {
+        "col": 12,
+        "line": 57,
+        "offset": 1562
+      }
+    },
+    {
+      "check_id": "lsc.semgrep.dgryski-semgrep-go.sprintf-host-port",
+      "end": {
+        "col": 19,
+        "line": 59,
+        "offset": 1660
+      },
+      "extra": {
+        "engine_kind": "OSS",
+        "fingerprint": "2b09e54ea9078af0593efa40183f2ddeb702f8e4b0884965d18f5dddf13de07f73980bc52f82c42d2cc7e6f5e6606d7f7b488dfe5aba1beca8d59f351ee39939_0",
+        "is_ignored": false,
+        "lines": "\t\tu.Host = fmt.Sprintf(\"%s:%d\",\n\t\t\tgetDomainFromHost(config.Global().HostConfig.Hostname),\n\t\t\tcfg.ListenPort)",
+        "message": "use net.JoinHostPort instead of fmt.Sprintf(getDomainFromHost(config.Global().HostConfig.Hostname), cfg.ListenPort)\n",
+        "metadata": {},
+        "metavars": {
+          "$NET": {
+            "abstract_content": "cfg.ListenPort",
+            "end": {
+              "col": 18,
+              "line": 59,
+              "offset": 1659
+            },
+            "start": {
+              "col": 4,
+              "line": 59,
+              "offset": 1645
+            }
+          },
+          "$XX": {
+            "abstract_content": "getDomainFromHost(config.Global().HostConfig.Hostname)",
+            "end": {
+              "col": 58,
+              "line": 58,
+              "offset": 1640
+            },
+            "start": {
+              "col": 4,
+              "line": 58,
+              "offset": 1586
+            }
+          }
+        },
+        "severity": "ERROR"
+      },
+      "path": "dashboard/server_graphql.go",
+      "start": {
+        "col": 12,
+        "line": 57,
+        "offset": 1562
+      }
+    }
+  ],
+  "version": "1.17.1"
+}
