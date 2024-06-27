@@ -98,7 +98,7 @@ jobs:
       - working-directory: ./lsc/semgrep
         id: semgrep_run
         run: |
-          task 2>&1 | tee -a /tmp/output.log
+          task | tee /tmp/output.log
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/output.log >> $GITHUB_OUTPUT
@@ -107,7 +107,7 @@ jobs:
       - working-directory: ./lsc/semgrep
         id: semgrep_report
         run: |
-          task report | tee -a /tmp/output.log
+          task report | tee /tmp/output.log
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/output.log >> $GITHUB_OUTPUT
