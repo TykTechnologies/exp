@@ -9,14 +9,17 @@ tasks:
       absPath:
         sh: readlink -f .
     cmds:
-      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan --verbose --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json || true
-#      - cd src && git diff .
-#      - jq . reports/semgrep.tyk.json
+      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host semgrep/semgrep semgrep scan --verbose --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json || true
+
+  report:
+    desc: "Summarize semgrep report"
+    cmds:
+      - cat reports/semgrep.tyk.json | summary semgrep
 
   pull:
-    desc: "Pull latest returntocorp/semgrep"
+    desc: "Pull latest semgrep/semgrep"
     cmds:
-      - docker pull returntocorp/semgrep -q
+      - docker pull semgrep/semgrep -q
 
   scan:
     desc: Scan with upstream rules
@@ -25,22 +28,22 @@ tasks:
         sh: readlink -f .
     cmds:
       - |
-        docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan \
+        docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host semgrep/semgrep semgrep scan \
               --config /host/rules/ext-dgryski-semgrep-go/ \
               --autofix --json -o /host/reports/ext-dgryski-semgrep-go.json
       - |
-        docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host returntocorp/semgrep semgrep scan \
-              --config /host/rules/ext-returntocorp-semgrep-rules/go/ \
-               --autofix --json -o /host/reports/ext-returntocorp-semgrep-rules.json
+        docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host semgrep/semgrep semgrep scan \
+              --config /host/rules/ext-semgrep-semgrep-rules/go/ \
+               --autofix --json -o /host/reports/ext-semgrep-semgrep-rules.json
 
-  returntocorp:
+  semgrep:
     internal: true
     vars:
-      output: rules/ext-returntocorp-semgrep-rules
+      output: rules/ext-semgrep-semgrep-rules
     status:
       - test -d {{.output}}
     cmds:
-      - git clone --depth=1 https://github.com/returntocorp/semgrep-rules {{.output}}
+      - git clone --depth=1 https://github.com/semgrep/semgrep-rules {{.output}}
 
   semgrep-go:
     internal: true
