@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.webhookLog.remove.withField
+    pattern: 'log.WithField("prefix","webhooks")'
+    fix: webhookLog
+    languages:
+      - go
+    message: Replacing webhookLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.webhookLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"webhooks"})'
+    fix: webhookLog
+    languages:
+      - go
+    message: Replacing webhookLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.webhookLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"webhooks",$X})'
+    fix: |
+      webhookLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing webhookLog prefix with logger (autofix)
+    severity: WARNING

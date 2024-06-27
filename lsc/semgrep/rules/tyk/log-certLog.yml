@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.certLog.remove.withField
+    pattern: 'log.WithField("prefix","certs")'
+    fix: certLog
+    languages:
+      - go
+    message: Replacing certLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.certLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"certs"})'
+    fix: certLog
+    languages:
+      - go
+    message: Replacing certLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.certLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"certs",$X})'
+    fix: |
+      certLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing certLog prefix with logger (autofix)
+    severity: WARNING

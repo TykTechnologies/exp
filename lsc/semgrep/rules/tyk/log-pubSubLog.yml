@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.pubSubLog.remove.withField
+    pattern: 'log.WithField("prefix","pub-sub")'
+    fix: pubSubLog
+    languages:
+      - go
+    message: Replacing pubSubLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.pubSubLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"pub-sub"})'
+    fix: pubSubLog
+    languages:
+      - go
+    message: Replacing pubSubLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.pubSubLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"pub-sub",$X})'
+    fix: |
+      pubSubLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing pubSubLog prefix with logger (autofix)
+    severity: WARNING

@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.hostCheckLog.remove.withField
+    pattern: 'log.WithField("prefix","host-check-mgr")'
+    fix: hostCheckLog
+    languages:
+      - go
+    message: Replacing hostCheckLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.hostCheckLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"host-check-mgr"})'
+    fix: hostCheckLog
+    languages:
+      - go
+    message: Replacing hostCheckLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.hostCheckLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"host-check-mgr",$X})'
+    fix: |
+      hostCheckLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing hostCheckLog prefix with logger (autofix)
+    severity: WARNING

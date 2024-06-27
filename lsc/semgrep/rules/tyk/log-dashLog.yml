@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.dashLog.remove.withField
+    pattern: 'log.WithField("prefix","dashboard")'
+    fix: dashLog
+    languages:
+      - go
+    message: Replacing dashLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.dashLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"dashboard"})'
+    fix: dashLog
+    languages:
+      - go
+    message: Replacing dashLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.dashLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"dashboard",$X})'
+    fix: |
+      dashLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing dashLog prefix with logger (autofix)
+    severity: WARNING

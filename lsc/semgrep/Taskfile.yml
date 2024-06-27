@@ -9,7 +9,17 @@ tasks:
       absPath:
         sh: readlink -f .
     cmds:
-      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host semgrep/semgrep semgrep scan --verbose --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json || true
+      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host semgrep/semgrep semgrep scan --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json || true
+
+  debug:
+    desc: "Run semgrep"
+    deps: [pull]
+    vars:
+      absPath:
+        sh: readlink -f .
+    cmds:
+      - docker run --rm -v {{.absPath}}/src:/src -v {{.absPath}}:/host semgrep/semgrep semgrep scan --verbose --metrics=off --config /host/rules/tyk/ --autofix --json -o /host/reports/semgrep.tyk.json 2>&1 | grep -v Ignoring
+      - task: report
 
   report:
     desc: "Summarize semgrep report"

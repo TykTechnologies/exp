@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.pythonLog.remove.withField
+    pattern: 'log.WithField("prefix","python")'
+    fix: pythonLog
+    languages:
+      - go
+    message: Replacing pythonLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.pythonLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"python"})'
+    fix: pythonLog
+    languages:
+      - go
+    message: Replacing pythonLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.pythonLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"python",$X})'
+    fix: |
+      pythonLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing pythonLog prefix with logger (autofix)
+    severity: WARNING

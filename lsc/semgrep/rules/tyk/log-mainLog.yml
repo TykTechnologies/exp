@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.mainLog.remove.withField
+    pattern: 'log.WithField("prefix","main")'
+    fix: mainLog
+    languages:
+      - go
+    message: Replacing mainLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.mainLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"main"})'
+    fix: mainLog
+    languages:
+      - go
+    message: Replacing mainLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.mainLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"main",$X})'
+    fix: |
+      mainLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing mainLog prefix with logger (autofix)
+    severity: WARNING

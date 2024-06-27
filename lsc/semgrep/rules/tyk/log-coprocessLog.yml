@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.coprocessLog.remove.withField
+    pattern: 'log.WithField("prefix","coprocess")'
+    fix: coprocessLog
+    languages:
+      - go
+    message: Replacing coprocessLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.coprocessLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"coprocess"})'
+    fix: coprocessLog
+    languages:
+      - go
+    message: Replacing coprocessLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.coprocessLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"coprocess",$X})'
+    fix: |
+      coprocessLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing coprocessLog prefix with logger (autofix)
+    severity: WARNING

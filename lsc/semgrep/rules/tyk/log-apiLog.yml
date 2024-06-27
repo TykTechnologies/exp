@@ -1,0 +1,28 @@
+---
+rules:
+  - id: log.apiLog.remove.withField
+    pattern: 'log.WithField("prefix","api")'
+    fix: apiLog
+    languages:
+      - go
+    message: Replacing apiLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.apiLog.remove.withFields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"api"})'
+    fix: apiLog
+    languages:
+      - go
+    message: Replacing apiLog prefix with logger (autofix)
+    severity: WARNING
+
+  - id: log.apiLog.remove.prefix.from.Fields
+    pattern: 'log.WithFields(logrus.Fields{"prefix":"api",$X})'
+    fix: |
+      apiLog.WithFields(logrus.Fields{
+      	$X,
+      })
+    languages:
+      - go
+    message: Replacing apiLog prefix with logger (autofix)
+    severity: WARNING
