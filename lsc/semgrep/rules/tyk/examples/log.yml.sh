@@ -29,4 +29,4 @@ function rewriteLogs() {
 	rewriteLog "webhooks" "webhookLog"
 }
 
-rewriteLogs > log.yml
+rewriteLogs > log.yml.txt
