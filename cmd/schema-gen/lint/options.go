@@ -10,6 +10,7 @@ type options struct {
 	rules     []string
 	exclude   []string
 	verbose   bool
+	summary   bool
 }
 
 // GetRules traverses the rules and excludes any excluded rules.
@@ -44,6 +45,7 @@ func NewOptions() *options {
 	flag.StringSliceVarP(&cfg.rules, "rules", "", cfg.rules, "linter rules to run")
 	flag.StringSliceVarP(&cfg.exclude, "exclude", "", cfg.exclude, "linter rules to exlude")
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
+	flag.BoolVarP(&cfg.summary, "summary", "", cfg.summary, "summarize linter issues")
 	flag.Parse()
 
 	return cfg

@@ -2,6 +2,8 @@ package lint
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
@@ -23,7 +25,24 @@ func lint(cfg *options) error {
 		if errs.Empty() {
 			return nil
 		}
-		return errs
+
+		fmt.Println(errs.Error())
+
+		if cfg.summary {
+			rules := map[string]int{}
+			for _, err := range errs.errs {
+				errStr := strings.SplitN(err, "\n", 2)
+				errFields := strings.Fields(errStr[0])
+				rule := strings.Join(errFields[1:], " ")
+				rules[rule] = rules[rule] + 1
+			}
+
+			for rule, count := range rules {
+				fmt.Printf("- %d %s\n", count, rule)
+			}
+		}
+
+		os.Exit(1)
 	}
 
 	return nil

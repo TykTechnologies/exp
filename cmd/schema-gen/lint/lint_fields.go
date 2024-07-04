@@ -54,11 +54,11 @@ func validateRule(scope, rule, field, name, doc string) string {
 		if doc == "" {
 			return ""
 		}
-		if strings.HasSuffix(doc, ".") || strings.HasSuffix(doc, "`") {
+		if strings.HasSuffix(doc, ".") || strings.HasSuffix(doc, "`") || strings.HasSuffix(doc, "~") {
 			return ""
 		}
 
-		return fmt.Sprintf("[%s] Symbol comment must end with dot or `.\nGot:  %s\n", field, doc)
+		return fmt.Sprintf("[%s] Symbol comment must end with [.~`] (dot, markdown code block).\nGot:  %s\n", field, doc)
 	case rule == "require-prefix":
 		if doc == "" {
 			return ""
