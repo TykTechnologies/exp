@@ -6,9 +6,17 @@ on:  # yamllint disable-line rule:truthy
   pull_request:
     branches:
       - main
+    paths:
+      - cmd/
+      - go.mod
+      - go.sum
   push:
     branches:
       - main
+    paths:
+      - cmd/
+      - go.mod
+      - go.sum
 
 jobs:
   exp-cmd-build:
@@ -30,3 +38,11 @@ jobs:
 
       - working-directory: ./cmd/schema-gen
         run: go build .
+
+      - name: Send event to tyk-github-actions
+        uses: ./.github/actions/github-sync
+        if: github.event_name == 'push'
+        with:
+          repository: TykTechnologies/tyk-github-actions
+          eventType: exp-cmd
+          token: ${{ secrets.ORG_GH_TOKEN }}
