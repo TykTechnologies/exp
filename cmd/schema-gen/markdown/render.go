@@ -52,6 +52,10 @@ func render(cfg *options) error {
 			if err != nil {
 				return err
 			}
+			if outputFile == "-" {
+				_, err = os.Stdout.Write(body)
+				return err
+			}
 			return os.WriteFile(outputFile, body, 0644)
 		}
 		return fmt.Errorf("Renderer %q not implemented", kind)
