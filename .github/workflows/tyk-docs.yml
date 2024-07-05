@@ -151,7 +151,7 @@ jobs:
         run: |
           schema-gen extract -o - | schema-gen markdown -i - \
                                                         --root XTykAPIGateway \
-                                                        --skip "OldOAS,APIDef,OAS" \
+                                                        --skip "OldOAS,APIDef,OAS,TykExtensionConfigParams" \
                                                         --title "## Tyk OAS API Definition Object" \
                                                         --replace "model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
                                                         --heading-format "### **%s**" \
