@@ -64,6 +64,7 @@ func validateRule(scope, rule, field, name, doc string) string {
 			return ""
 		}
 		prefixes := []string{
+			fmt.Sprintf("Deprecated: %s ", name),
 			fmt.Sprintf("%s ", name),
 			fmt.Sprintf("%s: ", name),
 		}
