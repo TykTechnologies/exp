@@ -6,7 +6,7 @@ import (
 )
 
 // Parse parses the coverage data into CoverageInfo.
-func Parse(data [][]string) []CoverageInfo {
+func Parse(data [][]string, skipUncovered bool) []CoverageInfo {
 	var coverageInfos []CoverageInfo
 
 	for _, line := range data {
@@ -26,6 +26,11 @@ func Parse(data [][]string) []CoverageInfo {
 		}
 		percent, _ := strconv.ParseFloat(strings.TrimSuffix(line[2], "%"), 64)
 		info.Percent = percent
+
+		if percent <= 0 && skipUncovered {
+			continue
+		}
+
 		coverageInfos = append(coverageInfos, info)
 	}
 

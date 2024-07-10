@@ -9,15 +9,19 @@ import (
 )
 
 type options struct {
-	GroupByFiles bool
+	GroupByFiles  bool
+	SkipUncovered bool
 
 	RenderJSON bool
 }
 
 func NewOptions() *options {
-	cfg := &options{}
+	cfg := &options{
+		SkipUncovered: true,
+	}
 
-	flag.BoolVarP(&cfg.GroupByFiles, "files", "f", false, "Group coverage by file")
+	flag.BoolVarP(&cfg.GroupByFiles, "files", "f", cfg.GroupByFiles, "Group coverage by file")
+	flag.BoolVar(&cfg.SkipUncovered, "skip-uncovered", cfg.SkipUncovered, "Skip uncovered files")
 	flag.BoolVar(&cfg.RenderJSON, "json", false, "Render output as json")
 	flag.Parse()
 

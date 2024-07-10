@@ -36,7 +36,7 @@ func coverfunc(cfg *options) error {
 }
 
 func coverFiles(cfg *options, lines [][]string, encoder *json.Encoder) error {
-	parsed := Parse(lines)
+	parsed := Parse(lines, cfg.SkipUncovered)
 	files := ByFile(parsed)
 	if encoder != nil {
 		return encoder.Encode(files)
@@ -48,7 +48,7 @@ func coverFiles(cfg *options, lines [][]string, encoder *json.Encoder) error {
 }
 
 func coverPackages(cfg *options, lines [][]string, encoder *json.Encoder) error {
-	parsed := Parse(lines)
+	parsed := Parse(lines, cfg.SkipUncovered)
 	pkgs := ByPackage(parsed)
 	if encoder != nil {
 		return encoder.Encode(pkgs)
