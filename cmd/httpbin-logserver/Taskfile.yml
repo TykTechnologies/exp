@@ -13,13 +13,13 @@ tasks:
 
   build:
     desc: "Build from source"
-    deps: [ fmt ]
+    deps: [fmt]
     cmds:
       - go build .
 
   install:
     desc: "Install from source"
-    deps: [ fmt ]
+    deps: [fmt]
     cmds:
       - go install .
 
@@ -32,9 +32,19 @@ tasks:
 
   docker:
     desc: "Build docker image"
-    deps: [ build ]
+    deps: [build]
     vars:
       image: internal/httpbin-logserver
     cmds:
       - docker build -t {{.image}} .
       - docker run --rm {{.image}} -? || true
+
+  up:
+    desc: "Bring up environment"
+    cmds:
+      - docker compose up -d --remove-orphans
+
+  down:
+    desc: "Bring down the environment"
+    cmds:
+      - docker compose down

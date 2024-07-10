@@ -1,0 +1,13 @@
+---
+services:
+  httpbin:
+    image: tykio/ci-tools
+    ports:
+      - 8085:8085
+    volumes:
+      - ./logs:/logs:rw
+    entrypoint:
+      - /usr/local/bin/httpbin-logserver
+    command:
+      - '-output'
+      - '/logs/service.json'
