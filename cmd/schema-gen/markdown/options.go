@@ -20,6 +20,7 @@ type options struct {
 	fieldFormat      string
 	fieldFormatKnown string
 
+	full    bool
 	keep    []string
 	skip    []string
 	replace map[string]string
@@ -79,6 +80,7 @@ func NewOptions() *options {
 	flag.StringVar(&cfg.fieldFormat, "field-format", cfg.fieldFormat, "field format")
 	flag.StringVar(&cfg.fieldFormatKnown, "field-format-known", cfg.fieldFormatKnown, "field format for known types")
 
+	flag.BoolVar(&cfg.full, "full", cfg.full, "print package info with symbols")
 	flag.StringSliceVar(&cfg.keep, "keep", cfg.keep, "type definition names to keep (default: all)")
 	flag.StringSliceVar(&cfg.skip, "skip", cfg.skip, "type definition names to skip (default: none)")
 	flag.StringToStringVar(&cfg.replace, "replace", cfg.replace, "type replacement string to string csv (default: none)")

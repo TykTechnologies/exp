@@ -48,7 +48,7 @@ func render(cfg *options) error {
 
 		switch kind {
 		case "markdown":
-			body, err := renderMarkdown(cfg, sanitize(pkgInfo.Declarations), order)
+			body, err := renderMarkdown(cfg, packageName, sanitize(pkgInfo.Declarations), order)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func render(cfg *options) error {
 	return fmt.Errorf("Uknown package name: %q", packageName)
 }
 
-func renderMarkdown(cfg *options, schema model.DeclarationList, order []string) ([]byte, error) {
+func renderMarkdown(cfg *options, packageName string, schema model.DeclarationList, order []string) ([]byte, error) {
 	output := new(bytes.Buffer)
 	decls := schema.Find(order)
 
@@ -73,14 +73,14 @@ func renderMarkdown(cfg *options, schema model.DeclarationList, order []string) 
 	}
 
 	for _, decl := range decls {
-		if err := renderMarkdownType(cfg, output, decl, allTypes); err != nil {
+		if err := renderMarkdownType(cfg, output, packageName, decl, allTypes); err != nil {
 			return nil, err
 		}
 	}
 	return output.Bytes(), nil
 }
 
-func renderMarkdownType(cfg *options, w io.Writer, decl *model.TypeInfo, allTypes []string) error {
+func renderMarkdownType(cfg *options, w io.Writer, packageName string, decl *model.TypeInfo, allTypes []string) error {
 	canRender := func(name string) bool {
 		if len(cfg.keep) > 0 {
 			return slices.Contains(cfg.keep, name)
@@ -101,17 +101,22 @@ func renderMarkdownType(cfg *options, w io.Writer, decl *model.TypeInfo, allType
 		// Override root element with title if provided
 		fmt.Fprint(w, cfg.title+"\n\n")
 	} else {
-		fmt.Fprintf(w, cfg.headingFormat+"\n\n", decl.Name)
+		name := decl.Name
+		if cfg.full {
+			name = packageName + "." + decl.Name
+		}
+
+		fmt.Fprintf(w, cfg.headingFormat+"\n\n", name)
 	}
 
 	if decl.Doc != "" {
 		fmt.Fprintf(w, "%s\n\n", decl.Doc)
 	}
-	renderMarkdownFields(cfg, w, decl, allTypes)
+	renderMarkdownFields(cfg, w, packageName+"."+decl.Name, decl, allTypes)
 	return nil
 }
 
-func renderMarkdownFields(cfg *options, w io.Writer, decl *model.TypeInfo, allTypes []string) {
+func renderMarkdownFields(cfg *options, w io.Writer, packageName string, decl *model.TypeInfo, allTypes []string) {
 	for _, field := range decl.Fields {
 		jsonTag := strings.Split(field.JSONName, ",")
 
@@ -142,7 +147,12 @@ func renderMarkdownFields(cfg *options, w io.Writer, decl *model.TypeInfo, allTy
 				fieldType = "any"
 			}
 
-			fmt.Fprintf(w, cfg.fieldFormatKnown+"\n", jsonTag[0], fieldType)
+			name := jsonTag[0]
+			if cfg.full {
+				name = packageName + "." + jsonTag[0]
+			}
+
+			fmt.Fprintf(w, cfg.fieldFormatKnown+"\n", name, fieldType)
 
 			// This prints the go field name as well.
 			// fmt.Fprintf(w, "**Field: `%s` (%s, `%s`)**\n", jsonTag[0], field.Name, field.Type)
