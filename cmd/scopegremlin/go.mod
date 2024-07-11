@@ -1,4 +1,4 @@
-module scopegremlin
+module github.com/TykTechnologies/exp/cmd/scopegremlin
 
 go 1.21.4
 

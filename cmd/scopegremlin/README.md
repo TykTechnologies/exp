@@ -4,6 +4,10 @@ Scope gremlin lists the current discovered scope for each type
 definition. The scope considers links to other types, internal and
 imported. You can run it without parameters for the current folder.
 
+```
+go install github.com/TykTechnologies/exp/cmd/scopegremlin@main
+```
+
 In gateway, we get something like:
 
 ```yaml
