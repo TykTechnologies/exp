@@ -27,6 +27,8 @@ type options struct {
 	packageName string
 	statsFiles  bool
 	verbose     bool
+
+	V2 bool
 }
 
 func NewOptions() *options {
@@ -47,6 +49,7 @@ func NewOptions() *options {
 	flag.BoolVar(&cfg.splitTests, "split-tests", cfg.splitTests, "split tests by function name")
 	flag.BoolVar(&cfg.splitFunctions, "split-functions", cfg.splitFunctions, "split functions by name")
 	flag.StringVar(&cfg.addDotImport, "add-dot-import", cfg.addDotImport, "add dot import of fqdn package")
+	flag.BoolVar(&cfg.V2, "v2", cfg.V2, "run v2 restore")
 
 	flag.BoolVar(&cfg.statsFiles, "stats-files", cfg.statsFiles, "print files stats")
 

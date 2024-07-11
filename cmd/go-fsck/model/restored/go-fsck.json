@@ -75,7 +75,7 @@
       {
         "Kind": "type",
         "File": "collector.go",
-        "SelfContained": true,
+        "SelfContained": false,
         "Name": "collector",
         "Source": "type collector struct {\n\tfset\t*token.FileSet\n\n\tdefinition\tmap[string]*Definition\n\tseen\t\tmap[string]*Declaration\n}"
       }

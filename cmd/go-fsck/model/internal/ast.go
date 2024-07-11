@@ -68,19 +68,3 @@ func IsSelfContainedType(genDecl *ast.GenDecl) bool {
 	// All specs are self-contained types, variables, or constants.
 	return true
 }
-
-func ContainsOtherTypes(expr ast.Expr) bool {
-	switch t := expr.(type) {
-	case *ast.Ident:
-		// It's an identifier; check if it's referring to another type/package.
-		if t.Obj != nil && t.Obj.Kind == ast.Typ {
-			return true // It's referring to another type/package.
-		}
-	case *ast.SelectorExpr:
-		// It's a selector expression; check if it's referring to another package.
-		return true
-		// Add cases for other types you want to handle.
-	}
-
-	return false
-}

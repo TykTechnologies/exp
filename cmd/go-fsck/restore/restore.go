@@ -14,6 +14,49 @@ import (
 )
 
 func restore(cfg *options) error {
+	if cfg.V2 {
+		return restoreV2(cfg)
+	}
+	return restoreV1(cfg)
+}
+
+func restoreV2(cfg *options) error {
+	defs, err := model.ReadFile(cfg.inputFile)
+	if err != nil {
+		return err
+	}
+
+	var found bool
+	var def *model.Definition
+
+	pkgs := make([]string, 0, len(defs))
+	for _, def = range defs {
+		pkgs = append(pkgs, def.Package)
+	}
+
+	// find the def for restore
+	for _, def = range defs {
+		if cfg.packageName == def.Package {
+			found = true
+			break
+		}
+	}
+
+	if len(defs) == 1 {
+		cfg.packageName = defs[0].Package
+		def = defs[0]
+		found = true
+	}
+
+	if !found {
+		pkgList := strings.Join(pkgs, ",")
+		return fmt.Errorf("no such package: %s (have: %s)", cfg.packageName, pkgList)
+	}
+
+	return RestoreDefinition(def, cfg)
+}
+
+func restoreV1(cfg *options) error {
 	defs, err := model.ReadFile(cfg.inputFile)
 	if err != nil {
 		return err
