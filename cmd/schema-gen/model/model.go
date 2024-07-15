@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"io"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -77,6 +78,14 @@ func (x DeclarationList) Find(order []string) TypeList {
 	}
 
 	result := make(TypeList, 0, len(typeInfoMap))
+
+	if len(order) == 0 {
+		order = make([]string, 0, len(typeInfoMap))
+		for key := range typeInfoMap {
+			order = append(order, key)
+		}
+		sort.Strings(order)
+	}
 
 	// Step 2: Traverse the order slice and retrieve the corresponding TypeInfo objects
 	for _, typeName := range order {
