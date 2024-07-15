@@ -29,202 +29,54 @@
       {
         "types": [
           {
-            "name": "HostList"
+            "name": "HealthCheckComponentType",
+            "type": "string"
+          },
+          {
+            "name": "HealthCheckStatus",
+            "type": "string"
           }
         ]
       },
       {
         "types": [
           {
-            "name": "InboundData",
+            "name": "HealthCheckResponse",
             "fields": [
               {
-                "name": "KeyName",
+                "name": "Status",
+                "type": "HealthCheckStatus",
+                "path": "HealthCheckResponse.Status",
+                "tag": "json:\"status\"",
+                "json_name": "status"
+              },
+              {
+                "name": "Version",
                 "type": "string",
-                "path": "InboundData.KeyName",
-                "tag": "",
-                "json_name": "KeyName"
+                "path": "HealthCheckResponse.Version",
+                "tag": "json:\"version,omitempty\"",
+                "json_name": "version,omitempty"
               },
               {
-                "name": "Value",
+                "name": "Output",
                 "type": "string",
-                "path": "InboundData.Value",
-                "tag": "",
-                "json_name": "Value"
+                "path": "HealthCheckResponse.Output",
+                "tag": "json:\"output,omitempty\"",
+                "json_name": "output,omitempty"
               },
               {
-                "name": "SessionState",
+                "name": "Description",
                 "type": "string",
-                "path": "InboundData.SessionState",
-                "tag": "",
-                "json_name": "SessionState"
+                "path": "HealthCheckResponse.Description",
+                "tag": "json:\"description,omitempty\"",
+                "json_name": "description,omitempty"
               },
               {
-                "name": "Timeout",
-                "type": "int64",
-                "path": "InboundData.Timeout",
-                "tag": "",
-                "json_name": "Timeout"
-              },
-              {
-                "name": "Per",
-                "type": "int64",
-                "path": "InboundData.Per",
-                "tag": "",
-                "json_name": "Per"
-              },
-              {
-                "name": "Expire",
-                "type": "int64",
-                "path": "InboundData.Expire",
-                "tag": "",
-                "json_name": "Expire"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "types": [
-          {
-            "name": "DefRequest",
-            "fields": [
-              {
-                "name": "OrgId",
-                "type": "string",
-                "path": "DefRequest.OrgId",
-                "tag": "",
-                "json_name": "OrgId"
-              },
-              {
-                "name": "Tags",
-                "type": "[]string",
-                "path": "DefRequest.Tags",
-                "tag": "",
-                "json_name": "Tags"
-              },
-              {
-                "name": "LoadOAS",
-                "type": "bool",
-                "path": "DefRequest.LoadOAS",
-                "tag": "",
-                "json_name": "LoadOAS"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "types": [
-          {
-            "name": "GroupLoginRequest",
-            "fields": [
-              {
-                "name": "UserKey",
-                "type": "string",
-                "path": "GroupLoginRequest.UserKey",
-                "tag": "",
-                "json_name": "UserKey"
-              },
-              {
-                "name": "GroupID",
-                "type": "string",
-                "path": "GroupLoginRequest.GroupID",
-                "tag": "",
-                "json_name": "GroupID"
-              },
-              {
-                "name": "ForceSync",
-                "type": "bool",
-                "path": "GroupLoginRequest.ForceSync",
-                "tag": "",
-                "json_name": "ForceSync"
-              },
-              {
-                "name": "Node",
-                "type": "[]byte",
-                "path": "GroupLoginRequest.Node",
-                "tag": "",
-                "json_name": "Node"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "types": [
-          {
-            "name": "NodeData",
-            "fields": [
-              {
-                "name": "NodeID",
-                "type": "string",
-                "path": "NodeData.NodeID",
-                "tag": "json:\"node_id\"",
-                "json_name": "node_id"
-              },
-              {
-                "name": "APIKey",
-                "type": "string",
-                "path": "NodeData.APIKey",
-                "tag": "json:\"api_key\"",
-                "json_name": "api_key"
-              },
-              {
-                "name": "GroupID",
-                "type": "string",
-                "path": "NodeData.GroupID",
-                "tag": "json:\"group_id\"",
-                "json_name": "group_id"
-              },
-              {
-                "name": "NodeVersion",
-                "type": "string",
-                "path": "NodeData.NodeVersion",
-                "tag": "json:\"node_version\"",
-                "json_name": "node_version"
-              },
-              {
-                "name": "TTL",
-                "type": "int64",
-                "path": "NodeData.TTL",
-                "tag": "json:\"ttl\"",
-                "json_name": "ttl"
-              },
-              {
-                "name": "NodeIsSegmented",
-                "type": "bool",
-                "path": "NodeData.NodeIsSegmented",
-                "tag": "json:\"node_is_segmented\"",
-                "json_name": "node_is_segmented"
-              },
-              {
-                "name": "Tags",
-                "type": "[]string",
-                "path": "NodeData.Tags",
-                "tag": "json:\"tags\"",
-                "json_name": "tags"
-              },
-              {
-                "name": "Health",
+                "name": "Details",
                 "type": "map[string]HealthCheckItem",
-                "path": "NodeData.Health",
-                "tag": "json:\"health\"",
-                "json_name": "health"
-              },
-              {
-                "name": "Stats",
-                "type": "GWStats",
-                "path": "NodeData.Stats",
-                "tag": "json:\"stats\"",
-                "json_name": "stats"
-              },
-              {
-                "name": "HostDetails",
-                "type": "model.HostDetails",
-                "path": "NodeData.HostDetails",
-                "tag": "json:\"host_details\"",
-                "json_name": "host_details"
+                "path": "HealthCheckResponse.Details",
+                "tag": "json:\"details,omitempty\"",
+                "json_name": "details,omitempty"
               }
             ]
           }
@@ -233,44 +85,42 @@
       {
         "types": [
           {
-            "name": "GWStats",
+            "name": "HealthCheckItem",
             "fields": [
               {
-                "name": "APIsCount",
-                "type": "int",
-                "path": "GWStats.APIsCount",
-                "tag": "json:\"apis_count\"",
-                "json_name": "apis_count"
+                "name": "Status",
+                "type": "HealthCheckStatus",
+                "path": "HealthCheckItem.Status",
+                "tag": "json:\"status\"",
+                "json_name": "status"
               },
               {
-                "name": "PoliciesCount",
-                "type": "int",
-                "path": "GWStats.PoliciesCount",
-                "tag": "json:\"policies_count\"",
-                "json_name": "policies_count"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "types": [
-          {
-            "name": "GroupKeySpaceRequest",
-            "fields": [
-              {
-                "name": "OrgID",
+                "name": "Output",
                 "type": "string",
-                "path": "GroupKeySpaceRequest.OrgID",
-                "tag": "",
-                "json_name": "OrgID"
+                "path": "HealthCheckItem.Output",
+                "tag": "json:\"output,omitempty\"",
+                "json_name": "output,omitempty"
               },
               {
-                "name": "GroupID",
+                "name": "ComponentType",
                 "type": "string",
-                "path": "GroupKeySpaceRequest.GroupID",
-                "tag": "",
-                "json_name": "GroupID"
+                "path": "HealthCheckItem.ComponentType",
+                "tag": "json:\"componentType,omitempty\"",
+                "json_name": "componentType,omitempty"
+              },
+              {
+                "name": "ComponentID",
+                "type": "string",
+                "path": "HealthCheckItem.ComponentID",
+                "tag": "json:\"componentId,omitempty\"",
+                "json_name": "componentId,omitempty"
+              },
+              {
+                "name": "Time",
+                "type": "string",
+                "path": "HealthCheckItem.Time",
+                "tag": "json:\"time\"",
+                "json_name": "time"
               }
             ]
           }
@@ -279,23 +129,7 @@
       {
         "types": [
           {
-            "name": "KeysValuesPair",
-            "fields": [
-              {
-                "name": "Keys",
-                "type": "[]string",
-                "path": "KeysValuesPair.Keys",
-                "tag": "",
-                "json_name": "Keys"
-              },
-              {
-                "name": "Values",
-                "type": "[]string",
-                "path": "KeysValuesPair.Values",
-                "tag": "",
-                "json_name": "Values"
-              }
-            ]
+            "name": "HostList"
           }
         ]
       },
@@ -1627,6 +1461,13 @@
                 "path": "ExtendedPathsSet.PersistGraphQL",
                 "tag": "bson:\"persist_graphql\" json:\"persist_graphql\"",
                 "json_name": "persist_graphql"
+              },
+              {
+                "name": "RateLimit",
+                "type": "[]RateLimitMeta",
+                "path": "ExtendedPathsSet.RateLimit",
+                "tag": "bson:\"rate_limit\" json:\"rate_limit\"",
+                "json_name": "rate_limit"
               }
             ]
           }
@@ -3775,54 +3616,49 @@
       {
         "types": [
           {
-            "name": "HealthCheckComponentType",
-            "type": "string"
-          },
-          {
-            "name": "HealthCheckStatus",
-            "type": "string"
-          }
-        ]
-      },
-      {
-        "types": [
-          {
-            "name": "HealthCheckResponse",
+            "name": "InboundData",
             "fields": [
               {
-                "name": "Status",
-                "type": "HealthCheckStatus",
-                "path": "HealthCheckResponse.Status",
-                "tag": "json:\"status\"",
-                "json_name": "status"
-              },
-              {
-                "name": "Version",
+                "name": "KeyName",
                 "type": "string",
-                "path": "HealthCheckResponse.Version",
-                "tag": "json:\"version,omitempty\"",
-                "json_name": "version,omitempty"
+                "path": "InboundData.KeyName",
+                "tag": "",
+                "json_name": "KeyName"
               },
               {
-                "name": "Output",
+                "name": "Value",
                 "type": "string",
-                "path": "HealthCheckResponse.Output",
-                "tag": "json:\"output,omitempty\"",
-                "json_name": "output,omitempty"
+                "path": "InboundData.Value",
+                "tag": "",
+                "json_name": "Value"
               },
               {
-                "name": "Description",
+                "name": "SessionState",
                 "type": "string",
-                "path": "HealthCheckResponse.Description",
-                "tag": "json:\"description,omitempty\"",
-                "json_name": "description,omitempty"
+                "path": "InboundData.SessionState",
+                "tag": "",
+                "json_name": "SessionState"
               },
               {
-                "name": "Details",
-                "type": "map[string]HealthCheckItem",
-                "path": "HealthCheckResponse.Details",
-                "tag": "json:\"details,omitempty\"",
-                "json_name": "details,omitempty"
+                "name": "Timeout",
+                "type": "int64",
+                "path": "InboundData.Timeout",
+                "tag": "",
+                "json_name": "Timeout"
+              },
+              {
+                "name": "Per",
+                "type": "int64",
+                "path": "InboundData.Per",
+                "tag": "",
+                "json_name": "Per"
+              },
+              {
+                "name": "Expire",
+                "type": "int64",
+                "path": "InboundData.Expire",
+                "tag": "",
+                "json_name": "Expire"
               }
             ]
           }
@@ -3831,42 +3667,213 @@
       {
         "types": [
           {
-            "name": "HealthCheckItem",
+            "name": "DefRequest",
             "fields": [
               {
-                "name": "Status",
-                "type": "HealthCheckStatus",
-                "path": "HealthCheckItem.Status",
-                "tag": "json:\"status\"",
-                "json_name": "status"
+                "name": "OrgId",
+                "type": "string",
+                "path": "DefRequest.OrgId",
+                "tag": "",
+                "json_name": "OrgId"
               },
               {
-                "name": "Output",
-                "type": "string",
-                "path": "HealthCheckItem.Output",
-                "tag": "json:\"output,omitempty\"",
-                "json_name": "output,omitempty"
+                "name": "Tags",
+                "type": "[]string",
+                "path": "DefRequest.Tags",
+                "tag": "",
+                "json_name": "Tags"
               },
               {
-                "name": "ComponentType",
+                "name": "LoadOAS",
+                "type": "bool",
+                "path": "DefRequest.LoadOAS",
+                "tag": "",
+                "json_name": "LoadOAS"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "types": [
+          {
+            "name": "GroupLoginRequest",
+            "fields": [
+              {
+                "name": "UserKey",
                 "type": "string",
-                "path": "HealthCheckItem.ComponentType",
-                "tag": "json:\"componentType,omitempty\"",
-                "json_name": "componentType,omitempty"
+                "path": "GroupLoginRequest.UserKey",
+                "tag": "",
+                "json_name": "UserKey"
               },
               {
-                "name": "ComponentID",
+                "name": "GroupID",
                 "type": "string",
-                "path": "HealthCheckItem.ComponentID",
-                "tag": "json:\"componentId,omitempty\"",
-                "json_name": "componentId,omitempty"
+                "path": "GroupLoginRequest.GroupID",
+                "tag": "",
+                "json_name": "GroupID"
               },
               {
-                "name": "Time",
+                "name": "ForceSync",
+                "type": "bool",
+                "path": "GroupLoginRequest.ForceSync",
+                "tag": "",
+                "json_name": "ForceSync"
+              },
+              {
+                "name": "Node",
+                "type": "[]byte",
+                "path": "GroupLoginRequest.Node",
+                "tag": "",
+                "json_name": "Node"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "types": [
+          {
+            "name": "NodeData",
+            "fields": [
+              {
+                "name": "NodeID",
                 "type": "string",
-                "path": "HealthCheckItem.Time",
-                "tag": "json:\"time\"",
-                "json_name": "time"
+                "path": "NodeData.NodeID",
+                "tag": "json:\"node_id\"",
+                "json_name": "node_id"
+              },
+              {
+                "name": "APIKey",
+                "type": "string",
+                "path": "NodeData.APIKey",
+                "tag": "json:\"api_key\"",
+                "json_name": "api_key"
+              },
+              {
+                "name": "GroupID",
+                "type": "string",
+                "path": "NodeData.GroupID",
+                "tag": "json:\"group_id\"",
+                "json_name": "group_id"
+              },
+              {
+                "name": "NodeVersion",
+                "type": "string",
+                "path": "NodeData.NodeVersion",
+                "tag": "json:\"node_version\"",
+                "json_name": "node_version"
+              },
+              {
+                "name": "TTL",
+                "type": "int64",
+                "path": "NodeData.TTL",
+                "tag": "json:\"ttl\"",
+                "json_name": "ttl"
+              },
+              {
+                "name": "NodeIsSegmented",
+                "type": "bool",
+                "path": "NodeData.NodeIsSegmented",
+                "tag": "json:\"node_is_segmented\"",
+                "json_name": "node_is_segmented"
+              },
+              {
+                "name": "Tags",
+                "type": "[]string",
+                "path": "NodeData.Tags",
+                "tag": "json:\"tags\"",
+                "json_name": "tags"
+              },
+              {
+                "name": "Health",
+                "type": "map[string]HealthCheckItem",
+                "path": "NodeData.Health",
+                "tag": "json:\"health\"",
+                "json_name": "health"
+              },
+              {
+                "name": "Stats",
+                "type": "GWStats",
+                "path": "NodeData.Stats",
+                "tag": "json:\"stats\"",
+                "json_name": "stats"
+              },
+              {
+                "name": "HostDetails",
+                "type": "model.HostDetails",
+                "path": "NodeData.HostDetails",
+                "tag": "json:\"host_details\"",
+                "json_name": "host_details"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "types": [
+          {
+            "name": "GWStats",
+            "fields": [
+              {
+                "name": "APIsCount",
+                "type": "int",
+                "path": "GWStats.APIsCount",
+                "tag": "json:\"apis_count\"",
+                "json_name": "apis_count"
+              },
+              {
+                "name": "PoliciesCount",
+                "type": "int",
+                "path": "GWStats.PoliciesCount",
+                "tag": "json:\"policies_count\"",
+                "json_name": "policies_count"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "types": [
+          {
+            "name": "GroupKeySpaceRequest",
+            "fields": [
+              {
+                "name": "OrgID",
+                "type": "string",
+                "path": "GroupKeySpaceRequest.OrgID",
+                "tag": "",
+                "json_name": "OrgID"
+              },
+              {
+                "name": "GroupID",
+                "type": "string",
+                "path": "GroupKeySpaceRequest.GroupID",
+                "tag": "",
+                "json_name": "GroupID"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "types": [
+          {
+            "name": "KeysValuesPair",
+            "fields": [
+              {
+                "name": "Keys",
+                "type": "[]string",
+                "path": "KeysValuesPair.Keys",
+                "tag": "",
+                "json_name": "Keys"
+              },
+              {
+                "name": "Values",
+                "type": "[]string",
+                "path": "KeysValuesPair.Values",
+                "tag": "",
+                "json_name": "Values"
               }
             ]
           }
@@ -4770,6 +4777,51 @@
                 "path": "NotificationsManager.OAuthKeyChangeURL",
                 "tag": "bson:\"oauth_on_keychange_url\" json:\"oauth_on_keychange_url\"",
                 "json_name": "oauth_on_keychange_url"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "RateLimitMeta configures rate limits per API path.",
+        "types": [
+          {
+            "name": "RateLimitMeta",
+            "fields": [
+              {
+                "name": "Disabled",
+                "type": "bool",
+                "path": "RateLimitMeta.Disabled",
+                "tag": "bson:\"disabled\" json:\"disabled\"",
+                "json_name": "disabled"
+              },
+              {
+                "name": "Path",
+                "type": "string",
+                "path": "RateLimitMeta.Path",
+                "tag": "bson:\"path\" json:\"path\"",
+                "json_name": "path"
+              },
+              {
+                "name": "Method",
+                "type": "string",
+                "path": "RateLimitMeta.Method",
+                "tag": "bson:\"method\" json:\"method\"",
+                "json_name": "method"
+              },
+              {
+                "name": "Rate",
+                "type": "float64",
+                "path": "RateLimitMeta.Rate",
+                "tag": "bson:\"rate\" json:\"rate\"",
+                "json_name": "rate"
+              },
+              {
+                "name": "Per",
+                "type": "float64",
+                "path": "RateLimitMeta.Per",
+                "tag": "bson:\"per\" json:\"per\"",
+                "json_name": "per"
               }
             ]
           }

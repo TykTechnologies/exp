@@ -16,7 +16,7 @@ tasks:
     deps: [collect:gateway, collect:dashboard]
     cmds:
       - go run . data/gateway-user.json APILimit Policy SessionState > data/output.yml
-      - go run . data/gateway-apidef.json RateLimitSmoothing >> data/output.yml
+      - go run . data/gateway-apidef.json APIDefinition RateLimitSmoothing ExtendedPathsSet RateLimitMeta >> data/output.yml
 
   # collect swagger schema for definitions from gateway swagger
   collect:gateway:
@@ -27,7 +27,7 @@ tasks:
         sh: git rev-parse --show-toplevel
     cmds:
       - rm -f data/input-gateway.yml
-      - for: ['APILimit', 'Policy', 'SessionState', 'RateLimitSmoothing']
+      - for: ['APILimit', 'Policy', 'SessionState', 'APIDefinition', 'RateLimitSmoothing', 'ExtendedPathsSet', 'RateLimitMeta']
         cmd: yq eval '.components.schemas | with_entries(select(.key == "{{.ITEM}}"))' data/gateway-swagger.yml >> data/input-gateway.yml
 
   # collect swagger schema for definitions from dashboard swagger
@@ -39,7 +39,7 @@ tasks:
         sh: git rev-parse --show-toplevel
     cmds:
       - rm -f data/input-dashboard.yml
-      - for: ['APILimit', 'Policy', 'SessionState', 'RateLimitSmoothing']
+      - for: ['APILimit', 'Policy', 'SessionState', 'APIDefinition', 'RateLimitSmoothing', 'ExtendedPathsSet', 'RateLimitMeta']
         cmd: yq eval '.components.schemas | with_entries(select(.key == "{{.ITEM}}"))' data/dashboard-swagger.yml >> data/input-dashboard.yml
 
   test:
@@ -67,3 +67,8 @@ tasks:
     desc: "Install deps"
     cmds:
       - go install github.com/homeport/dyff/cmd/dyff@latest
+
+  update:
+    desc: "Update schema-gen dependency"
+    cmds:
+      - go get github.com/TykTechnologies/exp/cmd/schema-gen@main

@@ -3,12 +3,30 @@
 The motivation behind this is to validate the data model against the
 swagger specification, validating that all fields are covered in schema.
 
-It currently validates these definitions:
 
-- Policy
-- APILimit
-- SessionState
-- RateLimitSmoothing
+## Development usage
+
+To use the task stand alone, install and run it like so:
+
+```
+go install github.com/TykTechnologies/exp/scripts/model2schema@main
+```
+
+In the folder where you want to get the definitions:
+
+```
+schema-gen extract
+model2schema schema.json <names...>
+```
+
+If no names are provided, all the symbols are output.
+
+
+# How is this tested?
+
+Manual tests exists in this folder. They validate the definitions as
+configured in the taskfile. The validations may be extended to support
+work in progress.
 
 Specifically what it does is:
 
@@ -17,7 +35,9 @@ Specifically what it does is:
 - implements rendering an openapi definition from the schema-gen outputs
 - using `dyff` to compare yaml outputs and note differences
 
-To see the report, just run `task`. You may use `task install` to install dyff.
+To see the report, just run `task`. You may use `task install` to install
+dyff. On occasion, you may need to run `task update` to ensure the latest
+dependencies are in use.
 
 ## Example output
 

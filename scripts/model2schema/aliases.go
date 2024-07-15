@@ -20,7 +20,7 @@ func TypeAlias(kind string) (TypeInfo, bool) {
 		return TypeInfo{
 			Type:   "array",
 			Format: format,
-		}, true
+		}, false
 	}
 
 	if strings.HasPrefix(kind, "map[") {
@@ -28,7 +28,7 @@ func TypeAlias(kind string) (TypeInfo, bool) {
 		return TypeInfo{
 			Type:   "map",
 			Format: format,
-		}, true
+		}, false
 	}
 
 	return typeInfo, false

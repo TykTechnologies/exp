@@ -52,16 +52,20 @@ func Convert(goPackage string, in *model.TypeInfo) DefinitionMap {
 		fieldFormat := ""
 
 		p, ok := TypeAlias(fieldType)
-		if ok {
-			fieldType = p.Type
-			fieldFormat = p.Format
-			builtin = true
-		}
+		fieldType = p.Type
+		fieldFormat = p.Format
+		builtin = ok
+
 		if fieldType == fieldFormat {
 			fieldFormat = ""
 		}
 
-		props[field.JSONName] = &Property{
+		name := field.JSONName
+		if strings.Contains(field.JSONName, ",") {
+			name = name[:strings.Index(name, ",")]
+		}
+
+		props[name] = &Property{
 			Type:        fieldType,
 			Format:      fieldFormat,
 			GoName:      field.Name,
