@@ -48,6 +48,11 @@ func getSymbolAndCoverage(filename string, startLine, endLine, numStmts, numCov 
 		if strings.HasPrefix(funcLine, "(") {
 			endIdx := strings.Index(funcLine, ")")
 			receiver = funcLine[1:endIdx]
+			parts := strings.SplitN(receiver, " ", 2)
+			if len(parts) == 2 {
+				receiver = parts[1]
+			}
+			receiver = strings.Trim(receiver, "*")
 			funcLine = funcLine[endIdx+1:]
 		}
 		funcNameEndIdx := strings.IndexAny(funcLine, "(")
@@ -56,6 +61,7 @@ func getSymbolAndCoverage(filename string, startLine, endLine, numStmts, numCov 
 		} else {
 			symbol = funcLine
 		}
+		symbol = strings.TrimSpace(symbol)
 		found = true
 	}
 
