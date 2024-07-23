@@ -145,6 +145,21 @@ func (i StringSet) Map() (map[string]string, []error) {
 	warnings := []error{}
 	warningSeen := map[string]bool{}
 
+	addWarning := func(warning error) {
+		msg := warning.Error()
+		if _, seen := warningSeen[msg]; !seen {
+			warningSeen[msg] = true
+			warnings = append(warnings, warning)
+		}
+	}
+
+	cleanPackageName := func(name string) (string, bool) {
+		clean := name
+		clean = strings.ToLower(clean)
+		clean = strings.ReplaceAll(clean, "_", "")
+		return clean, name == clean
+	}
+
 	result := map[string]string{}
 	imports := i.All()
 
@@ -160,7 +175,25 @@ func (i StringSet) Map() (map[string]string, []error) {
 			short = path.Base(long)
 		}
 
-		val, ok := result[short]
+		if short == "C" {
+			continue
+		}
+
+		if strings.HasSuffix(short, "_test") {
+			clean, ok := cleanPackageName(short[:len(short)-5])
+			if !ok {
+				addWarning(fmt.Errorf("Alias %s should be %s_test", short, clean))
+			}
+			continue
+		}
+
+		clean, ok := cleanPackageName(short)
+		if !ok {
+			addWarning(fmt.Errorf("Alias %s should be %s", short, clean))
+			continue
+		}
+
+		val, ok := result[clean]
 
 		if ok && val != long {
 			warning := "Import conflict for %s, "
@@ -170,13 +203,10 @@ func (i StringSet) Map() (map[string]string, []error) {
 			} else {
 				warning += long + " != " + val
 			}
-			if _, seen := warningSeen[warning]; !seen {
-				warningSeen[warning] = true
-				warnings = append(warnings, fmt.Errorf(warning, short))
-			}
+			addWarning(fmt.Errorf(warning, short))
 		}
 
-		result[short] = long
+		result[clean] = long
 	}
 
 	return result, warnings
