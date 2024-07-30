@@ -14,7 +14,6 @@ type options struct {
 	showHandlers   bool
 	showMiddleware bool
 
-	all     bool
 	json    bool
 	verbose bool
 }
@@ -29,7 +28,6 @@ func NewOptions() *options {
 	flag.BoolVar(&cfg.showHandlers, "handlers", cfg.showHandlers, "show http handlers")
 	flag.BoolVar(&cfg.showMiddleware, "middleware", cfg.showMiddleware, "show tyk middleware")
 
-	flag.BoolVar(&cfg.all, "all", cfg.all, "traverse all packages (./...)")
 	flag.BoolVar(&cfg.json, "json", cfg.json, "print results as json")
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
 	flag.Parse()

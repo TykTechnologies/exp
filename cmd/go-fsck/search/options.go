@@ -14,7 +14,6 @@ type options struct {
 	name      string
 	reference string
 
-	all     bool
 	json    bool
 	verbose bool
 }
@@ -29,7 +28,6 @@ func NewOptions() *options {
 	flag.StringVar(&cfg.name, "name", cfg.name, "function name match (case sensitive)")
 	flag.StringVar(&cfg.reference, "reference", cfg.reference, "reference symbol (e.g. 'oas', or 'oas.OAS')")
 
-	flag.BoolVar(&cfg.all, "all", cfg.all, "traverse all packages (./...)")
 	flag.BoolVar(&cfg.json, "json", cfg.json, "print results as json")
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
 	flag.Parse()
