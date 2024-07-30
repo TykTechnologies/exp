@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/loader"
 )
 
 func extract(cfg *options) error {
-	definitions, err := model.Load(cfg.sourcePath, cfg.verbose)
+	definitions, err := loader.Load(cfg.sourcePath, cfg.verbose)
 	if err != nil {
 		return err
 	}

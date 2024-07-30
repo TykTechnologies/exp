@@ -1,4 +1,4 @@
-package model_test
+package loader_test
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/kortschak/utter"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/loader"
 )
 
 func TestLoad(t *testing.T) {
@@ -14,9 +14,9 @@ func TestLoad(t *testing.T) {
 	utter.Config.OmitZero = true
 	utter.Config.ElideType = true
 
-	defs, err := model.Load(".", false)
+	defs, err := loader.Load(".", false)
 	assert.NoError(t, err)
 	assert.NotNil(t, defs)
 
-	// utter.Dump(defs)
+	utter.Dump(defs)
 }

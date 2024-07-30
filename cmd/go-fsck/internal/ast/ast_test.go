@@ -1,4 +1,4 @@
-package internal_test
+package ast_test
 
 import (
 	"go/parser"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast"
 )
 
 const src = `package example
@@ -30,7 +30,7 @@ func TestPrint(t *testing.T) {
 	assert.NoError(t, err)
 
 	var out strings.Builder
-	assert.NoError(t, internal.PrintSource(internal.CommentedNode(f, f), fset, &out))
+	assert.NoError(t, ast.PrintSource(ast.CommentedNode(f, f), fset, &out))
 
 	assert.Equal(t, src, strings.TrimSpace(out.String()))
 }

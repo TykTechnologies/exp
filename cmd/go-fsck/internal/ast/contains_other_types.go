@@ -1,4 +1,4 @@
-package internal
+package ast
 
 import (
 	"go/ast"

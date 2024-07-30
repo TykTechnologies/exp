@@ -1,4 +1,4 @@
-package model
+package loader
 
 import (
 	"encoding/json"
@@ -8,13 +8,15 @@ import (
 	"go/token"
 	"os"
 	"path"
-	"sort"
 
 	"golang.org/x/tools/go/ast/inspector"
+
+	"github.com/TykTechnologies/exp/cmd/go-fsck/internal/collector"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
 
 // Load definitions from package located in sourcePath.
-func Load(sourcePath string, verbose bool) ([]*Definition, error) {
+func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
 	fset := token.NewFileSet()
 
 	packages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
@@ -42,44 +44,24 @@ func Load(sourcePath string, verbose bool) ([]*Definition, error) {
 		}
 	}
 
-	collector := NewCollector(fset)
+	sink := collector.NewCollector(fset)
 
 	insp := inspector.New(files)
-	insp.WithStack(nil, collector.Visit)
+	insp.WithStack(nil, sink.Visit)
 
-	collector.Clean(verbose)
-
-	results := make([]*Definition, 0, len(collector.definition))
-	pkgNames := make([]string, 0, len(collector.definition))
-	for _, pkg := range collector.definition {
-		pkg.Sort()
-		pkgNames = append(pkgNames, pkg.Package)
-	}
-	sort.Strings(pkgNames)
-
-	for _, pkg := range collector.definition {
-		for _, name := range pkgNames {
-			if pkg.Package == name {
-				results = append(results, pkg)
-			}
-		}
-	}
-
-	sort.Slice(results, func(i, j int) bool {
-		return results[i].Package < results[j].Package
-	})
+	results := sink.Clean(verbose)
 
 	return results, nil
 }
 
 // ReadFile loads the definitions from a json file
-func ReadFile(inputPath string) ([]*Definition, error) {
+func ReadFile(inputPath string) ([]*model.Definition, error) {
 	data, err := os.ReadFile(inputPath)
 	if err != nil {
 		return nil, err
 	}
 
-	var result []*Definition
+	var result []*model.Definition
 	if err := json.Unmarshal(data, &result); err != nil {
 		return nil, err
 	}

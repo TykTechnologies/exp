@@ -1,4 +1,4 @@
-package model
+package loader
 
 import (
 	"regexp"

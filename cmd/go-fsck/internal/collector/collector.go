@@ -1,4 +1,4 @@
-package model
+package collector
 
 import (
 	"bytes"
@@ -9,10 +9,18 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"strings"
 
-	"github.com/TykTechnologies/exp/cmd/go-fsck/model/internal"
 	"github.com/davecgh/go-spew/spew"
+
+	. "github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+)
+
+type (
+	Definition  = model.Definition
+	Declaration = model.Declaration
 )
 
 type collector struct {
@@ -30,7 +38,7 @@ func NewCollector(fset *token.FileSet) *collector {
 	}
 }
 
-func (v *collector) Clean(verbose bool) {
+func (v *collector) Clean(verbose bool) []*Definition {
 	for _, def := range v.definition {
 		importMap, _ := def.Imports.Map()
 
@@ -49,27 +57,105 @@ func (v *collector) Clean(verbose bool) {
 			}
 		}
 	}
+
+	results := make([]*Definition, 0, len(v.definition))
+	pkgNames := make([]string, 0, len(v.definition))
+	for _, pkg := range v.definition {
+		pkg.Sort()
+		pkgNames = append(pkgNames, pkg.Package)
+	}
+	sort.Strings(pkgNames)
+
+	for _, pkg := range v.definition {
+		for _, name := range pkgNames {
+			if pkg.Package == name {
+				results = append(results, pkg)
+			}
+		}
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].Package < results[j].Package
+	})
+
+	return results
 }
 
-func (v *collector) Names(decl *ast.GenDecl) []string {
-	names := make([]string, 0, len(decl.Specs))
+func (v *collector) appendSeen(key string, value *Declaration) {
+	if len(value.Names) == 1 {
+		value.Name = value.Names[0]
+		value.Names = nil
+	}
+	v.seen[key] = value
+}
+
+func (v *collector) isSeen(key string) bool {
+	decl, ok := v.seen[key]
+	return ok && decl != nil
+}
+
+func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {
 	for _, spec := range decl.Specs {
-		if val, ok := spec.(*ast.ValueSpec); ok {
-			names = append(names, v.identNames(val.Names)...)
+		imported, ok := spec.(*ast.ImportSpec)
+		if !ok {
 			continue
 		}
 
-		if val, ok := spec.(*ast.TypeSpec); ok {
-			names = append(names, val.Name.Name)
-			continue
+		importLiteral := imported.Path.Value
+		importClean := strings.Trim(importLiteral, `*`)
+		if imported.Name != nil {
+			alias := imported.Name.Name
+			base := path.Base(importClean)
+			switch alias {
+			case base:
+				fmt.Fprintf(os.Stderr, "WARN: removing %s alias for %s)\n", alias, importClean)
+			case "_":
+				// no warning
+			default:
+				// fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
+				importLiteral = alias + " " + importLiteral
+			}
 		}
 
-		v.error("warning getting names: unhandled %T", spec)
+		def.Imports.Add(filename, importLiteral)
 	}
-	if len(names) == 0 {
-		return nil
-	}
-	return names
+}
+
+func collectFuncReferences(funcDecl *ast.FuncDecl) map[string][]string {
+	imports := make(map[string][]string)
+
+	// Traverse the function body and look for package identifiers.
+	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.SelectorExpr:
+			// If it's a SelectorExpr, get the leftmost identifier which is the package name.
+			if ident, ok := n.X.(*ast.Ident); ok {
+				pkgName := ident.Name
+
+				if ident.Obj != nil {
+					if ident.Obj.Kind != ast.Pkg {
+						// pkgName is not a package
+						return true
+					}
+				}
+
+				selName := n.Sel.Name
+				if pkgName != "internal" && ast.IsExported(selName) {
+					imports[pkgName] = appendIfNotExists(imports[pkgName], selName)
+				}
+			}
+		case *ast.Ident:
+			// If it's an identifier, it might be a package name.
+			if obj := n.Obj; obj != nil && obj.Kind == ast.Pkg {
+				pkgName := n.Name
+				imports[pkgName] = nil // No specific symbol, just mark the package as imported.
+			}
+		}
+
+		return true
+	})
+
+	return imports
 }
 
 func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
@@ -119,7 +205,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		def := &Declaration{
 			Names:         names,
 			File:          filename,
-			SelfContained: internal.IsSelfContainedType(node),
+			SelfContained: IsSelfContainedType(node),
 			Source:        v.getSource(file, node),
 		}
 
@@ -129,13 +215,13 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 
 		switch node.Tok {
 		case token.CONST:
-			def.Kind = ConstKind
+			def.Kind = model.ConstKind
 			pkg.Consts.Append(def)
 		case token.VAR:
-			def.Kind = VarKind
+			def.Kind = model.VarKind
 			pkg.Vars.Append(def)
 		case token.TYPE:
-			def.Kind = TypeKind
+			def.Kind = model.TypeKind
 			pkg.Types.Append(def)
 		}
 
@@ -156,19 +242,48 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	return true
 }
 
-func (v *collector) appendSeen(key string, value *Declaration) {
-	if len(value.Names) == 1 {
-		value.Name = value.Names[0]
-		value.Names = nil
+func (v *collector) Names(decl *ast.GenDecl) []string {
+	names := make([]string, 0, len(decl.Specs))
+	for _, spec := range decl.Specs {
+		if val, ok := spec.(*ast.ValueSpec); ok {
+			names = append(names, v.identNames(val.Names)...)
+			continue
+		}
+
+		if val, ok := spec.(*ast.TypeSpec); ok {
+			names = append(names, val.Name.Name)
+			continue
+		}
+
+		v.error("warning getting names: unhandled %T", spec)
 	}
-	v.seen[key] = value
+	if len(names) == 0 {
+		return nil
+	}
+	return names
+}
+
+func (v *collector) error(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
+}
+
+func (v *collector) identNames(decl []*ast.Ident) []string {
+	if len(decl) == 0 {
+		return nil
+	}
+
+	result := make([]string, 0, len(decl))
+	for _, t := range decl {
+		result = append(result, t.Name)
+	}
+	return result
 }
 
 func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, filename string, stack []ast.Node) *Declaration {
 	args, returns := v.functionBindings(decl)
 
 	declaration := &Declaration{
-		Kind:       FuncKind,
+		Kind:       model.FuncKind,
 		File:       filename,
 		Name:       decl.Name.Name,
 		Arguments:  args,
@@ -185,35 +300,34 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 	return declaration
 }
 
-func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {
-	for _, spec := range decl.Specs {
-		imported, ok := spec.(*ast.ImportSpec)
-		if !ok {
-			continue
-		}
-
-		importLiteral := imported.Path.Value
-		importClean := strings.Trim(importLiteral, `*`)
-		if imported.Name != nil {
-			alias := imported.Name.Name
-			base := path.Base(importClean)
-			switch alias {
-			case base:
-				fmt.Fprintf(os.Stderr, "WARN: removing %s alias for %s)\n", alias, importClean)
-			case "_":
-				// no warning
-			default:
-				// fmt.Printf("WARN: package %s is aliased to %s\n", importLiteral, alias)
-				importLiteral = alias + " " + importLiteral
-			}
-		}
-
-		def.Imports.Add(filename, importLiteral)
+func (p *collector) getSource(file *ast.File, node any) string {
+	var buf strings.Builder
+	err := PrintSource(CommentedNode(file, node), p.fset, &buf)
+	if err != nil {
+		return ""
 	}
+	return buf.String()
 }
 
-func (v *collector) error(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, format+"\n", args...)
+func (p *collector) symbolType(expr ast.Expr) string {
+	switch t := expr.(type) {
+	case *ast.Ident:
+		return t.Name
+	case *ast.StarExpr:
+		return "*" + p.symbolType(t.X)
+	case *ast.ArrayType:
+		return "[]" + p.symbolType(t.Elt)
+	case *ast.Ellipsis:
+		return "..." + p.symbolType(t.Elt)
+	case *ast.SelectorExpr:
+		return p.symbolType(t.X) + "." + p.symbolType(t.Sel)
+	case *ast.MapType:
+		k, v := p.symbolType(t.Key), p.symbolType(t.Value)
+		return fmt.Sprintf("map[%s]%s", k, v)
+	case *ast.InterfaceType:
+		return ""
+	}
+	return fmt.Sprintf("%T", expr)
 }
 
 func (p *collector) functionBindings(decl *ast.FuncDecl) (args []string, returns []string) {
@@ -275,49 +389,11 @@ func (p *collector) functionDef(fun *ast.FuncDecl) string {
 	return fmt.Sprintf("%s (%s)", name, paramsString)
 }
 
-func (p *collector) getSource(file *ast.File, node any) string {
-	var buf strings.Builder
-	err := internal.PrintSource(internal.CommentedNode(file, node), p.fset, &buf)
-	if err != nil {
-		return ""
+func appendIfNotExists(slice []string, element string) []string {
+	for _, s := range slice {
+		if s == element {
+			return slice
+		}
 	}
-	return buf.String()
-}
-
-func (v *collector) identNames(decl []*ast.Ident) []string {
-	if len(decl) == 0 {
-		return nil
-	}
-
-	result := make([]string, 0, len(decl))
-	for _, t := range decl {
-		result = append(result, t.Name)
-	}
-	return result
-}
-
-func (v *collector) isSeen(key string) bool {
-	decl, ok := v.seen[key]
-	return ok && decl != nil
-}
-
-func (p *collector) symbolType(expr ast.Expr) string {
-	switch t := expr.(type) {
-	case *ast.Ident:
-		return t.Name
-	case *ast.StarExpr:
-		return "*" + p.symbolType(t.X)
-	case *ast.ArrayType:
-		return "[]" + p.symbolType(t.Elt)
-	case *ast.Ellipsis:
-		return "..." + p.symbolType(t.Elt)
-	case *ast.SelectorExpr:
-		return p.symbolType(t.X) + "." + p.symbolType(t.Sel)
-	case *ast.MapType:
-		k, v := p.symbolType(t.Key), p.symbolType(t.Value)
-		return fmt.Sprintf("map[%s]%s", k, v)
-	case *ast.InterfaceType:
-		return ""
-	}
-	return fmt.Sprintf("%T", expr)
+	return append(slice, element)
 }

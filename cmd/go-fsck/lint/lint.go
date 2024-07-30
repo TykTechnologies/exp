@@ -6,6 +6,7 @@ import (
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/internal"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/loader"
 )
 
 func getDefinitions(cfg *options) ([]*model.Definition, error) {
@@ -18,7 +19,7 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 	defs := []*model.Definition{}
 
 	for _, pkgPath := range packages {
-		d, err := model.Load(pkgPath, cfg.verbose)
+		d, err := loader.Load(pkgPath, cfg.verbose)
 		if err != nil {
 			return nil, err
 		}

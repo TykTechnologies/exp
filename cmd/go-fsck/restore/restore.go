@@ -11,6 +11,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/loader"
 )
 
 func restore(cfg *options) error {
@@ -21,7 +22,7 @@ func restore(cfg *options) error {
 }
 
 func restoreV2(cfg *options) error {
-	defs, err := model.ReadFile(cfg.inputFile)
+	defs, err := loader.ReadFile(cfg.inputFile)
 	if err != nil {
 		return err
 	}
@@ -57,7 +58,7 @@ func restoreV2(cfg *options) error {
 }
 
 func restoreV1(cfg *options) error {
-	defs, err := model.ReadFile(cfg.inputFile)
+	defs, err := loader.ReadFile(cfg.inputFile)
 	if err != nil {
 		return err
 	}

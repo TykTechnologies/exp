@@ -9,12 +9,14 @@ import (
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/internal"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/loader"
 )
 
 func getDefinitions(cfg *options) ([]*model.Definition, error) {
-	if !cfg.all {
-		// Read the exported go-fsck.json data.
-		return model.ReadFile(cfg.inputFile)
+	// Read the exported go-fsck.json data.
+	defs, err := loader.ReadFile(cfg.inputFile)
+	if err == nil {
+		return defs, nil
 	}
 
 	// list current local packages
@@ -23,10 +25,10 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 		return nil, err
 	}
 
-	defs := []*model.Definition{}
+	defs = []*model.Definition{}
 
 	for _, pkgPath := range packages {
-		d, err := model.Load(pkgPath, cfg.verbose)
+		d, err := loader.Load(pkgPath, cfg.verbose)
 		if err != nil {
 			return nil, err
 		}

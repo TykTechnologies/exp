@@ -1,11 +1,11 @@
-package model_test
+package loader_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model/loader"
 )
 
 func TestBuildTags(t *testing.T) {
@@ -22,7 +22,7 @@ func main() {
 }`
 
 	want := []string{"debug", "linux"}
-	got := model.BuildTags([]byte(src))
+	got := loader.BuildTags([]byte(src))
 
 	assert.Equal(t, want, got)
 }
