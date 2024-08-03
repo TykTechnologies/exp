@@ -13,6 +13,7 @@ import (
 	"github.com/TykTechnologies/exp/cmd/summary/coverfunc"
 	"github.com/TykTechnologies/exp/cmd/summary/golangcilint"
 	"github.com/TykTechnologies/exp/cmd/summary/lsof"
+	"github.com/TykTechnologies/exp/cmd/summary/modfile"
 	"github.com/TykTechnologies/exp/cmd/summary/semgrep"
 	"github.com/TykTechnologies/exp/cmd/summary/vet"
 )
@@ -31,6 +32,7 @@ func start() (err error) {
 		"golangcilint": golangcilint.Run,
 		"coverfunc":    coverfunc.Run,
 		"semgrep":      semgrep.Run,
+		"modfile":      modfile.Run,
 	}
 	commandList := maps.Keys(commands)
 	sort.Strings(commandList)

@@ -10,6 +10,7 @@ tasks:
     desc: "Run default (install)"
     cmds:
       - task: install
+      - cat go.mod | summary modfile
 
   test:
     desc: "Run tests"
