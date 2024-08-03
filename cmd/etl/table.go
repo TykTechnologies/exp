@@ -33,6 +33,7 @@ func Tables(ctx context.Context, command *Command, _ io.Reader) error {
 				return err
 			}
 			tables[i].Columns = columns
+
 		}
 	}
 
@@ -68,6 +69,12 @@ func getTableList(db *sqlx.DB, verbose bool) ([]TableInfo, error) {
 			Name:        tableName,
 			Description: tableComment,
 		}
+
+		err = db.Get(&table.Count, fmt.Sprintf("select count(*) from %s", table.Name))
+		if err != nil {
+			return nil, err
+		}
+
 		tables = append(tables, table)
 	}
 

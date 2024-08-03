@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -70,6 +71,14 @@ func Insert(ctx context.Context, command *Command, r io.Reader) error {
 		if strings.Contains(arg, "=") {
 			parts := strings.SplitN(arg, "=", 2)
 			parts[1] = strings.Trim(parts[1], "'")
+
+			if strings.HasPrefix(parts[1], "@") {
+				contents, err := os.ReadFile(parts[1][1:])
+				if err != nil {
+					return err
+				}
+				parts[1] = string(contents)
+			}
 
 			names = append(names, parts[0])
 			values = append(values, parts[1])

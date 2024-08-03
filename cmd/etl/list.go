@@ -12,14 +12,21 @@ import (
 
 func List(ctx context.Context, command *Command, _ io.Reader) error {
 	var offset, limit int
+	var order, sortBy string
 
 	flagSet := NewFlagSet("List")
+	flagSet.StringVar(&sortBy, "sort-by", "id", "Sort by field")
+	flagSet.StringVar(&order, "order", "desc", "Order")
 	flagSet.IntVar(&offset, "offset", 0, "Offset for the results")
-	flagSet.IntVar(&limit, "limit", 10, "Limit the number of results")
+	flagSet.IntVar(&limit, "limit", 1000, "Limit the number of results")
 	if err := flagSet.Parse(command.Args); err != nil {
 		return fmt.Errorf("error parsing flags: %w", err)
 	}
 	args := flagSet.Args()
+
+	if order != "asc" {
+		order = "desc"
+	}
 
 	var err error
 	var rows *sqlx.Rows
@@ -29,7 +36,7 @@ func List(ctx context.Context, command *Command, _ io.Reader) error {
 		query := fmt.Sprintf("SELECT * FROM %s WHERE id=?", table)
 		rows, err = command.DB.Queryx(query, command.Args[1])
 	} else {
-		query := fmt.Sprintf("SELECT * FROM %s ORDER BY id DESC LIMIT %d OFFSET %d", table, limit, offset)
+		query := fmt.Sprintf("SELECT * FROM %s ORDER BY %s %s LIMIT %d OFFSET %d", table, sortBy, order, limit, offset)
 		rows, err = command.DB.Queryx(query)
 	}
 	if err != nil {
