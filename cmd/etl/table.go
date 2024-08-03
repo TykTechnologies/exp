@@ -4,23 +4,27 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/spf13/pflag"
 )
 
 // Tables retrieves the list of tables in the current database schema along with their comments.
 // If the Verbose flag in the command is set to true, it also retrieves the details of each table's columns.
-func Tables(ctx context.Context, command *Command) error {
+func Tables(ctx context.Context, command *Command, _ io.Reader) error {
+	var showColumns bool
+
+	flagSet := NewFlagSet("Tables")
+	flagSet.BoolVar(&showColumns, "show-columns", false, "Show columns")
+	if err := flagSet.Parse(command.Args); err != nil {
+		return fmt.Errorf("error parsing flags: %w", err)
+	}
+
 	tables, err := getTableList(command.DB, command.Verbose)
 	if err != nil {
 		return err
 	}
-
-	var showColumns bool
-	pflag.BoolVar(&showColumns, "show-columns", false, "Show columns")
-	pflag.Parse()
 
 	if showColumns {
 		for i, table := range tables {
@@ -106,6 +110,9 @@ func getTableColumns(db *sqlx.DB, tableName string, verbose bool) ([]ColumnInfo,
 func dbValue(in any) string {
 	if v, ok := in.([]byte); ok {
 		return string(v)
+	}
+	if in == nil {
+		return ""
 	}
 	return fmt.Sprint(in)
 }

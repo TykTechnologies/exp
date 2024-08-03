@@ -17,7 +17,7 @@ type Command struct {
 type TableInfo struct {
 	Name        string       `json:"name"`
 	Description string       `json:"description"`
-	Columns     []ColumnInfo `json:"columns"`
+	Columns     []ColumnInfo `json:"columns,omitempty"`
 }
 
 type ColumnInfo map[string]string

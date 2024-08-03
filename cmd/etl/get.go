@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/spf13/pflag"
 )
 
-func Get(ctx context.Context, command *Command) error {
+func Get(ctx context.Context, command *Command, _ io.Reader) error {
 	var first bool
 	pflag.BoolVar(&first, "first", true, "Return first record")
 	pflag.Parse()

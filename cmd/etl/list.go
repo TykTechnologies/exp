@@ -4,22 +4,28 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/spf13/pflag"
 )
 
-func List(ctx context.Context, command *Command) error {
+func List(ctx context.Context, command *Command, _ io.Reader) error {
 	var offset, limit int
-	pflag.IntVar(&offset, "offset", 0, "Offset for the results")
-	pflag.IntVar(&limit, "limit", 10, "Limit the number of results")
-	pflag.Parse()
+
+	flagSet := NewFlagSet("List")
+	flagSet.IntVar(&offset, "offset", 0, "Offset for the results")
+	flagSet.IntVar(&limit, "limit", 10, "Limit the number of results")
+	if err := flagSet.Parse(command.Args); err != nil {
+		return fmt.Errorf("error parsing flags: %w", err)
+	}
+	args := flagSet.Args()
 
 	var err error
 	var rows *sqlx.Rows
-	table := command.Args[0]
-	if len(command.Args) > 1 {
+
+	table := args[0]
+	if len(args) > 1 {
 		query := fmt.Sprintf("SELECT * FROM %s WHERE id=?", table)
 		rows, err = command.DB.Queryx(query, command.Args[1])
 	} else {

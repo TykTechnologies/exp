@@ -28,7 +28,8 @@ func start(ctx context.Context) error {
 		return errors.New("usage: etl <command> <tableName> [options]")
 	}
 
-	config, err := NewConfig()
+	config := NewConfig()
+	args, err := config.ParseFlags()
 	if err != nil {
 		return err
 	}
@@ -41,8 +42,8 @@ func start(ctx context.Context) error {
 
 	command := Command{
 		DB:      db,
-		Name:    os.Args[1],
-		Args:    os.Args[2:],
+		Name:    args[0],
+		Args:    args[1:],
 		Verbose: config.Verbose,
 	}
 
