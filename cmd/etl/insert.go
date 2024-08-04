@@ -120,6 +120,6 @@ func Insert(ctx context.Context, command *Command, r io.Reader) error {
 		return err
 	}
 
-	fmt.Printf("Records inserted successfully: %d rows added\n", count)
+	fmt.Printf("%d rows added\n", count)
 	return nil
 }

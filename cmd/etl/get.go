@@ -7,20 +7,27 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
-	"github.com/spf13/pflag"
 )
 
 func Get(ctx context.Context, command *Command, _ io.Reader) error {
-	var first bool
-	pflag.BoolVar(&first, "first", true, "Return first record")
-	pflag.Parse()
+	var all bool
 
-	table := command.Args[0]
+	flagSet := NewFlagSet("List")
+	flagSet.BoolVar(&all, "all", false, "Return all records")
+	if err := flagSet.Parse(command.Args); err != nil {
+		return fmt.Errorf("error parsing flags: %w", err)
+	}
+	args := flagSet.Args()
+
+	table := args[0]
 
 	var values []any
 	var params []string
-	for _, arg := range command.Args[1:] {
+	for _, arg := range args[1:] {
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
+
 		if strings.Contains(arg, "=") {
 			parts := strings.SplitN(arg, "=", 2)
 			parts[1] = strings.Trim(parts[1], "'\"")
@@ -33,6 +40,9 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 	}
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s", table, strings.Join(params, " "))
+	if command.Verbose {
+		fmt.Println("--", query)
+	}
 	rows, err := command.DB.Queryx(query, values...)
 	if err != nil {
 		return err
@@ -55,7 +65,7 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 	}
 
 	var output []byte
-	if first {
+	if !all {
 		var res *Record
 		if len(results) > 0 {
 			res = &results[0]
