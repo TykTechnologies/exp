@@ -1,8 +1,20 @@
 package model
 
 type (
-	Definition struct {
+	Package struct {
+		// Package is the name of the package.
 		Package string
+		// ImportPath contains the import path (github...).
+		ImportPath string
+		// Path is sanitized to contain the relative location (folder).
+		Path string
+		// TestPackage is true if this is a test package.
+		TestPackage bool
+	}
+
+	Definition struct {
+		Package
+
 		Doc     StringSet
 		Imports StringSet
 		Types   DeclarationList
@@ -34,6 +46,10 @@ func (d *Definition) Sort() {
 	d.Vars.Sort()
 	d.Consts.Sort()
 	d.Funcs.Sort()
+}
+
+func (p Package) Name() string {
+	return p.Package
 }
 
 func (d *Definition) getImports(decl *Declaration) []string {

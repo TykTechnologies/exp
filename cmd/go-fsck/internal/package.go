@@ -5,35 +5,54 @@ import (
 	"strings"
 
 	"golang.org/x/tools/go/packages"
+
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
 
-// List returns a slice of local package paths in the specified root directory.
-func List(rootPath string) ([]string, error) {
-	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles,
-	}
-
-	pkgs, err := packages.Load(cfg, "./...")
-	if err != nil {
+// ListPackages returns a slice of local packages in the specified root directory.
+// The second argument is either `.` or `./...` (recursive).
+func ListPackages(rootPath string, pattern string) ([]model.Package, error) {
+	if err := os.Chdir(rootPath); err != nil {
 		return nil, err
 	}
 
-	first := pkgs[0].PkgPath
-
-	var localPackages []string
-
-	for _, pkg := range pkgs {
-		localPackages = append(localPackages, strings.ReplaceAll(pkg.PkgPath, first, "."))
+	packages, err := listPackages(pattern)
+	if err != nil || len(packages) == 0 {
+		return nil, err
 	}
 
-	return localPackages, nil
+	return cleanPackages(packages), nil
 }
 
-// ListCurrent uses the current path as the root directory for List().
-func ListCurrent() ([]string, error) {
-	currentPath, err := os.Getwd()
-	if err != nil {
-		return nil, err
+func cleanPackages(pkgs []*packages.Package) []model.Package {
+	results := make([]model.Package, 0, len(pkgs))
+	first := pkgs[0].PkgPath
+	for _, pkg := range pkgs {
+		cleanPath := "." + strings.TrimPrefix(pkg.PkgPath, first)
+		var testPackage bool
+		if strings.HasSuffix(cleanPath, ".test") {
+			continue
+		}
+		if strings.HasSuffix(cleanPath, "_test") {
+			cleanPath = cleanPath[:len(cleanPath)-5]
+			testPackage = true
+		}
+		result := model.Package{
+			Package:     pkg.Name, //filepath.Base(pkg.PkgPath),
+			ImportPath:  pkg.PkgPath,
+			Path:        cleanPath,
+			TestPackage: testPackage,
+		}
+		results = append(results, result)
 	}
-	return List(currentPath)
+	return results
+}
+
+func listPackages(pattern string) ([]*packages.Package, error) {
+	cfg := &packages.Config{
+		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedModule,
+		Tests: true,
+	}
+
+	return packages.Load(cfg, pattern)
 }

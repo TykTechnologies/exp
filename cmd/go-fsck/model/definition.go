@@ -11,8 +11,20 @@ import (
 )
 
 type (
-	Definition struct {
+	Package struct {
+		// Package is the name of the package.
 		Package string
+		// ImportPath contains the import path (github...).
+		ImportPath string
+		// Path is sanitized to contain the relative location (folder).
+		Path string
+		// TestPackage is true if this is a test package.
+		TestPackage bool
+	}
+
+	Definition struct {
+		Package
+
 		Doc     StringSet
 		Imports StringSet
 		Types   DeclarationList
@@ -58,6 +70,10 @@ const (
 	VarKind                     = "var"
 	CommentKind                 = "comment"
 )
+
+func (p Package) Name() string {
+	return p.Package
+}
 
 func (d DeclarationKind) String() string {
 	return string(d)

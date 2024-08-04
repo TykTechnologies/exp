@@ -30,7 +30,7 @@ func TestPrint(t *testing.T) {
 	assert.NoError(t, err)
 
 	var out strings.Builder
-	assert.NoError(t, ast.PrintSource(ast.CommentedNode(f, f), fset, &out))
+	assert.NoError(t, ast.PrintSource(&out, fset, ast.CommentedNode(f, f)))
 
 	assert.Equal(t, src, strings.TrimSpace(out.String()))
 }

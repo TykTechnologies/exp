@@ -14,7 +14,7 @@ func CommentedNode(file *ast.File, node any) *printer.CommentedNode {
 	}
 }
 
-func PrintSource(val *printer.CommentedNode, fset *token.FileSet, out io.Writer) error {
+func PrintSource(out io.Writer, fset *token.FileSet, val *printer.CommentedNode) error {
 	return printer.Fprint(out, fset, val)
 }
 

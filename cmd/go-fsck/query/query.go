@@ -20,15 +20,15 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 	}
 
 	// list current local packages
-	packages, err := internal.ListCurrent()
+	packages, err := internal.ListPackages(".", "./...")
 	if err != nil {
 		return nil, err
 	}
 
 	defs = []*model.Definition{}
 
-	for _, pkgPath := range packages {
-		d, err := loader.Load(pkgPath, cfg.verbose)
+	for _, pkg := range packages {
+		d, err := loader.Load(pkg.Path, cfg.verbose)
 		if err != nil {
 			return nil, err
 		}

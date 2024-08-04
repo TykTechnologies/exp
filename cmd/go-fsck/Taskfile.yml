@@ -20,7 +20,7 @@ tasks:
   example:
     desc: "Build example"
     cmds:
-      - go-fsck extract -i example/ -o example/go-fsck.json --pretty-json
+      - go-fsck extract -i example/ -o example/go-fsck.json --pretty-json --include-tests
 
 
   restore:

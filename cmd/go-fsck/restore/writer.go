@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/internal/files"
+	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 	. "github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
 
@@ -91,7 +92,7 @@ func mergeImports(importsSet *StringSet, imports []string) {
 }
 
 // writeFile writes the declarations and imports to a specified file using the files package
-func writeFile(pkgName string, declarations []*Declaration, imports StringSet, filePath string) error {
+func writeFile(pkg model.Package, declarations []*Declaration, imports StringSet, filePath string) error {
 	// Collect types
 	var types []string
 	for _, decl := range declarations {
@@ -101,7 +102,7 @@ func writeFile(pkgName string, declarations []*Declaration, imports StringSet, f
 	// Create a File struct
 	file := &files.File{
 		Filename: filePath,
-		Package:  pkgName,
+		Package:  pkg.Name(),
 		Imports:  imports.All(),
 		Types:    types,
 	}

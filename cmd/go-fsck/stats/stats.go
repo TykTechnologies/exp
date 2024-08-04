@@ -21,16 +21,16 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 		return defs, nil
 	}
 
-	// list current local packages
-	packages, err := internal.ListCurrent()
+	// list current local package
+	packages, err := internal.ListPackages(".", ".")
 	if err != nil {
 		return nil, err
 	}
 
 	defs = []*model.Definition{}
 
-	for _, pkgPath := range packages {
-		d, err := loader.Load(pkgPath, cfg.verbose)
+	for _, pkg := range packages {
+		d, err := loader.Load(pkg.Path, cfg.verbose)
 		if err != nil {
 			return nil, err
 		}
@@ -164,7 +164,7 @@ func stats(cfg *options) error {
 	return nil
 }
 
-func listUsedSymbols(decl *model.Declaration, packageName string) []SymbolReference {
+func listUsedSymbols(decl *model.Declaration, pkg model.Package) []SymbolReference {
 	if len(decl.References) == 0 {
 		return nil
 	}
@@ -173,7 +173,7 @@ func listUsedSymbols(decl *model.Declaration, packageName string) []SymbolRefere
 	for pkg, refs := range decl.References {
 		for _, ref := range refs {
 			symbols = append(symbols, SymbolReference{
-				Package: packageName,
+				Package: pkg,
 				Import:  pkg,
 				Symbol:  ref,
 				UsedBy:  decl.Name,

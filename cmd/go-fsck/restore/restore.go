@@ -32,19 +32,19 @@ func restoreV2(cfg *options) error {
 
 	pkgs := make([]string, 0, len(defs))
 	for _, def = range defs {
-		pkgs = append(pkgs, def.Package)
+		pkgs = append(pkgs, def.Package.Name())
 	}
 
 	// find the def for restore
 	for _, def = range defs {
-		if cfg.packageName == def.Package {
+		if cfg.packageName == def.Package.Name() {
 			found = true
 			break
 		}
 	}
 
 	if len(defs) == 1 {
-		cfg.packageName = defs[0].Package
+		cfg.packageName = defs[0].Package.Name()
 		def = defs[0]
 		found = true
 	}
@@ -233,19 +233,19 @@ func restoreV1(cfg *options) error {
 
 	pkgs := make([]string, 0, len(defs))
 	for _, def = range defs {
-		pkgs = append(pkgs, def.Package)
+		pkgs = append(pkgs, def.Package.Name())
 	}
 
 	// find the def for restore
 	for _, def = range defs {
-		if cfg.packageName == def.Package {
+		if cfg.packageName == def.Package.Name() {
 			found = true
 			break
 		}
 	}
 
 	if len(defs) == 1 {
-		cfg.packageName = defs[0].Package
+		cfg.packageName = defs[0].Package.Name()
 		def = defs[0]
 		found = true
 	}

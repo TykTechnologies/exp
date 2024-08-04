@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -21,6 +22,7 @@ import (
 type (
 	Definition  = model.Definition
 	Declaration = model.Declaration
+	Package     = model.Package
 )
 
 type collector struct {
@@ -62,20 +64,20 @@ func (v *collector) Clean(verbose bool) []*Definition {
 	pkgNames := make([]string, 0, len(v.definition))
 	for _, pkg := range v.definition {
 		pkg.Sort()
-		pkgNames = append(pkgNames, pkg.Package)
+		pkgNames = append(pkgNames, pkg.Package.Path)
 	}
 	sort.Strings(pkgNames)
 
 	for _, pkg := range v.definition {
 		for _, name := range pkgNames {
-			if pkg.Package == name {
+			if pkg.Package.Path == name {
 				results = append(results, pkg)
 			}
 		}
 	}
 
 	sort.Slice(results, func(i, j int) bool {
-		return results[i].Package < results[j].Package
+		return results[i].Package.Path < results[j].Package.Path
 	})
 
 	return results
@@ -163,15 +165,16 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	if !ok {
 		return true
 	}
-	filename := path.Base(v.fset.Position(file.Pos()).Filename)
+	filename := v.fset.Position(file.Pos()).Filename
 
 	packageName := file.Name.Name
 
 	pkg, ok := v.definition[packageName]
 	if !ok {
-		pkg = &Definition{
-			Package: packageName,
-		}
+		pkg = &Definition{}
+		pkg.Package.Path = filepath.Dir(filename)
+		pkg.Package.Package = packageName
+
 		v.definition[packageName] = pkg
 	}
 
@@ -302,7 +305,7 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 
 func (p *collector) getSource(file *ast.File, node any) string {
 	var buf strings.Builder
-	err := PrintSource(CommentedNode(file, node), p.fset, &buf)
+	err := PrintSource(&buf, p.fset, CommentedNode(file, node))
 	if err != nil {
 		return ""
 	}

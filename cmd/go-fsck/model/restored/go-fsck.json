@@ -1,6 +1,9 @@
 [
   {
     "Package": "model",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/model",
+    "Path": ".",
+    "TestPackage": false,
     "Doc": null,
     "Imports": {
       "definition.go": [
@@ -24,15 +27,18 @@
         "Kind": "type",
         "File": "definition.go",
         "SelfContained": false,
-        "Name": "Definition",
-        "Source": "type (\n\tDefinition struct {\n\t\tPackage\tstring\n\t\tDoc\tStringSet\n\t\tImports\tStringSet\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
+        "Name": "StringSet",
+        "Source": "type StringSet map[string][]string"
       },
       {
         "Kind": "type",
         "File": "definition.go",
         "SelfContained": false,
-        "Name": "StringSet",
-        "Source": "type StringSet map[string][]string"
+        "Names": [
+          "Package",
+          "Definition"
+        ],
+        "Source": "type (\n\tPackage\tstruct {\n\t\t// Package is the name of the package.\n\t\tPackage\tstring\n\t\t// ImportPath contains the import path (github...).\n\t\tImportPath\tstring\n\t\t// Path is sanitized to contain the relative location (folder).\n\t\tPath\tstring\n\t\t// TestPackage is true if this is a test package.\n\t\tTestPackage\tbool\n\t}\n\n\tDefinition\tstruct {\n\t\tPackage\n\n\t\tDoc\tStringSet\n\t\tImports\tStringSet\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
       },
       {
         "Kind": "type",
@@ -183,6 +189,18 @@
         ],
         "Signature": "FindKind (kind DeclarationKind) []*Declaration",
         "Source": "func (p DeclarationList) FindKind(kind DeclarationKind) (result []*Declaration) {\n\tfor _, decl := range p {\n\t\tif decl.Kind == kind {\n\t\t\tresult = append(result, decl)\n\t\t}\n\t}\n\treturn\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "SelfContained": false,
+        "Name": "Name",
+        "Receiver": "Package",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Name () string",
+        "Source": "func (p Package) Name() string {\n\treturn p.Package\n}"
       },
       {
         "Kind": "func",
