@@ -61,8 +61,6 @@ func buildUpdateQuery(table string, data Record, whereKeys []string) (string, []
 		values = append(values, data[key])
 	}
 
-	fmt.Println(query)
-
 	return query, values
 }
 
