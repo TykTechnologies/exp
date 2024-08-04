@@ -194,9 +194,9 @@ jobs:
         with:
           name: dashboard-docs
           path: dashboard-docs
-          
+
   mdcb:
-    needs: [ sanitize ]
+    needs: [sanitize]
     name: MDCB docs
     if: ${{ github.event.inputs.sync-mdcb == 'true' }}
     runs-on: ubuntu-latest
@@ -209,18 +209,18 @@ jobs:
           repository: TykTechnologies/tyk-sink
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk-sink
-      
+
       - name: Generate docs
         run: |
           mkdir -p mdcb-docs/
           cp ./tyk-sink/swagger.yml mdcb-docs/mdcb-swagger.yml
-        
+
       - name: Store docs
         uses: actions/upload-artifact@v3
         with:
           name: mdcb-docs
           path: mdcb-docs
-          
+
   configs:
     needs: [sanitize]
     name: Configuration docs
@@ -272,7 +272,7 @@ jobs:
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
-          
+
       - name: Sync MDCB
         working-directory: ./tyk-config-info-generator/src
         if: ${{ github.event.inputs.sync-mdcb == 'true' }}
@@ -283,7 +283,7 @@ jobs:
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
-            
+
       - name: Store docs
         uses: actions/upload-artifact@v3
         with:
@@ -319,7 +319,7 @@ jobs:
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
-        
+
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@v6
         with:

@@ -1,3 +1,4 @@
+---
 name: 'GitHub Sync'
 description: >
   Emit a repository_dispatch event to synchronize repositories
@@ -22,4 +23,4 @@ runs:
         token: ${{ inputs.token }}
         repository: ${{ inputs.repository }}
         event-type: ${{ inputs.eventType }}
-        client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+        client-payload: '{"ref":"${{ github.ref }}", "sha":"${{ github.sha }}"}'
