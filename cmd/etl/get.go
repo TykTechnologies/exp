@@ -12,7 +12,7 @@ import (
 func Get(ctx context.Context, command *Command, _ io.Reader) error {
 	var all bool
 
-	flagSet := NewFlagSet("List")
+	flagSet := NewFlagSet("Get")
 	flagSet.BoolVar(&all, "all", false, "Return all records")
 	if err := flagSet.Parse(command.Args); err != nil {
 		return fmt.Errorf("error parsing flags: %w", err)

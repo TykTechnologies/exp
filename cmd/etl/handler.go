@@ -12,11 +12,12 @@ type CommandHandlerFunc func(ctx context.Context, command *Command, r io.Reader)
 
 func HandleCommand(ctx context.Context, command *Command, r io.Reader) error {
 	commandMap := map[string]CommandHandlerFunc{
-		"insert": Insert,
-		"get":    Get,
-		"list":   List,
-		"tables": Tables,
-		"update": Update,
+		"insert":   Insert,
+		"get":      Get,
+		"list":     List,
+		"tables":   Tables,
+		"update":   Update,
+		"truncate": Truncate,
 	}
 	commands := maps.Keys(commandMap)
 

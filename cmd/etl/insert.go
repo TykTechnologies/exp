@@ -9,7 +9,21 @@ import (
 	"strings"
 )
 
+// isInputFromPipe checks if there's input from a pipe
+func isInputFromPipe() bool {
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		fmt.Println("Error stating stdin:", err)
+		return false
+	}
+	return fi.Mode()&os.ModeNamedPipe != 0 || fi.Size() > 0
+}
+
 func InsertRequest(r io.Reader, args []string) (Records, error) {
+	if !isInputFromPipe() {
+		return Records{Record{}}, nil
+	}
+
 	input, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -109,7 +123,7 @@ func Insert(ctx context.Context, command *Command, r io.Reader) error {
 	}
 	defer tx.Rollback()
 
-	var inserts, updates int64
+	var updates int64
 	for _, record := range records {
 		query, params := buildInsertQuery(table, record)
 
@@ -122,17 +136,13 @@ func Insert(ctx context.Context, command *Command, r io.Reader) error {
 			return err
 		}
 		rowsAffected, _ := result.RowsAffected()
-		if rowsAffected > 1 {
-			updates++
-		} else {
-			inserts++
-		}
+		updates += rowsAffected
 	}
 
 	if err := tx.Commit(); err != nil {
 		return err
 	}
 
-	fmt.Printf("%d inserts, %d updates\n", inserts, updates)
+	fmt.Printf("%d rows affected\n", updates)
 	return nil
 }
