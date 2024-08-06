@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -32,6 +32,11 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 			parts := strings.SplitN(arg, "=", 2)
 			parts[1] = strings.Trim(parts[1], "'\"")
 
+			if parts[1] == "NULL" {
+				params = append(params, parts[0]+" IS NULL")
+				continue
+			}
+
 			params = append(params, parts[0]+" = ?")
 			values = append(values, parts[1])
 			continue
@@ -39,9 +44,16 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 		params = append(params, arg)
 	}
 
+	if len(params) == 0 {
+		params = append(params, "1=1")
+	}
+
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s", table, strings.Join(params, " "))
+	if !all {
+		query = query + " LIMIT 0,1"
+	}
 	if command.Verbose {
-		fmt.Println("--", query)
+		fmt.Printf("-- %s %#v %#v\n", query, params, values)
 	}
 	rows, err := command.DB.Queryx(query, values...)
 	if err != nil {
@@ -64,21 +76,16 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 		results = append(results, result)
 	}
 
-	var output []byte
-	if !all {
-		var res *Record
-		if len(results) > 0 {
-			res = &results[0]
-		}
-		if res == nil {
-			return errors.New("no results")
-		}
-
-		output, err = json.Marshal(res)
-	} else {
-		output, err = json.Marshal(results)
+	if len(results) == 0 {
+		os.Exit(1)
 	}
 
+	var data any = results
+	if !all {
+		data = &results[0]
+	}
+
+	output, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
