@@ -53,7 +53,16 @@ func buildInsertQuery(table string, data Record) (string, []any) {
 		values = append(values, data[key])
 	}
 
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", table, strings.Join(keys, ", "), placeholders)
+	// Step 4: Construct ON DUPLICATE KEY UPDATE clause
+	updates := make([]string, 0, len(data))
+	for _, key := range keys {
+		updates = append(updates, fmt.Sprintf("%s = VALUES(%s)", key, key))
+	}
+
+	// Step 5: Create the query string
+	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s",
+		table, strings.Join(keys, ", "), placeholders, strings.Join(updates, ", "))
+
 	return query, values
 }
 
@@ -70,7 +79,7 @@ func Insert(ctx context.Context, command *Command, r io.Reader) error {
 	for _, arg := range command.Args[1:] {
 		if strings.Contains(arg, "=") {
 			parts := strings.SplitN(arg, "=", 2)
-			parts[1] = strings.Trim(parts[1], "'")
+			parts[1] = strings.Trim(parts[1], "'\"")
 
 			if strings.HasPrefix(parts[1], "@") {
 				contents, err := os.ReadFile(parts[1][1:])
@@ -100,26 +109,30 @@ func Insert(ctx context.Context, command *Command, r io.Reader) error {
 	}
 	defer tx.Rollback()
 
-	count := 0
+	var inserts, updates int64
 	for _, record := range records {
 		query, params := buildInsertQuery(table, record)
-		_, err := tx.Exec(query, params...)
+
+		if command.Verbose {
+			fmt.Printf("-- %s %#v\n", query, params)
+		}
+
+		result, err := tx.Exec(query, params...)
 		if err != nil {
-			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-				continue // Ignore unique constraint errors
-			}
-			if strings.Contains(err.Error(), "Duplicate entry") {
-				continue // Ignore unique constraint errors
-			}
 			return err
 		}
-		count++
+		rowsAffected, _ := result.RowsAffected()
+		if rowsAffected > 1 {
+			updates++
+		} else {
+			inserts++
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
 		return err
 	}
 
-	fmt.Printf("%d rows added\n", count)
+	fmt.Printf("%d inserts, %d updates\n", inserts, updates)
 	return nil
 }
