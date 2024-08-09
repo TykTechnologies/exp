@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/spf13/pflag"
+
+	"github.com/TykTechnologies/exp/cmd/etl/handlers"
 )
 
 type Config struct {
@@ -21,7 +23,7 @@ func NewConfig() *Config {
 }
 
 func (c *Config) ParseFlags() ([]string, error) {
-	flagSet := NewFlagSet("Config")
+	flagSet := handlers.NewFlagSet("Config")
 	flagSet.StringVar(&c.DSN, "db-dsn", os.Getenv("DB_DSN"), "Database DSN")
 	flagSet.StringVar(&c.Driver, "db-driver", os.Getenv("DB_DRIVER"), "Database Driver")
 	flagSet.StringVarP(&c.Folder, "folder", "f", "output", "Folder with outputs")
@@ -46,13 +48,6 @@ func (c *Config) GetDSN() string {
 
 func (c *Config) GetDriver() string {
 	return c.Driver
-}
-
-// NewFlagSet is used for command flags.
-func NewFlagSet(name string) *pflag.FlagSet {
-	fs := pflag.NewFlagSet(name, pflag.ContinueOnError)
-	fs.SetInterspersed(true)
-	return fs
 }
 
 // filterKnownArgs separates known flags from unknown ones
