@@ -143,6 +143,8 @@ func Insert(ctx context.Context, command *Command, r io.Reader) error {
 		return err
 	}
 
-	fmt.Printf("%d rows affected\n", updates)
+	if !command.Quiet {
+		fmt.Printf("%s: stored %d records, %d rows affected\n", table, len(records), updates)
+	}
 	return nil
 }

@@ -8,10 +8,12 @@ type Record map[string]string
 type Records []Record
 
 type Command struct {
-	Name    string
-	Args    []string
-	DB      *sqlx.DB
+	Name string
+	Args []string
+	DB   *sqlx.DB
+
 	Verbose bool
+	Quiet   bool
 }
 
 type TableInfo struct {

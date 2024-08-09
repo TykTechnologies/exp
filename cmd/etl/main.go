@@ -45,6 +45,7 @@ func start(ctx context.Context) error {
 		Name:    args[0],
 		Args:    args[1:],
 		Verbose: config.Verbose,
+		Quiet:   config.Quiet,
 	}
 
 	return HandleCommand(ctx, &command, os.Stdin)

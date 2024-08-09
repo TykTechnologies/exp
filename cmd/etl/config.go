@@ -8,10 +8,12 @@ import (
 )
 
 type Config struct {
-	DSN     string
-	Driver  string
-	Folder  string
+	DSN    string
+	Driver string
+	Folder string
+
 	Verbose bool
+	Quiet   bool
 }
 
 func NewConfig() *Config {
@@ -24,6 +26,7 @@ func (c *Config) ParseFlags() ([]string, error) {
 	flagSet.StringVar(&c.Driver, "db-driver", os.Getenv("DB_DRIVER"), "Database Driver")
 	flagSet.StringVarP(&c.Folder, "folder", "f", "output", "Folder with outputs")
 	flagSet.BoolVarP(&c.Verbose, "verbose", "v", false, "Folder with outputs")
+	flagSet.BoolVarP(&c.Quiet, "quiet", "q", false, "Quiet output")
 
 	k, u := filterKnownArgs(flagSet, os.Args[1:])
 

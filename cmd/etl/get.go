@@ -10,9 +10,14 @@ import (
 )
 
 func Get(ctx context.Context, command *Command, _ io.Reader) error {
-	var all bool
+	var (
+		all           bool
+		offset, limit int
+	)
 
 	flagSet := NewFlagSet("Get")
+	flagSet.IntVar(&offset, "offset", 0, "Offset for the results")
+	flagSet.IntVar(&limit, "limit", 1, "Limit the number of results")
 	flagSet.BoolVar(&all, "all", false, "Return all records")
 	if err := flagSet.Parse(command.Args); err != nil {
 		return fmt.Errorf("error parsing flags: %w", err)
@@ -49,8 +54,8 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 	}
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s", table, strings.Join(params, " "))
-	if !all {
-		query = query + " LIMIT 0,1"
+	if !all || limit > 1 {
+		query = query + fmt.Sprintf(" LIMIT %d, %d", offset, limit)
 	}
 	if command.Verbose {
 		fmt.Printf("-- %s %#v %#v\n", query, params, values)
@@ -81,7 +86,7 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 	}
 
 	var data any = results
-	if !all {
+	if !all && limit == 1 {
 		data = &results[0]
 	}
 

@@ -17,6 +17,7 @@ func HandleCommand(ctx context.Context, command *Command, r io.Reader) error {
 		"list":     List,
 		"tables":   Tables,
 		"update":   Update,
+		"query":    Query,
 		"truncate": Truncate,
 	}
 	commands := maps.Keys(commandMap)
