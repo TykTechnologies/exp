@@ -8,9 +8,11 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
+
+	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
-func List(ctx context.Context, command *Command, _ io.Reader) error {
+func List(ctx context.Context, command *model.Command, _ io.Reader) error {
 	var offset, limit int
 	var order, sortBy string
 
@@ -44,7 +46,7 @@ func List(ctx context.Context, command *Command, _ io.Reader) error {
 	}
 	defer rows.Close()
 
-	var results []Record
+	var results []model.Record
 	for rows.Next() {
 		row := make(map[string]any)
 		if err := rows.MapScan(row); err != nil {
@@ -61,7 +63,7 @@ func List(ctx context.Context, command *Command, _ io.Reader) error {
 
 	var output []byte
 	if len(command.Args) > 1 {
-		var res *Record
+		var res *model.Record
 		if len(results) > 0 {
 			res = &results[0]
 		}

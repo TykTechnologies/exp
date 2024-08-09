@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
 func decodeQueryParameters(args []string) (map[string]any, error) {
@@ -33,7 +35,7 @@ func decodeQueryParameters(args []string) (map[string]any, error) {
 	return result, nil
 }
 
-func Query(ctx context.Context, command *Command, _ io.Reader) error {
+func Query(ctx context.Context, command *model.Command, _ io.Reader) error {
 	flagSet := NewFlagSet("Query")
 	if err := flagSet.Parse(command.Args); err != nil {
 		return fmt.Errorf("error parsing flags: %w", err)

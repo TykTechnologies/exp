@@ -6,11 +6,13 @@ import (
 	"io"
 
 	"golang.org/x/exp/maps"
+
+	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
-type CommandHandlerFunc func(ctx context.Context, command *Command, r io.Reader) error
+type CommandHandlerFunc func(ctx context.Context, command *model.Command, r io.Reader) error
 
-func HandleCommand(ctx context.Context, command *Command, r io.Reader) error {
+func HandleCommand(ctx context.Context, command *model.Command, r io.Reader) error {
 	commandMap := map[string]CommandHandlerFunc{
 		"insert":   Insert,
 		"get":      Get,

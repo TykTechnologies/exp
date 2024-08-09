@@ -5,6 +5,6 @@ tasks:
   default:
     desc: "Everything"
     cmds:
-      - goimports -w .
+      - goimports -w -local=$(go list .) .
       - go fmt .
       - go install .

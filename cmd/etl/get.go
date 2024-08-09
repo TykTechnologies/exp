@@ -7,9 +7,11 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
-func Get(ctx context.Context, command *Command, _ io.Reader) error {
+func Get(ctx context.Context, command *model.Command, _ io.Reader) error {
 	var (
 		all           bool
 		offset, limit int
@@ -66,7 +68,7 @@ func Get(ctx context.Context, command *Command, _ io.Reader) error {
 	}
 	defer rows.Close()
 
-	var results []Record
+	var results []model.Record
 	for rows.Next() {
 		row := make(map[string]any)
 		if err := rows.MapScan(row); err != nil {

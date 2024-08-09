@@ -10,9 +10,11 @@ import (
 	"strings"
 
 	"golang.org/x/exp/maps"
+
+	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
-func UpdateRequest(r io.Reader, args []string) (Records, error) {
+func UpdateRequest(r io.Reader, args []string) (model.Records, error) {
 	input, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -23,13 +25,13 @@ func UpdateRequest(r io.Reader, args []string) (Records, error) {
 		multi = true
 	}
 
-	var records Records
+	var records model.Records
 	if multi {
 		if err := json.Unmarshal(input, &records); err != nil {
 			return nil, err
 		}
 	} else {
-		var record Record
+		var record model.Record
 		if err := json.Unmarshal(input, &record); err != nil {
 			return nil, err
 		}
@@ -39,7 +41,7 @@ func UpdateRequest(r io.Reader, args []string) (Records, error) {
 	return records, nil
 }
 
-func buildUpdateQuery(table string, data Record, whereKeys []string) (string, []any) {
+func buildUpdateQuery(table string, data model.Record, whereKeys []string) (string, []any) {
 	var query = fmt.Sprintf("UPDATE %s SET ", table)
 
 	keys := maps.Keys(data)
@@ -70,7 +72,7 @@ func buildUpdateQuery(table string, data Record, whereKeys []string) (string, []
 	return query, values
 }
 
-func Update(ctx context.Context, command *Command, r io.Reader) error {
+func Update(ctx context.Context, command *model.Command, r io.Reader) error {
 	records, err := UpdateRequest(r, command.Args[1:])
 	if err != nil {
 		return err

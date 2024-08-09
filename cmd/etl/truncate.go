@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+
+	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
-func Truncate(ctx context.Context, command *Command, _ io.Reader) error {
+func Truncate(ctx context.Context, command *model.Command, _ io.Reader) error {
 	var skipForeignKeyChecks bool
 
 	flagSet := NewFlagSet("Get")

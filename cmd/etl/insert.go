@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
 // isInputFromPipe checks if there's input from a pipe
@@ -19,9 +21,9 @@ func isInputFromPipe() bool {
 	return fi.Mode()&os.ModeNamedPipe != 0 || fi.Size() > 0
 }
 
-func InsertRequest(r io.Reader, args []string) (Records, error) {
+func InsertRequest(r io.Reader, args []string) (model.Records, error) {
 	if !isInputFromPipe() {
-		return Records{Record{}}, nil
+		return model.Records{model.Record{}}, nil
 	}
 
 	input, err := io.ReadAll(r)
@@ -34,13 +36,13 @@ func InsertRequest(r io.Reader, args []string) (Records, error) {
 		multi = true
 	}
 
-	var records Records
+	var records model.Records
 	if multi {
 		if err := json.Unmarshal(input, &records); err != nil {
 			return nil, err
 		}
 	} else {
-		var record Record
+		var record model.Record
 		if err := json.Unmarshal(input, &record); err != nil {
 			return nil, err
 		}
@@ -50,7 +52,7 @@ func InsertRequest(r io.Reader, args []string) (Records, error) {
 	return records, nil
 }
 
-func buildInsertQuery(table string, data Record) (string, []any) {
+func buildInsertQuery(table string, data model.Record) (string, []any) {
 	// Step 1: List the keys
 	keys := make([]string, 0, len(data))
 	for key := range data {
@@ -80,7 +82,7 @@ func buildInsertQuery(table string, data Record) (string, []any) {
 	return query, values
 }
 
-func Insert(ctx context.Context, command *Command, r io.Reader) error {
+func Insert(ctx context.Context, command *model.Command, r io.Reader) error {
 	records, err := InsertRequest(r, command.Args[1:])
 	if err != nil {
 		return err

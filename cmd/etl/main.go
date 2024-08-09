@@ -10,6 +10,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/TykTechnologies/exp/cmd/etl/model"
+
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -40,7 +42,7 @@ func start(ctx context.Context) error {
 	}
 	defer db.Close()
 
-	command := Command{
+	command := model.Command{
 		DB:      db,
 		Name:    args[0],
 		Args:    args[1:],
