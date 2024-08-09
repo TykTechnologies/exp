@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	"golang.org/x/exp/maps"
@@ -43,9 +45,13 @@ func buildUpdateQuery(table string, data Record, whereKeys []string) (string, []
 	keys := maps.Keys(data)
 
 	values := []any{}
-	for i, key := range keys {
+	for _, key := range keys {
+		if slices.Contains(whereKeys, key) {
+			continue
+		}
+
 		prefix := ", "
-		if i == 0 {
+		if len(values) == 0 {
 			prefix = ""
 		}
 		query += fmt.Sprintf("%s%s=? ", prefix, key)
@@ -73,16 +79,47 @@ func Update(ctx context.Context, command *Command, r io.Reader) error {
 	table := command.Args[0]
 	where := command.Args[1:]
 
+	var values []string
+	var names []string
+	for _, arg := range where {
+		if strings.HasPrefix(arg, "-") {
+			continue
+		}
+
+		if strings.Contains(arg, "=") {
+			parts := strings.SplitN(arg, "=", 2)
+			parts[1] = strings.Trim(parts[1], "'\"")
+
+			if parts[1] == "NULL" {
+				names = append(names, parts[0]+" IS NULL")
+				continue
+			}
+
+			names = append(names, parts[0]+" = ?")
+			values = append(values, parts[1])
+			continue
+		}
+		names = append(names, arg)
+	}
+
+	if len(names) == 0 {
+		return errors.New("no where condition for update")
+	}
+
 	tx, err := command.DB.Beginx()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	count := 0
+	var updates int64
 	for _, record := range records {
-		query, params := buildUpdateQuery(table, record, where)
-		_, err := tx.Exec(query, params...)
+		query, params := buildUpdateQuery(table, record, names)
+		if command.Verbose {
+			fmt.Printf("-- %s %#v\n", query, params)
+		}
+
+		result, err := tx.Exec(query, params...)
 		if err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				continue // Ignore unique constraint errors
@@ -92,13 +129,16 @@ func Update(ctx context.Context, command *Command, r io.Reader) error {
 			}
 			return err
 		}
-		count++
+		rowsAffected, _ := result.RowsAffected()
+		updates += rowsAffected
 	}
 
 	if err := tx.Commit(); err != nil {
 		return err
 	}
 
-	fmt.Printf("%d rows updated\n", count)
+	if !command.Quiet {
+		fmt.Printf("%s: stored %d records, %d rows affected\n", table, len(records), updates)
+	}
 	return nil
 }
