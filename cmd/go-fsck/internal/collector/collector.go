@@ -328,7 +328,7 @@ func (p *collector) symbolType(expr ast.Expr) string {
 		k, v := p.symbolType(t.Key), p.symbolType(t.Value)
 		return fmt.Sprintf("map[%s]%s", k, v)
 	case *ast.InterfaceType:
-		return ""
+		return "any"
 	}
 	return fmt.Sprintf("%T", expr)
 }
