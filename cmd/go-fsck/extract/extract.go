@@ -42,6 +42,12 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 		}
 	}
 
+	if !cfg.includeSources {
+		for _, def := range defs {
+			def.ClearSource()
+		}
+	}
+
 	return defs, nil
 }
 

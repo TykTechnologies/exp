@@ -26,20 +26,20 @@ func (i *StringSet) Add(key, lit string) {
 	*i = data
 }
 
-func (i StringSet) All() []string {
-	result := []string{}
-	for _, set := range i {
-		result = append(result, set...)
-	}
-	return result
-}
-
 func (i StringSet) Get(key string) []string {
 	val, _ := i[key]
 	if val != nil {
 		sort.Strings(val)
 	}
 	return val
+}
+
+func (i StringSet) All() []string {
+	result := []string{}
+	for _, set := range i {
+		result = append(result, set...)
+	}
+	return result
 }
 
 // Map returns a map with the short package name as the key

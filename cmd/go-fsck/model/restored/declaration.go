@@ -4,30 +4,26 @@ import (
 	"strings"
 )
 
-type (
-	DeclarationKind string
+type Declaration struct {
+	Kind DeclarationKind
+	File string
 
-	Declaration struct {
-		Kind DeclarationKind
-		File string
+	SelfContained bool
 
-		SelfContained bool
+	Imports []string `json:",omitempty"`
 
-		Imports []string `json:",omitempty"`
+	References map[string][]string `json:",omitempty"`
 
-		References map[string][]string `json:",omitempty"`
+	Name     string   `json:",omitempty"`
+	Names    []string `json:",omitempty"`
+	Receiver string   `json:",omitempty"`
 
-		Name     string   `json:",omitempty"`
-		Names    []string `json:",omitempty"`
-		Receiver string   `json:",omitempty"`
+	Arguments []string `json:",omitempty"`
+	Returns   []string `json:",omitempty"`
 
-		Arguments []string `json:",omitempty"`
-		Returns   []string `json:",omitempty"`
-
-		Signature string `json:",omitempty"`
-		Source    string
-	}
-)
+	Signature string `json:",omitempty"`
+	Source    string
+}
 
 func (d *Declaration) Keys() []string {
 	trimPath := "*."
@@ -43,8 +39,4 @@ func (d *Declaration) Keys() []string {
 		}
 	}
 	return nil
-}
-
-func (d DeclarationKind) String() string {
-	return string(d)
 }

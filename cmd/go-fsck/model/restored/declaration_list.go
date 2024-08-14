@@ -11,6 +11,12 @@ func (p *DeclarationList) Append(in ...*Declaration) {
 	*p = append(*p, in...)
 }
 
+func (p *DeclarationList) ClearSource() {
+	for _, decl := range *p {
+		decl.Source = ""
+	}
+}
+
 func (p *DeclarationList) Sort() {
 	sort.Slice(*p, func(i, j int) bool {
 		a, b := (*p)[i], (*p)[j]

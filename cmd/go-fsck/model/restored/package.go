@@ -24,6 +24,13 @@ type (
 	}
 )
 
+func (d *Definition) ClearSource() {
+	d.Types.ClearSource()
+	d.Vars.ClearSource()
+	d.Consts.ClearSource()
+	d.Funcs.ClearSource()
+}
+
 func (d *Definition) Fill() {
 	for _, decl := range d.Order() {
 		decl.Imports = d.getImports(decl)
