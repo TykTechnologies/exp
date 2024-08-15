@@ -11,12 +11,25 @@ import (
 
 func getDefinitions(cfg *options) ([]*model.Definition, error) {
 	// list current local packages
-	packages, err := internal.ListPackages(".", "./...")
+	pattern := "./..."
+	if len(cfg.args) > 0 {
+		pattern = cfg.args[0]
+	}
+
+	packages, err := internal.ListPackages(".", pattern)
 	if err != nil {
 		return nil, err
 	}
 
 	defs := []*model.Definition{}
+	getDef := func(in *model.Definition) *model.Definition {
+		for _, def := range defs {
+			if def.Package.Equal(in.Package) {
+				return def
+			}
+		}
+		return nil
+	}
 
 	for _, pkg := range packages {
 		d, err := loader.Load(pkg.Path, cfg.verbose)
@@ -24,7 +37,14 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 			return nil, err
 		}
 
-		defs = append(defs, d...)
+		for _, in := range d {
+			def := getDef(in)
+			if def != nil {
+				def.Merge(in)
+				continue
+			}
+			defs = append(defs, in)
+		}
 	}
 
 	return defs, nil

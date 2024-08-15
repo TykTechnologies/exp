@@ -117,6 +117,10 @@ func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Defi
 func collectFuncReferences(funcDecl *ast.FuncDecl) map[string][]string {
 	imports := make(map[string][]string)
 
+	defer func() {
+		recover()
+	}()
+
 	// Traverse the function body and look for package identifiers.
 	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
 		switch n := node.(type) {

@@ -29,6 +29,7 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		for _, v := range d {
 			v.Package.ImportPath = pkg.ImportPath
 			v.Package.Path = pkg.Path
@@ -41,6 +42,8 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 			defs = append(defs, d...)
 		}
 	}
+
+	defs = unique(defs)
 
 	if !cfg.includeSources {
 		for _, def := range defs {

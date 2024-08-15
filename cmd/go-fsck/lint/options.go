@@ -9,20 +9,16 @@ import (
 )
 
 type options struct {
-	lintImports bool
-
 	verbose bool
+	args    []string
 }
 
 func NewOptions() *options {
-	cfg := &options{
-		lintImports: true,
-	}
-
-	flag.BoolVar(&cfg.lintImports, "lint-all", cfg.lintImports, "lint imports")
-
+	cfg := &options{}
 	flag.BoolVarP(&cfg.verbose, "verbose", "v", cfg.verbose, "verbose output")
 	flag.Parse()
+
+	cfg.args = flag.Args()
 
 	return cfg
 }

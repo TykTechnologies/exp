@@ -2,9 +2,13 @@ package loader
 
 import (
 	"encoding/json"
+	"fmt"
 	"go/ast"
+	"go/parser"
 	"go/token"
 	"os"
+	"path"
+	"strings"
 
 	"golang.org/x/tools/go/ast/inspector"
 	"golang.org/x/tools/go/packages"
@@ -18,22 +22,39 @@ func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
 	fset := token.NewFileSet()
 
 	cfg := &packages.Config{
-		Mode:  packages.LoadSyntax,
+		Mode:  packages.LoadAllSyntax,
 		Tests: true,
 		Fset:  fset,
 	}
+	_ = cfg
 
-	pkgs, err := packages.Load(cfg, sourcePath)
+	pkgs, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
+	//pkgs, err := packages.Load(cfg, sourcePath)
 	if err != nil {
 		return nil, err
-	}
-	if len(pkgs) > 2 {
-		pkgs = pkgs[:2]
 	}
 
 	files := []*ast.File{}
 	for _, pkg := range pkgs {
-		files = append(files, pkg.Syntax...)
+		for _, file := range pkg.Files {
+			filename := path.Base(fset.Position(file.Pos()).Filename)
+			if !strings.HasSuffix(filename, ".go") {
+				// skip test packages that don't end in .go
+				continue
+			}
+
+			src, err := os.ReadFile(path.Join(sourcePath, filename))
+			if err != nil {
+				return nil, fmt.Errorf("Error reading in source file: %s", filename)
+			}
+
+			if tags := BuildTags(src); len(tags) > 0 {
+				// skipped files with build tags
+				continue
+			}
+
+			files = append(files, file)
+		}
 	}
 
 	sink := collector.NewCollector(fset)
