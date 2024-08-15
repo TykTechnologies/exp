@@ -6,7 +6,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// Run is the entrypoint for `schema-gen extract`.
+// Run is the entrypoint for `go-fsck extract`.
 func Run() (err error) {
 	cfg := NewOptions()
 

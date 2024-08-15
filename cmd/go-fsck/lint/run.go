@@ -6,7 +6,7 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// Run is the entrypoint for `schema-gen lint`.
+// Run is the entrypoint for `go-fsck lint`.
 func Run() (err error) {
 	cfg := NewOptions()
 
