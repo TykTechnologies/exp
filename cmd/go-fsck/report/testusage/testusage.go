@@ -18,7 +18,7 @@ type FuncRef struct {
 }
 
 func (f *FuncRef) String() string {
-	return fmt.Sprint(f.FuncDecl.Signature)
+	return fmt.Sprintf("%s --> %s.%s", f.FuncDecl.Signature, f.ReferencedPackage, f.ReferencedSymbol)
 }
 
 type Report struct {
@@ -34,7 +34,7 @@ func (r *Report) String() string {
 }
 
 // NewReport analyzes the provided definitions, resolves external dependencies, and returns a list of *FuncRef.
-func NewReport(definitions []*model.Definition) ([]*FuncRef, error) {
+func NewReport(definitions []*model.Definition) (*Report, error) {
 	var allFuncRefs []*FuncRef
 
 	for _, def := range definitions {
@@ -53,7 +53,7 @@ func NewReport(definitions []*model.Definition) ([]*FuncRef, error) {
 	}
 
 	log.Printf("Total test function references found: %d\n", len(resolvedRefs))
-	return resolvedRefs, nil
+	return &Report{resolvedRefs}, nil
 }
 
 // isTestFunction checks if a function is a test function based on its name or signature.
@@ -109,41 +109,14 @@ func resolveExternalDependencies(funcRefs []*FuncRef, definitions []*model.Defin
 		symbolPackage := ref.ReferencedPackage
 
 		// First, try to resolve within the same definition
-		imported, ok := ref.Definition.Imports[ref.FuncDecl.File]
-		if !ok {
+		imported, errs := ref.Definition.Imports.Map()
+		if len(errs) > 0 {
 			log.Printf("No imports found for file: %s in definition: %s", ref.FuncDecl.File, ref.Definition.Package.Package)
+			log.Println(errs)
 		}
 
-		var matchedImport string
-		for _, p := range imported {
-			if strings.HasPrefix(p, symbolPackage+" ") || strings.HasSuffix(p, symbolPackage+"\"") {
-				matchedImport = p
-				break
-			}
-		}
-
-		// If not found, try resolving in other definitions
-		if matchedImport == "" {
-			for _, def := range definitions {
-				if def == ref.Definition {
-					continue // Skip the current definition as we've already checked it
-				}
-				otherImports, ok := def.Imports[ref.FuncDecl.File]
-				if ok {
-					for _, p := range otherImports {
-						if strings.HasPrefix(p, symbolPackage+" ") || strings.HasSuffix(p, symbolPackage+"\"") {
-							matchedImport = p
-							break
-						}
-					}
-				}
-				if matchedImport != "" {
-					break
-				}
-			}
-		}
-
-		if matchedImport == "" {
+		matchedImport, ok := imported[symbolPackage]
+		if !ok {
 			return nil, fmt.Errorf("no matching import found for symbol package: %s in function: %s", symbolPackage, ref.FuncDecl.Name)
 		}
 

@@ -13,8 +13,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
-
 	. "github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
 )
@@ -29,24 +27,20 @@ type collector struct {
 	fset *token.FileSet
 
 	definition map[string]*Definition
-	seen       map[string]*Declaration
+	seen       map[string]bool
 }
 
 func NewCollector(fset *token.FileSet) *collector {
 	return &collector{
 		fset:       fset,
 		definition: make(map[string]*Definition),
-		seen:       make(map[string]*Declaration),
+		seen:       make(map[string]bool),
 	}
 }
 
 func (v *collector) Clean(verbose bool) []*Definition {
 	for _, def := range v.definition {
 		importMap, _ := def.Imports.Map()
-
-		if verbose {
-			fmt.Printf("Imports: %s\n", spew.Sdump(importMap))
-		}
 
 		for _, fv := range def.Funcs {
 			for k, v := range fv.References {
@@ -83,17 +77,14 @@ func (v *collector) Clean(verbose bool) []*Definition {
 	return results
 }
 
-func (v *collector) appendSeen(key string, value *Declaration) {
-	if len(value.Names) == 1 {
-		value.Name = value.Names[0]
-		value.Names = nil
-	}
-	v.seen[key] = value
+func (v *collector) setSeen(key string) {
+	// fmt.Printf("seen: %s\n", key)
+	v.seen[key] = true
 }
 
 func (v *collector) isSeen(key string) bool {
-	decl, ok := v.seen[key]
-	return ok && decl != nil
+	_, ok := v.seen[key]
+	return ok
 }
 
 func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Definition) {
@@ -119,7 +110,7 @@ func (v *collector) collectImports(filename string, decl *ast.GenDecl, def *Defi
 			}
 		}
 
-		def.Imports.Add(filename, importLiteral)
+		def.Imports.Add(filepath.Base(filename), importLiteral)
 	}
 }
 
@@ -199,21 +190,26 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		}
 
 		names := v.Names(node)
+
 		for _, name := range names {
-			if v.isSeen(packageName + "." + name) {
+			if v.isSeen("decl:" + packageName + "." + name) {
 				return true
 			}
 		}
 
 		def := &Declaration{
 			Names:         names,
-			File:          filename,
+			File:          filepath.Base(filename),
 			SelfContained: IsSelfContainedType(node),
 			Source:        v.getSource(file, node),
 		}
+		if len(def.Names) == 1 {
+			def.Name = def.Names[0]
+			def.Names = nil
+		}
 
 		for _, name := range names {
-			v.appendSeen(packageName+"."+name, def)
+			v.setSeen("decl:" + packageName + "." + name)
 		}
 
 		switch node.Tok {
@@ -229,17 +225,20 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		}
 
 	case *ast.FuncDecl:
+		name := node.Name.Name
+		key := name
+		if packageName != "" {
+			key = packageName + "." + name
+		}
+		if v.isSeen("func:" + key) {
+			return true
+		}
+		v.setSeen("func:" + key)
+
 		def := v.collectFuncDeclaration(file, node, filename, stack)
 		if def != nil {
-			key := strings.Trim(packageName+"."+def.Receiver+"."+def.Name, "*.")
-			if v.isSeen(key) {
-				return true
-			}
-			defer v.appendSeen(key, def)
-
 			pkg.Funcs.Append(def)
 		}
-
 	}
 
 	return true
@@ -287,7 +286,7 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 
 	declaration := &Declaration{
 		Kind:       model.FuncKind,
-		File:       filename,
+		File:       filepath.Base(filename),
 		Name:       decl.Name.Name,
 		Arguments:  args,
 		Returns:    returns,
@@ -360,10 +359,12 @@ func (p *collector) functionDef(fun *ast.FuncDecl) string {
 		if err != nil {
 			log.Fatalf("failed printing %s", err)
 		}
+
 		names := make([]string, 0)
 		for _, name := range p.Names {
 			names = append(names, name.Name)
 		}
+
 		params = append(params, fmt.Sprintf("%s %s", strings.Join(names, ","), typeNameBuf.String()))
 	}
 	returns := make([]string, 0)

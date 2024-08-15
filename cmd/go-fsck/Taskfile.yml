@@ -8,7 +8,7 @@ tasks:
     cmds:
       - go install .
       - rm -rf model/restored && mkdir -p model/restored
-      - go-fsck extract --include-sources -i model/ -o model/restored/go-fsck.json --pretty-json
+      - go-fsck extract --verbose --include-sources -i model/ -o model/restored/go-fsck.json --pretty-json
       - task: restore
       - task: example
 
@@ -20,8 +20,7 @@ tasks:
   example:
     desc: "Build example"
     cmds:
-      - go-fsck extract --include-sources -i example/ -o example/go-fsck.json --pretty-json --include-tests
-
+      - go-fsck extract --verbose --include-tests --include-sources -i example/ -o example/go-fsck.json --pretty-json
 
   restore:
     desc: "Restore from model"
@@ -45,3 +44,21 @@ tasks:
     desc: "{{ .cli}}: Clean model/restored"
     cmds:
       - rm -rf model/restored && mkdir model/restored
+
+  stress:
+    desc: "Stress test"
+    cmds:
+      - |-
+        # Create a temporary file to store the results
+        output_file=$(mktemp)
+
+        # Run the command 100 times and store the results
+        for i in {1..100}; do
+          go-fsck extract --include-sources -i model/ -o model/restored/go-fsck.json --pretty-json | xargs md5sum >> "$output_file"
+        done
+
+        # Count and display unique results with their occurrence count
+        sort "$output_file" | uniq -c | sort -nr
+
+        # Clean up the temporary file
+        rm "$output_file"

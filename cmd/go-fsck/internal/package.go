@@ -21,7 +21,9 @@ func ListPackages(rootPath string, pattern string) ([]model.Package, error) {
 		return nil, err
 	}
 
-	return cleanPackages(packages), nil
+	result := cleanPackages(packages)
+
+	return result, nil
 }
 
 func cleanPackages(pkgs []*packages.Package) []model.Package {
@@ -30,7 +32,7 @@ func cleanPackages(pkgs []*packages.Package) []model.Package {
 	for _, pkg := range pkgs {
 		cleanPath := "." + strings.TrimPrefix(pkg.PkgPath, first)
 		var testPackage bool
-		if strings.HasSuffix(cleanPath, ".test") {
+		if strings.Contains(cleanPath, ".test") {
 			continue
 		}
 		if strings.HasSuffix(cleanPath, "_test") {

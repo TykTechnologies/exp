@@ -65,6 +65,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -134,306 +145,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "printer_test.go": [
-        "\"fmt\"",
-        "\"go/parser\"",
-        "\"go/printer\"",
-        "\"go/token\"",
-        "\"io\"",
-        "\"strings\"",
-        "\"testing\"",
-        "\"github.com/stretchr/testify/assert\"",
-        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
-      ]
-    },
-    "Types": null,
-    "Consts": null,
-    "Vars": null,
-    "Funcs": [
+      },
       {
         "Kind": "func",
-        "File": "printer_test.go",
+        "File": "example_tag.go",
         "SelfContained": false,
-        "References": {
-          "printer": [
-            "Fprint"
-          ]
-        },
-        "Name": "PrintSource",
-        "Arguments": [
-          "io.Writer",
-          "*token.FileSet",
-          "any"
-        ],
+        "Name": "Linux",
         "Returns": [
-          "error"
+          "string"
         ],
-        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
-        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "printer_test.go",
-        "SelfContained": false,
-        "References": {
-          "assert": [
-            "NoError"
-          ],
-          "ast": [
-            "PrintSource"
-          ],
-          "fmt": [
-            "Println"
-          ],
-          "parser": [
-            "ParseDir",
-            "ParseComments"
-          ],
-          "printer": [
-            "CommentedNode"
-          ],
-          "strings": [
-            "Builder"
-          ],
-          "token": [
-            "NewFileSet"
-          ]
-        },
-        "Name": "TestPrinter",
-        "Arguments": [
-          "*testing.T"
-        ],
-        "Signature": "TestPrinter (t *testing.T)",
-        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "printer_test.go": [
-        "\"fmt\"",
-        "\"go/parser\"",
-        "\"go/printer\"",
-        "\"go/token\"",
-        "\"io\"",
-        "\"strings\"",
-        "\"testing\"",
-        "\"github.com/stretchr/testify/assert\"",
-        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
-      ]
-    },
-    "Types": null,
-    "Consts": null,
-    "Vars": null,
-    "Funcs": [
-      {
-        "Kind": "func",
-        "File": "printer_test.go",
-        "SelfContained": false,
-        "References": {
-          "printer": [
-            "Fprint"
-          ]
-        },
-        "Name": "PrintSource",
-        "Arguments": [
-          "io.Writer",
-          "*token.FileSet",
-          "any"
-        ],
-        "Returns": [
-          "error"
-        ],
-        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
-        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "printer_test.go",
-        "SelfContained": false,
-        "References": {
-          "assert": [
-            "NoError"
-          ],
-          "ast": [
-            "PrintSource"
-          ],
-          "fmt": [
-            "Println"
-          ],
-          "parser": [
-            "ParseDir",
-            "ParseComments"
-          ],
-          "printer": [
-            "CommentedNode"
-          ],
-          "strings": [
-            "Builder"
-          ],
-          "token": [
-            "NewFileSet"
-          ]
-        },
-        "Name": "TestPrinter",
-        "Arguments": [
-          "*testing.T"
-        ],
-        "Signature": "TestPrinter (t *testing.T)",
-        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "example.go": [
-        "\"net/http\""
-      ]
-    },
-    "Types": [
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "Body",
-        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
-      },
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "File",
-        "Source": "// File represents a filename\ntype File string"
-      }
-    ],
-    "Consts": [
-      {
-        "Kind": "const",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "E_WARNING",
-        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
-      }
-    ],
-    "Vars": [
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Names": [
-          "exampleGroup1",
-          "exampleGroup2"
-        ],
-        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
-      },
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "exampleGroup3",
-        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
-      }
-    ],
-    "Funcs": [
-      {
-        "Kind": "func",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "GlobalFunc",
-        "Returns": [
-          "error"
-        ],
-        "Signature": "GlobalFunc () error",
-        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "example.go": [
-        "\"net/http\""
-      ]
-    },
-    "Types": [
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "Body",
-        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
-      },
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "File",
-        "Source": "// File represents a filename\ntype File string"
-      }
-    ],
-    "Consts": [
-      {
-        "Kind": "const",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "E_WARNING",
-        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
-      }
-    ],
-    "Vars": [
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Names": [
-          "exampleGroup1",
-          "exampleGroup2"
-        ],
-        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
-      },
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "exampleGroup3",
-        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
-      }
-    ],
-    "Funcs": [
-      {
-        "Kind": "func",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "GlobalFunc",
-        "Returns": [
-          "error"
-        ],
-        "Signature": "GlobalFunc () error",
-        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -665,6 +387,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -734,306 +467,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "printer_test.go": [
-        "\"fmt\"",
-        "\"go/parser\"",
-        "\"go/printer\"",
-        "\"go/token\"",
-        "\"io\"",
-        "\"strings\"",
-        "\"testing\"",
-        "\"github.com/stretchr/testify/assert\"",
-        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
-      ]
-    },
-    "Types": null,
-    "Consts": null,
-    "Vars": null,
-    "Funcs": [
+      },
       {
         "Kind": "func",
-        "File": "printer_test.go",
+        "File": "example_tag.go",
         "SelfContained": false,
-        "References": {
-          "printer": [
-            "Fprint"
-          ]
-        },
-        "Name": "PrintSource",
-        "Arguments": [
-          "io.Writer",
-          "*token.FileSet",
-          "any"
-        ],
+        "Name": "Linux",
         "Returns": [
-          "error"
+          "string"
         ],
-        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
-        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "printer_test.go",
-        "SelfContained": false,
-        "References": {
-          "assert": [
-            "NoError"
-          ],
-          "ast": [
-            "PrintSource"
-          ],
-          "fmt": [
-            "Println"
-          ],
-          "parser": [
-            "ParseDir",
-            "ParseComments"
-          ],
-          "printer": [
-            "CommentedNode"
-          ],
-          "strings": [
-            "Builder"
-          ],
-          "token": [
-            "NewFileSet"
-          ]
-        },
-        "Name": "TestPrinter",
-        "Arguments": [
-          "*testing.T"
-        ],
-        "Signature": "TestPrinter (t *testing.T)",
-        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "printer_test.go": [
-        "\"fmt\"",
-        "\"go/parser\"",
-        "\"go/printer\"",
-        "\"go/token\"",
-        "\"io\"",
-        "\"strings\"",
-        "\"testing\"",
-        "\"github.com/stretchr/testify/assert\"",
-        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
-      ]
-    },
-    "Types": null,
-    "Consts": null,
-    "Vars": null,
-    "Funcs": [
-      {
-        "Kind": "func",
-        "File": "printer_test.go",
-        "SelfContained": false,
-        "References": {
-          "printer": [
-            "Fprint"
-          ]
-        },
-        "Name": "PrintSource",
-        "Arguments": [
-          "io.Writer",
-          "*token.FileSet",
-          "any"
-        ],
-        "Returns": [
-          "error"
-        ],
-        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
-        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "printer_test.go",
-        "SelfContained": false,
-        "References": {
-          "assert": [
-            "NoError"
-          ],
-          "ast": [
-            "PrintSource"
-          ],
-          "fmt": [
-            "Println"
-          ],
-          "parser": [
-            "ParseDir",
-            "ParseComments"
-          ],
-          "printer": [
-            "CommentedNode"
-          ],
-          "strings": [
-            "Builder"
-          ],
-          "token": [
-            "NewFileSet"
-          ]
-        },
-        "Name": "TestPrinter",
-        "Arguments": [
-          "*testing.T"
-        ],
-        "Signature": "TestPrinter (t *testing.T)",
-        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "example.go": [
-        "\"net/http\""
-      ]
-    },
-    "Types": [
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "Body",
-        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
-      },
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "File",
-        "Source": "// File represents a filename\ntype File string"
-      }
-    ],
-    "Consts": [
-      {
-        "Kind": "const",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "E_WARNING",
-        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
-      }
-    ],
-    "Vars": [
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Names": [
-          "exampleGroup1",
-          "exampleGroup2"
-        ],
-        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
-      },
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "exampleGroup3",
-        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
-      }
-    ],
-    "Funcs": [
-      {
-        "Kind": "func",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "GlobalFunc",
-        "Returns": [
-          "error"
-        ],
-        "Signature": "GlobalFunc () error",
-        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
-      }
-    ]
-  },
-  {
-    "Package": "example",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
-    "Path": ".",
-    "TestPackage": false,
-    "Doc": null,
-    "Imports": {
-      "example.go": [
-        "\"net/http\""
-      ]
-    },
-    "Types": [
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "Body",
-        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
-      },
-      {
-        "Kind": "type",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "File",
-        "Source": "// File represents a filename\ntype File string"
-      }
-    ],
-    "Consts": [
-      {
-        "Kind": "const",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "E_WARNING",
-        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
-      }
-    ],
-    "Vars": [
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Names": [
-          "exampleGroup1",
-          "exampleGroup2"
-        ],
-        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
-      },
-      {
-        "Kind": "var",
-        "File": "example.go",
-        "SelfContained": true,
-        "Name": "exampleGroup3",
-        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
-      }
-    ],
-    "Funcs": [
-      {
-        "Kind": "func",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "GlobalFunc",
-        "Returns": [
-          "error"
-        ],
-        "Signature": "GlobalFunc () error",
-        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -1200,8 +644,8 @@
     ]
   },
   {
-    "Package": "example_test",
-    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example_test",
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
     "Path": ".",
     "TestPackage": false,
     "Doc": null,
@@ -1265,6 +709,581 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "example.go": [
+        "\"net/http\""
+      ]
+    },
+    "Types": [
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "Body",
+        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
+      },
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "File",
+        "Source": "// File represents a filename\ntype File string"
+      }
+    ],
+    "Consts": [
+      {
+        "Kind": "const",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "E_WARNING",
+        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
+      }
+    ],
+    "Vars": [
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Names": [
+          "exampleGroup1",
+          "exampleGroup2"
+        ],
+        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
+      },
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "exampleGroup3",
+        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
+      }
+    ],
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "GlobalFunc",
+        "Returns": [
+          "error"
+        ],
+        "Signature": "GlobalFunc () error",
+        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "printer_test.go": [
+        "\"fmt\"",
+        "\"go/parser\"",
+        "\"go/printer\"",
+        "\"go/token\"",
+        "\"io\"",
+        "\"strings\"",
+        "\"testing\"",
+        "\"github.com/stretchr/testify/assert\"",
+        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
+      ]
+    },
+    "Types": null,
+    "Consts": null,
+    "Vars": null,
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "printer": [
+            "Fprint"
+          ]
+        },
+        "Name": "PrintSource",
+        "Arguments": [
+          "io.Writer",
+          "*token.FileSet",
+          "any"
+        ],
+        "Returns": [
+          "error"
+        ],
+        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
+        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "assert": [
+            "NoError"
+          ],
+          "ast": [
+            "PrintSource"
+          ],
+          "fmt": [
+            "Println"
+          ],
+          "parser": [
+            "ParseDir",
+            "ParseComments"
+          ],
+          "printer": [
+            "CommentedNode"
+          ],
+          "strings": [
+            "Builder"
+          ],
+          "token": [
+            "NewFileSet"
+          ]
+        },
+        "Name": "TestPrinter",
+        "Arguments": [
+          "*testing.T"
+        ],
+        "Signature": "TestPrinter (t *testing.T)",
+        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "printer_test.go": [
+        "\"fmt\"",
+        "\"go/parser\"",
+        "\"go/printer\"",
+        "\"go/token\"",
+        "\"io\"",
+        "\"strings\"",
+        "\"testing\"",
+        "\"github.com/stretchr/testify/assert\"",
+        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
+      ]
+    },
+    "Types": null,
+    "Consts": null,
+    "Vars": null,
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "printer": [
+            "Fprint"
+          ]
+        },
+        "Name": "PrintSource",
+        "Arguments": [
+          "io.Writer",
+          "*token.FileSet",
+          "any"
+        ],
+        "Returns": [
+          "error"
+        ],
+        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
+        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "assert": [
+            "NoError"
+          ],
+          "ast": [
+            "PrintSource"
+          ],
+          "fmt": [
+            "Println"
+          ],
+          "parser": [
+            "ParseDir",
+            "ParseComments"
+          ],
+          "printer": [
+            "CommentedNode"
+          ],
+          "strings": [
+            "Builder"
+          ],
+          "token": [
+            "NewFileSet"
+          ]
+        },
+        "Name": "TestPrinter",
+        "Arguments": [
+          "*testing.T"
+        ],
+        "Signature": "TestPrinter (t *testing.T)",
+        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "example.go": [
+        "\"net/http\""
+      ]
+    },
+    "Types": [
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "Body",
+        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
+      },
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "File",
+        "Source": "// File represents a filename\ntype File string"
+      }
+    ],
+    "Consts": [
+      {
+        "Kind": "const",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "E_WARNING",
+        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
+      }
+    ],
+    "Vars": [
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Names": [
+          "exampleGroup1",
+          "exampleGroup2"
+        ],
+        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
+      },
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "exampleGroup3",
+        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
+      }
+    ],
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "GlobalFunc",
+        "Returns": [
+          "error"
+        ],
+        "Signature": "GlobalFunc () error",
+        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "example.go": [
+        "\"net/http\""
+      ]
+    },
+    "Types": [
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "Body",
+        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
+      },
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "File",
+        "Source": "// File represents a filename\ntype File string"
+      }
+    ],
+    "Consts": [
+      {
+        "Kind": "const",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "E_WARNING",
+        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
+      }
+    ],
+    "Vars": [
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Names": [
+          "exampleGroup1",
+          "exampleGroup2"
+        ],
+        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
+      },
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "exampleGroup3",
+        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
+      }
+    ],
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "GlobalFunc",
+        "Returns": [
+          "error"
+        ],
+        "Signature": "GlobalFunc () error",
+        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "printer_test.go": [
+        "\"fmt\"",
+        "\"go/parser\"",
+        "\"go/printer\"",
+        "\"go/token\"",
+        "\"io\"",
+        "\"strings\"",
+        "\"testing\"",
+        "\"github.com/stretchr/testify/assert\"",
+        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
+      ]
+    },
+    "Types": null,
+    "Consts": null,
+    "Vars": null,
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "printer": [
+            "Fprint"
+          ]
+        },
+        "Name": "PrintSource",
+        "Arguments": [
+          "io.Writer",
+          "*token.FileSet",
+          "any"
+        ],
+        "Returns": [
+          "error"
+        ],
+        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
+        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "assert": [
+            "NoError"
+          ],
+          "ast": [
+            "PrintSource"
+          ],
+          "fmt": [
+            "Println"
+          ],
+          "parser": [
+            "ParseDir",
+            "ParseComments"
+          ],
+          "printer": [
+            "CommentedNode"
+          ],
+          "strings": [
+            "Builder"
+          ],
+          "token": [
+            "NewFileSet"
+          ]
+        },
+        "Name": "TestPrinter",
+        "Arguments": [
+          "*testing.T"
+        ],
+        "Signature": "TestPrinter (t *testing.T)",
+        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "printer_test.go": [
+        "\"fmt\"",
+        "\"go/parser\"",
+        "\"go/printer\"",
+        "\"go/token\"",
+        "\"io\"",
+        "\"strings\"",
+        "\"testing\"",
+        "\"github.com/stretchr/testify/assert\"",
+        "\"github.com/TykTechnologies/exp/cmd/go-fsck/internal/ast\""
+      ]
+    },
+    "Types": null,
+    "Consts": null,
+    "Vars": null,
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "printer": [
+            "Fprint"
+          ]
+        },
+        "Name": "PrintSource",
+        "Arguments": [
+          "io.Writer",
+          "*token.FileSet",
+          "any"
+        ],
+        "Returns": [
+          "error"
+        ],
+        "Signature": "PrintSource (out io.Writer, fset *token.FileSet, node any) error",
+        "Source": "func PrintSource(out io.Writer, fset *token.FileSet, node any) error {\n\treturn printer.Fprint(out, fset, node)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "printer_test.go",
+        "SelfContained": false,
+        "References": {
+          "assert": [
+            "NoError"
+          ],
+          "ast": [
+            "PrintSource"
+          ],
+          "fmt": [
+            "Println"
+          ],
+          "parser": [
+            "ParseDir",
+            "ParseComments"
+          ],
+          "printer": [
+            "CommentedNode"
+          ],
+          "strings": [
+            "Builder"
+          ],
+          "token": [
+            "NewFileSet"
+          ]
+        },
+        "Name": "TestPrinter",
+        "Arguments": [
+          "*testing.T"
+        ],
+        "Signature": "TestPrinter (t *testing.T)",
+        "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
       }
     ]
   },
@@ -1334,6 +1353,97 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
+      }
+    ]
+  },
+  {
+    "Package": "example_test",
+    "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example_test",
+    "Path": ".",
+    "TestPackage": false,
+    "Doc": null,
+    "Imports": {
+      "example.go": [
+        "\"net/http\""
+      ]
+    },
+    "Types": [
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "Body",
+        "Source": "// Body represends a decoded body\ntype Body struct {\n\tName string\n}"
+      },
+      {
+        "Kind": "type",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "File",
+        "Source": "// File represents a filename\ntype File string"
+      }
+    ],
+    "Consts": [
+      {
+        "Kind": "const",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "E_WARNING",
+        "Source": "// Const comment\nconst E_WARNING = \"warning\"\t// const line comment\n"
+      }
+    ],
+    "Vars": [
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Names": [
+          "exampleGroup1",
+          "exampleGroup2"
+        ],
+        "Source": "// Comment outer\nvar (\n\t// Comment inner\n\texampleGroup1\t= \"Hello\"\n\texampleGroup2\t= \"There\"\n)"
+      },
+      {
+        "Kind": "var",
+        "File": "example.go",
+        "SelfContained": true,
+        "Name": "exampleGroup3",
+        "Source": "// Comment outer\nvar exampleGroup3 = \"Sir\""
+      }
+    ],
+    "Funcs": [
+      {
+        "Kind": "func",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "GlobalFunc",
+        "Returns": [
+          "error"
+        ],
+        "Signature": "GlobalFunc () error",
+        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -1565,6 +1675,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -1634,6 +1755,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -1865,6 +1997,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -1934,6 +2077,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -2165,6 +2319,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
@@ -2234,6 +2399,17 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "example_tag.go",
+        "SelfContained": false,
+        "Name": "Linux",
+        "Returns": [
+          "string"
+        ],
+        "Signature": "Linux () string",
+        "Source": "func Linux() string {\n\treturn \"yes\"\n}"
       }
     ]
   },
