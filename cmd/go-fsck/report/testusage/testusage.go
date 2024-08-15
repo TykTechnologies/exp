@@ -18,7 +18,7 @@ type FuncRef struct {
 }
 
 func (f *FuncRef) String() string {
-	return fmt.Sprintf("%s --> %s.%s", f.FuncDecl.Signature, f.ReferencedPackage, f.ReferencedSymbol)
+	return fmt.Sprintf("%s --> %s.%s", f.FuncDecl.Name, f.ReferencedPackage, f.ReferencedSymbol)
 }
 
 type Report struct {
