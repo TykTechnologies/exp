@@ -17,6 +17,17 @@ func (d *Definition) Fill() {
 	}
 }
 
+func (d *Definition) Merge(in *Definition) {
+	for k, v := range in.Imports {
+		d.Imports[k] = v
+	}
+
+	d.Types.AppendUnique(in.Types...)
+	d.Funcs.AppendUnique(in.Funcs...)
+	d.Vars.AppendUnique(in.Vars...)
+	d.Consts.AppendUnique(in.Consts...)
+}
+
 func (d *Definition) Order() []*Declaration {
 	count := len(d.Types) + len(d.Funcs) + len(d.Vars) + len(d.Consts)
 	result := make([]*Declaration, 0, count)

@@ -88,6 +88,21 @@
         "Kind": "func",
         "File": "declaration.go",
         "SelfContained": false,
+        "Name": "Equal",
+        "Receiver": "*Declaration",
+        "Arguments": [
+          "*Declaration"
+        ],
+        "Returns": [
+          "bool"
+        ],
+        "Signature": "Equal (in *Declaration) bool",
+        "Source": "func (d *Declaration) Equal(in *Declaration) bool {\n\tif d.File == in.File \u0026\u0026 d.Kind == in.Kind \u0026\u0026 d.Name == in.Name {\n\t\treturn true\n\t}\n\treturn false\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "declaration.go",
+        "SelfContained": false,
         "References": {
           "strings": [
             "Trim"
@@ -112,6 +127,18 @@
         ],
         "Signature": "Append (in ...*Declaration)",
         "Source": "func (p *DeclarationList) Append(in ...*Declaration) {\n\t*p = append(*p, in...)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "declaration_list.go",
+        "SelfContained": false,
+        "Name": "AppendUnique",
+        "Receiver": "*DeclarationList",
+        "Arguments": [
+          "...*Declaration"
+        ],
+        "Signature": "AppendUnique (in ...*Declaration)",
+        "Source": "func (p *DeclarationList) AppendUnique(in ...*Declaration) {\n\tfor _, i := range in {\n\t\tshouldAppend := true\n\t\tfor _, decl := range *p {\n\t\t\tif decl.Equal(i) {\n\t\t\t\tshouldAppend = false\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\n\t\tif shouldAppend {\n\t\t\t*p = append(*p, i)\n\t\t}\n\t}\n}"
       },
       {
         "Kind": "func",
@@ -147,6 +174,18 @@
         "Receiver": "*Definition",
         "Signature": "Fill ()",
         "Source": "func (d *Definition) Fill() {\n\tfor _, decl := range d.Order() {\n\t\tdecl.Imports = d.getImports(decl)\n\t}\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "definition.go",
+        "SelfContained": false,
+        "Name": "Merge",
+        "Receiver": "*Definition",
+        "Arguments": [
+          "*Definition"
+        ],
+        "Signature": "Merge (in *Definition)",
+        "Source": "func (d *Definition) Merge(in *Definition) {\n\tfor k, v := range in.Imports {\n\t\td.Imports[k] = v\n\t}\n\n\td.Types.AppendUnique(in.Types...)\n\td.Funcs.AppendUnique(in.Funcs...)\n\td.Vars.AppendUnique(in.Vars...)\n\td.Consts.AppendUnique(in.Consts...)\n}"
       },
       {
         "Kind": "func",

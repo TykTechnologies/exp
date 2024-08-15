@@ -18,3 +18,7 @@ func (p Package) Name() string {
 func (p Package) String() string {
 	return p.ImportPath
 }
+
+func (p Package) Equal(in Package) bool {
+	return p.ImportPath == in.ImportPath
+}

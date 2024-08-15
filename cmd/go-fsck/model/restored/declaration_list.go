@@ -11,6 +11,22 @@ func (p *DeclarationList) Append(in ...*Declaration) {
 	*p = append(*p, in...)
 }
 
+func (p *DeclarationList) AppendUnique(in ...*Declaration) {
+	for _, i := range in {
+		shouldAppend := true
+		for _, decl := range *p {
+			if decl.Equal(i) {
+				shouldAppend = false
+				break
+			}
+		}
+
+		if shouldAppend {
+			*p = append(*p, i)
+		}
+	}
+}
+
 func (p *DeclarationList) ClearSource() {
 	for _, decl := range *p {
 		decl.Source = ""

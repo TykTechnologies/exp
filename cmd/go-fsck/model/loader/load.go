@@ -34,36 +34,6 @@ func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
 	files := []*ast.File{}
 	for _, pkg := range pkgs {
 		files = append(files, pkg.Syntax...)
-		/*
-			if verbose {
-				spew.Dump(pkg)
-			}
-			for _, file := range pkg.Syntax {
-				filename := path.Base(fset.Position(file.Pos()).Filename)
-				if verbose {
-					log.Printf("  Filename:   %s", filename)
-				}
-
-				if !strings.HasSuffix(filename, ".go") {
-					log.Printf("skipping %s.%s", pkg.Name, filename)
-					continue
-				}
-
-				src, err := os.ReadFile(path.Join(sourcePath, filename))
-				if err != nil {
-					return nil, fmt.Errorf("Error reading in source file: %s", filename)
-				}
-
-				tags := BuildTags(src)
-				if len(tags) == 0 {
-					files = append(files, file)
-					continue
-				}
-
-				if verbose {
-					log.Printf("WARN: Skipping file %s with build tags: %v", filename, tags)
-				}
-			} */
 	}
 
 	sink := collector.NewCollector(fset)

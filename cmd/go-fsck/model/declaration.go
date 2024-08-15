@@ -25,6 +25,13 @@ type Declaration struct {
 	Source    string
 }
 
+func (d *Declaration) Equal(in *Declaration) bool {
+	if d.File == in.File && d.Kind == in.Kind && d.Name == in.Name {
+		return true
+	}
+	return false
+}
+
 func (d *Declaration) Keys() []string {
 	trimPath := "*."
 	if d.Name != "" {
