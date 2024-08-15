@@ -11,8 +11,10 @@ type Definition struct {
 	Funcs   DeclarationList
 }
 
-func (d *Definition) getImports(decl *Declaration) []string {
-	return d.Imports.Get(decl.File)
+func (d *Definition) Fill() {
+	for _, decl := range d.Order() {
+		decl.Imports = d.getImports(decl)
+	}
 }
 
 func (d *Definition) Order() []*Declaration {
@@ -26,22 +28,6 @@ func (d *Definition) Order() []*Declaration {
 	return result
 }
 
-func (d *Definition) Sort() {
-	d.Types.Sort()
-	d.Vars.Sort()
-	d.Consts.Sort()
-	d.Funcs.Sort()
-}
-
-func (d *Definition) ClearSource() {
-	d.Types.ClearSource()
-	d.Vars.ClearSource()
-	d.Consts.ClearSource()
-	d.Funcs.ClearSource()
-}
-
-func (d *Definition) Fill() {
-	for _, decl := range d.Order() {
-		decl.Imports = d.getImports(decl)
-	}
+func (d *Definition) getImports(decl *Declaration) []string {
+	return d.Imports.Get(decl.File)
 }

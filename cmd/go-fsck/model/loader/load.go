@@ -2,14 +2,12 @@ package loader
 
 import (
 	"encoding/json"
-	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/token"
 	"os"
-	"path"
 
 	"golang.org/x/tools/go/ast/inspector"
+	"golang.org/x/tools/go/packages"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/internal/collector"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
@@ -19,29 +17,53 @@ import (
 func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
 	fset := token.NewFileSet()
 
-	packages, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
+	cfg := &packages.Config{
+		Mode:  packages.LoadSyntax,
+		Tests: true,
+		Fset:  fset,
+	}
+
+	pkgs, err := packages.Load(cfg, sourcePath)
 	if err != nil {
 		return nil, err
 	}
+	if len(pkgs) > 2 {
+		pkgs = pkgs[:2]
+	}
 
 	files := []*ast.File{}
-	for _, pkg := range packages {
-		for _, file := range pkg.Files {
-			filename := path.Base(fset.Position(file.Pos()).Filename)
-
-			src, err := os.ReadFile(path.Join(sourcePath, filename))
-			if err != nil {
-				return nil, fmt.Errorf("Error reading in source file: %s", filename)
+	for _, pkg := range pkgs {
+		files = append(files, pkg.Syntax...)
+		/*
+			if verbose {
+				spew.Dump(pkg)
 			}
+			for _, file := range pkg.Syntax {
+				filename := path.Base(fset.Position(file.Pos()).Filename)
+				if verbose {
+					log.Printf("  Filename:   %s", filename)
+				}
 
-			tags := BuildTags(src)
-			if len(tags) == 0 {
-				files = append(files, file)
-				continue
-			}
+				if !strings.HasSuffix(filename, ".go") {
+					log.Printf("skipping %s.%s", pkg.Name, filename)
+					continue
+				}
 
-			fmt.Fprintf(os.Stderr, "WARN: Skipping file %s with build tags: %v\n", filename, tags)
-		}
+				src, err := os.ReadFile(path.Join(sourcePath, filename))
+				if err != nil {
+					return nil, fmt.Errorf("Error reading in source file: %s", filename)
+				}
+
+				tags := BuildTags(src)
+				if len(tags) == 0 {
+					files = append(files, file)
+					continue
+				}
+
+				if verbose {
+					log.Printf("WARN: Skipping file %s with build tags: %v", filename, tags)
+				}
+			} */
 	}
 
 	sink := collector.NewCollector(fset)

@@ -6,10 +6,12 @@
     "TestPackage": false,
     "Doc": null,
     "Imports": {
-      "definition.go": [
-        "\"go/ast\"",
-        "\"sort\"",
+      "declaration.go": [
         "\"strings\""
+      ],
+      "declaration_list.go": [
+        "\"go/ast\"",
+        "\"sort\""
       ],
       "string_set.go": [
         "\"fmt\"",
@@ -22,24 +24,38 @@
     "Types": [
       {
         "Kind": "type",
-        "File": "definition.go",
+        "File": "declaration.go",
         "SelfContained": true,
         "Name": "Declaration",
         "Source": "type Declaration struct {\n\tKind\tDeclarationKind\n\tFile\tstring\n\n\tSelfContained\tbool\n\n\tImports\t[]string\t`json:\",omitempty\"`\n\n\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\tName\t\tstring\t\t`json:\",omitempty\"`\n\tNames\t\t[]string\t`json:\",omitempty\"`\n\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\tArguments\t[]string\t`json:\",omitempty\"`\n\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\tSignature\tstring\t`json:\",omitempty\"`\n\tSource\t\tstring\n}"
       },
       {
         "Kind": "type",
-        "File": "consts.go",
+        "File": "declaration_kind.go",
         "SelfContained": false,
         "Name": "DeclarationKind",
         "Source": "type DeclarationKind string"
       },
       {
         "Kind": "type",
-        "File": "definition.go",
+        "File": "declaration_list.go",
         "SelfContained": false,
         "Name": "DeclarationList",
         "Source": "type DeclarationList []*Declaration"
+      },
+      {
+        "Kind": "type",
+        "File": "definition.go",
+        "SelfContained": true,
+        "Name": "Definition",
+        "Source": "type Definition struct {\n\tPackage\n\n\tDoc\tStringSet\n\tImports\tStringSet\n\tTypes\tDeclarationList\n\tConsts\tDeclarationList\n\tVars\tDeclarationList\n\tFuncs\tDeclarationList\n}"
+      },
+      {
+        "Kind": "type",
+        "File": "package.go",
+        "SelfContained": true,
+        "Name": "Package",
+        "Source": "type Package struct {\n\t// Package is the name of the package.\n\tPackage\tstring\n\t// ImportPath contains the import path (github...).\n\tImportPath\tstring\n\t// Path is sanitized to contain the relative location (folder).\n\tPath\tstring\n\t// TestPackage is true if this is a test package.\n\tTestPackage\tbool\n}"
       },
       {
         "Kind": "type",
@@ -47,23 +63,13 @@
         "SelfContained": false,
         "Name": "StringSet",
         "Source": "type StringSet map[string][]string"
-      },
-      {
-        "Kind": "type",
-        "File": "definition.go",
-        "SelfContained": false,
-        "Names": [
-          "Package",
-          "Definition"
-        ],
-        "Source": "type (\n\tPackage\tstruct {\n\t\t// Package is the name of the package.\n\t\tPackage\tstring\n\t\t// ImportPath contains the import path (github...).\n\t\tImportPath\tstring\n\t\t// Path is sanitized to contain the relative location (folder).\n\t\tPath\tstring\n\t\t// TestPackage is true if this is a test package.\n\t\tTestPackage\tbool\n\t}\n\n\tDefinition\tstruct {\n\t\tPackage\n\n\t\tDoc\tStringSet\n\t\tImports\tStringSet\n\t\tTypes\tDeclarationList\n\t\tConsts\tDeclarationList\n\t\tVars\tDeclarationList\n\t\tFuncs\tDeclarationList\n\t}\n)"
       }
     ],
     "Consts": [
       {
         "Kind": "const",
-        "File": "consts.go",
-        "SelfContained": false,
+        "File": "const.go",
+        "SelfContained": true,
         "Names": [
           "StructKind",
           "ImportKind",
@@ -80,7 +86,7 @@
     "Funcs": [
       {
         "Kind": "func",
-        "File": "definition.go",
+        "File": "declaration.go",
         "SelfContained": false,
         "References": {
           "strings": [
@@ -97,7 +103,7 @@
       },
       {
         "Kind": "func",
-        "File": "definition.go",
+        "File": "declaration_list.go",
         "SelfContained": false,
         "Name": "Append",
         "Receiver": "*DeclarationList",
@@ -109,7 +115,7 @@
       },
       {
         "Kind": "func",
-        "File": "definition.go",
+        "File": "declaration_list.go",
         "SelfContained": false,
         "Name": "ClearSource",
         "Receiver": "*DeclarationList",
@@ -118,7 +124,7 @@
       },
       {
         "Kind": "func",
-        "File": "definition.go",
+        "File": "declaration_list.go",
         "SelfContained": false,
         "References": {
           "ast": [
@@ -132,15 +138,6 @@
         "Receiver": "*DeclarationList",
         "Signature": "Sort ()",
         "Source": "func (p *DeclarationList) Sort() {\n\tsort.Slice(*p, func(i, j int) bool {\n\t\ta, b := (*p)[i], (*p)[j]\n\t\tif a.Kind != b.Kind {\n\t\t\tindexOf := map[DeclarationKind]int{\n\t\t\t\tCommentKind:\t0,\n\t\t\t\tImportKind:\t1,\n\t\t\t\tConstKind:\t2,\n\t\t\t\tStructKind:\t3,\n\t\t\t\tTypeKind:\t4,\n\t\t\t\tVarKind:\t5,\n\t\t\t\tFuncKind:\t6,\n\t\t\t}\n\t\t\treturn indexOf[a.Kind] \u003c indexOf[b.Kind]\n\t\t}\n\t\tae, be := ast.IsExported(a.Name), ast.IsExported(b.Name)\n\t\tif ae != be {\n\t\t\treturn ae\n\t\t}\n\n\t\tif a.Receiver != b.Receiver {\n\t\t\tif a.Receiver == \"\" {\n\t\t\t\treturn true\n\t\t\t}\n\t\t\treturn a.Receiver \u003c b.Receiver\n\t\t}\n\n\t\tif a.Signature != b.Signature {\n\t\t\treturn a.Signature \u003c b.Signature\n\t\t}\n\n\t\treturn a.Name \u003c b.Name\n\t})\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "definition.go",
-        "SelfContained": false,
-        "Name": "ClearSource",
-        "Receiver": "*Definition",
-        "Signature": "ClearSource ()",
-        "Source": "func (d *Definition) ClearSource() {\n\td.Types.ClearSource()\n\td.Vars.ClearSource()\n\td.Consts.ClearSource()\n\td.Funcs.ClearSource()\n}"
       },
       {
         "Kind": "func",
@@ -165,15 +162,6 @@
       },
       {
         "Kind": "func",
-        "File": "definition.go",
-        "SelfContained": false,
-        "Name": "Sort",
-        "Receiver": "*Definition",
-        "Signature": "Sort ()",
-        "Source": "func (d *Definition) Sort() {\n\td.Types.Sort()\n\td.Vars.Sort()\n\td.Consts.Sort()\n\td.Funcs.Sort()\n}"
-      },
-      {
-        "Kind": "func",
         "File": "string_set.go",
         "SelfContained": false,
         "References": {
@@ -191,7 +179,7 @@
       },
       {
         "Kind": "func",
-        "File": "definition.go",
+        "File": "declaration_kind.go",
         "SelfContained": false,
         "Name": "String",
         "Receiver": "DeclarationKind",
@@ -203,7 +191,7 @@
       },
       {
         "Kind": "func",
-        "File": "definition.go",
+        "File": "declaration_list.go",
         "SelfContained": false,
         "Name": "FindKind",
         "Receiver": "DeclarationList",
@@ -218,7 +206,7 @@
       },
       {
         "Kind": "func",
-        "File": "definition.go",
+        "File": "package.go",
         "SelfContained": false,
         "Name": "Name",
         "Receiver": "Package",

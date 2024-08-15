@@ -1,7 +1,5 @@
 package model
 
-type DeclarationKind string
-
 const (
 	StructKind  DeclarationKind = "struct"
 	ImportKind                  = "import"

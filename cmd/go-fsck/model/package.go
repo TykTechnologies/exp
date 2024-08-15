@@ -14,3 +14,7 @@ type Package struct {
 func (p Package) Name() string {
 	return p.Package
 }
+
+func (p Package) String() string {
+	return p.ImportPath
+}

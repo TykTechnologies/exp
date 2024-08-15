@@ -14,7 +14,7 @@ func TestLoad(t *testing.T) {
 	utter.Config.OmitZero = true
 	utter.Config.ElideType = true
 
-	defs, err := loader.Load(".", false)
+	defs, err := loader.Load(".", true)
 	assert.NoError(t, err)
 	assert.NotNil(t, defs)
 
