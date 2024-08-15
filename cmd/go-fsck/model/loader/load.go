@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/token"
 	"os"
 	"path"
@@ -28,15 +27,15 @@ func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
 	}
 	_ = cfg
 
-	pkgs, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
-	//pkgs, err := packages.Load(cfg, sourcePath)
+	//pkgs, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
+	pkgs, err := packages.Load(cfg, sourcePath)
 	if err != nil {
 		return nil, err
 	}
 
 	files := []*ast.File{}
 	for _, pkg := range pkgs {
-		for _, file := range pkg.Files {
+		for _, file := range pkg.Syntax {
 			filename := path.Base(fset.Position(file.Pos()).Filename)
 			if !strings.HasSuffix(filename, ".go") {
 				// skip test packages that don't end in .go
