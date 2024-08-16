@@ -18,7 +18,7 @@ type FuncRef struct {
 }
 
 func (f *FuncRef) String() string {
-	return fmt.Sprintf("%s --> %s.%s", f.FuncDecl.Name, f.ReferencedPackage, f.ReferencedSymbol)
+	return fmt.Sprintf("%s --> %s.%s (external %v)", f.FuncDecl.Name, f.ReferencedPackage, f.ReferencedSymbol, f.IsExternal)
 }
 
 type Report struct {
@@ -81,17 +81,31 @@ func isTestFunction(funcDecl *model.Declaration) bool {
 func getFunctionNames(def *model.Definition) ([]*FuncRef, error) {
 	var funcRefs []*FuncRef
 
+	importMap, _ := def.Imports.Map()
+
 	for _, funcDecl := range def.Funcs {
 		if isTestFunction(funcDecl) || strings.HasSuffix(funcDecl.File, "_test.go") {
 			for prodPkg, symbols := range funcDecl.References {
 				for _, symbol := range symbols {
-					isExternal := prodPkg != def.Package.ImportPath
+					fullImport, ok := importMap[prodPkg]
+					if !ok {
+						return nil, fmt.Errorf("no import reference for: %s", prodPkg)
+					}
+
+					// this check excludes stdlib couplings
+					// but we may want them to discover
+					// things like mutex use, etc.
+					if !strings.Contains(fullImport, ".") {
+						continue
+					}
+
+					isExternal := !strings.HasPrefix(fullImport, def.Package.ImportPath)
 					ref := &FuncRef{
 						FuncDecl:          funcDecl,
-						Definition:        def, // Store the definition for later use
+						Definition:        def,
 						ReferencedPackage: prodPkg,
 						ReferencedSymbol:  symbol,
-						ImportPath:        "", // To be resolved
+						ImportPath:        fullImport,
 						IsExternal:        isExternal,
 					}
 					funcRefs = append(funcRefs, ref)
@@ -109,10 +123,9 @@ func resolveExternalDependencies(funcRefs []*FuncRef, definitions []*model.Defin
 		symbolPackage := ref.ReferencedPackage
 
 		// First, try to resolve within the same definition
-		imported, errs := ref.Definition.Imports.Map()
-		if len(errs) > 0 {
-			log.Printf("No imports found for file: %s in definition: %s", ref.FuncDecl.File, ref.Definition.Package.Package)
-			log.Println(errs)
+		imported, _ := ref.Definition.Imports.Map()
+		if len(imported) == 0 {
+			continue
 		}
 
 		matchedImport, ok := imported[symbolPackage]

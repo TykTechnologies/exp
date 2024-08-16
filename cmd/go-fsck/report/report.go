@@ -63,6 +63,6 @@ func report(cfg *options) error {
 	}
 
 	fmt.Println(report)
-
 	return nil
+	// return json.NewEncoder(os.Stdout).Encode(report)
 }
