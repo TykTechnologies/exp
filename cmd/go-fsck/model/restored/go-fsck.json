@@ -185,7 +185,7 @@
           "*Definition"
         ],
         "Signature": "Merge (in *Definition)",
-        "Source": "func (d *Definition) Merge(in *Definition) {\n\tfor k, v := range in.Imports {\n\t\td.Imports[k] = v\n\t}\n\n\td.Types.AppendUnique(in.Types...)\n\td.Funcs.AppendUnique(in.Funcs...)\n\td.Vars.AppendUnique(in.Vars...)\n\td.Consts.AppendUnique(in.Consts...)\n}"
+        "Source": "func (d *Definition) Merge(in *Definition) {\n\tfor k, v := range in.Imports {\n\t\td.Imports.Add(k, v...)\n\t}\n\n\td.Types.AppendUnique(in.Types...)\n\td.Funcs.AppendUnique(in.Funcs...)\n\td.Vars.AppendUnique(in.Vars...)\n\td.Consts.AppendUnique(in.Consts...)\n}"
       },
       {
         "Kind": "func",
@@ -211,10 +211,11 @@
         "Name": "Add",
         "Receiver": "*StringSet",
         "Arguments": [
-          "string"
+          "string",
+          "...string"
         ],
-        "Signature": "Add (key,lit string)",
-        "Source": "func (i *StringSet) Add(key, lit string) {\n\tdata := *i\n\tif data == nil {\n\t\tdata = make(StringSet)\n\t}\n\tif set, ok := data[key]; ok {\n\t\tif slices.Contains(set, lit) {\n\t\t\treturn\n\t\t}\n\t\tdata[key] = append(set, lit)\n\t\treturn\n\t}\n\tdata[key] = []string{lit}\n\t*i = data\n}"
+        "Signature": "Add (key string, lits ...string)",
+        "Source": "func (i *StringSet) Add(key string, lits ...string) {\n\tdata := *i\n\tif data == nil {\n\t\tdata = make(StringSet)\n\t}\n\tif set, ok := data[key]; ok {\n\t\tfor _, lit := range lits {\n\t\t\tif slices.Contains(set, lit) {\n\t\t\t\treturn\n\t\t\t}\n\t\t\tset = append(set, lit)\n\t\t}\n\n\t\tdata[key] = set\n\t\treturn\n\t}\n\tdata[key] = lits[:]\n\t*i = data\n}"
       },
       {
         "Kind": "func",

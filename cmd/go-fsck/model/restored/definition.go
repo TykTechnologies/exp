@@ -19,7 +19,7 @@ func (d *Definition) Fill() {
 
 func (d *Definition) Merge(in *Definition) {
 	for k, v := range in.Imports {
-		d.Imports[k] = v
+		d.Imports.Add(k, v...)
 	}
 
 	d.Types.AppendUnique(in.Types...)
