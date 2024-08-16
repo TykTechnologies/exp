@@ -11,19 +11,12 @@ type Definition struct {
 	Funcs   DeclarationList
 }
 
-func (d *Definition) getImports(decl *Declaration) []string {
-	return d.Imports.Get(decl.File)
-}
-
-func (d *Definition) Merge(in *Definition) {
-	for k, v := range in.Imports {
-		d.Imports.Add(k, v...)
-	}
-
-	d.Types.AppendUnique(in.Types...)
-	d.Funcs.AppendUnique(in.Funcs...)
-	d.Vars.AppendUnique(in.Vars...)
-	d.Consts.AppendUnique(in.Consts...)
+// Sort will sort the inner types so they have a stable order.
+func (d *Definition) Sort() {
+	d.Types.Sort()
+	d.Vars.Sort()
+	d.Consts.Sort()
+	d.Funcs.Sort()
 }
 
 func (d *Definition) Order() []*Declaration {
@@ -37,13 +30,6 @@ func (d *Definition) Order() []*Declaration {
 	return result
 }
 
-func (d *Definition) Sort() {
-	d.Types.Sort()
-	d.Vars.Sort()
-	d.Consts.Sort()
-	d.Funcs.Sort()
-}
-
 func (d *Definition) ClearSource() {
 	d.Types.ClearSource()
 	d.Vars.ClearSource()
@@ -55,4 +41,26 @@ func (d *Definition) Fill() {
 	for _, decl := range d.Order() {
 		decl.Imports = d.getImports(decl)
 	}
+}
+
+func (d *Definition) Merge(in *Definition) {
+	for k, v := range in.Imports {
+		d.Imports.Add(k, v...)
+	}
+
+	d.Types.AppendUnique(in.Types...)
+	d.Funcs.AppendUnique(in.Funcs...)
+	d.Vars.AppendUnique(in.Vars...)
+	d.Consts.AppendUnique(in.Consts...)
+
+	// this line causes Sort to be omitted from the
+	// definitions :/ ... solved by adding the sort
+	// in the AppendUnique above, but the Sort symbol
+	// should not be omitted from Definition.
+
+	// d.Sort()
+}
+
+func (d *Definition) getImports(decl *Declaration) []string {
+	return d.Imports.Get(decl.File)
 }

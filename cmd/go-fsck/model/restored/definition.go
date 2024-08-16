@@ -26,6 +26,13 @@ func (d *Definition) Merge(in *Definition) {
 	d.Funcs.AppendUnique(in.Funcs...)
 	d.Vars.AppendUnique(in.Vars...)
 	d.Consts.AppendUnique(in.Consts...)
+
+	// this line causes Sort to be omitted from the
+	// definitions :/ ... solved by adding the sort
+	// in the AppendUnique above, but the Sort symbol
+	// should not be omitted from Definition.
+
+	// d.Sort()
 }
 
 func (d *Definition) Order() []*Declaration {
