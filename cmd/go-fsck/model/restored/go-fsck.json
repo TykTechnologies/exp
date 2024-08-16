@@ -27,7 +27,7 @@
         "File": "declaration.go",
         "SelfContained": true,
         "Name": "Declaration",
-        "Source": "type Declaration struct {\n\tKind\tDeclarationKind\n\tFile\tstring\n\n\tSelfContained\tbool\n\n\tImports\t[]string\t`json:\",omitempty\"`\n\n\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\tName\t\tstring\t\t`json:\",omitempty\"`\n\tNames\t\t[]string\t`json:\",omitempty\"`\n\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\tArguments\t[]string\t`json:\",omitempty\"`\n\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\tSignature\tstring\t`json:\",omitempty\"`\n\tSource\t\tstring\n}"
+        "Source": "type Declaration struct {\n\tKind\tDeclarationKind\n\tFile\tstring\n\n\tSelfContained\tbool\n\n\tImports\t[]string\t`json:\",omitempty\"`\n\n\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\tName\t\tstring\t\t`json:\",omitempty\"`\n\tNames\t\t[]string\t`json:\",omitempty\"`\n\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\tArguments\t[]string\t`json:\",omitempty\"`\n\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\tSignature\tstring\t`json:\",omitempty\"`\n\tSource\t\tstring\t`json:\",omitempty\"`\n}"
       },
       {
         "Kind": "type",
