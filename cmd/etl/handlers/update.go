@@ -14,7 +14,7 @@ import (
 	"github.com/TykTechnologies/exp/cmd/etl/model"
 )
 
-func UpdateRequest(r io.Reader, args []string) (model.Records, error) {
+func UpdateRequest(r io.Reader, args []string) ([]model.Record, error) {
 	input, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func UpdateRequest(r io.Reader, args []string) (model.Records, error) {
 		multi = true
 	}
 
-	var records model.Records
+	var records []model.Record
 	if multi {
 		if err := json.Unmarshal(input, &records); err != nil {
 			return nil, err
