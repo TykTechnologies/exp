@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -47,12 +48,16 @@ func Query(ctx context.Context, command *model.Command, _ io.Reader) error {
 		return err
 	}
 
-	queryParams, err := decodeQueryParameters(args[1:])
+	params, err := decodeQueryParameters(args[1:])
 	if err != nil {
 		return err
 	}
 
-	rows, err := command.DB.NamedQuery(string(query), queryParams)
+	if command.Verbose {
+		log.Printf("-- %s %#v\n", query, params)
+	}
+
+	rows, err := command.DB.NamedQuery(string(query), params)
 	if err != nil {
 		return err
 	}

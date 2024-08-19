@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -60,7 +61,7 @@ func Get(ctx context.Context, command *model.Command, _ io.Reader) error {
 		query = query + fmt.Sprintf(" LIMIT %d, %d", offset, limit)
 	}
 	if command.Verbose {
-		fmt.Printf("-- %s %#v %#v\n", query, params, values)
+		log.Printf("-- %s %#v %#v\n", query, params, values)
 	}
 	rows, err := command.DB.Queryx(query, values...)
 	if err != nil {
