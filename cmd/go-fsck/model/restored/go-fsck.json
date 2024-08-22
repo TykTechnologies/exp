@@ -27,7 +27,7 @@
         "File": "declaration.go",
         "SelfContained": true,
         "Name": "Declaration",
-        "Source": "type Declaration struct {\n\tKind\tDeclarationKind\n\tFile\tstring\n\n\tSelfContained\tbool\n\n\tImports\t[]string\t`json:\",omitempty\"`\n\n\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\tName\t\tstring\t\t`json:\",omitempty\"`\n\tNames\t\t[]string\t`json:\",omitempty\"`\n\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\tArguments\t[]string\t`json:\",omitempty\"`\n\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\tSignature\tstring\t`json:\",omitempty\"`\n\tSource\t\tstring\n}"
+        "Source": "type Declaration struct {\n\tKind\tDeclarationKind\n\tFile\tstring\n\n\tSelfContained\tbool\n\n\tImports\t[]string\t`json:\",omitempty\"`\n\n\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\tName\t\tstring\t\t`json:\",omitempty\"`\n\tNames\t\t[]string\t`json:\",omitempty\"`\n\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\tArguments\t[]string\t`json:\",omitempty\"`\n\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\tSignature\tstring\t`json:\",omitempty\"`\n\tSource\t\tstring\t`json:\",omitempty\"`\n}"
       },
       {
         "Kind": "type",
@@ -138,7 +138,7 @@
           "...*Declaration"
         ],
         "Signature": "AppendUnique (in ...*Declaration)",
-        "Source": "func (p *DeclarationList) AppendUnique(in ...*Declaration) {\n\tfor _, i := range in {\n\t\tshouldAppend := true\n\t\tfor _, decl := range *p {\n\t\t\tif decl.Equal(i) {\n\t\t\t\tshouldAppend = false\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\n\t\tif shouldAppend {\n\t\t\t*p = append(*p, i)\n\t\t}\n\t}\n}"
+        "Source": "func (p *DeclarationList) AppendUnique(in ...*Declaration) {\n\tfor _, i := range in {\n\t\tshouldAppend := true\n\t\tfor _, decl := range *p {\n\t\t\tif decl.Equal(i) {\n\t\t\t\tshouldAppend = false\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\n\t\tif shouldAppend {\n\t\t\t*p = append(*p, i)\n\t\t}\n\t}\n\tp.Sort()\n}"
       },
       {
         "Kind": "func",
@@ -185,7 +185,7 @@
           "*Definition"
         ],
         "Signature": "Merge (in *Definition)",
-        "Source": "func (d *Definition) Merge(in *Definition) {\n\tfor k, v := range in.Imports {\n\t\td.Imports[k] = v\n\t}\n\n\td.Types.AppendUnique(in.Types...)\n\td.Funcs.AppendUnique(in.Funcs...)\n\td.Vars.AppendUnique(in.Vars...)\n\td.Consts.AppendUnique(in.Consts...)\n}"
+        "Source": "func (d *Definition) Merge(in *Definition) {\n\tfor k, v := range in.Imports {\n\t\td.Imports.Add(k, v...)\n\t}\n\n\td.Types.AppendUnique(in.Types...)\n\td.Funcs.AppendUnique(in.Funcs...)\n\td.Vars.AppendUnique(in.Vars...)\n\td.Consts.AppendUnique(in.Consts...)\n\n\t// this line causes Sort to be omitted from the\n\t// definitions :/ ... solved by adding the sort\n\t// in the AppendUnique above, but the Sort symbol\n\t// should not be omitted from Definition.\n\n\t// d.Sort()\n}"
       },
       {
         "Kind": "func",
@@ -211,10 +211,11 @@
         "Name": "Add",
         "Receiver": "*StringSet",
         "Arguments": [
-          "string"
+          "string",
+          "...string"
         ],
-        "Signature": "Add (key,lit string)",
-        "Source": "func (i *StringSet) Add(key, lit string) {\n\tdata := *i\n\tif data == nil {\n\t\tdata = make(StringSet)\n\t}\n\tif set, ok := data[key]; ok {\n\t\tif slices.Contains(set, lit) {\n\t\t\treturn\n\t\t}\n\t\tdata[key] = append(set, lit)\n\t\treturn\n\t}\n\tdata[key] = []string{lit}\n\t*i = data\n}"
+        "Signature": "Add (key string, lits ...string)",
+        "Source": "func (i *StringSet) Add(key string, lits ...string) {\n\tdata := *i\n\tif data == nil {\n\t\tdata = make(StringSet)\n\t}\n\tif set, ok := data[key]; ok {\n\t\tfor _, lit := range lits {\n\t\t\tif slices.Contains(set, lit) {\n\t\t\t\treturn\n\t\t\t}\n\t\t\tset = append(set, lit)\n\t\t}\n\n\t\tdata[key] = set\n\t\treturn\n\t}\n\tdata[key] = lits[:]\n\t*i = data\n}"
       },
       {
         "Kind": "func",

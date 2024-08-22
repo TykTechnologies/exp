@@ -19,13 +19,20 @@ func (d *Definition) Fill() {
 
 func (d *Definition) Merge(in *Definition) {
 	for k, v := range in.Imports {
-		d.Imports[k] = v
+		d.Imports.Add(k, v...)
 	}
 
 	d.Types.AppendUnique(in.Types...)
 	d.Funcs.AppendUnique(in.Funcs...)
 	d.Vars.AppendUnique(in.Vars...)
 	d.Consts.AppendUnique(in.Consts...)
+
+	// this line causes Sort to be omitted from the
+	// definitions :/ ... solved by adding the sort
+	// in the AppendUnique above, but the Sort symbol
+	// should not be omitted from Definition.
+
+	// d.Sort()
 }
 
 func (d *Definition) Order() []*Declaration {

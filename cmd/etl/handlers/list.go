@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -46,19 +45,9 @@ func List(ctx context.Context, command *model.Command, _ io.Reader) error {
 	}
 	defer rows.Close()
 
-	var results []model.Record
-	for rows.Next() {
-		row := make(map[string]any)
-		if err := rows.MapScan(row); err != nil {
-			return err
-		}
-
-		result := make(map[string]string, len(row))
-		for k, v := range row {
-			result[strings.ToLower(k)] = dbValue(v)
-		}
-
-		results = append(results, result)
+	results, err := scanAllRecords(rows)
+	if err != nil {
+		return err
 	}
 
 	var output []byte

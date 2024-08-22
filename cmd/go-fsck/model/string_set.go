@@ -10,19 +10,23 @@ import (
 
 type StringSet map[string][]string
 
-func (i *StringSet) Add(key, lit string) {
+func (i *StringSet) Add(key string, lits ...string) {
 	data := *i
 	if data == nil {
 		data = make(StringSet)
 	}
 	if set, ok := data[key]; ok {
-		if slices.Contains(set, lit) {
-			return
+		for _, lit := range lits {
+			if slices.Contains(set, lit) {
+				return
+			}
+			set = append(set, lit)
 		}
-		data[key] = append(set, lit)
+
+		data[key] = set
 		return
 	}
-	data[key] = []string{lit}
+	data[key] = lits[:]
 	*i = data
 }
 

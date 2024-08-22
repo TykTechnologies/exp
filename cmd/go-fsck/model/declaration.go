@@ -22,7 +22,7 @@ type Declaration struct {
 	Returns   []string `json:",omitempty"`
 
 	Signature string `json:",omitempty"`
-	Source    string
+	Source    string `json:",omitempty"`
 }
 
 func (d *Declaration) Equal(in *Declaration) bool {

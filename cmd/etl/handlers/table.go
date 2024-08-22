@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -83,7 +82,7 @@ func getTableList(db *sqlx.DB, verbose bool) ([]model.TableInfo, error) {
 	return tables, nil
 }
 
-func getTableColumns(db *sqlx.DB, tableName string, verbose bool) ([]model.ColumnInfo, error) {
+func getTableColumns(db *sqlx.DB, tableName string, verbose bool) ([]model.Record, error) {
 	var (
 		query  = "select %s from information_schema.columns where table_schema=database() and table_name=?"
 		fields = "column_name, column_type, column_comment"
@@ -98,30 +97,5 @@ func getTableColumns(db *sqlx.DB, tableName string, verbose bool) ([]model.Colum
 	}
 	defer rows.Close()
 
-	var columns []model.ColumnInfo
-	for rows.Next() {
-		column := make(map[string]interface{})
-		if err := rows.MapScan(column); err != nil {
-			return nil, err
-		}
-
-		field := make(map[string]string)
-		for k, v := range column {
-			field[strings.ToLower(k)] = dbValue(v)
-		}
-
-		columns = append(columns, field)
-	}
-
-	return columns, nil
-}
-
-func dbValue(in any) string {
-	if v, ok := in.([]byte); ok {
-		return string(v)
-	}
-	if in == nil {
-		return ""
-	}
-	return fmt.Sprint(in)
+	return scanAllRecords(rows)
 }

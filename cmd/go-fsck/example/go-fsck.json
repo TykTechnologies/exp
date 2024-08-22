@@ -204,6 +204,17 @@
     "Funcs": [
       {
         "Kind": "func",
+        "File": "example.go",
+        "SelfContained": false,
+        "Name": "GlobalFunc",
+        "Returns": [
+          "error"
+        ],
+        "Signature": "GlobalFunc () error",
+        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
         "File": "printer_test.go",
         "SelfContained": false,
         "References": {
@@ -257,17 +268,6 @@
         ],
         "Signature": "TestPrinter (t *testing.T)",
         "Source": "func TestPrinter(t *testing.T) {\n\tfset := token.NewFileSet()\n\tfs, err := parser.ParseDir(fset, \".\", nil, parser.ParseComments)\n\tassert.NoError(t, err)\n\n\tfor _, pkg := range fs {\n\t\tfor _, f := range pkg.Files {\n\t\t\tfor _, decl := range f.Decls {\n\t\t\t\tvar out strings.Builder\n\t\t\t\tx := \u0026printer.CommentedNode{\n\t\t\t\t\tNode:\t\tdecl,\n\t\t\t\t\tComments:\tf.Comments,\n\t\t\t\t}\n\t\t\t\tassert.NoError(t, ast.PrintSource(\u0026out, fset, x))\n\t\t\t\tfmt.Println(out.String())\n\t\t\t}\n\t\t}\n\t}\n}"
-      },
-      {
-        "Kind": "func",
-        "File": "example.go",
-        "SelfContained": false,
-        "Name": "GlobalFunc",
-        "Returns": [
-          "error"
-        ],
-        "Signature": "GlobalFunc () error",
-        "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
       }
     ]
   }

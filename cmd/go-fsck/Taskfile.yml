@@ -53,7 +53,8 @@ tasks:
         output_file=$(mktemp)
 
         # Run the command 100 times and store the results
-        for i in {1..100}; do
+        for i in {1..20}; do
+          go-fsck extract --verbose --include-tests --include-sources -i example/ -o example/go-fsck.json --pretty-json | xargs md5sum >> "$output_file"
           go-fsck extract --include-sources -i model/ -o model/restored/go-fsck.json --pretty-json | xargs md5sum >> "$output_file"
         done
 

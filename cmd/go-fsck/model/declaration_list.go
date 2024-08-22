@@ -25,6 +25,7 @@ func (p *DeclarationList) AppendUnique(in ...*Declaration) {
 			*p = append(*p, i)
 		}
 	}
+	p.Sort()
 }
 
 func (p DeclarationList) FindKind(kind DeclarationKind) (result []*Declaration) {

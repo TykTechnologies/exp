@@ -21,9 +21,9 @@ func isInputFromPipe() bool {
 	return fi.Mode()&os.ModeNamedPipe != 0 || fi.Size() > 0
 }
 
-func InsertRequest(r io.Reader, args []string) (model.Records, error) {
+func InsertRequest(r io.Reader, args []string) ([]model.RecordInput, error) {
 	if !isInputFromPipe() {
-		return model.Records{model.Record{}}, nil
+		return []model.RecordInput{model.RecordInput{}}, nil
 	}
 
 	input, err := io.ReadAll(r)
@@ -36,13 +36,13 @@ func InsertRequest(r io.Reader, args []string) (model.Records, error) {
 		multi = true
 	}
 
-	var records model.Records
+	var records []model.RecordInput
 	if multi {
 		if err := json.Unmarshal(input, &records); err != nil {
 			return nil, err
 		}
 	} else {
-		var record model.Record
+		var record model.RecordInput
 		if err := json.Unmarshal(input, &record); err != nil {
 			return nil, err
 		}
@@ -52,7 +52,7 @@ func InsertRequest(r io.Reader, args []string) (model.Records, error) {
 	return records, nil
 }
 
-func buildInsertQuery(table string, data model.Record) (string, []any) {
+func buildInsertQuery(table string, data model.RecordInput) (string, []any) {
 	// Step 1: List the keys
 	keys := make([]string, 0, len(data))
 	for key := range data {
@@ -88,35 +88,20 @@ func Insert(ctx context.Context, command *model.Command, r io.Reader) error {
 		return err
 	}
 
-	table := command.Args[0]
+	args := command.Args
+	table := args[0]
 
-	var names []string
-	var values []string
-	for _, arg := range command.Args[1:] {
-		if strings.Contains(arg, "=") {
-			parts := strings.SplitN(arg, "=", 2)
-			parts[1] = strings.Trim(parts[1], "'\"")
-
-			if strings.HasPrefix(parts[1], "@") {
-				contents, err := os.ReadFile(parts[1][1:])
-				if err != nil {
-					return err
-				}
-				parts[1] = string(contents)
-			}
-
-			names = append(names, parts[0])
-			values = append(values, parts[1])
-			continue
-		}
+	params, err := decodeQueryParameters(args[1:])
+	if err != nil {
+		return err
 	}
 
 	// append with commandline args
-	for k, name := range names {
-		for i, r := range records {
-			r[name] = values[k]
-			records[i] = r
+	for i, r := range records {
+		for k, v := range params {
+			r[k] = v
 		}
+		records[i] = r
 	}
 
 	tx, err := command.DB.Beginx()

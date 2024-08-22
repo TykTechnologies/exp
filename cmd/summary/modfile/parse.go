@@ -21,6 +21,10 @@ func Parse(contents []byte, match string) ([]*modfile.Require, error) {
 
 	var matchingModules []*modfile.Require
 	for _, req := range f.Require {
+		if req.Indirect {
+			continue
+		}
+
 		if match == "" || strings.Contains(req.Mod.Path, match) {
 			matchingModules = append(matchingModules, req)
 		}

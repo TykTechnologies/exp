@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -60,7 +61,7 @@ func Get(ctx context.Context, command *model.Command, _ io.Reader) error {
 		query = query + fmt.Sprintf(" LIMIT %d, %d", offset, limit)
 	}
 	if command.Verbose {
-		fmt.Printf("-- %s %#v %#v\n", query, params, values)
+		log.Printf("-- %s %#v %#v\n", query, params, values)
 	}
 	rows, err := command.DB.Queryx(query, values...)
 	if err != nil {
@@ -68,21 +69,10 @@ func Get(ctx context.Context, command *model.Command, _ io.Reader) error {
 	}
 	defer rows.Close()
 
-	var results []model.Record
-	for rows.Next() {
-		row := make(map[string]any)
-		if err := rows.MapScan(row); err != nil {
-			return err
-		}
-
-		result := make(map[string]string, len(row))
-		for k, v := range row {
-			result[strings.ToLower(k)] = dbValue(v)
-		}
-
-		results = append(results, result)
+	results, err := scanAllRecords(rows)
+	if err != nil {
+		return err
 	}
-
 	if len(results) == 0 {
 		os.Exit(1)
 	}
