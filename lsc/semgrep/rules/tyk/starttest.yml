@@ -1,0 +1,14 @@
+---
+
+rules:
+  - id: starttest-never-closed
+    patterns:
+      - pattern: $F = StartTest(...)
+      - pattern-not-inside: |
+          $F = StartTest(...)
+          ...
+          defer $F.Close()
+    message: startest opened without corresponding close
+    languages:
+      - go
+    severity: ERROR
