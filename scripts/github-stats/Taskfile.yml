@@ -1,0 +1,8 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: "Run stats processor"
+    cmds:
+      - go run ./cmd/monthly/...
