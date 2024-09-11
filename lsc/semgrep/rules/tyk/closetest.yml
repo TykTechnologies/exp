@@ -1,0 +1,15 @@
+---
+
+rules:
+  - id: starttest-closed-improperly
+    patterns:
+      - pattern: |
+          $F = StartTest($X)
+          defer $F.Close()
+    message: startest closed with defer
+    fix: |
+      $F = StartTest($X)
+      t.Cleanup($F.Close)
+    languages:
+      - go
+    severity: ERROR
