@@ -1,6 +1,8 @@
 module github.com/TykTechnologies/exp/cmd/go-fsck
 
-go 1.20
+go 1.22.0
+
+toolchain go1.22.7
 
 require (
 	github.com/davecgh/go-spew v1.1.1
@@ -11,7 +13,7 @@ require (
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/exp v0.0.0-20230519143937-03e91628a987
-	golang.org/x/tools v0.11.0
+	golang.org/x/tools v0.25.0
 	modernc.org/sqlite v1.26.0
 )
 
@@ -38,8 +40,9 @@ require (
 	go.elastic.co/apm/module/apmsql v1.15.0 // indirect
 	go.elastic.co/fastjson v1.1.0 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
-	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/mod v0.21.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	howett.net/plist v1.0.0 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
