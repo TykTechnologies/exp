@@ -61,7 +61,7 @@ jobs:
       - name: Set up env
         run: |
           echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
-          echo "hold=gorm.io,github.com/go-redsync,github.com/newrelic,go.opentelemetry.io,github.com/getkin/kin-openapi" >> $GITHUB_ENV
+          echo "hold=gorm.io,github.com/newrelic,go.opentelemetry.io,github.com/getkin/kin-openapi" >> $GITHUB_ENV
 
       - name: Setup Golang
         uses: actions/setup-go@v4
@@ -117,7 +117,7 @@ jobs:
       - working-directory: ./tyk
         id: mod_tidy
         run: |
-          GOTOOLCHAIN=local go mod tidy 2>&1 | tee -a /tmp/go-mod.txt
+          task lint | tee -a /tmp/go-mod.txt || true
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/go-mod.txt >> $GITHUB_OUTPUT
@@ -151,6 +151,6 @@ jobs:
             </details>
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
-          branch: update/${{ env.jira }}/update-go-mod-dependencies
+          branch: update/${{ env.jira }}/${{ github.event.inputs.branch }}-update-go-mod
           path: ./tyk
           delete-branch: true
