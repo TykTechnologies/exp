@@ -131,6 +131,7 @@ jobs:
           title: '[${{ env.jira }}] exp/modcheck: Update go.mod dependencies'
           body: |
             Triggered by: ${{ github.actor }}
+            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
 
             ${{ steps.modcheck.outputs.report }}
 
@@ -150,7 +151,6 @@ jobs:
               ```
             </details>
 
-            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
           branch: update/${{ env.jira }}/${{ github.event.inputs.branch }}-update-go-mod
           path: ./tyk
           delete-branch: true
