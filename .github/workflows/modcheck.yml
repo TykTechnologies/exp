@@ -128,7 +128,7 @@ jobs:
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
           commit-message: Import updated go.mod/go.sum
-          title: '[${{ env.jira }}] exp/modcheck: Update go.mod dependencies'
+          title: '[${{ env.jira }}] [${{ github.event.inputs.branch }}] exp/modcheck: Update go.mod dependencies'
           body: |
             Triggered by: ${{ github.actor }}
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
