@@ -61,7 +61,7 @@ jobs:
       - name: Set up env
         run: |
           echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
-          echo "hold=gorm.io,github.com/newrelic,go.opentelemetry.io,github.com/getkin/kin-openapi" >> $GITHUB_ENV
+          echo "hold=gorm.io,PuerkitoBio/goquery,github.com/newrelic,go.opentelemetry.io,github.com/getkin/kin-openapi" >> $GITHUB_ENV
 
       - name: Setup Golang
         uses: actions/setup-go@v4
@@ -99,7 +99,7 @@ jobs:
       - working-directory: ./tyk
         id: modcheck
         run: |
-          modcheck --for-upgrade --skip "${{ env.hold }}" | tee -a /tmp/modcheck.md
+          GOTOOLCHAIN=local modcheck --for-upgrade --skip "${{ env.hold }}" | tee -a /tmp/modcheck.md
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/modcheck.md >> $GITHUB_OUTPUT
@@ -108,7 +108,7 @@ jobs:
       - working-directory: ./tyk
         id: modcheck_upgrade
         run: |
-          modcheck --suggest --skip "${{ env.hold }}" | sh -x 2>&1 | tee -a /tmp/modcheck.log
+          GOTOOLCHAIN=local modcheck --suggest --skip "${{ env.hold }}" | sh -x 2>&1 | tee -a /tmp/modcheck.log
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/modcheck.log >> $GITHUB_OUTPUT
