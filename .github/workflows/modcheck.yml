@@ -19,6 +19,10 @@ on:  # yamllint disable-line rule:truthy
         description: 'Base branch'
         required: true
         default: 'master'
+      goVersion:
+        description: 'Go version'
+        required: true
+        default: '1.22.x'
       repository:
         description: 'Repository'
         type: choice
@@ -62,11 +66,12 @@ jobs:
         run: |
           echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
           echo "hold=gorm.io,PuerkitoBio/goquery,github.com/newrelic,go.opentelemetry.io,github.com/getkin/kin-openapi" >> $GITHUB_ENV
+          echo "GOTOOLCHAIN=local" >> $GITHUB_ENV
 
       - name: Setup Golang
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21.x'
+          go-version: ${{ inputs.goVersion }}
 
       - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3
@@ -99,7 +104,7 @@ jobs:
       - working-directory: ./tyk
         id: modcheck
         run: |
-          GOTOOLCHAIN=local modcheck --for-upgrade --skip "${{ env.hold }}" | tee -a /tmp/modcheck.md
+          modcheck --for-upgrade --skip "${{ env.hold }}" | tee -a /tmp/modcheck.md
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/modcheck.md >> $GITHUB_OUTPUT
@@ -108,7 +113,7 @@ jobs:
       - working-directory: ./tyk
         id: modcheck_upgrade
         run: |
-          GOTOOLCHAIN=local modcheck --suggest --skip "${{ env.hold }}" | sh -x 2>&1 | tee -a /tmp/modcheck.log
+          modcheck --suggest --skip "${{ env.hold }}" | sh -x 2>&1 | tee -a /tmp/modcheck.log
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/modcheck.log >> $GITHUB_OUTPUT
@@ -117,7 +122,7 @@ jobs:
       - working-directory: ./tyk
         id: mod_tidy
         run: |
-          GOTOOLCHAIN=local go mod tidy | tee -a /tmp/go-mod.txt || true
+          go mod tidy | tee -a /tmp/go-mod.txt || true
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/go-mod.txt >> $GITHUB_OUTPUT
