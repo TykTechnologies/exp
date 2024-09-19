@@ -117,7 +117,7 @@ jobs:
       - working-directory: ./tyk
         id: mod_tidy
         run: |
-          task lint | tee -a /tmp/go-mod.txt || true
+          GOTOOLCHAIN=local go mod tidy | tee -a /tmp/go-mod.txt || true
 
           echo 'report<<EOF' >> $GITHUB_OUTPUT
           cat /tmp/go-mod.txt >> $GITHUB_OUTPUT
