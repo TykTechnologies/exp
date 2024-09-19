@@ -2,6 +2,8 @@
 ---
 name: Tyk Docs sync
 
+run-name: '[${{ inputs.jira }}] ${{ github.actor }} running tyk-docs sync'
+
 # This workflow builds the documentation for a release.
 # It uses the following external dependencies:
 #
