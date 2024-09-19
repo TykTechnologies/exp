@@ -238,7 +238,7 @@ jobs:
         run: |
              mkdir -p $GITHUB_WORKSPACE/config-docs/
              echo "repoBranch=${{ needs.sanitize.outputs.repoBranch }}" >> $GITHUB_ENV
-             echo "docsBranch=${{ needs.sanitize.outputs.repoBranch }}" >> $GITHUB_ENV
+             echo "docsBranch=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
 
       - name: Sync Gateway
         working-directory: ./tyk-config-info-generator/src
