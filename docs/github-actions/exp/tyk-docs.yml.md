@@ -1,8 +1,8 @@
-# Tyk Docs sync for release
+# Tyk Docs sync
 
 ```mermaid
 stateDiagram-v2
-    workflow : tyk-docs.yml - Tyk Docs sync for release
+    workflow : tyk-docs.yml - Tyk Docs sync
     state workflow {
         sanitize: Sanitize inputs
         state sanitize {
@@ -12,6 +12,7 @@ stateDiagram-v2
             step0sanitize --> dashboard
             step0sanitize --> finish
             step0sanitize --> gateway
+            step0sanitize --> mdcb
         }
 
         configs: Configuration docs
@@ -49,10 +50,14 @@ stateDiagram-v2
             [*] --> step0gateway
             step0gateway : Checkout Gateway
             step0gateway --> step1gateway
-            step1gateway : Generate docs
-            step1gateway --> step2gateway
-            step2gateway : Store docs
-            step2gateway --> finish
+            step1gateway : Extract tykio/ci-tools:latest
+            step1gateway --> step3gateway
+            step3gateway : Generate x-tyk-gateway docs
+            step3gateway --> step4gateway
+            step4gateway : Generate docs
+            step4gateway --> step5gateway
+            step5gateway : Store docs
+            step5gateway --> finish
         }
 
         finish: Open PR against tyk-docs
@@ -67,6 +72,16 @@ stateDiagram-v2
             step3finish : Write out docs
             step3finish --> step4finish
             step4finish : Raise tyk-docs PR
+        }
+
+        mdcb: MDCB docs
+        state mdcb {
+            [*] --> step0mdcb
+            step0mdcb : Checkout MDCB
+            step0mdcb --> step1mdcb
+            step1mdcb : Generate docs
+            step1mdcb --> step2mdcb
+            step2mdcb : Store docs
         }
     }
 ```
