@@ -50,7 +50,7 @@ stateDiagram-v2
             [*] --> step0gateway
             step0gateway : Checkout Gateway
             step0gateway --> step1gateway
-            step1gateway : Extract tykio/ci-tools:latest
+            step1gateway : Extract CI Tools
             step1gateway --> step3gateway
             step3gateway : Generate x-tyk-gateway docs
             step3gateway --> step4gateway

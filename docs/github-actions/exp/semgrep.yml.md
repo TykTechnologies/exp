@@ -20,7 +20,7 @@ stateDiagram-v2
             step1semgrep --> step2semgrep
             step2semgrep : Setup Golang
             step2semgrep --> step3semgrep
-            step3semgrep : Extract tykio/ci-tools:latest
+            step3semgrep : Extract CI Tools
             step3semgrep --> step4semgrep
             step4semgrep : Checkout repository
             step4semgrep --> step5semgrep
