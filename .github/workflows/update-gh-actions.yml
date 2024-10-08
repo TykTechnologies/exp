@@ -23,4 +23,3 @@ jobs:
         with:
           # [Required] Access token with `workflow` scope.
           token: ${{ secrets.ORG_GH_TOKEN }}
-          release_types: 'major'
