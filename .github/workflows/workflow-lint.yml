@@ -111,5 +111,5 @@ jobs:
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
           branch: update/${{ env.jira }}/semgrep-check
-          path: ./src/.github
+          path: ./src
           delete-branch: true
