@@ -11,7 +11,7 @@ name: Workflow Lint
 #
 # See https://github.com/TykTechnologies/exp/tree/main/cmd/workflow-lint.
 
-run-name: '[${{ inputs.jira }}] ${{ inputs.repository }}: ${{ github.actor }} running semgrep'
+run-name: '[${{ inputs.jira }}] ${{ inputs.repository }}: ${{ github.actor }} running workflow-lint'
 
 on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
@@ -51,7 +51,7 @@ jobs:
           fi
           echo "jira=$jira" >> $GITHUB_OUTPUT
 
-  semgrep:
+  workflow-lint:
     runs-on: ubuntu-latest
     needs: [sanitize]
 
@@ -87,27 +87,27 @@ jobs:
           git config --global url."https://${TOKEN}@github.com/TykTechnologies".insteadOf "https://github.com/TykTechnologies"
 
       - name: Run workflow-lint --fix
+        id: lint_run
         working-directory: ./src
-        run: workflow-lint --fix --ignore release.yml
+        run: |
+          workflow-lint --fix --ignore release.yml | tee /tmp/output.log
+
+          echo 'report<<EOF' >> $GITHUB_OUTPUT
+          cat /tmp/output.log >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Raise PR
         uses: peter-evans/create-pull-request@v7.0.5
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
-          commit-message: Semgrep scan result
-          title: '[${{ env.jira }}] exp/semgrep: Update from LSC semgrep rule'
+          commit-message: Workflow lint autofix
+          title: '[${{ env.jira }}] exp/workflow-lint: Update to latest known actions'
           body: |
             Triggered by: ${{ github.actor }}
 
-            ${{ steps.semgrep_report.outputs.report }}
-
-            <details>
-              <summary>Steps performed</summary>
-
-              ~~~
-              ${{ steps.semgrep_run.outputs.report }}
-              ~~~
-            </details>
+            ~~~
+            ${{ steps.lint_run.outputs.report }}
+            ~~~
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
           branch: update/${{ env.jira }}/semgrep-check
