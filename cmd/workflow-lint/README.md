@@ -14,7 +14,7 @@
 You can compile the Go program by running:
 
 ```bash
-go build -o workflow-lint main.go
+go install github.com/TykTechnologies/exp/cmd/workflow-lint@latest
 ```
 
 ## Usage
