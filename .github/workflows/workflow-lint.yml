@@ -110,6 +110,6 @@ jobs:
             ~~~
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
-          branch: update/${{ env.jira }}/semgrep-check
+          branch: update/${{ env.jira }}/workflow-lint-check
           path: ./src
           delete-branch: true
