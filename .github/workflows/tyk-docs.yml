@@ -165,7 +165,7 @@ jobs:
           cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.1
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: gateway-docs
           path: gateway-docs
@@ -192,7 +192,7 @@ jobs:
           cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.1
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: dashboard-docs
           path: dashboard-docs
@@ -218,7 +218,7 @@ jobs:
           cp ./tyk-sink/swagger.yml mdcb-docs/mdcb-swagger.yml
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.1
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: mdcb-docs
           path: mdcb-docs
@@ -287,7 +287,7 @@ jobs:
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.1
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: config-docs
           path: config-docs
