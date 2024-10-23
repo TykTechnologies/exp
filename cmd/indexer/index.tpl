@@ -72,7 +72,7 @@
 <li><a href="{{ .Basename }}/">{{ .Basename }}/</a></li>
 {{ end }}
 {{ range .files }}
-<li><a href="{{ .Basename }}/">{{ .Basename }}/</a></li>
+<li><a href="{{ .Basename }}">{{ .Basename }}</a></li>
 {{ end }}
 </ul>
 

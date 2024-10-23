@@ -17,6 +17,14 @@ type fileRecord struct {
 }
 
 func newFileRecord(name string) fileRecord {
+	if !strings.Contains(name, "/") {
+		return fileRecord{
+			Name:     name,
+			Basename: name,
+			Dir:      ".",
+		}
+	}
+
 	return fileRecord{
 		Name:     name,
 		Basename: path.Base(name),

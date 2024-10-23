@@ -6,6 +6,14 @@ This tool generates an `index.html` file to be used in cases where:
 - github pages directory indexes
 - ...
 
+## Install
+
+```
+go install github.com/TykTechnologies/exp/cmd/indexer@main
+```
+
+Just run `indexer` in victim folder.
+
 ## Flags
 
 ```
