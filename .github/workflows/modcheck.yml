@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
 
@@ -69,7 +69,7 @@ jobs:
           echo "GOTOOLCHAIN=local" >> $GITHUB_ENV
 
       - name: Setup Golang
-        uses: actions/setup-go@v5.0.2
+        uses: actions/setup-go@v5.1.0
         with:
           go-version: ${{ inputs.goVersion }}
 
@@ -85,7 +85,7 @@ jobs:
         run: task
 
       - name: Checkout repository
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
         with:
           repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}

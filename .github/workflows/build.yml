@@ -37,14 +37,14 @@ jobs:
 
     steps:
       - name: Checkout of tyk
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
         with:
           repository: TykTechnologies/tyk
           ref: ${{ github.event.inputs.branch }}
           fetch-depth: 1
 
       - name: Setup Golang
-        uses: actions/setup-go@v5.0.2
+        uses: actions/setup-go@v5.1.0
         with:
           go-version: ${{ matrix.go-version }}
 
