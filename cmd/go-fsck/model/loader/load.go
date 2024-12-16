@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -26,6 +27,10 @@ func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
 		Fset:  fset,
 	}
 	_ = cfg
+
+	if verbose {
+		log.Println("Loading package", sourcePath)
+	}
 
 	//pkgs, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
 	pkgs, err := packages.Load(cfg, sourcePath)
