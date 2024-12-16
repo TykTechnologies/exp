@@ -25,6 +25,10 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 	defs := []*model.Definition{}
 
 	for _, pkg := range packages {
+		if !cfg.includeTests && pkg.TestPackage {
+			continue
+		}
+
 		d, err := loader.Load(pkg, cfg.verbose)
 		if err != nil {
 			return nil, err
@@ -34,10 +38,6 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 			v.Package.ImportPath = pkg.ImportPath
 			v.Package.Path = pkg.Path
 			v.Package.Package = pkg.Package
-
-			if !cfg.includeTests && pkg.TestPackage {
-				continue
-			}
 
 			defs = append(defs, d...)
 		}

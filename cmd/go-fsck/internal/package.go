@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -35,46 +34,34 @@ func ListPackages(rootPath string, pattern string) ([]*model.Package, error) {
 
 func cleanPackages(pkgs []*packages.Package, workDir string) []*model.Package {
 	results := make([]*model.Package, 0, len(pkgs))
-	seen := make(map[string]*packages.Package)
 
 	isDebug := false
 	if isDebug {
+		// This area is sensitive. ID combines test context and package names.
 		for _, pkg := range pkgs {
 			fmt.Printf("- %s [%s, %q]\n", pkg.Name, pkg.Dir, pkg.ID)
 		}
 	}
 
 	for _, pkg := range pkgs {
-		// Filters out tests packages. We only care about the Dir's
-		// so we don't want to duplicate folders for tests.
-		if strings.HasSuffix(pkg.PkgPath, ".test") {
+		// This skips compiled tests.
+		if pkg.Name == "main" {
 			continue
 		}
 
-		testPackage := strings.Contains(pkg.Name, "_test")
+		isTestScope := strings.Contains(pkg.ID, "_test") || strings.Contains(pkg.ID, ".test")
 
-		cleanPath := "." + strings.TrimPrefix(pkg.Dir, workDir)
-
-		pkgKey := cleanPath + "-" + fmt.Sprint(testPackage)
-
-		if val, ok := seen[pkgKey]; ok {
-			enc := json.NewEncoder(os.Stdout)
-			enc.SetIndent("", "  ")
-
-			enc.Encode(val)
-			enc.Encode(pkg)
-
-			panic("seen package twice: " + pkgKey)
+		// Not black box tests, somehow in package scope.
+		if isTestScope && !strings.HasSuffix(pkg.Name, "_test") {
+			pkg.Name += "_test"
 		}
 
 		result := &model.Package{
 			Package:     pkg.Name, //filepath.Base(pkg.PkgPath),
 			ImportPath:  pkg.PkgPath,
-			Path:        cleanPath,
-			TestPackage: testPackage,
+			Path:        "." + strings.TrimPrefix(pkg.Dir, workDir),
+			TestPackage: isTestScope,
 		}
-
-		seen[pkgKey] = pkg
 
 		results = append(results, result)
 	}
