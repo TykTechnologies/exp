@@ -13,6 +13,9 @@
         "\"go/ast\"",
         "\"sort\""
       ],
+      "package.go": [
+        "\"fmt\""
+      ],
       "string_set.go": [
         "\"fmt\"",
         "\"path\"",

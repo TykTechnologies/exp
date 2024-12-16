@@ -18,7 +18,8 @@ import (
 )
 
 // Load definitions from package located in sourcePath.
-func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
+func Load(pkg *model.Package, verbose bool) ([]*model.Definition, error) {
+	sourcePath := pkg.Path
 	fset := token.NewFileSet()
 
 	cfg := &packages.Config{
@@ -29,7 +30,7 @@ func Load(sourcePath string, verbose bool) ([]*model.Definition, error) {
 	_ = cfg
 
 	if verbose {
-		log.Println("Loading package", sourcePath)
+		log.Printf("Loading package %s %q", sourcePath, pkg.Name())
 	}
 
 	//pkgs, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
