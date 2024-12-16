@@ -19,5 +19,4 @@ func TestListPackages(t *testing.T) {
 	pkgs, err = ListPackages(".", ".")
 	assert.NoError(t, err)
 	spew.Dump(pkgs)
-
 }
