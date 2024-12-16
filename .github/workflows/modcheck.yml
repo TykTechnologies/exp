@@ -69,7 +69,7 @@ jobs:
           echo "GOTOOLCHAIN=local" >> $GITHUB_ENV
 
       - name: Setup Golang
-        uses: actions/setup-go@v5.1.0
+        uses: actions/setup-go@v5.2.0
         with:
           go-version: ${{ inputs.goVersion }}
 
