@@ -37,29 +37,34 @@ func cleanPackages(pkgs []*packages.Package, workDir string) []*model.Package {
 	results := make([]*model.Package, 0, len(pkgs))
 	seen := make(map[string]*packages.Package)
 
+	isDebug := false
+	if isDebug {
+		for _, pkg := range pkgs {
+			fmt.Printf("- %s [%s, %q]\n", pkg.Name, pkg.Dir, pkg.ID)
+		}
+	}
+
 	for _, pkg := range pkgs {
 		// Filters out tests packages. We only care about the Dir's
 		// so we don't want to duplicate folders for tests.
-		if strings.Contains(pkg.ID, ".test") {
+		if strings.HasSuffix(pkg.PkgPath, ".test") {
 			continue
 		}
 
-		testPackage := strings.HasSuffix(pkg.PkgPath, "_test")
+		testPackage := strings.Contains(pkg.Name, "_test")
 
 		cleanPath := "." + strings.TrimPrefix(pkg.Dir, workDir)
 
 		pkgKey := cleanPath + "-" + fmt.Sprint(testPackage)
-		fmt.Println(pkgKey)
 
 		if val, ok := seen[pkgKey]; ok {
-
 			enc := json.NewEncoder(os.Stdout)
 			enc.SetIndent("", "  ")
 
 			enc.Encode(val)
 			enc.Encode(pkg)
 
-			//panic("seen package twice: " + pkgKey)
+			panic("seen package twice: " + pkgKey)
 		}
 
 		result := &model.Package{
