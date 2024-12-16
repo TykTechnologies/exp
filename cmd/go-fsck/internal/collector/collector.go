@@ -170,7 +170,7 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 	}
 
 	if file.Doc != nil {
-		pkg.Doc.Add(filename, v.getSource(file, file.Doc.List))
+		pkg.Doc = strings.TrimSpace(v.getSource(file, file.Doc))
 	}
 
 	switch node := node.(type) {
@@ -285,6 +285,7 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 	args, returns := v.functionBindings(decl)
 
 	declaration := &Declaration{
+		Doc:        strings.TrimSpace(v.getSource(file, decl.Doc)),
 		Kind:       model.FuncKind,
 		File:       filepath.Base(filename),
 		Name:       decl.Name.Name,
@@ -303,9 +304,14 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 }
 
 func (p *collector) getSource(file *ast.File, node any) string {
+	if commentGroup, ok := node.(*ast.CommentGroup); ok {
+		return commentGroup.Text()
+	}
+
 	var buf strings.Builder
 	err := PrintSource(&buf, p.fset, CommentedNode(file, node))
 	if err != nil {
+		fmt.Printf("Error printing source: %v\n", err)
 		return ""
 	}
 	return buf.String()

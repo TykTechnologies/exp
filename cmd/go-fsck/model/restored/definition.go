@@ -3,7 +3,8 @@ package model
 type Definition struct {
 	Package
 
-	Doc     StringSet
+	Doc string
+
 	Imports StringSet
 	Types   DeclarationList
 	Consts  DeclarationList

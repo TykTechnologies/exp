@@ -14,6 +14,8 @@ type Declaration struct {
 
 	References map[string][]string `json:",omitempty"`
 
+	Doc string `json:",omitempty"`
+
 	Name     string   `json:",omitempty"`
 	Names    []string `json:",omitempty"`
 	Receiver string   `json:",omitempty"`

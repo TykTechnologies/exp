@@ -3,6 +3,7 @@ package model
 import (
 	"go/ast"
 	"sort"
+	"strings"
 )
 
 type DeclarationList []*Declaration
@@ -32,6 +33,17 @@ func (p *DeclarationList) ClearSource() {
 	for _, decl := range *p {
 		decl.Source = ""
 	}
+}
+
+func (p *DeclarationList) ClearTestFiles() {
+	result := DeclarationList{}
+	for _, decl := range *p {
+		if strings.HasSuffix(decl.File, "_test.go") {
+			continue
+		}
+		result.Append(decl)
+	}
+	*p = result
 }
 
 func (p *DeclarationList) Sort() {

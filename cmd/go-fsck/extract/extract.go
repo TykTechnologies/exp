@@ -51,6 +51,12 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 		}
 	}
 
+	if !cfg.includeTests {
+		for _, def := range defs {
+			def.ClearTestFiles()
+		}
+	}
+
 	return defs, nil
 }
 

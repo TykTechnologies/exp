@@ -4,14 +4,18 @@
     "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/model",
     "Path": ".",
     "TestPackage": false,
-    "Doc": null,
+    "Doc": "",
     "Imports": {
       "declaration.go": [
         "\"strings\""
       ],
       "declaration_list.go": [
         "\"go/ast\"",
-        "\"sort\""
+        "\"sort\"",
+        "\"strings\""
+      ],
+      "definition.go": [
+        "\"strings\""
       ],
       "package.go": [
         "\"fmt\""
@@ -30,7 +34,7 @@
         "File": "declaration.go",
         "SelfContained": true,
         "Name": "Declaration",
-        "Source": "type Declaration struct {\n\tKind\tDeclarationKind\n\tFile\tstring\n\n\tSelfContained\tbool\n\n\tImports\t[]string\t`json:\",omitempty\"`\n\n\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\tName\t\tstring\t\t`json:\",omitempty\"`\n\tNames\t\t[]string\t`json:\",omitempty\"`\n\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\tArguments\t[]string\t`json:\",omitempty\"`\n\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\tSignature\tstring\t`json:\",omitempty\"`\n\tSource\t\tstring\t`json:\",omitempty\"`\n}"
+        "Source": "type Declaration struct {\n\tKind\tDeclarationKind\n\tFile\tstring\n\n\tSelfContained\tbool\n\n\tImports\t[]string\t`json:\",omitempty\"`\n\n\tReferences\tmap[string][]string\t`json:\",omitempty\"`\n\n\tDoc\tstring\t`json:\",omitempty\"`\n\n\tName\t\tstring\t\t`json:\",omitempty\"`\n\tNames\t\t[]string\t`json:\",omitempty\"`\n\tReceiver\tstring\t\t`json:\",omitempty\"`\n\n\tArguments\t[]string\t`json:\",omitempty\"`\n\tReturns\t\t[]string\t`json:\",omitempty\"`\n\n\tSignature\tstring\t`json:\",omitempty\"`\n\tSource\t\tstring\t`json:\",omitempty\"`\n}"
       },
       {
         "Kind": "type",
@@ -51,7 +55,7 @@
         "File": "definition.go",
         "SelfContained": true,
         "Name": "Definition",
-        "Source": "type Definition struct {\n\tPackage\n\n\tDoc\tStringSet\n\tImports\tStringSet\n\tTypes\tDeclarationList\n\tConsts\tDeclarationList\n\tVars\tDeclarationList\n\tFuncs\tDeclarationList\n}"
+        "Source": "type Definition struct {\n\tPackage\n\n\tDoc\tstring\n\n\tImports\tStringSet\n\tTypes\tDeclarationList\n\tConsts\tDeclarationList\n\tVars\tDeclarationList\n\tFuncs\tDeclarationList\n}"
       },
       {
         "Kind": "type",
@@ -85,7 +89,7 @@
         "Source": "const (\n\tStructKind\tDeclarationKind\t= \"struct\"\n\tImportKind\t\t\t= \"import\"\n\tConstKind\t\t\t= \"const\"\n\tTypeKind\t\t\t= \"type\"\n\tFuncKind\t\t\t= \"func\"\n\tVarKind\t\t\t\t= \"var\"\n\tCommentKind\t\t\t= \"comment\"\n)"
       }
     ],
-    "Vars": null,
+    "Vars": [],
     "Funcs": [
       {
         "Kind": "func",
@@ -151,6 +155,20 @@
         "Receiver": "*DeclarationList",
         "Signature": "ClearSource ()",
         "Source": "func (p *DeclarationList) ClearSource() {\n\tfor _, decl := range *p {\n\t\tdecl.Source = \"\"\n\t}\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "declaration_list.go",
+        "SelfContained": false,
+        "References": {
+          "strings": [
+            "HasSuffix"
+          ]
+        },
+        "Name": "ClearTestFiles",
+        "Receiver": "*DeclarationList",
+        "Signature": "ClearTestFiles ()",
+        "Source": "func (p *DeclarationList) ClearTestFiles() {\n\tresult := DeclarationList{}\n\tfor _, decl := range *p {\n\t\tif strings.HasSuffix(decl.File, \"_test.go\") {\n\t\t\tcontinue\n\t\t}\n\t\tresult.Append(decl)\n\t}\n\t*p = result\n}"
       },
       {
         "Kind": "func",
@@ -311,6 +329,7 @@
             "HasSuffix"
           ]
         },
+        "Doc": "Map returns a map with the short package name as the key\nand the full import path as the value.",
         "Name": "Map",
         "Receiver": "StringSet",
         "Returns": [

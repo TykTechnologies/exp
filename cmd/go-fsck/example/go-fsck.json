@@ -4,7 +4,7 @@
     "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example",
     "Path": ".",
     "TestPackage": false,
-    "Doc": null,
+    "Doc": "Example package doc.",
     "Imports": {
       "example.go": [
         "\"net/http\""
@@ -70,6 +70,7 @@
         "Kind": "func",
         "File": "example.go",
         "SelfContained": false,
+        "Doc": "Global func comment",
         "Name": "GlobalFunc",
         "Returns": [
           "error"
@@ -140,7 +141,7 @@
     "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/example_test",
     "Path": ".",
     "TestPackage": false,
-    "Doc": null,
+    "Doc": "Example package doc.",
     "Imports": {
       "example.go": [
         "\"net/http\""
@@ -206,6 +207,7 @@
         "Kind": "func",
         "File": "example.go",
         "SelfContained": false,
+        "Doc": "Global func comment",
         "Name": "GlobalFunc",
         "Returns": [
           "error"

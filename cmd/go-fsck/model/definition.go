@@ -1,9 +1,12 @@
 package model
 
+import "strings"
+
 type Definition struct {
 	Package
 
-	Doc     StringSet
+	Doc string
+
 	Imports StringSet
 	Types   DeclarationList
 	Consts  DeclarationList
@@ -35,6 +38,18 @@ func (d *Definition) ClearSource() {
 	d.Vars.ClearSource()
 	d.Consts.ClearSource()
 	d.Funcs.ClearSource()
+}
+
+func (d *Definition) ClearTestFiles() {
+	for filename, _ := range d.Imports {
+		if strings.HasSuffix(filename, "_test.go") {
+			delete(d.Imports, filename)
+		}
+	}
+	d.Types.ClearTestFiles()
+	d.Vars.ClearTestFiles()
+	d.Consts.ClearTestFiles()
+	d.Funcs.ClearTestFiles()
 }
 
 func (d *Definition) Fill() {
