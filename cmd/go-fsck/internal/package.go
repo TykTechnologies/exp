@@ -45,9 +45,11 @@ func cleanPackages(pkgs []*packages.Package, workDir string) []*model.Package {
 	}
 
 	for _, pkg := range pkgs {
-		log.Printf("> %q, %q %q %q", pkg.ID, pkg.Name, pkg.PkgPath, pkg.ForTest)
-		for _, f := range pkg.GoFiles {
-			log.Println("-", f)
+		if isDebug {
+			log.Printf("> %q, %q %q %q", pkg.ID, pkg.Name, pkg.PkgPath, pkg.ForTest)
+			for _, f := range pkg.GoFiles {
+				log.Println("-", f)
+			}
 		}
 
 		// This skips compiled tests.
@@ -74,7 +76,9 @@ func cleanPackages(pkgs []*packages.Package, workDir string) []*model.Package {
 		results = append(results, result)
 	}
 
-	fmt.Println("Done with", len(results))
+	if isDebug {
+		fmt.Println("Done with", len(results))
+	}
 
 	return results
 }
