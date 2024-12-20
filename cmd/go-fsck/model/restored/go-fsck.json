@@ -1,5 +1,6 @@
 [
   {
+    "ID": "github.com/TykTechnologies/exp/cmd/go-fsck/model",
     "Package": "model",
     "ImportPath": "github.com/TykTechnologies/exp/cmd/go-fsck/model",
     "Path": ".",
@@ -18,7 +19,8 @@
         "\"strings\""
       ],
       "package.go": [
-        "\"fmt\""
+        "\"fmt\"",
+        "\"golang.org/x/tools/go/packages\""
       ],
       "string_set.go": [
         "\"fmt\"",
@@ -60,9 +62,9 @@
       {
         "Kind": "type",
         "File": "package.go",
-        "SelfContained": true,
+        "SelfContained": false,
         "Name": "Package",
-        "Source": "type Package struct {\n\t// Package is the name of the package.\n\tPackage\tstring\n\t// ImportPath contains the import path (github...).\n\tImportPath\tstring\n\t// Path is sanitized to contain the relative location (folder).\n\tPath\tstring\n\t// TestPackage is true if this is a test package.\n\tTestPackage\tbool\n}"
+        "Source": "type Package struct {\n\t// ID is the ID of the package as x/tools packages loads it.\n\tID\tstring\n\t// Package is the name of the package.\n\tPackage\tstring\n\t// ImportPath contains the import path (github...).\n\tImportPath\tstring\n\t// Path is sanitized to contain the relative location (folder).\n\tPath\tstring\n\t// TestPackage is true if this is a test package.\n\tTestPackage\tbool\n\n\t// Pkg serves to carry ast package information, preventing a double Load().\n\t// It's used during analysis and merging and discarded for the result.\n\tPkg\t*packages.Package\t`json:\"-\"`\n}"
       },
       {
         "Kind": "type",
@@ -151,6 +153,20 @@
         "Kind": "func",
         "File": "declaration_list.go",
         "SelfContained": false,
+        "References": {
+          "strings": [
+            "HasSuffix"
+          ]
+        },
+        "Name": "ClearNonTestFiles",
+        "Receiver": "*DeclarationList",
+        "Signature": "ClearNonTestFiles ()",
+        "Source": "func (p *DeclarationList) ClearNonTestFiles() {\n\tresult := DeclarationList{}\n\tfor _, decl := range *p {\n\t\tif !strings.HasSuffix(decl.File, \"_test.go\") {\n\t\t\tcontinue\n\t\t}\n\t\tresult.Append(decl)\n\t}\n\t*p = result\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "declaration_list.go",
+        "SelfContained": false,
         "Name": "ClearSource",
         "Receiver": "*DeclarationList",
         "Signature": "ClearSource ()",
@@ -206,7 +222,7 @@
           "*Definition"
         ],
         "Signature": "Merge (in *Definition)",
-        "Source": "func (d *Definition) Merge(in *Definition) {\n\tfor k, v := range in.Imports {\n\t\td.Imports.Add(k, v...)\n\t}\n\n\td.Types.AppendUnique(in.Types...)\n\td.Funcs.AppendUnique(in.Funcs...)\n\td.Vars.AppendUnique(in.Vars...)\n\td.Consts.AppendUnique(in.Consts...)\n\n\t// this line causes Sort to be omitted from the\n\t// definitions :/ ... solved by adding the sort\n\t// in the AppendUnique above, but the Sort symbol\n\t// should not be omitted from Definition.\n\n\t// d.Sort()\n}"
+        "Source": "func (d *Definition) Merge(in *Definition) {\n\td.TestPackage = d.TestPackage || in.TestPackage\n\n\tfor k, v := range in.Imports {\n\t\td.Imports.Add(k, v...)\n\t}\n\n\td.Types.AppendUnique(in.Types...)\n\td.Funcs.AppendUnique(in.Funcs...)\n\td.Vars.AppendUnique(in.Vars...)\n\td.Consts.AppendUnique(in.Consts...)\n\n\t// this line causes Sort to be omitted from the\n\t// definitions :/ ... solved by adding the sort\n\t// in the AppendUnique above, but the Sort symbol\n\t// should not be omitted from Definition.\n\n\t// d.Sort()\n}"
       },
       {
         "Kind": "func",

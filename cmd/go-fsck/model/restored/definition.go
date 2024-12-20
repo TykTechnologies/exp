@@ -19,6 +19,8 @@ func (d *Definition) Fill() {
 }
 
 func (d *Definition) Merge(in *Definition) {
+	d.TestPackage = d.TestPackage || in.TestPackage
+
 	for k, v := range in.Imports {
 		d.Imports.Add(k, v...)
 	}

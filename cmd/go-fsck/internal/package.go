@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -44,33 +45,43 @@ func cleanPackages(pkgs []*packages.Package, workDir string) []*model.Package {
 	}
 
 	for _, pkg := range pkgs {
+		log.Printf("> %q, %q %q %q", pkg.ID, pkg.Name, pkg.PkgPath, pkg.ForTest)
+		for _, f := range pkg.GoFiles {
+			log.Println("-", f)
+		}
+
 		// This skips compiled tests.
 		if pkg.Name == "main" {
 			continue
 		}
 
-		isTestScope := strings.Contains(pkg.ID, "_test") || strings.Contains(pkg.ID, ".test")
-
-		// Not black box tests, somehow in package scope.
-		if isTestScope && !strings.HasSuffix(pkg.Name, "_test") {
-			pkg.Name += "_test"
+		isTestScope := false
+		for _, f := range pkg.GoFiles {
+			if strings.HasSuffix(f, "_test.go") {
+				isTestScope = true
+			}
 		}
 
 		result := &model.Package{
+			ID:          pkg.ID,
 			Package:     pkg.Name, //filepath.Base(pkg.PkgPath),
 			ImportPath:  pkg.PkgPath,
 			Path:        "." + strings.TrimPrefix(pkg.Dir, workDir),
 			TestPackage: isTestScope,
+			Pkg:         pkg,
 		}
 
 		results = append(results, result)
 	}
+
+	fmt.Println("Done with", len(results))
+
 	return results
 }
 
 func listPackages(pattern string) ([]*packages.Package, error) {
 	cfg := &packages.Config{
-		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedModule,
+		Mode:  packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedModule | packages.LoadAllSyntax,
 		Tests: true,
 	}
 

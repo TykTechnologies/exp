@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/internal"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/model"
@@ -34,10 +35,20 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 			return nil, err
 		}
 
+		// White box test include whole package scope. Lie.
+		if pkg.TestPackage {
+			if !strings.HasSuffix(pkg.Package, "_test") {
+				pkg.Package += "_test"
+				pkg.ImportPath += "_test" // More about the binary, it's test scope even if not black box.
+			}
+		}
+
 		for _, v := range d {
+			v.Package.ID = pkg.ID
 			v.Package.ImportPath = pkg.ImportPath
 			v.Package.Path = pkg.Path
 			v.Package.Package = pkg.Package
+			v.Package.TestPackage = pkg.TestPackage
 
 			defs = append(defs, d...)
 		}
@@ -45,15 +56,15 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 
 	defs = unique(defs)
 
-	if !cfg.includeSources {
-		for _, def := range defs {
+	for _, def := range defs {
+		if !cfg.includeSources {
 			def.ClearSource()
 		}
-	}
-
-	if !cfg.includeTests {
-		for _, def := range defs {
+		if !def.TestPackage || !cfg.includeTests {
 			def.ClearTestFiles()
+		}
+		if def.TestPackage {
+			def.ClearNonTestFiles()
 		}
 	}
 

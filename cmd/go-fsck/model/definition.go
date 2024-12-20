@@ -52,6 +52,18 @@ func (d *Definition) ClearTestFiles() {
 	d.Funcs.ClearTestFiles()
 }
 
+func (d *Definition) ClearNonTestFiles() {
+	for filename, _ := range d.Imports {
+		if !strings.HasSuffix(filename, "_test.go") {
+			delete(d.Imports, filename)
+		}
+	}
+	d.Types.ClearNonTestFiles()
+	d.Vars.ClearNonTestFiles()
+	d.Consts.ClearNonTestFiles()
+	d.Funcs.ClearNonTestFiles()
+}
+
 func (d *Definition) Fill() {
 	for _, decl := range d.Order() {
 		decl.Imports = d.getImports(decl)
@@ -59,6 +71,8 @@ func (d *Definition) Fill() {
 }
 
 func (d *Definition) Merge(in *Definition) {
+	d.TestPackage = d.TestPackage || in.TestPackage
+
 	for k, v := range in.Imports {
 		d.Imports.Add(k, v...)
 	}

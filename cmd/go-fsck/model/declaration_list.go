@@ -55,6 +55,17 @@ func (p *DeclarationList) ClearTestFiles() {
 	*p = result
 }
 
+func (p *DeclarationList) ClearNonTestFiles() {
+	result := DeclarationList{}
+	for _, decl := range *p {
+		if !strings.HasSuffix(decl.File, "_test.go") {
+			continue
+		}
+		result.Append(decl)
+	}
+	*p = result
+}
+
 func (p *DeclarationList) Sort() {
 	sort.Slice(*p, func(i, j int) bool {
 		a, b := (*p)[i], (*p)[j]

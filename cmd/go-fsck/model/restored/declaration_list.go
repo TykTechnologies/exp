@@ -29,6 +29,17 @@ func (p *DeclarationList) AppendUnique(in ...*Declaration) {
 	p.Sort()
 }
 
+func (p *DeclarationList) ClearNonTestFiles() {
+	result := DeclarationList{}
+	for _, decl := range *p {
+		if !strings.HasSuffix(decl.File, "_test.go") {
+			continue
+		}
+		result.Append(decl)
+	}
+	*p = result
+}
+
 func (p *DeclarationList) ClearSource() {
 	for _, decl := range *p {
 		decl.Source = ""

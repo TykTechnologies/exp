@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go/ast"
-	"go/token"
 	"log"
 	"os"
 	"path"
@@ -18,9 +17,12 @@ import (
 )
 
 // Load definitions from package located in sourcePath.
-func Load(pkg *model.Package, verbose bool) ([]*model.Definition, error) {
-	sourcePath := pkg.Path
-	fset := token.NewFileSet()
+func Load(in *model.Package, verbose bool) ([]*model.Definition, error) {
+	pkg := in.Pkg
+	sourcePath := in.Path
+
+	//fset := token.NewFileSet()
+	fset := in.Pkg.Fset
 
 	cfg := &packages.Config{
 		Mode:  packages.LoadAllSyntax,
@@ -30,36 +32,36 @@ func Load(pkg *model.Package, verbose bool) ([]*model.Definition, error) {
 	_ = cfg
 
 	if verbose {
-		log.Printf("Loading package %s %q", sourcePath, pkg.Name())
+		log.Printf("Loading package %s %q", sourcePath, in.Name())
 	}
 
 	//pkgs, err := parser.ParseDir(fset, sourcePath, nil, parser.ParseComments)
-	pkgs, err := packages.Load(cfg, sourcePath)
-	if err != nil {
-		return nil, err
-	}
+	//	pkgs, err := packages.Load(cfg, sourcePath)
+	//	if err != nil {
+	//		return nil, err
+	//	}
 
 	files := []*ast.File{}
-	for _, pkg := range pkgs {
-		for _, file := range pkg.Syntax {
-			filename := path.Base(fset.Position(file.Pos()).Filename)
-			if !strings.HasSuffix(filename, ".go") {
-				// skip test packages that don't end in .go
-				continue
-			}
-
-			src, err := os.ReadFile(path.Join(sourcePath, filename))
-			if err != nil {
-				return nil, fmt.Errorf("Error reading in source file: %s", filename)
-			}
-
-			if tags := BuildTags(src); len(tags) > 0 {
-				// skipped files with build tags
-				continue
-			}
-
-			files = append(files, file)
+	//	for _, pkg := range pkgs {
+	for _, file := range pkg.Syntax {
+		filename := path.Base(fset.Position(file.Pos()).Filename)
+		if !strings.HasSuffix(filename, ".go") {
+			// skip test packages that don't end in .go
+			continue
 		}
+
+		src, err := os.ReadFile(path.Join(sourcePath, filename))
+		if err != nil {
+			return nil, fmt.Errorf("Error reading in source file: %s", filename)
+		}
+
+		if tags := BuildTags(src); len(tags) > 0 {
+			// skipped files with build tags
+			continue
+		}
+
+		files = append(files, file)
+		//		}
 	}
 
 	sink := collector.NewCollector(fset)

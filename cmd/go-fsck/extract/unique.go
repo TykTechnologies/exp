@@ -8,7 +8,7 @@ func unique(defs []*model.Definition) []*model.Definition {
 	for _, def := range defs {
 		var match bool
 		for _, res := range result {
-			if res.Package.Equal(def.Package) {
+			if res.ID == def.ID {
 				match = true
 				res.Merge(def)
 				break
