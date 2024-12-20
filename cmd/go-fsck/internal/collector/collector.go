@@ -206,6 +206,8 @@ func (v *collector) Visit(node ast.Node, push bool, stack []ast.Node) bool {
 		if len(def.Names) == 1 {
 			def.Name = def.Names[0]
 			def.Names = nil
+
+			def.Doc = strings.TrimSpace(v.getSource(file, node.Doc))
 		}
 
 		for _, name := range names {
