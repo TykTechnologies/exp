@@ -208,7 +208,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			importLiteral := imported.Path.Value
 			if imported.Name != nil {
 				alias := getTypeDeclaration(imported.Name)
-				fmt.Fprintf(os.Stderr, "WARN: package %s is aliased to %s\n", importLiteral, alias)
+				//fmt.Fprintf(os.Stderr, "WARN: package %s is aliased to %s\n", importLiteral, alias)
 				importLiteral = alias + " " + importLiteral
 			}
 
