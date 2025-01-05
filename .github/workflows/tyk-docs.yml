@@ -165,7 +165,7 @@ jobs:
           cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v4.5.0
         with:
           name: gateway-docs
           path: gateway-docs
@@ -192,7 +192,7 @@ jobs:
           cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v4.5.0
         with:
           name: dashboard-docs
           path: dashboard-docs
@@ -218,7 +218,7 @@ jobs:
           cp ./tyk-sink/swagger.yml mdcb-docs/mdcb-swagger.yml
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v4.5.0
         with:
           name: mdcb-docs
           path: mdcb-docs
@@ -287,7 +287,7 @@ jobs:
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Store docs
-        uses: actions/upload-artifact@v4.4.3
+        uses: actions/upload-artifact@v4.5.0
         with:
           name: config-docs
           path: config-docs
@@ -323,7 +323,7 @@ jobs:
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
 
       - name: Raise tyk-docs PR
-        uses: peter-evans/create-pull-request@v7.0.5
+        uses: peter-evans/create-pull-request@v7.0.6
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
           commit-message: Import config/docs
