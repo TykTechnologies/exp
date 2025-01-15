@@ -6,13 +6,16 @@ The scripts contained within run go benchmarks against the latest
 Plugin compiler generally contains the build environment for each
 particular release. This means that a tagged plugin compiler will have
 the complete gateway source code and the go toolchain used to build the
-release and in our case, tests.
+release and in our case, tests. However, the LTS branch (or master) is
+a fluid codebase - so there's some `git clone` under the hood.
+
+For each release, we:
 
 - Check out a gateway source tree
 - Build the test binary in `tests/`
 - Run docker services from latest gateway
 - Run each benchmark individually
-- Collect cpu, memory and trace profiles
+- Collect cpu, memory and trace profiles (disabled currently)
 - Collect benchmark outputs
 
 When all the benchmarks are collected, CSV output is produced using task
