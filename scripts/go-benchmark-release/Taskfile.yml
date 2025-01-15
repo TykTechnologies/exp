@@ -1,0 +1,24 @@
+---
+version: "3"
+
+tasks:
+  build:
+    desc: "Build test binaries"
+    cmd: ./bin/build-tests.sh
+
+  run:
+    desc: "Run test binaries"
+    cmd: ./bin/run-tests.sh
+
+  readme:
+    desc: "Update readme if needed"
+    cmd: sh ./README.md.sh > README.md
+
+  report:
+    desc: "Print test run durations CSV"
+    cmd: php bin/report.php
+
+  clean:
+    desc: "Clean up failed tests"
+    cmds:
+      - sudo find out -name '*.log' -size -140c -delete
