@@ -22,6 +22,10 @@ foreach ($versions as $version) {
 			$valid = true;
 
 			$res = preg_split("/[\s]+/", $line);
+			if (count($res) !== 8) {
+				continue;
+			}
+
 			$arr = array_combine($resultKeys, $res);
 
 			$name = $arr['name'];
