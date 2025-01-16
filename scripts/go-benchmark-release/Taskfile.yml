@@ -21,4 +21,4 @@ tasks:
   clean:
     desc: "Clean up failed tests"
     cmds:
-      - sudo find out -name '*.log' -size -140c -delete
+      - sudo find out -name '*.log' -size -140c -delete -print

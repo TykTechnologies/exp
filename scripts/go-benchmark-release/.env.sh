@@ -1,3 +1,7 @@
+declare -A details
+
+details['BenchmarkWrappedServeHTTP']=true
+
 declare -A releases
 
 # Releases is an associative array between the release tag,

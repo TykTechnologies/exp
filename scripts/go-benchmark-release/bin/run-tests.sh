@@ -1,5 +1,5 @@
 #!/bin/bash
-releases="v5.0.15 v5.1.2 v5.2.6 v5.3.9"
+source .env.sh
 
 # Start required test services (redis, httpbin...)
 function servicesUp {
@@ -42,25 +42,35 @@ function benchmark {
 			continue
 		fi
 
-		set -x
-		timeout -k 120s 60s \
-			./tests/tyk-$version.test -test.run=^$ \
-				-test.bench=^${name}$ \
-				-test.benchtime 15s \
-				2>$output/$name.err | tee $output/$name.log
-		set +x
+		local mode="short"
+		if [[ -n "${details[$name]}" ]]; then
+			mode="detail"
+		fi
+		local benchtime="20s"
+
+		echo "# $name $mode $benchtime"
+
+		if [[ "$mode" == "short" ]]; then
+			timeout -k 120s 60s \
+				./tests/tyk-$version.test -test.run=^$ \
+					-test.bench=^${name}$ \
+					-test.benchtime $benchtime \
+					2>$output/$name.err | tee $output/$name.log
+		fi
 
 		# This test invocation collects more details.
 		# It also fails more.
 
-#		timeout -k 120s 60s \
-#			./tests/tyk-$version.test -test.run=^$ \
-#				-test.bench=^${name}$ \
-#				-test.benchtime 30s -test.benchmem \
-#				-test.cpuprofile=$output/$name-cpu.out \
-#				-test.memprofile=$output/$name-mem.out \
-#				-test.trace=$output/$name-trace.out \
-#				2>$output/$name.err | tee $output/$name.log
+		if [[ "$mode" == "detail" ]]; then
+			timeout -k 120s 60s \
+				./tests/tyk-$version.test -test.run=^$ \
+					-test.bench=^${name}$ \
+					-test.benchtime $benchtime -test.benchmem \
+					-test.cpuprofile=$output/$name-cpu.out \
+					-test.memprofile=$output/$name-mem.out \
+					-test.trace=$output/$name-trace.out \
+					2>$output/$name.err | tee $output/$name.log
+		fi
 
 		exitCode=$?
 		if (( $exitCode > 0 )); then
@@ -83,7 +93,7 @@ if [ ! -z "$1" ]; then
 	benchmark $1
 else
 	benchmark master
-	for release in $releases; do
+	for release in "${!releases[@]}"; do
 		benchmark $release
 	done
 fi
