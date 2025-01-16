@@ -37,9 +37,9 @@ func main() {
 
 	// Validate the issue state
 	if err := validateTicketState(issue); err != nil {
-		fmt.Printf("Validation failed: %v\n", err)
+		log.Fatalf("Validation failed: %v", err)
 	} else {
-		fmt.Println("Validation succeeded: Ticket is in a valid state\n")
+		log.Print("Validation succeeded: Ticket is in a valid state")
 	}
 }
 
