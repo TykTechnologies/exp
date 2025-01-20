@@ -1,0 +1,42 @@
+{
+  "version": "1.102.0",
+  "results": [
+    {
+      "check_id": "find-non-returning-loops",
+      "path": "example.go",
+      "start": {
+        "line": 4,
+        "col": 1,
+        "offset": 60
+      },
+      "end": {
+        "line": 6,
+        "col": 2,
+        "offset": 100
+      },
+      "extra": {
+        "message": "Potential infinite loop detected. Ensure there is a condition to exit the loop, or include a break or return statement.",
+        "metadata": {
+          "category": "correctness",
+          "tags": [
+            "infinite-loop",
+            "go",
+            "best-practices"
+          ]
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    }
+  ],
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "example.go"
+    ]
+  },
+  "skipped_rules": []
+}

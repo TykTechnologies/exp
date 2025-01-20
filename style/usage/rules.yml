@@ -1,0 +1,21 @@
+# Logs code smells
+#
+# - violation of type safety with `any` or similar
+# - lack of concurrency protections
+# - suggest atomic.Pointer use if appropriate
+# - icks.
+
+rules:
+  - id: find-atomic-value-usage
+    ruleid: what
+    pattern-regex: 'atomic.Value'
+    message: "Usage of atomic.Value detected. Consider using atomic.Pointer for better type safety."
+    severity: WARNING
+    languages:
+      - go
+    metadata:
+      category: type-safety
+      tags:
+        - atomic
+        - go
+        - type-safety

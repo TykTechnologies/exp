@@ -1,0 +1,50 @@
+{
+  "version": "1.102.0",
+  "results": [
+    {
+      "check_id": "find-non-pointer-map-values",
+      "path": "example.go",
+      "start": {
+        "line": 9,
+        "col": 5,
+        "offset": 89
+      },
+      "end": {
+        "line": 9,
+        "col": 31,
+        "offset": 115
+      },
+      "extra": {
+        "message": "Map value type is not a pointer. Consider using a pointer for efficiency if the value type is large.",
+        "metadata": {
+          "category": "efficiency",
+          "tags": [
+            "map",
+            "pointers"
+          ]
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "find-non-pointer-map-values",
+      "message": "Internal matching error when running find-non-pointer-map-values on example.go:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-pattern failed because $VALUE does not bind to a sub-program, please check your rule",
+      "path": "example.go"
+    }
+  ],
+  "paths": {
+    "scanned": [
+      "example.go"
+    ]
+  },
+  "skipped_rules": []
+}

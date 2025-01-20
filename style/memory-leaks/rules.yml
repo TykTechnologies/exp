@@ -1,0 +1,31 @@
+# Find maps subject to memory leaks.
+
+# https://vivasoftltd.com/golang-mistakes-1-maps-and-memory-leaks/
+
+# Technically all maps leak. Using pointer references makes maps
+# leak less, optimizing GC usage and allocation pressure. Big
+# types shouldn't be used as map values without pointer refs.
+
+rules:
+  - id: find-non-pointer-map-values
+    patterns:
+      - pattern: |
+          $X = map[$KEY]$VALUE{}
+      - metavariable-regex:
+          metavariable: $VALUE
+          regex: "^[^*].+"
+      - metavariable-pattern:
+          metavariable: $VALUE
+          patterns:
+            - pattern-not: int
+            - pattern-not: string
+
+    message: "Map value type is not a pointer. Consider using a pointer for efficiency if the value type is large."
+    severity: WARNING
+    languages:
+      - go
+    metadata:
+      category: efficiency
+      tags:
+        - map
+        - pointers

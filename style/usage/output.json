@@ -1,0 +1,72 @@
+{
+  "version": "1.102.0",
+  "results": [
+    {
+      "check_id": "find-atomic-value-usage",
+      "path": "example.go",
+      "start": {
+        "line": 9,
+        "col": 14,
+        "offset": 138
+      },
+      "end": {
+        "line": 9,
+        "col": 26,
+        "offset": 150
+      },
+      "extra": {
+        "message": "Usage of atomic.Value detected. Consider using atomic.Pointer for better type safety.",
+        "metadata": {
+          "category": "type-safety",
+          "tags": [
+            "atomic",
+            "go",
+            "type-safety"
+          ]
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "find-atomic-value-usage",
+      "path": "example.go",
+      "start": {
+        "line": 14,
+        "col": 15,
+        "offset": 231
+      },
+      "end": {
+        "line": 14,
+        "col": 27,
+        "offset": 243
+      },
+      "extra": {
+        "message": "Usage of atomic.Value detected. Consider using atomic.Pointer for better type safety.",
+        "metadata": {
+          "category": "type-safety",
+          "tags": [
+            "atomic",
+            "go",
+            "type-safety"
+          ]
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    }
+  ],
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "example.go"
+    ]
+  },
+  "skipped_rules": []
+}

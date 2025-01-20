@@ -1,0 +1,29 @@
+rules:
+  - id: find-non-returning-loops
+    patterns:
+      - pattern: |
+          for {
+              ...
+          }
+      - pattern-not: |
+          for {
+              ...
+              break
+              ...
+          }
+      - pattern-not: |
+          for {
+              ...
+              return ...
+              ...
+          }
+    message: "Potential infinite loop detected. Ensure there is a condition to exit the loop, or include a break or return statement."
+    severity: WARNING
+    languages:
+      - go
+    metadata:
+      category: correctness
+      tags:
+        - infinite-loop
+        - go
+        - best-practices

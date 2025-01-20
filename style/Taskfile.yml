@@ -1,0 +1,9 @@
+---
+version: "3"
+
+tasks:
+  default:
+    desc: "Print info"
+    silent: true
+    cmds:
+      - echo "Nothing to run, navigate into subfolders."
