@@ -19,10 +19,6 @@ on:  # yamllint disable-line rule:truthy
         description: 'Base branch'
         required: true
         default: 'master'
-      goVersion:
-        description: 'Go version'
-        required: true
-        default: '1.22.x'
       repository:
         description: 'Repository'
         type: choice
@@ -71,7 +67,8 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5.1.0
         with:
-          go-version: ${{ inputs.goVersion }}
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
 
       - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3.0.1
@@ -79,10 +76,6 @@ jobs:
           image: tykio/ci-tools:latest
           path: /usr/local/bin/.
           destination: /usr/local/bin
-
-      # Build and install modcheck
-      - working-directory: ./cmd/modcheck
-        run: task
 
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
