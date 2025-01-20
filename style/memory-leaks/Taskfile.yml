@@ -10,4 +10,4 @@ tasks:
     cmds:
       - docker run --rm -v $PWD:/src -w /src {{.semgrep}} semgrep scan --metrics=off --config /src/rules.yml --json -o /src/output.json || true
       - jq . output.json > output2.json && mv output2.json output.json
-      - cat output.json | summary semgrep
+      - cat output.json | summary semgrep > README.md

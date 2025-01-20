@@ -5,14 +5,14 @@
       "check_id": "find-non-pointer-map-values",
       "path": "example.go",
       "start": {
-        "line": 9,
-        "col": 5,
-        "offset": 89
+        "line": 10,
+        "col": 6,
+        "offset": 110
       },
       "end": {
-        "line": 9,
-        "col": 31,
-        "offset": 115
+        "line": 10,
+        "col": 32,
+        "offset": 136
       },
       "extra": {
         "message": "Map value type is not a pointer. Consider using a pointer for efficiency if the value type is large.",
