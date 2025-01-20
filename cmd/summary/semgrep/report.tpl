@@ -1,8 +1,8 @@
 Semgrep version: {{ .version }}
 Errors reported: {{ .errors | len }}
-Path scanned: {{ .paths.scanned | len }}
+Path scanned: {{ with .paths }}{{ .scanned | len }}{{else}}0{{end}}
 Results: {{ .results | len }}
-Errors: {{ .errors | len }}
+Errors: {{ .errors | len -}}
 
 {{if gt (len .results) 0}}
 ~~~yaml
@@ -21,11 +21,12 @@ Errors: {{ .errors | len }}
 Errors reported:
 ~~~yaml
 {{ range .errors -}}
-- file: {{with index .spans 0}}{{ .file }}{{end}}
-  line: {{with index .spans 0}}{{ .start.line }}{{end}}
-  message: {{ .message }}
-  rule: {{ .rule_id }}
-{{ end }}
+- message: {{ .message }}
+{{if .spans }}{{ with index .spans 0 }}
+  file: {{ or .file "N/A" }}
+  line: {{ or .start.line "N/A" }}
+{{end}}
+  rule: {{ or .rule_id "N/A" -}}{{ end -}}{{ end -}}
 ~~~
 
 {{else}}

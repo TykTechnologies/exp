@@ -10,12 +10,26 @@ tasks:
     desc: "Run default (install)"
     cmds:
       - task: install
-      - cat go.mod | summary modfile
 
   test:
     desc: "Run tests"
+    deps: [ install ]
     cmds:
+      - task: test:semgrep
       - task: test:vet
+      - task: test:modfile
+
+  test:modfile:
+    desc: "Run tests for modfile"
+    cmds:
+      - cat go.mod | summary modfile
+
+  test:semgrep:
+    desc: "Run tests for semgrep"
+    cmds:
+      - cat testdata/semgrep-results.json | summary semgrep
+      - cat testdata/semgrep-error.json | summary semgrep
+      - cat testdata/semgrep-syntax.json | summary semgrep
 
   test:vet:
     desc: "Run tests for vet"
