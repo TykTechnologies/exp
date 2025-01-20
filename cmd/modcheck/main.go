@@ -28,7 +28,6 @@ type Dependency struct {
 	Latest   string
 	Upgrade  bool
 	Warnings string
-	CVEs     string
 }
 
 func (d *Dependency) StringSlice() []string {
@@ -44,16 +43,11 @@ func (d *Dependency) StringSlice() []string {
 	// strip github.com for less data
 	name = strings.ReplaceAll(name, "github.com/", "")
 
-	return toStringSlice(name, version, d.Latest, d.Warnings, d.CVEs)
+	return toStringSlice(name, version, d.Latest, d.Warnings)
 }
 
 func load(gomodPath string) ([]*Dependency, error) {
 	var result []*Dependency
-
-	vulns, err := getVulns()
-	if err != nil {
-		return nil, err
-	}
 
 	content, err := os.ReadFile(gomodPath)
 	if err != nil {
@@ -94,10 +88,6 @@ func load(gomodPath string) ([]*Dependency, error) {
 		}
 
 		dep.Warnings = lintImport(dep.Name, dep.Version, dep.Latest)
-
-		if m := vulns.Find(dep.Name); m != nil {
-			dep.CVEs = m.String(dep.Version)
-		}
 
 		switch {
 		case dep.Latest == dep.Version:
@@ -149,7 +139,7 @@ func start() error {
 		output := &strings.Builder{}
 
 		w := tablewriter.NewWriter(output)
-		w.SetHeader([]string{"import", "version", "latest", "warnings", "cves"})
+		w.SetHeader([]string{"import", "version", "latest", "warnings"})
 		w.SetAutoWrapText(false)
 		w.SetAutoFormatHeaders(true)
 		w.SetTablePadding(" ")
