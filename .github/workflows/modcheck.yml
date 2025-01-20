@@ -54,7 +54,7 @@ jobs:
 
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
 
@@ -65,20 +65,19 @@ jobs:
           echo "GOTOOLCHAIN=local" >> $GITHUB_ENV
 
       - name: Setup Golang
-        uses: actions/setup-go@v5.1.0
+        uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-          cache-dependency-path: go.sum
+          check-latest: true
 
       - name: 'Extract tykio/ci-tools:latest'
-        uses: shrink/actions-docker-extract@v3.0.1
+        uses: shrink/actions-docker-extract@v3
         with:
           image: tykio/ci-tools:latest
           path: /usr/local/bin/.
           destination: /usr/local/bin
 
       - name: Checkout repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}
@@ -122,7 +121,7 @@ jobs:
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Raise PR
-        uses: peter-evans/create-pull-request@v7.0.5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
           commit-message: Import updated go.mod/go.sum
