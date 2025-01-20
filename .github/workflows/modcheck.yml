@@ -67,7 +67,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          check-latest: true
+          go-version: 'stable'
 
       - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3
