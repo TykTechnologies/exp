@@ -14,10 +14,10 @@ func (S) Logger() Logger {
 func (s S) WorkBad() bool {
 	// ruleid: find-repeated-logger-calls
 	s.Logger().Info("One")
-
+	result := s.Work()
 	s.Logger().Info("Two")
 
-	return s.Work()
+	return result
 }
 
 func (s S) WorkGood() bool {

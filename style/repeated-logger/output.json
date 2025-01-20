@@ -12,7 +12,7 @@
       "end": {
         "line": 18,
         "col": 24,
-        "offset": 238
+        "offset": 257
       },
       "extra": {
         "message": "Repeated calls to Logger() detected. Reduce allocations/concurrency by only invoking it once.",
