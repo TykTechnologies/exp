@@ -1,7 +1,7 @@
 # Contents
 
 - [Detect memory leak exposure](./memory-leaks)
-- [Detect non-returning loops](./non-returning-loops)
+- [Detect non-returning loops](./non-returning-loop)
 - [Detect symbol usage code smells](./usage)
 
 # Structure
