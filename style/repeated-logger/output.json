@@ -1,0 +1,42 @@
+{
+  "version": "1.102.0",
+  "results": [
+    {
+      "check_id": "find-repeated-logger-calls",
+      "path": "example.go",
+      "start": {
+        "line": 16,
+        "col": 2,
+        "offset": 191
+      },
+      "end": {
+        "line": 18,
+        "col": 24,
+        "offset": 238
+      },
+      "extra": {
+        "message": "Repeated calls to Logger() detected. Reduce allocations/concurrency by only invoking it once.",
+        "metadata": {
+          "category": "best-practices",
+          "tags": [
+            "logging",
+            "go",
+            "performance"
+          ]
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    }
+  ],
+  "errors": [],
+  "paths": {
+    "scanned": [
+      "example.go"
+    ]
+  },
+  "skipped_rules": []
+}

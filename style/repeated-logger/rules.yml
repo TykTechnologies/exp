@@ -1,0 +1,21 @@
+---
+rules:
+  - id: find-repeated-logger-calls
+    patterns:
+      - pattern: |
+          $OBJ.Logger().$METHOD(...)
+          ...
+          $OBJ.Logger().$METHOD(...)
+      - metavariable-pattern:
+          metavariable: $METHOD
+          pattern: Info
+    message: "Repeated calls to Logger() detected. Reduce allocations/concurrency by only invoking it once."
+    severity: WARNING
+    languages:
+      - go
+    metadata:
+      category: best-practices
+      tags:
+        - logging
+        - go
+        - performance

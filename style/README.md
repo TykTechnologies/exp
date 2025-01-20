@@ -3,6 +3,7 @@
 - [Detect memory leak exposure](./memory-leaks)
 - [Detect non-returning loops](./non-returning-loop)
 - [Detect symbol usage code smells](./usage)
+- [Repeated Logger calls in scope](./repeated-logger)
 
 # Structure
 
