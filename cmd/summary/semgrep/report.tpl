@@ -1,8 +1,12 @@
-Semgrep version: {{ .version }}
-Errors reported: {{ .errors | len }}
-Path scanned: {{ with .paths }}{{ .scanned | len }}{{else}}0{{end}}
-Results: {{ .results | len }}
-Errors: {{ .errors | len -}}
+# Semgrep scan report
+
+| **Key**             | **Value**                           |
+|----------------------|-------------------------------------|
+| **Semgrep version**  | `{{ .version }}`                   |
+| **Errors reported**  | `{{ .errors | len }}`              |
+| **Path scanned**     | `{{ with .paths }}{{ .scanned | len }}{{else}}0{{end}}` |
+| **Results**          | `{{ .results | len }}`             |
+| **Errors**           | `{{ .errors | len }}`             |
 
 {{if gt (len .results) 0}}
 ~~~yaml
@@ -11,14 +15,14 @@ Errors: {{ .errors | len -}}
   line: {{ .start.line }}
   message: {{ .extra.message }}
   check: {{ .check_id }}
+{{if ne .extra.lines "requires login" }}
   example: |
     {{ .extra.lines }}
-
-{{ end }}
+{{ end }}{{ end -}}
 ~~~
-{{end}}
-{{if gt (len .errors) 0}}
+{{end}}{{if gt (len .errors) 0}}
 Errors reported:
+
 ~~~yaml
 {{ range .errors -}}
 - message: {{ .message }}
@@ -30,7 +34,6 @@ Errors reported:
 ~~~
 
 {{else}}
-
 Checks by occurence:
 {{ range .checks }}
 - {{ .Count }} {{ .CheckID -}}
