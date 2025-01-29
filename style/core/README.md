@@ -100,9 +100,10 @@ blocked are to sort the service types into individual files or packages.
 With the file naming restrictions, a file gives us a bounded scope for a
 service model implementation.
 
-Functions that are attached to this type should live in the same file, following
-the desired declaration order. If the functions become too large, it's possible
-to split individual ones by file prefix. For example:
+Functions that are attached to this type should live in the same file,
+following the desired declaration order. If the functions become too
+large, it's possible to split individual ones by file prefix. For
+example:
 
 - func (*ServiceDiscovery) Get(), `service_discovery_get.go`.
 - func (*HostChecker) Do(), `host_checker_do.go`.
@@ -113,7 +114,10 @@ the implementation. The latter issue is seen in large-scope packages, which
 are difficult to navigate.
 
 A package separate to the data model will reference `model.Record`. This
-is a good thing for code analysis, as we can track usage between packages.
+is a good thing for code analysis, as we can track usage between
+packages. A side effect of black box tests also provides us with this
+benefit as the black box tests `model_test` are considered a different
+package to `model`.
 
 ### Test file and test function naming restrictions
 
