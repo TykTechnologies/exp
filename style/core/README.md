@@ -47,7 +47,7 @@ inconsistencies in tooling like `goimports` have driven us to use
 
 The desired grouping is:
 
-```
+~~~go
 import (
 	// stlib packages
 
@@ -57,7 +57,7 @@ import (
 
 	// _ (driver imports)
 )
-```
+~~~
 
 This is a concern for `task fmt` (`task lint`, `task hooks:pre-commit`).
 You shouldn't need to do anything except enforce consistency.
@@ -219,11 +219,11 @@ There is some utility in providing `type Record struct` and `type RecordList
 []Record`, and a common traversal, filtering and retrieval API on
 RecordList:
 
-```
+~~~go
 type RecordList []*Record
 func (RecordList) FilterIDs(ids ...string) RecordList
 func (RecordList) Get(id string) *Record
-```
+~~~
 
 Similarly, getters should be added to increase the utility of individual
 data model fields. This is common practice in gRPC, which generates a getter
@@ -246,7 +246,7 @@ for _, v := recordList {
 
 Undesired code without pointers:
 
-~~~
+~~~go
 for k, v := recordList {
 	v.Name = "John Smith"
 	recordList[k] = v
@@ -326,7 +326,7 @@ handler would be preffered to reason about there only being one
 connection within. The accessibility of the connection becomes a
 spaghetti code affair, while the constructor looks like this:
 
-```
+~~~go
 // NewConnector creates a new storage connection.
 func NewConnector(connType string, conf config.Config) (model.Connector, error) {
     cfg := conf.Storage
@@ -336,13 +336,13 @@ func NewConnector(connType string, conf config.Config) (model.Connector, error) 
 	cfg = conf.AnalyticsStorage
     }
     log.Debug("Creating new " + connType + " Storage connection")
-```
+~~~
 
 Using these connections is awkward:
 
-```
-    store := storage.RedisCluster{IsCache: true, ConnectionHandler: gw.StorageConnectionHandler}
-    store.Connect()
+```go
+store := storage.RedisCluster{IsCache: true, ConnectionHandler: gw.StorageConnectionHandler}
+store.Connect()
 ```
 
 Obviously the desired code based on this is:
