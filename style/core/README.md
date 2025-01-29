@@ -354,9 +354,13 @@ desired outcome is that all this shared responsibility gets eliminated.
 
 All of it could be replaced with:
 
-- Gateway.CacheStorage =     NewConnector(conf.GetCacheStorage())
-- Gateway.AnalyticsStorage = NewConnector(conf.GetAnalyticsStorage())
-- Gateway.Storage =          NewConnector(conf.GetStorage())
+~~~go
+return &Gateway{
+	CacheStorage:     NewConnector(conf.GetCacheStorage()),
+	AnalyticsStorage: NewConnector(conf.GetAnalyticsStorage()),
+	Storage:          NewConnector(conf.GetStorage()),
+	...
+```
 
 Here's another example of a standalone implementation of one of those
 helpers that provide the config detail:
