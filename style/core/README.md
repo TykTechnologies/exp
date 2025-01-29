@@ -152,12 +152,23 @@ Bad:
 - [Uber style guide: Test Tables](https://github.com/uber-go/guide/blob/master/style.md#test-tables)
 - [Uber style guide: Avoid unnecessary complexity](https://github.com/uber-go/guide/blob/master/style.md#avoid-unnecessary-complexity-in-table-tests)
 
-### Integration tests and black box tests
+### Black box tests
+
+Black box tests use a `_test` suffix for the tested package. It imports
+the tested package and provides a clean symbol reference in source.
 
 Black box tests allow you to use only the "public" API parts, so that
 internal implementation details are allowed to change without needing to
 change any tests. This is the recommended way, otherwise we couple tests
 to code, and not to the logic.
+
+It's suggested you write black box tests also because they can be easily
+moved to a more appropriate location under `/tests`.
+
+### Integration tests
+
+Integration tests in this context means using an external service for
+shared caches or persistent storage (redis, mongo, postgres,...).
 
 The issue with integration tests is that:
 
@@ -169,6 +180,22 @@ You should pay attention to those restrictions as you write tests. Tests
 that clear the database state will interfere with other running tests.
 The `/tests` location should be encouraged to segment any integration
 tests into their own area to optimize this process in the future.
+
+### General testing
+
+Various micro-optimisations are encouraged:
+
+- use httptest.NewRequest
+- use testify/assert (not just standard testing package)
+- use t.Cleanup instead of defer in tests
+
+Red flags in testing and product code are usually:
+
+- usage of goroutines without cancellation or lifecycle control
+- inline usage of mutexes without a defined API over the data
+- usage of atomic.Value or `any` type loosing type safety
+- protecting a map with a mutex, but no protection or copies for the stored values
+- goroutine leaks, memory leaks, heap escapes (unnecessary copies)
 
 ### Type declaration restrictions
 
@@ -205,7 +232,7 @@ we rarely decouple the data model.
 
 Usage of data model asumes slices and maps should carry a pointer value.
 
-- 1. pointer values leak less with map[] usage,
+- 1. [pointer values leak less with map[]*T usage](https://github.com/golang/go/issues/20135),
 - 2. as it's a pointer, it's directly modifiable in for loops
 
 A simple loop becomes clearer and allows the value being modified in
