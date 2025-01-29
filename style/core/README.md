@@ -110,14 +110,17 @@ example:
 
 The desired structure is there to ensure that a package protects this
 API surface, and ensure that other files in the package don't partition
-the implementation. The latter issue is seen in large-scope packages, which
-are difficult to navigate.
+the implementation. The latter issue is seen in large-scope packages,
+which are difficult to navigate.
 
 A package separate to the data model will reference `model.Record`. This
 is a good thing for code analysis, as we can track usage between
-packages. A side effect of black box tests also provides us with this
-benefit as the black box tests `model_test` are considered a different
-package to `model`.
+packages.
+
+Black box tests will similarly reference types and functions from the
+package. Static code analysis tells us which functions or models are
+referenced from which test. White box tests fail to provide this
+usability with basic tools like ctrl+f / `grep` for `model.New`.
 
 ### Test file and test function naming restrictions
 
