@@ -297,16 +297,15 @@ the returned types (no globals, no other package functions, etc.).
 
 A self-contained function is moveable between packages.
 
-### Shared responsibility
+### Locality of behaviour
 
-When considering single responsibility is the desired outcome, these
-changes add up to cover code in a logically and technically consistent
-manner. This has benefits on any kind of future work.
+There are various names for this but generally locality of behaviour is
+what we're talking about when we mention single responsibility.
 
-A horrible example of shared responsibility is how our storage package
-has been implemented. To get a connection, several flags control which
-connection you get, essentially making it a complex way to handle what
-could just have been three individual connections (or handlers for them).
+An example of shared responsibility is how our storage package has been
+implemented. To get a connection, several flags control which connection
+you get, essentially making it a complex way to handle what could just
+have been three individual connections (or handlers for them).
 
 ~~~go
 func (rc *ConnectionHandler) getConnection(isCache, isAnalytics bool) model.Connector {
@@ -349,8 +348,10 @@ Obviously the desired code based on this is:
 
 - `func NewConnector(*config.StorageOptionsConf) (model.Connector, error)`.
 
-While there is always an integration point, this is a half life. The
-desired outcome is that all this shared responsibility gets eliminated.
+The responsibility of the constructor is to process the configuration
+passed via argument, and return an appropriate error if none is
+provided. Ideally the passed arguments never leave the constructor, or
+should be passed along as fields.
 
 All of it could be replaced with:
 
@@ -376,7 +377,9 @@ func (c *Config) GetCacheStorage() *conf.StorageOptionsConf {
 
 Not only does usage improve, but config evaluation is brought under the
 config package umbrella. Reasoning about configuration and how we
-evaluate that configuration would improve with the change.
+evaluate that configuration would improve with the change. The locality
+of behaviour is ensured both in the config package, and the gateway
+constructor, and shared responsibility is avoided.
 
 ### Maintainer
 
