@@ -340,10 +340,10 @@ func NewConnector(connType string, conf config.Config) (model.Connector, error) 
 
 Using these connections is awkward:
 
-```go
+~~~go
 store := storage.RedisCluster{IsCache: true, ConnectionHandler: gw.StorageConnectionHandler}
 store.Connect()
-```
+~~~
 
 Obviously the desired code based on this is:
 
@@ -360,19 +360,19 @@ return &Gateway{
 	AnalyticsStorage: NewConnector(conf.GetAnalyticsStorage()),
 	Storage:          NewConnector(conf.GetStorage()),
 	...
-```
+~~~
 
 Here's another example of a standalone implementation of one of those
 helpers that provide the config detail:
 
-```go
+~~~go
 func (c *Config) GetCacheStorage() *conf.StorageOptionsConf {
 	if !c.EnableSeparateCacheStore {
 		return nil
 	}
 	return c.CacheStorage
 }
-```
+~~~
 
 Not only does usage improve, but config evaluation is brought under the
 config package umbrella. Reasoning about configuration and how we
