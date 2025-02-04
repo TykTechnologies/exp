@@ -27,6 +27,8 @@ on:  # yamllint disable-line rule:truthy
           - 'TykTechnologies/tyk-analytics'
           - 'TykTechnologies/tyk-identity-broker'
           - 'TykTechnologies/storage'
+          - 'TykTechnologies/tyk-sync'
+          - 'TykTechnologies/tyk-sync-internal'
 
 env:
   GOPRIVATE: github.com/TykTechnologies
