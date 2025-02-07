@@ -32,6 +32,7 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   GOPRIVATE: github.com/TykTechnologies
+  GOTOOLCHAIN: local
 
 jobs:
   sanitize:
