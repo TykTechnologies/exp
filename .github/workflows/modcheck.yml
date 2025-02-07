@@ -19,6 +19,10 @@ on:  # yamllint disable-line rule:truthy
         description: 'Base branch'
         required: true
         default: 'master'
+      goversion:
+        description: 'Go version'
+        required: true
+        default: 'stable'
       repository:
         description: 'Repository'
         type: choice
@@ -70,8 +74,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
-          cache-dependency-path: go.sum
+          version: ${{ github.event.inputs.goversion }}
 
       - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3
