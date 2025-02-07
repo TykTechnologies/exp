@@ -7,13 +7,14 @@ import (
 	"go/types"
 	"log"
 	"os"
+	"slices"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
 
 // findFieldUsages searches for field accesses in Go files within the current module.
-func findFieldUsages(root, structName, fieldName string) error {
+func findFieldUsages(root, structName, fieldName string, verbose bool) error {
 	// Tokenizer set
 	fset := token.NewFileSet()
 
@@ -52,7 +53,11 @@ func findFieldUsages(root, structName, fieldName string) error {
 						// Check if the base identifier refers to the correct struct
 						if obj, ok := pkg.TypesInfo.Uses[ident]; ok {
 							if named, ok := obj.Type().(*types.Named); ok {
-								if named.Obj().Name() == structName {
+								currentName := named.Obj().Name()
+								if verbose {
+									fmt.Println(currentName)
+								}
+								if currentName == structName {
 									// Get position and line content
 									pos := fset.Position(sel.Pos())
 									line := strings.TrimSpace(getLineFromFile(src, pos.Line))
@@ -90,9 +95,10 @@ func main() {
 
 	structName := os.Args[1]
 	fieldName := os.Args[2]
+	verbose := slices.Contains(os.Args, "-v")
 	root := "." // Start from the current directory
 
-	err := findFieldUsages(root, structName, fieldName)
+	err := findFieldUsages(root, structName, fieldName, verbose)
 	if err != nil {
 		log.Fatalf("Error: %v\n", err)
 	}
