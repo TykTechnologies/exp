@@ -3,6 +3,14 @@
 This tool will go through the imports in go.mod and check with the
 official go proxy to get a list of versions for each of the imports.
 
+## Install
+
+```bash
+go install github.com/TykTechnologies/exp/cmd/modcheck@main
+```
+
+## Usage
+
 ```
 Usage of modcheck:
       --for-upgrade    only list packages for upgrade
