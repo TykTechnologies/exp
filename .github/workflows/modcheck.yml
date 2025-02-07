@@ -70,7 +70,8 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          go-version: 'stable'
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
 
       - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3
