@@ -74,7 +74,7 @@ jobs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          version: ${{ github.event.inputs.goversion }}
+          go-version: ${{ github.event.inputs.goversion }}
 
       - name: 'Extract tykio/ci-tools:latest'
         uses: shrink/actions-docker-extract@v3
