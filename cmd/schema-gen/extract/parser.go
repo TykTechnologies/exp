@@ -38,9 +38,7 @@ func NewExtractOptions(cfg *options) *ExtractOptions {
 
 // Extract package structs
 func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
-	var (
-		ignoreFiles = options.ignoreFiles
-	)
+	ignoreFiles := options.ignoreFiles
 
 	ignoreList := make(map[string]bool)
 	for _, file := range ignoreFiles {
@@ -105,7 +103,7 @@ func (p *objParser) getSourceCode(node ast.Node) string {
 }
 
 func (p *objParser) functionDef(fun *ast.FuncDecl) string {
-	var fset = p.fileset
+	fset := p.fileset
 	name := fun.Name.Name
 	params := make([]string, 0)
 	for _, p := range fun.Type.Params.List {
@@ -154,6 +152,9 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 		Imports:      []string{},
 	}
 
+	// sometimes the enums might be encountered before we encounter their type declaration . We store them here temporary until
+	// we find their declarations
+	pendingEnums := make(map[string][]*EnumValue)
 	var funcs []*FuncInfo
 	var globalFuncs []*FuncInfo
 
@@ -208,7 +209,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			importLiteral := imported.Path.Value
 			if imported.Name != nil {
 				alias := getTypeDeclaration(imported.Name)
-				//fmt.Fprintf(os.Stderr, "WARN: package %s is aliased to %s\n", importLiteral, alias)
+				// fmt.Fprintf(os.Stderr, "WARN: package %s is aliased to %s\n", importLiteral, alias)
 				importLiteral = alias + " " + importLiteral
 			}
 
@@ -225,6 +226,43 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			genDecl, ok := obj.(*ast.GenDecl)
 			if !ok {
 				continue
+			}
+
+			if genDecl.Tok == token.CONST {
+				var currentType string
+				var currentValue int
+
+				for _, spec := range genDecl.Specs {
+					if constSpec, ok := spec.(*ast.ValueSpec); ok {
+						if constSpec.Type != nil {
+							if ident, ok := constSpec.Type.(*ast.Ident); ok {
+								currentType = ident.Name
+							}
+						}
+
+						for i, name := range constSpec.Names {
+							enumValue := &EnumValue{
+								Name: name.Name,
+								Doc:  TrimSpace(constSpec.Doc),
+							}
+
+							if len(constSpec.Values) > i {
+								if basicLit, ok := constSpec.Values[i].(*ast.BasicLit); ok {
+									fmt.Sscanf(basicLit.Value, "%d", &currentValue)
+									enumValue.Value = currentValue
+								}
+							} else {
+								enumValue.Value = currentValue
+							}
+							currentValue++
+
+							// Store enum values for later association
+							if currentType != "" {
+								pendingEnums[currentType] = append(pendingEnums[currentType], enumValue)
+							}
+						}
+					}
+				}
 			}
 
 			info := &DeclarationInfo{
@@ -245,6 +283,10 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 					}
 
 					p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo, options)
+
+					if enums, exists := pendingEnums[typeInfo.Name]; exists {
+						typeInfo.EnumValues = enums
+					}
 
 					info.Types.Append(typeInfo)
 				}
@@ -312,13 +354,12 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, optio
 	p.visited[name] = true
 
 	for _, field := range structInfo.StructObj.Fields.List {
-		//pos := p.fileset.Position(field.Pos())
-		//filePos := path.Base(pos.String())
+		// pos := p.fileset.Position(field.Pos())
+		// filePos := path.Base(pos.String())
 
 		var goName string
 		if len(field.Names) > 0 {
 			goName = field.Names[0].Name
-
 		}
 
 		tagValue := ""
