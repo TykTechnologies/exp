@@ -112,7 +112,7 @@ func (x *DeclarationInfo) Valid() bool {
 
 type EnumValue struct {
 	Name  string
-	Value int
+	Value interface{}
 	Doc   string
 }
 

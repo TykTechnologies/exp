@@ -146,21 +146,18 @@ func (p *objParser) functionDef(fun *ast.FuncDecl) string {
 
 // GetDeclaration returns a filled out PackageInfo{} and an error if any.
 func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, error) {
-	var err error
 	result := &PackageInfo{
 		Declarations: DeclarationList{},
 		Imports:      []string{},
 	}
 
-	// sometimes the enums might be encountered before we encounter their type declaration . We store them here temporary until
-	// we find their declarations
-	pendingEnums := make(map[string][]*EnumValue)
+	typeMap := make(map[string]*TypeInfo)
+	enumsByType := make(map[string][]*EnumValue)
+
 	var funcs []*FuncInfo
 	var globalFuncs []*FuncInfo
 
 	for _, fileObj := range p.pkg.Files {
-		// https://pkg.go.dev/go/ast#File
-
 		if options.includeFunctions {
 			ast.Inspect(fileObj, func(n ast.Node) (res bool) {
 				res = true
@@ -197,19 +194,15 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 						}
 						funcs = append(funcs, funcinfo)
 					}
-
 				}
-
 				return
 			})
 		}
 
-		// Collect imports
 		for _, imported := range fileObj.Imports {
 			importLiteral := imported.Path.Value
 			if imported.Name != nil {
 				alias := getTypeDeclaration(imported.Name)
-				// fmt.Fprintf(os.Stderr, "WARN: package %s is aliased to %s\n", importLiteral, alias)
 				importLiteral = alias + " " + importLiteral
 			}
 
@@ -221,83 +214,91 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			}
 		}
 
-		// Collect declarations
 		for _, obj := range fileObj.Decls {
 			genDecl, ok := obj.(*ast.GenDecl)
 			if !ok {
 				continue
 			}
 
-			if genDecl.Tok == token.CONST {
-				var currentType string
-				var currentValue int
-
+			switch genDecl.Tok {
+			case token.TYPE:
 				for _, spec := range genDecl.Specs {
-					if constSpec, ok := spec.(*ast.ValueSpec); ok {
-						if constSpec.Type != nil {
-							if ident, ok := constSpec.Type.(*ast.Ident); ok {
-								currentType = ident.Name
-							}
-						}
-
-						for i, name := range constSpec.Names {
-							enumValue := &EnumValue{
-								Name: name.Name,
-								Doc:  TrimSpace(constSpec.Doc),
-							}
-
-							if len(constSpec.Values) > i {
-								if basicLit, ok := constSpec.Values[i].(*ast.BasicLit); ok {
-									fmt.Sscanf(basicLit.Value, "%d", &currentValue)
-									enumValue.Value = currentValue
-								}
-							} else {
-								enumValue.Value = currentValue
-							}
-							currentValue++
-
-							// Store enum values for later association
-							if currentType != "" {
-								pendingEnums[currentType] = append(pendingEnums[currentType], enumValue)
-							}
-						}
-					}
-				}
-			}
-
-			info := &DeclarationInfo{
-				Doc:     TrimSpace(genDecl.Doc),
-				FileDoc: TrimSpace(fileObj.Doc),
-				Types:   TypeList{},
-			}
-
-			for _, spec := range genDecl.Specs {
-				switch obj := spec.(type) {
-				case *ast.TypeSpec:
-					typeInfo, err := NewTypeSpecInfo(obj)
-					if err != nil {
-						isUnexported := errors.Is(err, ErrUnexported)
-						if isUnexported && !options.includeUnexported {
+					if typeSpec, ok := spec.(*ast.TypeSpec); ok {
+						typeInfo, err := NewTypeSpecInfo(typeSpec)
+						if err != nil && (!errors.Is(err, ErrUnexported) || !options.includeUnexported) {
 							continue
 						}
+
+						p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo, options)
+						typeMap[typeInfo.Name] = typeInfo
+
+						if enums, exists := enumsByType[typeInfo.Name]; exists {
+							typeInfo.EnumValues = enums
+						}
+					}
+				}
+
+			case token.CONST:
+				var currentType string
+				var currentValue interface{} = 0
+
+				for _, spec := range genDecl.Specs {
+					constSpec, ok := spec.(*ast.ValueSpec)
+					if !ok {
+						continue
 					}
 
-					p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo, options)
-
-					if enums, exists := pendingEnums[typeInfo.Name]; exists {
-						typeInfo.EnumValues = enums
+					if constSpec.Type != nil {
+						if ident, ok := constSpec.Type.(*ast.Ident); ok {
+							currentType = ident.Name
+						}
 					}
 
-					info.Types.Append(typeInfo)
+					for i, name := range constSpec.Names {
+						enumValue := &EnumValue{
+							Name:  name.Name,
+							Doc:   TrimSpace(constSpec.Doc),
+							Value: currentValue,
+						}
+
+						if len(constSpec.Values) > i {
+							if basicLit, ok := constSpec.Values[i].(*ast.BasicLit); ok {
+								switch basicLit.Kind {
+								case token.INT:
+									var val int
+									fmt.Sscanf(basicLit.Value, "%d", &val)
+									currentValue = val
+									enumValue.Value = val
+								case token.STRING:
+									val := strings.Trim(basicLit.Value, "\"")
+									currentValue = val
+									enumValue.Value = val
+								}
+							}
+						}
+
+						// Increment only if currentValue is int
+						if v, ok := currentValue.(int); ok {
+							currentValue = v + 1
+						}
+
+						if currentType != "" {
+							enumsByType[currentType] = append(enumsByType[currentType], enumValue)
+							if typeInfo, exists := typeMap[currentType]; exists {
+								typeInfo.EnumValues = enumsByType[currentType]
+							}
+						}
+					}
 				}
 			}
-
-			sort.Stable(info.Types)
-
-			if info.Valid() {
-				result.Declarations.Append(info)
-			}
 		}
+	}
+
+	for _, typeInfo := range typeMap {
+		info := &DeclarationInfo{
+			Types: TypeList{typeInfo},
+		}
+		result.Declarations.Append(info)
 	}
 
 	if options.includeFunctions {
@@ -310,14 +311,13 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				}
 			}
 		}
-
 		result.Functions = globalFuncs
 	}
-
+	// Remove this since some fields my not have docs field
 	sort.Stable(result.Declarations)
 	slices.Sort(result.Imports)
 
-	return result, err
+	return result, nil
 }
 
 // NewTypeSpecInfo allocates a TypeInfo from a TypeSpec node.
