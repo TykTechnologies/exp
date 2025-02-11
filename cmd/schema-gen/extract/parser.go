@@ -253,6 +253,10 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				}
 			}
 
+			if info.Valid() {
+				result.Declarations.Append(info)
+			}
+
 			for _, spec := range genDecl.Specs {
 				switch obj := spec.(type) {
 				case *ast.TypeSpec, *ast.ImportSpec:
@@ -268,17 +272,11 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 						break
 					}
 
-					typeMap := info.Types.TypeMap()
+					typeMap := result.Declarations.TypeMap()
 					typeInfo, ok := typeMap[currentType]
-					if typeInfo == nil || !ok {
-						typeInfo = &TypeInfo{
-							Name: currentType,
-							Doc:  TrimSpace(obj.Doc),
-						}
-						info.Types.Append(typeInfo)
-					}
-					if typeInfo.Enums == nil {
-						typeInfo.Enums = make([]*EnumInfo, 0)
+					if !ok || typeInfo == nil {
+						fmt.Printf("Unknown type: %q\n", currentType)
+						continue
 					}
 
 					for i, name := range obj.Names {
@@ -319,9 +317,6 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 
 			sort.Stable(info.Types)
 
-			if info.Valid() {
-				result.Declarations.Append(info)
-			}
 		}
 	}
 
@@ -354,6 +349,7 @@ func NewTypeSpecInfo(from *ast.TypeSpec) (*TypeInfo, error) {
 		Name:    getTypeDeclaration(from.Name),
 		Doc:     TrimSpace(from.Doc),
 		Comment: TrimSpace(from.Comment),
+		Enums:   []*EnumInfo{},
 	}
 
 	structObj, ok := from.Type.(*ast.StructType)

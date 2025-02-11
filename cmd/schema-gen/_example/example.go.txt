@@ -38,14 +38,6 @@ type (
 
 	Role = string
 
-	// Role is an enum type for user roles.
-
-	Role = string
-
-	// Status is an enum type.
-
-	Status = int
-
 	// Status is an enum type.
 
 	Status = int

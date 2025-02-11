@@ -9,40 +9,6 @@
       {
         "types": [
           {
-            "name": "Status",
-            "enums": [
-              {
-                "name": "Active",
-                "value": 0
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "types": [
-          {
-            "name": "Role",
-            "enums": [
-              {
-                "name": "Admin",
-                "value": "admin"
-              },
-              {
-                "name": "User",
-                "value": "user"
-              },
-              {
-                "name": "Guest",
-                "value": "guest"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "types": [
-          {
             "name": "keyRequest"
           }
         ]
@@ -132,7 +98,22 @@
         "types": [
           {
             "name": "Role",
-            "type": "string"
+            "doc": "Role is an enum type for user roles.",
+            "type": "string",
+            "enums": [
+              {
+                "name": "Admin",
+                "value": "admin"
+              },
+              {
+                "name": "User",
+                "value": "user"
+              },
+              {
+                "name": "Guest",
+                "value": "guest"
+              }
+            ]
           }
         ]
       },
@@ -141,7 +122,14 @@
         "types": [
           {
             "name": "Status",
-            "type": "int"
+            "doc": "Status is an enum type.",
+            "type": "int",
+            "enums": [
+              {
+                "name": "Active",
+                "value": 0
+              }
+            ]
           }
         ]
       },
