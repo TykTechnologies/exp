@@ -139,6 +139,13 @@ func generateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 }
 
 func getJSONType(goType string) map[string]interface{} {
+	if goType == "[]byte" {
+		return map[string]interface{}{
+			"type":   "string",
+			"format": "byte",
+		}
+	}
+
 	// Handle arrays
 	if strings.HasPrefix(goType, "[]") {
 		elementType := strings.TrimPrefix(goType, "[]")
@@ -152,11 +159,9 @@ func getJSONType(goType string) map[string]interface{} {
 
 	// Handle maps
 	if strings.HasPrefix(goType, "map[") {
-		// Extract value type (after closing bracket)
 		valueType := strings.Split(strings.TrimPrefix(goType, "map["), "]")[1]
 
-		// Special handling for interface{}
-		if valueType == "interface{}" {
+		if valueType == "interface{}" || valueType == "any" {
 			return map[string]interface{}{
 				"type":                 "object",
 				"additionalProperties": true,
@@ -175,9 +180,48 @@ func getJSONType(goType string) map[string]interface{} {
 		"type": getBaseJSONType(goType),
 	}
 
-	// Add minimum: 0 for unsigned integers
-	if strings.HasPrefix(goType, "uint") {
+	// Add constraints for numeric types
+	switch goType {
+	case "uint8", "byte":
 		schema["minimum"] = 0
+		schema["maximum"] = 255
+	case "uint16":
+		schema["minimum"] = 0
+		schema["maximum"] = 65535
+	case "uint32":
+		schema["minimum"] = 0
+		schema["maximum"] = 4294967295
+	case "uint64", "uint":
+		schema["minimum"] = 0
+	case "int8":
+		schema["minimum"] = -128
+		schema["maximum"] = 127
+	case "int16":
+		schema["minimum"] = -32768
+		schema["maximum"] = 32767
+	case "int32", "rune":
+		schema["minimum"] = -2147483648
+		schema["maximum"] = 2147483647
+	case "time.Time":
+		schema["type"] = "string"
+		schema["format"] = "date-time"
+	case "time.Duration":
+		schema["type"] = "string"
+		schema["pattern"] = "^[-+]?([0-9]*(\\.[0-9]*)?[a-z]+)+$"
+	case "complex64", "complex128":
+		// Represent complex numbers as an object with real and imaginary parts
+		return map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				"real": map[string]interface{}{
+					"type": "number",
+				},
+				"imag": map[string]interface{}{
+					"type": "number",
+				},
+			},
+			"required": []string{"real", "imag"},
+		}
 	}
 
 	return schema
@@ -187,16 +231,20 @@ func getJSONType(goType string) map[string]interface{} {
 // For example, 'int' becomes 'integer', 'float64' becomes 'number'.
 func getBaseJSONType(goType string) string {
 	switch goType {
-	case "int", "int32", "int64", "uint", "uint32", "uint64":
+	case "int", "int8", "int16", "int32", "int64",
+		"uint", "uint8", "uint16", "uint32", "uint64",
+		"byte", "rune", "uintptr":
 		return "integer"
 	case "float32", "float64":
 		return "number"
 	case "bool":
 		return "boolean"
-	case "string":
+	case "string", "time.Time", "time.Duration":
 		return "string"
-	case "interface{}":
+	case "interface{}", "any":
 		return "object"
+	case "error":
+		return "string"
 	default:
 		return "string"
 	}
@@ -237,13 +285,24 @@ func getBaseType(fieldType string) string {
 // isCustomType determines if a type is a built-in type or a custom type.
 // Returns true for custom types that need to be referenced in definitions.
 func isCustomType(typeName string) bool {
-	// First check if it's a map
+	// Check for maps
 	if strings.HasPrefix(typeName, "map[") {
 		return false
 	}
 
+	if typeName == "[]byte" {
+		return false
+	}
+
 	switch typeName {
-	case "int", "int32", "int64", "uint", "uint32", "uint64", "float32", "float64", "string", "bool", "interface{}":
+	case "int", "int8", "int16", "int32", "int64",
+		"uint", "uint8", "uint16", "uint32", "uint64",
+		"float32", "float64",
+		"complex64", "complex128",
+		"string", "bool", "interface{}", "any",
+		"byte", "rune",
+		"uintptr", "error",
+		"time.Time", "time.Duration":
 		return false
 	default:
 		return true
