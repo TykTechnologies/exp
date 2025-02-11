@@ -8,7 +8,7 @@ import (
 )
 
 // ConvertToJSONSchema converts PackageInfo to JSON Schema with only root type and its dependencies
-func ConvertToJSONSchema(pkgInfo *model.PackageInfo, rootType string) (map[string]interface{}, error) {
+func ConvertToJSONSchema(pkgInfo *model.PackageInfo, rootType string, config *RequiredFieldsConfig) (map[string]interface{}, error) {
 	schema := map[string]interface{}{
 		"$schema":     "http://json-schema.org/draft-07/schema#",
 		"definitions": make(map[string]interface{}),
@@ -43,7 +43,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, rootType string) (map[strin
 					definitions[typeInfo.Name] = enumSchema
 
 				case len(typeInfo.Fields) > 0:
-					structSchema := generateStructSchema(typeInfo)
+					structSchema := generateStructSchema(typeInfo, config)
 					definitions[typeInfo.Name] = structSchema
 				}
 			}
@@ -80,46 +80,85 @@ func generateEnumSchema(typeInfo *model.TypeInfo) map[string]interface{} {
 
 // generateStructSchema creates a JSON Schema definition for a struct type.
 // It processes all fields and creates property definitions.
-func generateStructSchema(typeInfo *model.TypeInfo) map[string]interface{} {
+func generateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig) map[string]interface{} {
 	properties := make(map[string]interface{})
 	required := make([]string, 0)
 
-	// Process each field in the struct
+	requiredFields := config.Fields[typeInfo.Name]
+	requiredMap := make(map[string]bool)
+	for _, field := range requiredFields {
+		requiredMap[field] = true
+	}
+
 	for _, field := range typeInfo.Fields {
-		// Initialize field schema with its type
-		fieldSchema := map[string]interface{}{
-			"type": getJSONType(field.Type),
+		// Get base type without array prefix
+		baseType := strings.TrimPrefix(field.Type, "[]")
+		isArray := strings.HasPrefix(field.Type, "[]")
+
+		var fieldSchema map[string]interface{}
+
+		if isCustomType(baseType) {
+			if isArray {
+				fieldSchema = map[string]interface{}{
+					"type": "array",
+					"items": map[string]interface{}{
+						"$ref": "#/definitions/" + baseType,
+					},
+				}
+			} else {
+				fieldSchema = map[string]interface{}{
+					"$ref": "#/definitions/" + field.Type,
+				}
+			}
+		} else {
+			fieldSchema = getJSONType(field.Type)
 		}
 
-		// Add documentation as description if available
 		if field.Doc != "" {
 			fieldSchema["description"] = field.Doc
 		}
 
-		// If field type is a custom type (not a built-in type),
-		// replace type with a reference to its definition
-		if isCustomType(field.Type) {
-			fieldSchema["$ref"] = "#/definitions/" + field.Type
-			delete(fieldSchema, "type")
-		}
-
-		// Add field to properties and mark as required
 		properties[field.JSONName] = fieldSchema
-		required = append(required, field.JSONName)
+
+		if requiredMap[field.Name] {
+			required = append(required, field.JSONName)
+		}
 	}
 
-	// Create the complete struct schema
-	return map[string]interface{}{
+	schema := map[string]interface{}{
 		"type":                 "object",
 		"properties":           properties,
-		"required":             required,
 		"additionalProperties": false,
+	}
+
+	if len(required) > 0 {
+		schema["required"] = required
+	}
+
+	return schema
+}
+
+func getJSONType(goType string) map[string]interface{} {
+	// Handle array types
+	if strings.HasPrefix(goType, "[]") {
+		elementType := strings.TrimPrefix(goType, "[]")
+		return map[string]interface{}{
+			"type": "array",
+			"items": map[string]interface{}{
+				"type": getBaseJSONType(elementType),
+			},
+		}
+	}
+
+	// Handle regular types
+	return map[string]interface{}{
+		"type": getBaseJSONType(goType),
 	}
 }
 
 // getJSONType converts Go types to JSON Schema types.
 // For example, 'int' becomes 'integer', 'float64' becomes 'number'.
-func getJSONType(goType string) string {
+func getBaseJSONType(goType string) string {
 	switch goType {
 	case "int", "int32", "int64":
 		return "integer"
@@ -136,20 +175,16 @@ func getJSONType(goType string) string {
 
 // collectDependencies recursively collects all type dependencies
 func collectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
-	// For structs, check field types
 	for _, field := range typeInfo.Fields {
-		// Remove any pointer symbols
-		fieldType := strings.TrimPrefix(field.Type, "*")
+		baseType := getBaseType(field.Type)
 
-		// If it's a custom type (not built-in), add it as dependency
-		if isCustomType(fieldType) {
-			if !dependencies[fieldType] {
-				dependencies[fieldType] = true
+		if isCustomType(baseType) {
+			if !dependencies[baseType] {
+				dependencies[baseType] = true
 
-				// Find the dependent type and collect its dependencies
 				for _, decl := range pkgInfo.Declarations {
 					for _, depType := range decl.Types {
-						if depType.Name == fieldType {
+						if depType.Name == baseType {
 							collectDependencies(depType, pkgInfo, dependencies)
 						}
 					}
@@ -157,6 +192,17 @@ func collectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 			}
 		}
 	}
+}
+
+// getBaseType Removes array and pointer from a filed type
+func getBaseType(fieldType string) string {
+	baseType := strings.TrimPrefix(fieldType, "[]")
+	baseType = strings.TrimPrefix(baseType, "*")
+	// Handle case where pointer comes before array
+	if strings.HasPrefix(fieldType, "[]*") {
+		baseType = strings.TrimPrefix(fieldType, "[]*")
+	}
+	return baseType
 }
 
 // isCustomType determines if a type is a built-in type or a custom type.
@@ -168,4 +214,9 @@ func isCustomType(typeName string) bool {
 	default:
 		return true
 	}
+}
+
+// RequiredFieldsConfig defines which fields are required for each type
+type RequiredFieldsConfig struct {
+	Fields map[string][]string // map[TypeName][]FieldName
 }

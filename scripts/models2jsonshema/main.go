@@ -12,13 +12,13 @@ import (
 )
 
 func main() {
-	pkgInfos, err := extract.Extract("/Users/itachisasuke/projects/dc/schema-test/.", &extract.ExtractOptions{})
+	pkgInfos, err := extract.Extract("/Users/itachisasuke/projects/dc/tyk/config/.", &extract.ExtractOptions{})
 	if err != nil {
 		log.Fatalf("Failed to extract types: %v", err)
 	}
-	rootType := "User"
+	rootType := "Config"
 
-	schema, err := converter.ConvertToJSONSchema(pkgInfos[0], rootType)
+	schema, err := converter.ConvertToJSONSchema(pkgInfos[0], rootType, NewDefaultConfig())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,4 +32,13 @@ func main() {
 	}
 
 	fmt.Println("Successfully generated JSON Schema in schema.json")
+}
+
+func NewDefaultConfig() *converter.RequiredFieldsConfig {
+	return &converter.RequiredFieldsConfig{
+		Fields: map[string][]string{
+			"User":  {"ID", "Name"}, // Only ID and Name are required for User
+			"Inner": {"Name"},
+		},
+	}
 }
