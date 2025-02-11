@@ -12,11 +12,11 @@ import (
 )
 
 func main() {
-	pkgInfos, err := extract.Extract("/Users/itachisasuke/projects/dc/tyk/config/.", &extract.ExtractOptions{})
+	pkgInfos, err := extract.Extract("/Users/itachisasuke/projects/dc/schema-test/.", &extract.ExtractOptions{})
 	if err != nil {
 		log.Fatalf("Failed to extract types: %v", err)
 	}
-	rootType := "Config"
+	rootType := "User"
 
 	schema, err := converter.ConvertToJSONSchema(pkgInfos[0], rootType, NewDefaultConfig())
 	if err != nil {

@@ -139,7 +139,7 @@ func generateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 }
 
 func getJSONType(goType string) map[string]interface{} {
-	// Handle array types
+	// Handle arrays
 	if strings.HasPrefix(goType, "[]") {
 		elementType := strings.TrimPrefix(goType, "[]")
 		return map[string]interface{}{
@@ -150,17 +150,44 @@ func getJSONType(goType string) map[string]interface{} {
 		}
 	}
 
-	// Handle regular types
-	return map[string]interface{}{
+	// Handle maps
+	if strings.HasPrefix(goType, "map[") {
+		// Extract value type (after closing bracket)
+		valueType := strings.Split(strings.TrimPrefix(goType, "map["), "]")[1]
+
+		// Special handling for interface{}
+		if valueType == "interface{}" {
+			return map[string]interface{}{
+				"type":                 "object",
+				"additionalProperties": true,
+			}
+		}
+
+		return map[string]interface{}{
+			"type": "object",
+			"additionalProperties": map[string]interface{}{
+				"type": getBaseJSONType(valueType),
+			},
+		}
+	}
+
+	schema := map[string]interface{}{
 		"type": getBaseJSONType(goType),
 	}
+
+	// Add minimum: 0 for unsigned integers
+	if strings.HasPrefix(goType, "uint") {
+		schema["minimum"] = 0
+	}
+
+	return schema
 }
 
 // getJSONType converts Go types to JSON Schema types.
 // For example, 'int' becomes 'integer', 'float64' becomes 'number'.
 func getBaseJSONType(goType string) string {
 	switch goType {
-	case "int", "int32", "int64":
+	case "int", "int32", "int64", "uint", "uint32", "uint64":
 		return "integer"
 	case "float32", "float64":
 		return "number"
@@ -168,8 +195,10 @@ func getBaseJSONType(goType string) string {
 		return "boolean"
 	case "string":
 		return "string"
+	case "interface{}":
+		return "object"
 	default:
-		return "string" // Default to string for custom types
+		return "string"
 	}
 }
 
@@ -208,8 +237,13 @@ func getBaseType(fieldType string) string {
 // isCustomType determines if a type is a built-in type or a custom type.
 // Returns true for custom types that need to be referenced in definitions.
 func isCustomType(typeName string) bool {
+	// First check if it's a map
+	if strings.HasPrefix(typeName, "map[") {
+		return false
+	}
+
 	switch typeName {
-	case "int", "int32", "int64", "float32", "float64", "string", "bool":
+	case "int", "int32", "int64", "uint", "uint32", "uint64", "float32", "float64", "string", "bool", "interface{}":
 		return false
 	default:
 		return true
