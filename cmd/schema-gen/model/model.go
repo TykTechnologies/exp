@@ -110,6 +110,13 @@ func (x *DeclarationInfo) Valid() bool {
 	return len(x.Types) > 0
 }
 
+// EnumInfo holds details about an enum definition.
+type EnumInfo struct {
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"`
+	Doc   string      `json:"doc,omitempty"`
+}
+
 // TypeInfo holds details about a type definition.
 type TypeInfo struct {
 	// Name is struct go name.
@@ -131,6 +138,9 @@ type TypeInfo struct {
 
 	// StructObj is the (optionally present) raw ast.StructType value
 	StructObj *ast.StructType `json:"-"`
+
+	// Enums hold information for an enum value.
+	Enums []*EnumInfo `json:"enums,omitempty"`
 }
 
 // TypeRef trims array and pointer info from a type reference.

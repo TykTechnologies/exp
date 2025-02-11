@@ -74,6 +74,37 @@
         ]
       },
       {
+        "doc": "EnumInfo holds details about an enum definition.",
+        "types": [
+          {
+            "name": "EnumInfo",
+            "fields": [
+              {
+                "name": "Name",
+                "type": "string",
+                "path": "EnumInfo.Name",
+                "tag": "json:\"name\"",
+                "json_name": "name"
+              },
+              {
+                "name": "Value",
+                "type": "",
+                "path": "EnumInfo.Value",
+                "tag": "json:\"value\"",
+                "json_name": "value"
+              },
+              {
+                "name": "Doc",
+                "type": "string",
+                "path": "EnumInfo.Doc",
+                "tag": "json:\"doc,omitempty\"",
+                "json_name": "doc,omitempty"
+              }
+            ]
+          }
+        ]
+      },
+      {
         "doc": "FieldInfo holds details about a field definition.",
         "types": [
           {
@@ -316,6 +347,14 @@
                 "doc": "StructObj is the (optionally present) raw ast.StructType value",
                 "tag": "json:\"-\"",
                 "json_name": ""
+              },
+              {
+                "name": "Enums",
+                "type": "[]*EnumInfo",
+                "path": "TypeInfo.Enums",
+                "doc": "Enums hold information for an enum value.",
+                "tag": "json:\"enums,omitempty\"",
+                "json_name": "enums,omitempty"
               }
             ],
             "functions": [

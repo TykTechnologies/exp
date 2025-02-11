@@ -33,6 +33,15 @@ type (
 
 	DeclarationList = []*DeclarationInfo
 
+	// EnumInfo holds details about an enum definition.
+	EnumInfo struct {
+		Name string `json:"name"`
+
+		Value `json:"value"`
+
+		Doc string `json:"doc,omitempty"`
+	}
+
 	// FieldInfo holds details about a field definition.
 	FieldInfo struct {
 		// Name is the name of the field.
@@ -118,6 +127,9 @@ type (
 
 		// StructObj is the (optionally present) raw ast.StructType value
 		StructObj ast.StructType `json:"-"`
+
+		// Enums hold information for an enum value.
+		Enums []*EnumInfo `json:"enums,omitempty"`
 	}
 
 	// TypeList implements list operations over a *TypeInfo slice.
