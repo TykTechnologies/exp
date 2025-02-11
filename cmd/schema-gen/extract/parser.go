@@ -38,9 +38,7 @@ func NewExtractOptions(cfg *options) *ExtractOptions {
 
 // Extract package structs
 func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
-	var (
-		ignoreFiles = options.ignoreFiles
-	)
+	ignoreFiles := options.ignoreFiles
 
 	ignoreList := make(map[string]bool)
 	for _, file := range ignoreFiles {
@@ -105,7 +103,7 @@ func (p *objParser) getSourceCode(node ast.Node) string {
 }
 
 func (p *objParser) functionDef(fun *ast.FuncDecl) string {
-	var fset = p.fileset
+	fset := p.fileset
 	name := fun.Name.Name
 	params := make([]string, 0)
 	for _, p := range fun.Type.Params.List {
@@ -148,18 +146,18 @@ func (p *objParser) functionDef(fun *ast.FuncDecl) string {
 
 // GetDeclaration returns a filled out PackageInfo{} and an error if any.
 func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, error) {
-	var err error
 	result := &PackageInfo{
 		Declarations: DeclarationList{},
 		Imports:      []string{},
 	}
 
+	typeMap := make(map[string]*TypeInfo)
+	enumsByType := make(map[string][]*EnumValue)
+
 	var funcs []*FuncInfo
 	var globalFuncs []*FuncInfo
 
 	for _, fileObj := range p.pkg.Files {
-		// https://pkg.go.dev/go/ast#File
-
 		if options.includeFunctions {
 			ast.Inspect(fileObj, func(n ast.Node) (res bool) {
 				res = true
@@ -196,19 +194,15 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 						}
 						funcs = append(funcs, funcinfo)
 					}
-
 				}
-
 				return
 			})
 		}
 
-		// Collect imports
 		for _, imported := range fileObj.Imports {
 			importLiteral := imported.Path.Value
 			if imported.Name != nil {
 				alias := getTypeDeclaration(imported.Name)
-				//fmt.Fprintf(os.Stderr, "WARN: package %s is aliased to %s\n", importLiteral, alias)
 				importLiteral = alias + " " + importLiteral
 			}
 
@@ -220,42 +214,91 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 			}
 		}
 
-		// Collect declarations
 		for _, obj := range fileObj.Decls {
 			genDecl, ok := obj.(*ast.GenDecl)
 			if !ok {
 				continue
 			}
 
-			info := &DeclarationInfo{
-				Doc:     TrimSpace(genDecl.Doc),
-				FileDoc: TrimSpace(fileObj.Doc),
-				Types:   TypeList{},
-			}
-
-			for _, spec := range genDecl.Specs {
-				switch obj := spec.(type) {
-				case *ast.TypeSpec:
-					typeInfo, err := NewTypeSpecInfo(obj)
-					if err != nil {
-						isUnexported := errors.Is(err, ErrUnexported)
-						if isUnexported && !options.includeUnexported {
+			switch genDecl.Tok {
+			case token.TYPE:
+				for _, spec := range genDecl.Specs {
+					if typeSpec, ok := spec.(*ast.TypeSpec); ok {
+						typeInfo, err := NewTypeSpecInfo(typeSpec)
+						if err != nil && (!errors.Is(err, ErrUnexported) || !options.includeUnexported) {
 							continue
+						}
+
+						p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo, options)
+						typeMap[typeInfo.Name] = typeInfo
+
+						if enums, exists := enumsByType[typeInfo.Name]; exists {
+							typeInfo.EnumValues = enums
+						}
+					}
+				}
+
+			case token.CONST:
+				var currentType string
+				var currentValue interface{} = 0
+
+				for _, spec := range genDecl.Specs {
+					constSpec, ok := spec.(*ast.ValueSpec)
+					if !ok {
+						continue
+					}
+
+					if constSpec.Type != nil {
+						if ident, ok := constSpec.Type.(*ast.Ident); ok {
+							currentType = ident.Name
 						}
 					}
 
-					p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo, options)
+					for i, name := range constSpec.Names {
+						enumValue := &EnumValue{
+							Name:  name.Name,
+							Doc:   TrimSpace(constSpec.Doc),
+							Value: currentValue,
+						}
 
-					info.Types.Append(typeInfo)
+						if len(constSpec.Values) > i {
+							if basicLit, ok := constSpec.Values[i].(*ast.BasicLit); ok {
+								switch basicLit.Kind {
+								case token.INT:
+									var val int
+									fmt.Sscanf(basicLit.Value, "%d", &val)
+									currentValue = val
+									enumValue.Value = val
+								case token.STRING:
+									val := strings.Trim(basicLit.Value, "\"")
+									currentValue = val
+									enumValue.Value = val
+								}
+							}
+						}
+
+						// Increment only if currentValue is int
+						if v, ok := currentValue.(int); ok {
+							currentValue = v + 1
+						}
+
+						if currentType != "" {
+							enumsByType[currentType] = append(enumsByType[currentType], enumValue)
+							if typeInfo, exists := typeMap[currentType]; exists {
+								typeInfo.EnumValues = enumsByType[currentType]
+							}
+						}
+					}
 				}
 			}
-
-			sort.Stable(info.Types)
-
-			if info.Valid() {
-				result.Declarations.Append(info)
-			}
 		}
+	}
+
+	for _, typeInfo := range typeMap {
+		info := &DeclarationInfo{
+			Types: TypeList{typeInfo},
+		}
+		result.Declarations.Append(info)
 	}
 
 	if options.includeFunctions {
@@ -268,14 +311,13 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				}
 			}
 		}
-
 		result.Functions = globalFuncs
 	}
-
+	// Remove this since some fields my not have docs field
 	sort.Stable(result.Declarations)
 	slices.Sort(result.Imports)
 
-	return result, err
+	return result, nil
 }
 
 // NewTypeSpecInfo allocates a TypeInfo from a TypeSpec node.
@@ -312,13 +354,12 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, optio
 	p.visited[name] = true
 
 	for _, field := range structInfo.StructObj.Fields.List {
-		//pos := p.fileset.Position(field.Pos())
-		//filePos := path.Base(pos.String())
+		// pos := p.fileset.Position(field.Pos())
+		// filePos := path.Base(pos.String())
 
 		var goName string
 		if len(field.Names) > 0 {
 			goName = field.Names[0].Name
-
 		}
 
 		tagValue := ""
