@@ -128,6 +128,14 @@
               {
                 "name": "Active",
                 "value": 0
+              },
+              {
+                "name": "Inactive",
+                "value": 1
+              },
+              {
+                "name": "Suspended",
+                "value": 2
               }
             ]
           }

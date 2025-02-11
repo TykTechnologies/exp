@@ -257,13 +257,13 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				result.Declarations.Append(info)
 			}
 
+			var currentType string
+			var currentValue any = 0
+
 			for _, spec := range genDecl.Specs {
 				switch obj := spec.(type) {
 				case *ast.TypeSpec, *ast.ImportSpec:
 				case *ast.ValueSpec:
-					var currentType string
-					var currentValue any = 0
-
 					if ident, ok := obj.Type.(*ast.Ident); ok {
 						currentType = ident.Name
 					}
