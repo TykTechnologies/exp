@@ -9,6 +9,40 @@
       {
         "types": [
           {
+            "name": "Status",
+            "enums": [
+              {
+                "name": "Active",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "types": [
+          {
+            "name": "Role",
+            "enums": [
+              {
+                "name": "Admin",
+                "value": "admin"
+              },
+              {
+                "name": "User",
+                "value": "user"
+              },
+              {
+                "name": "Guest",
+                "value": "guest"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "types": [
+          {
             "name": "keyRequest"
           }
         ]
@@ -90,6 +124,24 @@
           {
             "name": "NamedRequests",
             "type": "map[string]KeyRequest"
+          }
+        ]
+      },
+      {
+        "doc": "Role is an enum type for user roles.",
+        "types": [
+          {
+            "name": "Role",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "doc": "Status is an enum type.",
+        "types": [
+          {
+            "name": "Status",
+            "type": "int"
           }
         ]
       },

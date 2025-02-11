@@ -235,6 +235,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 
 			for _, spec := range genDecl.Specs {
 				switch obj := spec.(type) {
+				case *ast.ValueSpec, *ast.ImportSpec:
 				case *ast.TypeSpec:
 					typeInfo, err := NewTypeSpecInfo(obj)
 					if err != nil {
@@ -247,6 +248,72 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 					p.parseStruct(typeInfo.Name, typeInfo.Name, typeInfo, options)
 
 					info.Types.Append(typeInfo)
+				default:
+					fmt.Printf("Unhandled %T\n", spec)
+				}
+			}
+
+			for _, spec := range genDecl.Specs {
+				switch obj := spec.(type) {
+				case *ast.TypeSpec, *ast.ImportSpec:
+				case *ast.ValueSpec:
+					var currentType string
+					var currentValue any = 0
+
+					if ident, ok := obj.Type.(*ast.Ident); ok {
+						currentType = ident.Name
+					}
+
+					if currentType == "" {
+						break
+					}
+
+					typeMap := info.Types.TypeMap()
+					typeInfo, ok := typeMap[currentType]
+					if typeInfo == nil || !ok {
+						typeInfo = &TypeInfo{
+							Name: currentType,
+							Doc:  TrimSpace(obj.Doc),
+						}
+						info.Types.Append(typeInfo)
+					}
+					if typeInfo.Enums == nil {
+						typeInfo.Enums = make([]*EnumInfo, 0)
+					}
+
+					for i, name := range obj.Names {
+						enumValue := &EnumInfo{
+							Name:  name.Name,
+							Doc:   TrimSpace(obj.Doc),
+							Value: currentValue,
+						}
+
+						if len(obj.Values) > i {
+							if basicLit, ok := obj.Values[i].(*ast.BasicLit); ok {
+								switch basicLit.Kind {
+								case token.INT:
+									var val int
+									fmt.Sscanf(basicLit.Value, "%d", &val)
+									currentValue = val
+									enumValue.Value = val
+								case token.STRING:
+									val := strings.Trim(basicLit.Value, "\"")
+									currentValue = val
+									enumValue.Value = val
+								}
+							}
+						}
+
+						// Increment only if currentValue is int.
+						// This doesn't handle `1 << enum` type declarations.
+						if v, ok := currentValue.(int); ok {
+							currentValue = v + 1
+						}
+
+						typeInfo.Enums = append(typeInfo.Enums, enumValue)
+					}
+				default:
+					fmt.Printf("Unhandled %T\n", spec)
 				}
 			}
 
