@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	pkgInfos, err := extract.Extract("/Users/peojects.", &extract.ExtractOptions{})
+	pkgInfos, err := extract.Extract("/Users/itachisasuke/projects/dc/schema-test/.", &extract.ExtractOptions{})
 	if err != nil {
 		log.Fatalf("Failed to extract types: %v", err)
 	}
