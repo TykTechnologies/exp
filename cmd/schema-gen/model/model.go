@@ -63,20 +63,25 @@ type DeclarationInfo struct {
 // DeclarationList implements list operations over a `*DeclarationInfo` slice.
 type DeclarationList []*DeclarationInfo
 
-// Find returns a TypeList containing TypeInfo objects from the DeclarationList in the specified order.
-func (x DeclarationList) Find(order []string) TypeList {
-	typeInfoMap := make(map[string]*TypeInfo)
+// TypeMap returns a map of type references, the key being the type name.
+func (x DeclarationList) TypeMap() map[string]*TypeInfo {
+	result := make(map[string]*TypeInfo)
 
-	// Step 1: Create a map of type names to TypeInfo objects for fast lookup
 	for _, decl := range x {
 		for _, t := range decl.Types {
 			if t.Doc == "" && strings.HasPrefix(decl.Doc, t.Name) {
 				t.Doc = decl.Doc
 			}
-			typeInfoMap[t.Name] = t
+			result[t.Name] = t
 		}
 	}
 
+	return result
+}
+
+// Find returns a TypeList containing TypeInfo objects from the DeclarationList in the specified order.
+func (x DeclarationList) Find(order []string) TypeList {
+	typeInfoMap := x.TypeMap()
 	result := make(TypeList, 0, len(typeInfoMap))
 
 	if len(order) == 0 {
@@ -87,7 +92,6 @@ func (x DeclarationList) Find(order []string) TypeList {
 		sort.Strings(order)
 	}
 
-	// Step 2: Traverse the order slice and retrieve the corresponding TypeInfo objects
 	for _, typeName := range order {
 		if typeInfo, ok := typeInfoMap[typeName]; ok {
 			result = append(result, typeInfo)
@@ -110,10 +114,11 @@ func (x *DeclarationInfo) Valid() bool {
 	return len(x.Types) > 0
 }
 
-type EnumValue struct {
-	Name  string
-	Value interface{}
-	Doc   string
+// EnumInfo holds details about an enum definition.
+type EnumInfo struct {
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"`
+	Doc   string      `json:"doc,omitempty"`
 }
 
 // TypeInfo holds details about a type definition.
@@ -138,8 +143,8 @@ type TypeInfo struct {
 	// StructObj is the (optionally present) raw ast.StructType value
 	StructObj *ast.StructType `json:"-"`
 
-	// EnumValues stores enum values
-	EnumValues []*EnumValue `json:"enumValues,omitempty"`
+	// Enums hold information for an enum value.
+	Enums []*EnumInfo `json:"enums,omitempty"`
 }
 
 // TypeRef trims array and pointer info from a type reference.
@@ -149,6 +154,17 @@ func (f *TypeInfo) TypeRef() string {
 
 // TypeList implements list operations over a *TypeInfo slice.
 type TypeList []*TypeInfo
+
+// TypeMap returns a map of type references, the key being the type name.
+func (x TypeList) TypeMap() map[string]*TypeInfo {
+	result := make(map[string]*TypeInfo)
+
+	for _, t := range x {
+		result[t.Name] = t
+	}
+
+	return result
+}
 
 func (x TypeList) Len() int           { return len(x) }
 func (x TypeList) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
