@@ -34,13 +34,5 @@ type (
 
 	NamedRequests = map[string]KeyRequest
 
-	// Role is an enum type for user roles.
-
-	Role = string
-
-	// Status is an enum type.
-
-	Status = int
-
 	keyRequest struct{}
 )
