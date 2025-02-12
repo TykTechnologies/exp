@@ -16,7 +16,7 @@ import (
 
 // ParseAndConvertStruct parses the given repo directory for Go structs and
 // converts the specified rootType to JSON Schema, writing the result to "schema.json".
-func parseAndConvertStruct(repoDir, rootType, outFile string) error {
+func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 	if outFile == "" {
 		outFile = "schema.json"
 	}
@@ -34,7 +34,7 @@ func parseAndConvertStruct(repoDir, rootType, outFile string) error {
 		return fmt.Errorf("no package info extracted from %q", absDir)
 	}
 
-	schema, err := convertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig())
+	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig())
 	if err != nil {
 		return fmt.Errorf("failed to convert to JSON Schema: %w", err)
 	}
@@ -46,17 +46,17 @@ func parseAndConvertStruct(repoDir, rootType, outFile string) error {
 	if err := os.WriteFile(outFile, jsonBytes, 0o644); err != nil {
 		return fmt.Errorf("failed to write %q: %w", outFile, err)
 	}
-	fmt.Printf("Successfully generated JSON Schema for type %q in %s\n", rootType, outFile)
+
 	return nil
 }
 
-// convertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
-func convertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (map[string]interface{}, error) {
-	schema := map[string]interface{}{
-		"$schema":     "http://json-schema.org/draft-07/schema#",
-		"definitions": make(map[string]interface{}),
+// ConvertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
+func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (*JSONSchema, error) {
+	rootSchema := &JSONSchema{
+		Schema:      "http://json-schema.org/draft-07/schema#",
+		Definitions: make(map[string]*JSONSchema),
 	}
-	definitions := schema["definitions"].(map[string]interface{})
+	definitions := rootSchema.Definitions
 
 	// We'll store discovered dependencies in this map
 	dependencies := make(map[string]bool)
@@ -70,7 +70,7 @@ func convertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 		for _, typ := range decl.Types {
 			if typ.Name == rootType {
 				rootTypeInfo = typ
-				collectDependencies(typ, pkgInfo, dependencies)
+				CollectDependencies(typ, pkgInfo, dependencies)
 				break
 			}
 		}
@@ -89,18 +89,18 @@ func convertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 					switch {
 					case len(typ.Enums) > 0:
 						// Enum
-						definitions[typ.Name] = generateEnumSchema(typ)
+						definitions[typ.Name] = GenerateEnumSchema(typ)
 
 					case len(typ.Fields) > 0:
 						// Struct
-						definitions[typ.Name] = generateStructSchema(typ, config)
+						definitions[typ.Name] = GenerateStructSchema(typ, config)
 
 					case strings.HasPrefix(typ.Type, "map["):
 
-						definitions[typ.Name] = generateMapDefinition(typ.Type)
+						definitions[typ.Name] = GenerateMapDefinition(typ.Type)
 
 					case strings.HasPrefix(typ.Type, "[]"):
-						definitions[typ.Name] = generateSliceDefinition(typ.Type)
+						definitions[typ.Name] = GenerateSliceDefinition(typ.Type)
 
 					default:
 						log.Printf("Skipping type %q with underlying type %q\n", typ.Name, typ.Type)
@@ -114,19 +114,19 @@ func convertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 	visited := make(map[string]bool)
 	for dep := range dependencies {
 		if strings.Contains(dep, ".") {
-			if err := processExternalType(dep, repoDir, aliasMap, definitions, visited); err != nil {
+			if err := ProcessExternalType(dep, repoDir, aliasMap, definitions, visited); err != nil {
 				fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 			}
 		}
 	}
 
-	schema["$ref"] = "#/definitions/" + rootType
-	return schema, nil
+	rootSchema.Ref = "#/definitions/" + rootType
+	return rootSchema, nil
 }
 
-// processExternalType loads an external package for a qualified type (e.g. "model.Inner"),
+// ProcessExternalType loads an external package for a qualified type (e.g. "model.Inner"),
 // generates its JSON Schema definition, and then recursively processes its custom fields.
-func processExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]interface{}, visited map[string]bool) error {
+func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]*JSONSchema, visited map[string]bool) error {
 	if visited[qualifiedType] {
 		return nil
 	}
@@ -144,10 +144,8 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if !ok {
 		return fmt.Errorf("alias %q not found in alias map", pkgAlias)
 	}
-	log.Println("Loading external package:", pkgPath)
-
 	// Load the external package
-	extPkgInfo, err := loadExternalPackage(pkgPath, repoDir)
+	extPkgInfo, err := LoadExternalPackage(pkgPath, repoDir)
 	if err != nil {
 		return fmt.Errorf("failed to load external package %q: %w", pkgPath, err)
 	}
@@ -171,19 +169,19 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 		return fmt.Errorf("type %q not found in external package %q", typeName, pkgPath)
 	}
 
-	var extSchema map[string]interface{}
+	var extSchema *JSONSchema
 	switch {
 	case len(extType.Enums) > 0:
-		extSchema = generateEnumSchema(extType)
+		extSchema = GenerateEnumSchema(extType)
 
 	case len(extType.Fields) > 0:
-		extSchema = generateStructSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}})
+		extSchema = GenerateStructSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}})
 
 	case strings.HasPrefix(extType.Type, "map["):
-		extSchema = generateMapDefinition(extType.Type)
+		extSchema = GenerateMapDefinition(extType.Type)
 
 	case strings.HasPrefix(extType.Type, "[]"):
-		extSchema = generateSliceDefinition(extType.Type)
+		extSchema = GenerateSliceDefinition(extType.Type)
 
 	default:
 		log.Printf("Skipping external type %q (type: %q)\n", typeName, extType.Type)
@@ -203,7 +201,7 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 			} else {
 				depQualified = pkgAlias + "." + baseType
 			}
-			if err := processExternalType(depQualified, repoDir, extAliasMap, definitions, visited); err != nil {
+			if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited); err != nil {
 				return err
 			}
 		}
@@ -212,9 +210,9 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	return nil
 }
 
-// loadExternalPackage uses golang.org/x/tools/go/packages to load a package from its import path
+// LoadExternalPackage uses golang.org/x/tools/go/packages to load a package from its import path
 // and then runs the extraction process on it.
-func loadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
+func LoadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 	absDir, err := filepath.Abs(repoDir)
 	if err != nil {
 		log.Fatalf("Failed to get absolute path: %v", err)
@@ -245,10 +243,10 @@ func loadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 	return pkgInfos[0], nil
 }
 
-// collectDependencies recursively collects type dependencies from a given struct type's fields.
+// CollectDependencies recursively collects type dependencies from a given struct type's fields.
 // If a field references a named custom type, we also parse that named type's definition
 // to discover deeper dependencies (like "CertData" inside "CertsData").
-func collectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
+func CollectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
 	for _, field := range typeInfo.Fields {
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
@@ -260,7 +258,7 @@ func collectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 						for _, depType := range decl.Types {
 							if depType.Name == baseType {
 								// This named type might be "[]CertData", "map[string]PortWhiteList", etc.
-								collectTypeDefinitionDeps(depType, pkgInfo, dependencies)
+								CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 							}
 						}
 					}
@@ -270,9 +268,9 @@ func collectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 	}
 }
 
-// collectTypeDefinitionDeps inspects a named type's underlying type
+// CollectTypeDefinitionDeps inspects a named type's underlying type
 // (e.g. "CertsData" -> "[]CertData") to find further dependencies.
-func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
+func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
 	underlying := typeInfo.Type
 
 	// If it's a slice: e.g. "[]CertData"
@@ -286,7 +284,7 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 					for _, decl := range pkgInfo.Declarations {
 						for _, depType := range decl.Types {
 							if depType.Name == elemType {
-								collectTypeDefinitionDeps(depType, pkgInfo, dependencies)
+								CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 							}
 						}
 					}
@@ -310,7 +308,7 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 						for _, decl := range pkgInfo.Declarations {
 							for _, depType := range decl.Types {
 								if depType.Name == valueType {
-									collectTypeDefinitionDeps(depType, pkgInfo, dependencies)
+									CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 								}
 							}
 						}
@@ -332,7 +330,7 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 						for _, decl := range pkgInfo.Declarations {
 							for _, depType := range decl.Types {
 								if depType.Name == baseType {
-									collectTypeDefinitionDeps(depType, pkgInfo, dependencies)
+									CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 								}
 							}
 						}
@@ -346,9 +344,9 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 	// If it's an enum, built-in alias, or something else, do nothing.
 }
 
-// generateEnumSchema creates a JSON Schema definition for an enum type.
-func generateEnumSchema(typeInfo *model.TypeInfo) map[string]interface{} {
-	enumValues := make([]interface{}, 0)
+// GenerateEnumSchema creates a JSON Schema definition for an enum type.
+func GenerateEnumSchema(typeInfo *model.TypeInfo) *JSONSchema {
+	enumValues := make([]any, 0, len(typeInfo.Enums))
 	for _, enum := range typeInfo.Enums {
 		enumValues = append(enumValues, enum.Value)
 	}
@@ -356,72 +354,72 @@ func generateEnumSchema(typeInfo *model.TypeInfo) map[string]interface{} {
 	if typeInfo.Type == "int" {
 		jsonType = "integer"
 	}
-	return map[string]interface{}{
-		"type": jsonType,
-		"enum": enumValues,
+	return &JSONSchema{
+		Type: jsonType,
+		Enum: enumValues,
 	}
 }
 
-// generateStructSchema creates a JSON Schema definition for a struct type.
-func generateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig) map[string]interface{} {
-	properties := make(map[string]interface{})
-	required := make([]string, 0)
+// GenerateStructSchema creates a JSON Schema definition for a struct type.
+func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig) *JSONSchema {
+	schema := &JSONSchema{
+		Type:       "object",
+		Properties: make(map[string]*JSONSchema),
+		// Typically, "additionalProperties" is either `false` or another schema
+		AdditionalProperties: false,
+	}
 
 	requiredFields := config.Fields[typeInfo.Name]
 	requiredMap := make(map[string]bool)
 	for _, field := range requiredFields {
 		requiredMap[field] = true
 	}
+	var required []string
 
 	for _, field := range typeInfo.Fields {
 		isArray := strings.HasPrefix(field.Type, "[]")
 		baseType := strings.TrimPrefix(field.Type, "[]")
-		var fieldSchema map[string]interface{}
+		var fieldSchema *JSONSchema
 		if isCustomType(baseType) {
 			if isArray {
-				fieldSchema = map[string]interface{}{
-					"type": "array",
-					"items": map[string]interface{}{
-						"$ref": "#/definitions/" + baseType,
+				fieldSchema = &JSONSchema{
+					Type: "array",
+					Items: &JSONSchema{
+						Ref: "#/definitions/" + baseType,
 					},
 				}
 			} else {
-				fieldSchema = map[string]interface{}{
-					"$ref": "#/definitions/" + baseType,
+				fieldSchema = &JSONSchema{
+					Ref: "#/definitions/" + baseType,
 				}
 			}
 		} else {
 			fieldSchema = getJSONType(field.Type)
 		}
 		if field.Doc != "" {
-			fieldSchema["description"] = field.Doc
+			fieldSchema.Description = field.Doc
 		}
-		properties[field.JSONName] = fieldSchema
+		schema.Properties[field.JSONName] = fieldSchema
 		if requiredMap[field.Name] {
 			required = append(required, field.JSONName)
 		}
 	}
-	schema := map[string]interface{}{
-		"type":                 "object",
-		"properties":           properties,
-		"additionalProperties": false,
-	}
 	if len(required) > 0 {
-		schema["required"] = required
+		schema.Required = required
 	}
 	return schema
 }
 
-// generateMapDefinition creates a top-level JSON Schema definition for a map type (e.g. map[string]Something).
-func generateMapDefinition(goType string) map[string]interface{} {
+// GenerateMapDefinition creates a top-level JSON Schema definition for a map type (e.g. map[string]Something).
+func GenerateMapDefinition(goType string) *JSONSchema {
 	// Example: "map[string]interface{}" or "map[string]PortWhiteList"
 	inside := goType[len("map["):]
 	parts := strings.SplitN(inside, "]", 2)
 	if len(parts) != 2 {
 		// fallback to a generic object
-		return map[string]interface{}{
-			"type":                 "object",
-			"additionalProperties": true,
+		return &JSONSchema{
+			Type:                 "object",
+			AdditionalProperties: true,
 		}
 	}
 	keyType := strings.TrimSpace(parts[0])   // e.g. "string"
@@ -429,60 +427,58 @@ func generateMapDefinition(goType string) map[string]interface{} {
 
 	// JSON only supports string keys as standard objects.
 	if keyType != "string" {
-		return map[string]interface{}{
-			"type":                 "object",
-			"additionalProperties": true,
+		return &JSONSchema{
+			Type:                 "object",
+			AdditionalProperties: true,
 		}
 	}
 
 	// If the value is interface{} or any => no constraints
 	if valueType == "interface{}" || valueType == "any" {
-		return map[string]interface{}{
-			"type":                 "object",
-			"additionalProperties": true,
+		return &JSONSchema{
+			Type:                 "object",
+			AdditionalProperties: true,
 		}
 	}
 
 	// If it's built-in, produce a simple type
 	if !isCustomType(valueType) {
-		return map[string]interface{}{
-			"type": "object",
-			"additionalProperties": map[string]interface{}{
-				"type": getBaseJSONType(valueType),
+		return &JSONSchema{
+			Type: "object",
+			AdditionalProperties: &JSONSchema{
+				Type: getBaseJSONType(valueType),
 			},
 		}
 	}
 
 	// Otherwise it's a custom type => reference
-	return map[string]interface{}{
-		"type": "object",
-		"additionalProperties": map[string]interface{}{
-			"$ref": "#/definitions/" + valueType,
+	return &JSONSchema{
+		Type: "object",
+		AdditionalProperties: &JSONSchema{
+			Ref: "#/definitions/" + valueType,
 		},
 	}
 }
 
-// generateSliceDefinition creates a top-level JSON Schema definition for a slice type (e.g. []CertData).
-func generateSliceDefinition(goType string) map[string]interface{} {
+// GenerateSliceDefinition creates a top-level JSON Schema definition for a slice type (e.g. []CertData).
+func GenerateSliceDefinition(goType string) *JSONSchema {
 	// e.g. "[]CertData"
 	elemType := strings.TrimPrefix(goType, "[]")
 	elemType = strings.TrimSpace(elemType)
 
-	// If it's built-in:
 	if !isCustomType(elemType) {
-		return map[string]interface{}{
-			"type": "array",
-			"items": map[string]interface{}{
-				"type": getBaseJSONType(elemType),
+		return &JSONSchema{
+			Type: "array",
+			Items: &JSONSchema{
+				Type: getBaseJSONType(elemType),
 			},
 		}
 	}
 
-	// Otherwise custom
-	return map[string]interface{}{
-		"type": "array",
-		"items": map[string]interface{}{
-			"$ref": "#/definitions/" + elemType,
+	return &JSONSchema{
+		Type: "array",
+		Items: &JSONSchema{
+			Ref: "#/definitions/" + elemType,
 		},
 	}
 }

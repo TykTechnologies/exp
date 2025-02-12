@@ -18,12 +18,9 @@ func NewOptions() *options {
 		outputFile: "schema.json",
 	}
 
-	pflag.StringVarP(&cfg.sourcePath, "dir", "i", cfg.sourcePath,
-		"Path to the directory that contains the root type (required)")
-	pflag.StringVarP(&cfg.rootType, "type", "t", cfg.rootType,
-		"Root type to generate schema for (required)")
-	pflag.StringVarP(&cfg.outputFile, "out", "o", cfg.outputFile,
-		"Output file name (optional)")
+	pflag.StringVarP(&cfg.sourcePath, "dir", "i", cfg.sourcePath, "Path to the directory that contains the root type (required)")
+	pflag.StringVarP(&cfg.rootType, "type", "t", cfg.rootType, "Root type to generate schema for (required)")
+	pflag.StringVarP(&cfg.outputFile, "out", "o", cfg.outputFile, "Output file name (optional)")
 
 	pflag.Parse()
 

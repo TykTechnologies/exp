@@ -1,6 +1,6 @@
 module github.com/TykTechnologies/exp/cmd/schema-gen
 
-go 1.22.0
+go 1.23.4
 
 require (
 	github.com/davecgh/go-spew v1.1.1

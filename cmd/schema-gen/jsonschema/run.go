@@ -14,5 +14,5 @@ func Run() (err error) {
 		return nil
 	}
 
-	return parseAndConvertStruct(cfg.sourcePath, cfg.rootType, cfg.outputFile)
+	return ParseAndConvertStruct(cfg.sourcePath, cfg.rootType, cfg.outputFile)
 }

@@ -1,14 +1,15 @@
 package jsonschema
 
-import "strings"
+import (
+	"strings"
+)
 
 // getJSONType converts a Go type into its JSON Schema representation (for fields).
-func getJSONType(goType string) map[string]interface{} {
-	// handle []byte specially
+func getJSONType(goType string) *JSONSchema {
 	if goType == "[]byte" {
-		return map[string]interface{}{
-			"type":   "string",
-			"format": "byte",
+		return &JSONSchema{
+			Type:   "string",
+			Format: "byte",
 		}
 	}
 
@@ -16,17 +17,17 @@ func getJSONType(goType string) map[string]interface{} {
 	if strings.HasPrefix(goType, "[]") {
 		elementType := strings.TrimPrefix(goType, "[]")
 		if isCustomType(elementType) {
-			return map[string]interface{}{
-				"type": "array",
-				"items": map[string]interface{}{
-					"$ref": "#/definitions/" + elementType,
+			return &JSONSchema{
+				Type: "array",
+				Items: &JSONSchema{
+					Ref: "#/definitions/" + elementType,
 				},
 			}
 		}
-		return map[string]interface{}{
-			"type": "array",
-			"items": map[string]interface{}{
-				"type": getBaseJSONType(elementType),
+		return &JSONSchema{
+			Type: "array",
+			Items: &JSONSchema{
+				Type: getBaseJSONType(elementType),
 			},
 		}
 	}
@@ -36,88 +37,83 @@ func getJSONType(goType string) map[string]interface{} {
 		inside := goType[len("map["):]
 		parts := strings.SplitN(inside, "]", 2)
 		if len(parts) != 2 {
-			return map[string]interface{}{
-				"type":                 "object",
-				"additionalProperties": true,
+			return &JSONSchema{
+				Type:                 "object",
+				AdditionalProperties: true,
 			}
 		}
 		keyType := strings.TrimSpace(parts[0])
 		valueType := strings.TrimSpace(parts[1])
 
 		if keyType != "string" {
-			return map[string]interface{}{
-				"type":                 "object",
-				"additionalProperties": true,
+			return &JSONSchema{
+				Type:                 "object",
+				AdditionalProperties: true,
 			}
 		}
 		if valueType == "interface{}" || valueType == "any" {
-			return map[string]interface{}{
-				"type":                 "object",
-				"additionalProperties": true,
+			return &JSONSchema{
+				Type:                 "object",
+				AdditionalProperties: true,
 			}
 		}
 		if !isCustomType(valueType) {
-			return map[string]interface{}{
-				"type": "object",
-				"additionalProperties": map[string]interface{}{
-					"type": getBaseJSONType(valueType),
+			return &JSONSchema{
+				Type: "object",
+				AdditionalProperties: &JSONSchema{
+					Type: getBaseJSONType(valueType),
 				},
 			}
 		}
 		// custom type => $ref
-		return map[string]interface{}{
-			"type": "object",
-			"additionalProperties": map[string]interface{}{
-				"$ref": "#/definitions/" + valueType,
+		return &JSONSchema{
+			Type: "object",
+			AdditionalProperties: &JSONSchema{
+				Ref: "#/definitions/" + valueType,
 			},
 		}
 	}
 
 	// fallback for non-array, non-map
-	schema := map[string]interface{}{
-		"type": getBaseJSONType(goType),
+	schema := &JSONSchema{
+		Type: getBaseJSONType(goType),
 	}
 
-	// numeric constraints
 	switch goType {
 	case "uint8", "byte":
-		schema["minimum"] = 0
-		schema["maximum"] = 255
+		schema.Minimum = ToPtr(0.0)
+		schema.Maximum = ToPtr(255.0)
 	case "uint16":
-		schema["minimum"] = 0
-		schema["maximum"] = 65535
+		schema.Minimum = ToPtr(0.0)
+		schema.Maximum = ToPtr(65535.0)
 	case "uint32":
-		schema["minimum"] = 0
-		schema["maximum"] = 4294967295
+		schema.Minimum = ToPtr(0.0)
+		schema.Maximum = ToPtr(4294967295.0)
 	case "uint64", "uint":
-		schema["minimum"] = 0
+		schema.Minimum = ToPtr(0.0)
 	case "int8":
-		schema["minimum"] = -128
-		schema["maximum"] = 127
+		schema.Minimum = ToPtr(-128.0)
+		schema.Maximum = ToPtr(127.0)
 	case "int16":
-		schema["minimum"] = -32768
-		schema["maximum"] = 32767
+		schema.Minimum = ToPtr(-32768.0)
+		schema.Maximum = ToPtr(32767.0)
 	case "int32", "rune":
-		schema["minimum"] = -2147483648
-		schema["maximum"] = 2147483647
+		schema.Minimum = ToPtr(-2147483648.0)
+		schema.Maximum = ToPtr(2147483647.0)
 	case "time.Time":
-		schema["type"] = "string"
-		schema["format"] = "date-time"
+		schema.Type = "string"
+		schema.Format = "date-time"
 	case "time.Duration":
-		schema["type"] = "string"
-		schema["pattern"] = "^[-+]?([0-9]*(\\.[0-9]*)?[a-z]+)+$"
+		schema.Type = "string"
+		schema.Pattern = "^[-+]?([0-9]*(\\.[0-9]*)?[a-z]+)+$"
 	case "complex64", "complex128":
-		return map[string]interface{}{
-			"type": "object",
-			"properties": map[string]interface{}{
-				"real": map[string]interface{}{
-					"type": "number",
-				},
-				"imag": map[string]interface{}{
-					"type": "number",
-				},
+		return &JSONSchema{
+			Type: "object",
+			Properties: map[string]*JSONSchema{
+				"real": {Type: "number"},
+				"imag": {Type: "number"},
 			},
-			"required": []string{"real", "imag"},
+			Required: []string{"real", "imag"},
 		}
 	}
 	return schema
@@ -158,7 +154,6 @@ func getBaseType(fieldType string) string {
 
 // isCustomType determines if a type is not one of the built-in or immediate recognized types.
 func isCustomType(typeName string) bool {
-	// For direct map[...] or []byte, we skip
 	if strings.HasPrefix(typeName, "map[") || typeName == "[]byte" {
 		return false
 	}
@@ -193,4 +188,8 @@ func buildAliasMap(imports []string) map[string]string {
 		}
 	}
 	return aliasMap
+}
+
+func ToPtr[T any](v T) *T {
+	return &v
 }
