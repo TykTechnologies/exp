@@ -89,6 +89,9 @@ Fields holds information of the fields, if this object is a struct.
 **Field: `` (`ast.StructType`)**
 StructObj is the (optionally present) raw ast.StructType value
 
+**Field: `enums` ([[]*EnumInfo](#enuminfo))**
+Enums hold information for an enum value.
+
 # FieldInfo
 
 FieldInfo holds details about a field definition.
@@ -117,4 +120,17 @@ It's cleared if it's set to `-` (unexported).
 
 **Field: `map_key` (`string`)**
 MapKey is the map key type, if this field is a map.
+
+# EnumInfo
+
+EnumInfo holds details about an enum definition.
+
+**Field: `name` (`string`)**
+
+
+**Field: `value` (``)**
+
+
+**Field: `doc` (`string`)**
+
 

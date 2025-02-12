@@ -94,6 +94,54 @@
         ]
       },
       {
+        "doc": "Role is an enum type for user roles.",
+        "types": [
+          {
+            "name": "Role",
+            "doc": "Role is an enum type for user roles.",
+            "type": "string",
+            "enums": [
+              {
+                "name": "Admin",
+                "value": "admin"
+              },
+              {
+                "name": "User",
+                "value": "user"
+              },
+              {
+                "name": "Guest",
+                "value": "guest"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "Status is an enum type.",
+        "types": [
+          {
+            "name": "Status",
+            "doc": "Status is an enum type.",
+            "type": "int",
+            "enums": [
+              {
+                "name": "Active",
+                "value": 0
+              },
+              {
+                "name": "Inactive",
+                "value": 1
+              },
+              {
+                "name": "Suspended",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
         "doc": "Type declaration doc, File is an alias of os.File.",
         "types": [
           {
