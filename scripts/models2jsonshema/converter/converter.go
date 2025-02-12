@@ -92,7 +92,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 				// Only handle if it's an internal type (no dot in the name)
 				if !strings.Contains(typ.Name, ".") {
 					switch {
-					case len(typ.EnumValues) > 0:
+					case len(typ.Enums) > 0:
 						// Enum
 						definitions[typ.Name] = generateEnumSchema(typ)
 
@@ -182,7 +182,7 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	// Generate the JSON Schema for this external type
 	var extSchema map[string]interface{}
 	switch {
-	case len(extType.EnumValues) > 0:
+	case len(extType.Enums) > 0:
 		// External enum
 		extSchema = generateEnumSchema(extType)
 
@@ -385,7 +385,7 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 // generateEnumSchema creates a JSON Schema definition for an enum type.
 func generateEnumSchema(typeInfo *model.TypeInfo) map[string]interface{} {
 	enumValues := make([]interface{}, 0)
-	for _, enum := range typeInfo.EnumValues {
+	for _, enum := range typeInfo.Enums {
 		enumValues = append(enumValues, enum.Value)
 	}
 	jsonType := "string"
