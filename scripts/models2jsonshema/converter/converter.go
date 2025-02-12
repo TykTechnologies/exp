@@ -14,8 +14,49 @@ import (
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 )
 
+// ParseAndConvertStruct parses the given repo directory for Go structs and
+// converts the specified rootType to JSON Schema, writing the result to "schema.json".
+func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
+	// Default the output file to "schema.json" if none is provided
+	if outFile == "" {
+		outFile = "schema.json"
+	}
+
+	absDir, err := filepath.Abs(repoDir)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for %q: %w", repoDir, err)
+	}
+
+	pkgInfos, err := extract.Extract(absDir+"/", &extract.ExtractOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to extract types from %q: %w", absDir, err)
+	}
+
+	if len(pkgInfos) == 0 {
+		return fmt.Errorf("no package info extracted from %q", absDir)
+	}
+
+	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir+"/", rootType, NewDefaultConfig())
+	if err != nil {
+		return fmt.Errorf("failed to convert to JSON Schema: %w", err)
+	}
+
+	jsonBytes, err := json.MarshalIndent(schema, "", "    ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal schema to JSON: %w", err)
+	}
+
+	err = os.WriteFile(outFile, jsonBytes, 0o644)
+	if err != nil {
+		return fmt.Errorf("failed to write %q: %w", outFile, err)
+	}
+
+	fmt.Printf("Successfully generated JSON Schema for type %q in %s\n", rootType, outFile)
+	return nil
+}
+
 // ConvertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
-func ConvertToJSONSchema(pkgInfo *model.PackageInfo, rootType string, config *RequiredFieldsConfig) (map[string]interface{}, error) {
+func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (map[string]interface{}, error) {
 	schema := map[string]interface{}{
 		"$schema":     "http://json-schema.org/draft-07/schema#",
 		"definitions": make(map[string]interface{}),
@@ -61,7 +102,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, rootType string, config *Re
 	for dep := range dependencies {
 		if strings.Contains(dep, ".") {
 			log.Println("log here i am me", dep)
-			if err := processExternalType(dep, aliasMap, definitions, visited); err != nil {
+			if err := processExternalType(dep, repoDir, aliasMap, definitions, visited); err != nil {
 				// Log a warning but continue processing.
 				fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 			}
@@ -74,8 +115,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, rootType string, config *Re
 
 // processExternalType loads an external package for a qualified type (e.g. "model.Inner"),
 // generates its JSON Schema definition, and then recursively processes its custom fields.
-func processExternalType(qualifiedType string, aliasMap map[string]string, definitions map[string]interface{}, visited map[string]bool) error {
-	log.Println("here i am quantifies", qualifiedType)
+func processExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]interface{}, visited map[string]bool) error {
 	if visited[qualifiedType] {
 		return nil
 	}
@@ -92,17 +132,10 @@ func processExternalType(qualifiedType string, aliasMap map[string]string, defin
 		return fmt.Errorf("alias %q not found in alias map", pkgAlias)
 	}
 	log.Println("here is me", pkgPath)
-	extPkgInfo, err := loadExternalPackage(pkgPath)
+	extPkgInfo, err := loadExternalPackage(pkgPath, repoDir)
 	if err != nil {
 		return fmt.Errorf("failed to load external package %q: %w", pkgPath, err)
 	}
-	jsonBytes, err := json.MarshalIndent(extPkgInfo, "", "    ")
-	if err != nil {
-		log.Fatalf("Failed to marshal PackageInfo to JSON: %v", err)
-	}
-
-	fmt.Println(string(jsonBytes))
-
 	// Build an alias map for the external package.
 	extAliasMap := buildAliasMap(extPkgInfo.Imports)
 	// Also add an entry for the external package’s own name.
@@ -146,7 +179,7 @@ func processExternalType(qualifiedType string, aliasMap map[string]string, defin
 			} else {
 				depQualified = pkgAlias + "." + baseType
 			}
-			if err := processExternalType(depQualified, extAliasMap, definitions, visited); err != nil {
+			if err := processExternalType(depQualified, repoDir, extAliasMap, definitions, visited); err != nil {
 				return err
 			}
 		}
@@ -157,9 +190,14 @@ func processExternalType(qualifiedType string, aliasMap map[string]string, defin
 
 // loadExternalPackage uses golang.org/x/tools/go/packages to load a package from its import path
 // and then runs your extraction process on it.
-func loadExternalPackage(pkgPath string) (*model.PackageInfo, error) {
+func loadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
+	absDir, err := filepath.Abs(repoDir)
+	if err != nil {
+		log.Fatalf("Failed to get absolute path: %v", err)
+	}
 	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedFiles | packages.NeedImports,
+		Mode: packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps,
+		Dir:  absDir + "/.",
 	}
 	pkgs, err := packages.Load(cfg, pkgPath)
 	if err != nil {
@@ -171,10 +209,8 @@ func loadExternalPackage(pkgPath string) (*model.PackageInfo, error) {
 	if len(pkgs[0].GoFiles) == 0 {
 		return nil, fmt.Errorf("external package %q has no Go files", pkgPath)
 	}
-	log.Println("log.ppepe", pkgs[0].GoFiles)
 	// Use the directory of the first Go file in the package.
 	pkgDir := filepath.Dir(pkgs[0].GoFiles[0])
-	log.Println(pkgDir)
 	pkgInfos, err := extract.Extract(pkgDir+"/", &extract.ExtractOptions{})
 	if err != nil {
 		return nil, err
@@ -429,5 +465,11 @@ type RequiredFieldsConfig struct {
 	Fields map[string][]string // map[TypeName][]FieldName
 }
 
-func test() {
+func NewDefaultConfig() *RequiredFieldsConfig {
+	return &RequiredFieldsConfig{
+		Fields: map[string][]string{
+			"User":  {"ID", "Name"}, // Only ID and Name are required for User
+			"Inner": {"Name"},
+		},
+	}
 }

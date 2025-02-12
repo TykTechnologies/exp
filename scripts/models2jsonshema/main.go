@@ -1,44 +1,41 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 
-	"models2jsonshema/converter"
+	"github.com/spf13/pflag"
 
-	"github.com/TykTechnologies/exp/cmd/schema-gen/extract"
+	"github.com/TykTechnologies/exp/scripts/models2jsonshema/converter"
 )
 
 func main() {
-	pkgInfos, err := extract.Extract("/Users/itachisasuke/projects/dc/schema-test/.", &extract.ExtractOptions{})
-	if err != nil {
-		log.Fatalf("Failed to extract types: %v", err)
-	}
-	rootType := "User"
+	var (
+		userDir  string
+		rootType string
+		outFile  string
+	)
 
-	schema, err := converter.ConvertToJSONSchema(pkgInfos[0], rootType, NewDefaultConfig())
-	if err != nil {
-		log.Fatal(err)
+	pflag.StringVar(&userDir, "dir", "", "Path to the user's Go module (required)")
+	pflag.StringVar(&rootType, "type", "", "Root type to generate schema for (required)")
+	pflag.StringVar(&outFile, "out", "schema.json", "Output file name (optional)")
+
+	pflag.Parse()
+
+	// Check required flags
+	if userDir == "" {
+		fmt.Fprintln(os.Stderr, "Error: --dir is required")
+		pflag.Usage()
+		os.Exit(1)
 	}
-	jsonBytes, err := json.MarshalIndent(schema, "", "    ")
-	if err != nil {
-		log.Fatalf("Failed to marshal schema: %v", err)
-	}
-	err = os.WriteFile("schema.json", jsonBytes, 0o644)
-	if err != nil {
-		log.Fatalf("Failed to write schema: %v", err)
+	if rootType == "" {
+		fmt.Fprintln(os.Stderr, "Error: --type is required")
+		pflag.Usage()
+		os.Exit(1)
 	}
 
-	fmt.Println("Successfully generated JSON Schema in schema.json")
-}
-
-func NewDefaultConfig() *converter.RequiredFieldsConfig {
-	return &converter.RequiredFieldsConfig{
-		Fields: map[string][]string{
-			"User":  {"ID", "Name"}, // Only ID and Name are required for User
-			"Inner": {"Name"},
-		},
+	if err := converter.ParseAndConvertStruct(userDir, rootType, outFile); err != nil {
+		log.Fatalf("Error: %v", err)
 	}
 }
