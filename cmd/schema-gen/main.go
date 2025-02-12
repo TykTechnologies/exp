@@ -12,6 +12,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/extract"
+	"github.com/TykTechnologies/exp/cmd/schema-gen/jsonschema"
 	"github.com/TykTechnologies/exp/cmd/schema-gen/lint"
 	"github.com/TykTechnologies/exp/cmd/schema-gen/list"
 	"github.com/TykTechnologies/exp/cmd/schema-gen/markdown"
@@ -27,11 +28,12 @@ func main() {
 
 func start() (err error) {
 	commands := map[string]func() error{
-		"extract":  extract.Run,
-		"restore":  restore.Run,
-		"markdown": markdown.Run,
-		"lint":     lint.Run,
-		"list":     list.Run,
+		"extract":    extract.Run,
+		"restore":    restore.Run,
+		"markdown":   markdown.Run,
+		"lint":       lint.Run,
+		"list":       list.Run,
+		"jsonschema": jsonschema.Run,
 	}
 	commandList := maps.Keys(commands)
 	sort.Strings(commandList)

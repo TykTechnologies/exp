@@ -1,4 +1,4 @@
-package converter
+package jsonschema
 
 import (
 	"encoding/json"
@@ -16,8 +16,7 @@ import (
 
 // ParseAndConvertStruct parses the given repo directory for Go structs and
 // converts the specified rootType to JSON Schema, writing the result to "schema.json".
-func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
-	// Default the output file to "schema.json" if none is provided
+func parseAndConvertStruct(repoDir, rootType, outFile string) error {
 	if outFile == "" {
 		outFile = "schema.json"
 	}
@@ -27,7 +26,6 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 		return fmt.Errorf("failed to get absolute path for %q: %w", repoDir, err)
 	}
 
-	// Extract type information from the user's code
 	pkgInfos, err := extract.Extract(absDir+"/", &extract.ExtractOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to extract types from %q: %w", absDir, err)
@@ -36,13 +34,11 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 		return fmt.Errorf("no package info extracted from %q", absDir)
 	}
 
-	// Convert to JSON Schema
-	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig())
+	schema, err := convertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig())
 	if err != nil {
 		return fmt.Errorf("failed to convert to JSON Schema: %w", err)
 	}
 
-	// Marshal the JSON Schema and write to file
 	jsonBytes, err := json.MarshalIndent(schema, "", "    ")
 	if err != nil {
 		return fmt.Errorf("failed to marshal schema to JSON: %w", err)
@@ -50,13 +46,12 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 	if err := os.WriteFile(outFile, jsonBytes, 0o644); err != nil {
 		return fmt.Errorf("failed to write %q: %w", outFile, err)
 	}
-
 	fmt.Printf("Successfully generated JSON Schema for type %q in %s\n", rootType, outFile)
 	return nil
 }
 
-// ConvertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
-func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (map[string]interface{}, error) {
+// convertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
+func convertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (map[string]interface{}, error) {
 	schema := map[string]interface{}{
 		"$schema":     "http://json-schema.org/draft-07/schema#",
 		"definitions": make(map[string]interface{}),
@@ -101,11 +96,10 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 						definitions[typ.Name] = generateStructSchema(typ, config)
 
 					case strings.HasPrefix(typ.Type, "map["):
-						// Named map type
+
 						definitions[typ.Name] = generateMapDefinition(typ.Type)
 
 					case strings.HasPrefix(typ.Type, "[]"):
-						// Named slice/array type
 						definitions[typ.Name] = generateSliceDefinition(typ.Type)
 
 					default:
@@ -121,13 +115,11 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 	for dep := range dependencies {
 		if strings.Contains(dep, ".") {
 			if err := processExternalType(dep, repoDir, aliasMap, definitions, visited); err != nil {
-				// Log a warning but keep going
 				fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 			}
 		}
 	}
 
-	// Point the top-level $ref to our root type
 	schema["$ref"] = "#/definitions/" + rootType
 	return schema, nil
 }
@@ -179,15 +171,12 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 		return fmt.Errorf("type %q not found in external package %q", typeName, pkgPath)
 	}
 
-	// Generate the JSON Schema for this external type
 	var extSchema map[string]interface{}
 	switch {
 	case len(extType.Enums) > 0:
-		// External enum
 		extSchema = generateEnumSchema(extType)
 
 	case len(extType.Fields) > 0:
-		// External struct
 		extSchema = generateStructSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}})
 
 	case strings.HasPrefix(extType.Type, "map["):
@@ -200,13 +189,9 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 		log.Printf("Skipping external type %q (type: %q)\n", typeName, extType.Type)
 	}
 
-	// If we generated a schema, store it in definitions
 	if extSchema != nil {
-		// Use the fully qualified name as the key
 		definitions[qualifiedType] = extSchema
 	}
-
-	// Recursively process each custom field in the external type
 	for _, field := range extType.Fields {
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
@@ -228,7 +213,7 @@ func processExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 }
 
 // loadExternalPackage uses golang.org/x/tools/go/packages to load a package from its import path
-// and then runs your extraction process on it.
+// and then runs the extraction process on it.
 func loadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 	absDir, err := filepath.Abs(repoDir)
 	if err != nil {
@@ -249,7 +234,6 @@ func loadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 		return nil, fmt.Errorf("external package %q has no Go files", pkgPath)
 	}
 
-	// Use the directory of the first Go file in the package
 	pkgDir := filepath.Dir(pkgs[0].GoFiles[0])
 	pkgInfos, err := extract.Extract(pkgDir+"/", &extract.ExtractOptions{})
 	if err != nil {
@@ -261,25 +245,6 @@ func loadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 	return pkgInfos[0], nil
 }
 
-// buildAliasMap creates a mapping from import alias to import path.
-func buildAliasMap(imports []string) map[string]string {
-	aliasMap := make(map[string]string)
-	for _, imp := range imports {
-		parts := strings.Split(imp, " ")
-		if len(parts) == 2 {
-			alias := parts[0]
-			path := strings.Trim(parts[1], "\"")
-			aliasMap[alias] = path
-		} else {
-			// No alias; deduce one from the import path
-			impPath := strings.Trim(imp, "\"")
-			segs := strings.Split(impPath, "/")
-			aliasMap[segs[len(segs)-1]] = impPath
-		}
-	}
-	return aliasMap
-}
-
 // collectDependencies recursively collects type dependencies from a given struct type's fields.
 // If a field references a named custom type, we also parse that named type's definition
 // to discover deeper dependencies (like "CertData" inside "CertsData").
@@ -289,7 +254,6 @@ func collectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 		if isCustomType(baseType) {
 			if !dependencies[baseType] {
 				dependencies[baseType] = true
-				// If it's an internal type, we find its definition and parse deeper
 				if !strings.Contains(baseType, ".") {
 					// e.g. baseType == "CertsData"
 					for _, decl := range pkgInfo.Declarations {
@@ -311,7 +275,7 @@ func collectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
 	underlying := typeInfo.Type
 
-	// 1) If it's a slice: e.g. "[]CertData"
+	// If it's a slice: e.g. "[]CertData"
 	if strings.HasPrefix(underlying, "[]") {
 		elemType := strings.TrimPrefix(underlying, "[]")
 		elemType = strings.TrimPrefix(elemType, "*")
@@ -332,7 +296,7 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 		return
 	}
 
-	// 2) If it's a map: e.g. "map[string]PortWhiteList"
+	// If it's a map: e.g. "map[string]PortWhiteList"
 	if strings.HasPrefix(underlying, "map[") {
 		inside := underlying[len("map["):]
 		parts := strings.SplitN(inside, "]", 2)
@@ -357,7 +321,7 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 		return
 	}
 
-	// 3) If it's a struct (fields > 0), we do the usual field-based check.
+	// If it's a struct (fields > 0), we do the usual field-based check.
 	if len(typeInfo.Fields) > 0 {
 		for _, field := range typeInfo.Fields {
 			baseType := getBaseType(field.Type)
@@ -379,7 +343,7 @@ func collectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 		return
 	}
 
-	// 4) If it's an enum, built-in alias, or something else, do nothing.
+	// If it's an enum, built-in alias, or something else, do nothing.
 }
 
 // generateEnumSchema creates a JSON Schema definition for an enum type.
@@ -521,181 +485,6 @@ func generateSliceDefinition(goType string) map[string]interface{} {
 			"$ref": "#/definitions/" + elemType,
 		},
 	}
-}
-
-// getJSONType converts a Go type into its JSON Schema representation (for fields).
-func getJSONType(goType string) map[string]interface{} {
-	// handle []byte specially
-	if goType == "[]byte" {
-		return map[string]interface{}{
-			"type":   "string",
-			"format": "byte",
-		}
-	}
-
-	// handle slices
-	if strings.HasPrefix(goType, "[]") {
-		elementType := strings.TrimPrefix(goType, "[]")
-		if isCustomType(elementType) {
-			return map[string]interface{}{
-				"type": "array",
-				"items": map[string]interface{}{
-					"$ref": "#/definitions/" + elementType,
-				},
-			}
-		}
-		return map[string]interface{}{
-			"type": "array",
-			"items": map[string]interface{}{
-				"type": getBaseJSONType(elementType),
-			},
-		}
-	}
-
-	// handle maps
-	if strings.HasPrefix(goType, "map[") {
-		inside := goType[len("map["):]
-		parts := strings.SplitN(inside, "]", 2)
-		if len(parts) != 2 {
-			return map[string]interface{}{
-				"type":                 "object",
-				"additionalProperties": true,
-			}
-		}
-		keyType := strings.TrimSpace(parts[0])
-		valueType := strings.TrimSpace(parts[1])
-
-		if keyType != "string" {
-			return map[string]interface{}{
-				"type":                 "object",
-				"additionalProperties": true,
-			}
-		}
-		if valueType == "interface{}" || valueType == "any" {
-			return map[string]interface{}{
-				"type":                 "object",
-				"additionalProperties": true,
-			}
-		}
-		if !isCustomType(valueType) {
-			return map[string]interface{}{
-				"type": "object",
-				"additionalProperties": map[string]interface{}{
-					"type": getBaseJSONType(valueType),
-				},
-			}
-		}
-		// custom type => $ref
-		return map[string]interface{}{
-			"type": "object",
-			"additionalProperties": map[string]interface{}{
-				"$ref": "#/definitions/" + valueType,
-			},
-		}
-	}
-
-	// fallback for non-array, non-map
-	schema := map[string]interface{}{
-		"type": getBaseJSONType(goType),
-	}
-
-	// numeric constraints
-	switch goType {
-	case "uint8", "byte":
-		schema["minimum"] = 0
-		schema["maximum"] = 255
-	case "uint16":
-		schema["minimum"] = 0
-		schema["maximum"] = 65535
-	case "uint32":
-		schema["minimum"] = 0
-		schema["maximum"] = 4294967295
-	case "uint64", "uint":
-		schema["minimum"] = 0
-	case "int8":
-		schema["minimum"] = -128
-		schema["maximum"] = 127
-	case "int16":
-		schema["minimum"] = -32768
-		schema["maximum"] = 32767
-	case "int32", "rune":
-		schema["minimum"] = -2147483648
-		schema["maximum"] = 2147483647
-	case "time.Time":
-		schema["type"] = "string"
-		schema["format"] = "date-time"
-	case "time.Duration":
-		schema["type"] = "string"
-		schema["pattern"] = "^[-+]?([0-9]*(\\.[0-9]*)?[a-z]+)+$"
-	case "complex64", "complex128":
-		return map[string]interface{}{
-			"type": "object",
-			"properties": map[string]interface{}{
-				"real": map[string]interface{}{
-					"type": "number",
-				},
-				"imag": map[string]interface{}{
-					"type": "number",
-				},
-			},
-			"required": []string{"real", "imag"},
-		}
-	}
-	return schema
-}
-
-// getBaseJSONType maps Go base types to JSON Schema types.
-func getBaseJSONType(goType string) string {
-	switch goType {
-	case "int", "int8", "int16", "int32", "int64",
-		"uint", "uint8", "uint16", "uint32", "uint64",
-		"byte", "rune", "uintptr":
-		return "integer"
-	case "float32", "float64":
-		return "number"
-	case "bool":
-		return "boolean"
-	case "string", "time.Time", "time.Duration":
-		return "string"
-	case "interface{}", "any":
-		return "object"
-	case "error":
-		return "string"
-	default:
-		return "string"
-	}
-}
-
-// getBaseType removes array and pointer markers from a field type.
-func getBaseType(fieldType string) string {
-	baseType := strings.TrimPrefix(fieldType, "[]")
-	baseType = strings.TrimPrefix(baseType, "*")
-	// Handle the special case of "[]*SomeType"
-	if strings.HasPrefix(fieldType, "[]*") {
-		baseType = strings.TrimPrefix(fieldType, "[]*")
-	}
-	return baseType
-}
-
-// isCustomType determines if a type is not one of the built-in or immediate recognized types.
-func isCustomType(typeName string) bool {
-	// For direct map[...] or []byte, we skip
-	if strings.HasPrefix(typeName, "map[") || typeName == "[]byte" {
-		return false
-	}
-	switch typeName {
-	case "int", "int8", "int16", "int32", "int64",
-		"uint", "uint8", "uint16", "uint32", "uint64",
-		"float32", "float64",
-		"complex64", "complex128",
-		"string", "bool", "interface{}", "any",
-		"byte", "rune",
-		"uintptr", "error",
-		"time.Time", "time.Duration":
-		return false
-	}
-	// Otherwise assume it's custom
-	return true
 }
 
 // RequiredFieldsConfig defines which fields are required for each type.
