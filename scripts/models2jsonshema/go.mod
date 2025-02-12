@@ -1,4 +1,4 @@
-module models2jsonshema
+module github.com/TykTechnologies/exp/scripts/models2jsonshema
 
 go 1.23.4
 
