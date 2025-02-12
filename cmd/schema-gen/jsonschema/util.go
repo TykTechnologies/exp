@@ -193,3 +193,15 @@ func buildAliasMap(imports []string) map[string]string {
 func ToPtr[T any](v T) *T {
 	return &v
 }
+
+func parseJSONTag(tagValue string) string {
+	parts := strings.SplitN(tagValue, ",", 2)
+	if len(parts) == 0 {
+		return ""
+	}
+	name := parts[0]
+	if name == "-" {
+		return ""
+	}
+	return name
+}

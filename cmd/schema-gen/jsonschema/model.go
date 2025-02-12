@@ -11,7 +11,7 @@ type JSONSchema struct {
 	Items       *JSONSchema            `json:"items,omitempty"`
 	Enum        []any                  `json:"enum,omitempty"`
 	Required    []string               `json:"required,omitempty"`
-	Description string                 `json:"description"`
+	Description string                 `json:"description,omitempty"`
 	Minimum     *float64               `json:"minimum,omitempty"`
 	Maximum     *float64               `json:"maximum,omitempty"`
 

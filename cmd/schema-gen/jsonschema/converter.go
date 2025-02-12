@@ -399,9 +399,10 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 		if field.Doc != "" {
 			fieldSchema.Description = field.Doc
 		}
-		schema.Properties[field.JSONName] = fieldSchema
+		cleanedJson := parseJSONTag(field.JSONName)
+		schema.Properties[cleanedJson] = fieldSchema
 		if requiredMap[field.Name] {
-			required = append(required, field.JSONName)
+			required = append(required, cleanedJson)
 		}
 	}
 	if len(required) > 0 {
