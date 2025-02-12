@@ -249,7 +249,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 
 					info.Types.Append(typeInfo)
 				default:
-					fmt.Printf("Unhandled %T\n", spec)
+					fmt.Fprintf(os.Stderr, "INFO: Unhandled AST %T\n", spec)
 				}
 			}
 
@@ -275,7 +275,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 					typeMap := result.Declarations.TypeMap()
 					typeInfo, ok := typeMap[currentType]
 					if !ok || typeInfo == nil {
-						fmt.Printf("Unknown type: %q\n", currentType)
+						// fmt.Fprintf(os.Stderr, "INFO: Unknown type in TypeMap: looking for %q\n", currentType)
 						continue
 					}
 
@@ -311,7 +311,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 						typeInfo.Enums = append(typeInfo.Enums, enumValue)
 					}
 				default:
-					fmt.Printf("Unhandled %T\n", spec)
+					// Type already logged in first loop.
 				}
 			}
 
