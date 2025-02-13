@@ -86,24 +86,10 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 			if typ.Name == rootType || dependencies[typ.Name] {
 				// Only handle if it's an internal type (no dot in the name)
 				if !strings.Contains(typ.Name, ".") {
-					switch {
-					case len(typ.Enums) > 0:
-						// Enum
-						definitions[typ.Name] = GenerateEnumSchema(typ)
-
-					case len(typ.Fields) > 0:
-						// Struct
-						definitions[typ.Name] = GenerateStructSchema(typ, config)
-
-					case strings.HasPrefix(typ.Type, "map["):
-
-						definitions[typ.Name] = GenerateMapDefinition(typ.Type)
-
-					case strings.HasPrefix(typ.Type, "[]"):
-						definitions[typ.Name] = GenerateSliceDefinition(typ.Type)
-
-					default:
-						log.Printf("Skipping type %q with underlying type %q\n", typ.Name, typ.Type)
+					schema := generateTypeSchema(typ, config)
+					if schema != nil {
+						// Store it in the definitions map
+						definitions[typ.Name] = schema
 					}
 				}
 			}
@@ -169,23 +155,7 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 		return fmt.Errorf("type %q not found in external package %q", typeName, pkgPath)
 	}
 
-	var extSchema *JSONSchema
-	switch {
-	case len(extType.Enums) > 0:
-		extSchema = GenerateEnumSchema(extType)
-
-	case len(extType.Fields) > 0:
-		extSchema = GenerateStructSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}})
-
-	case strings.HasPrefix(extType.Type, "map["):
-		extSchema = GenerateMapDefinition(extType.Type)
-
-	case strings.HasPrefix(extType.Type, "[]"):
-		extSchema = GenerateSliceDefinition(extType.Type)
-
-	default:
-		log.Printf("Skipping external type %q (type: %q)\n", typeName, extType.Type)
-	}
+	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}})
 
 	if extSchema != nil {
 		definitions[qualifiedType] = extSchema
@@ -303,7 +273,6 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 		return
 	}
 
-	// If it's a struct (fields > 0), we do the usual field-based check.
 	if len(typeInfo.Fields) > 0 {
 		for _, field := range typeInfo.Fields {
 			if strings.HasPrefix(field.Type, "map[") {
@@ -324,14 +293,11 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 						}
 					}
 				}
-			} else {
-				fmt.Println(baseType)
 			}
 		}
 		return
 	}
 
-	// If it's an enum, built-in alias, or something else, do nothing.
 }
 
 // GenerateEnumSchema creates a JSON Schema definition for an enum type.
@@ -368,7 +334,7 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 
 	for _, field := range typeInfo.Fields {
 
-		if field.JSONName == "-" {
+		if field.JSONName == "-" || field.JSONName == "" {
 			continue
 		}
 
@@ -491,6 +457,29 @@ func NewDefaultConfig() *RequiredFieldsConfig {
 			"User":  {"ID", "Name"}, // Only ID and Name are required for User
 			"Inner": {"Name"},
 		},
+	}
+}
+
+func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig) *JSONSchema {
+	switch {
+	case len(typ.Enums) > 0:
+		return GenerateEnumSchema(typ)
+
+	case len(typ.Fields) > 0:
+		return GenerateStructSchema(typ, config)
+
+	case strings.HasPrefix(typ.Type, "map["):
+		return GenerateMapDefinition(typ.Type)
+
+	case strings.HasPrefix(typ.Type, "[]"):
+		return GenerateSliceDefinition(typ.Type)
+
+	case !isCustomType(typ.Type):
+		return &JSONSchema{Type: getBaseJSONType(typ.Type)}
+
+	default:
+		log.Printf("Skipping type %q with underlying type %q\n", typ.Name, typ.Type)
+		return nil
 	}
 }
 
