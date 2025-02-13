@@ -205,3 +205,14 @@ func parseJSONTag(tagValue string) string {
 	}
 	return name
 }
+
+
+func qualifyTypeName(baseType, pkgAlias string) string {
+	if strings.Contains(baseType, ".") {
+		return baseType
+	}
+	if pkgAlias == "" {
+		return baseType
+	}
+	return pkgAlias + "." + baseType
+}

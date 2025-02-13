@@ -86,7 +86,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 			if typ.Name == rootType || dependencies[typ.Name] {
 				// Only handle if it's an internal type (no dot in the name)
 				if !strings.Contains(typ.Name, ".") {
-					schema := generateTypeSchema(typ, config)
+					schema := generateTypeSchema(typ, config,"")
 					if schema != nil {
 						// Store it in the definitions map
 						definitions[typ.Name] = schema
@@ -124,7 +124,6 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	}
 	pkgAlias := parts[0]
 	typeName := parts[1]
-
 	// Lookup the import path from our alias map
 	pkgPath, ok := aliasMap[pkgAlias]
 	if !ok {
@@ -135,12 +134,10 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if err != nil {
 		return fmt.Errorf("failed to load external package %q: %w", pkgPath, err)
 	}
-
 	// Build an alias map for the external package
 	extAliasMap := buildAliasMap(extPkgInfo.Imports)
 	// Also add an entry for the external package’s own name
 	extAliasMap[extPkgInfo.Name] = pkgPath
-
 	// Find the type in the external package
 	var extType *model.TypeInfo
 	for _, decl := range extPkgInfo.Declarations {
@@ -154,29 +151,22 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if extType == nil {
 		return fmt.Errorf("type %q not found in external package %q", typeName, pkgPath)
 	}
-
-	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}})
-
+	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}},pkgAlias)
 	if extSchema != nil {
 		definitions[qualifiedType] = extSchema
 	}
 	for _, field := range extType.Fields {
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
-			var depQualified string
+
 			// If the field's type is already qualified, use it
 			// otherwise qualify it with pkgAlias
-			if strings.Contains(baseType, ".") {
-				depQualified = baseType
-			} else {
-				depQualified = pkgAlias + "." + baseType
-			}
+			depQualified := qualifyTypeName(baseType, pkgAlias)
 			if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited); err != nil {
 				return err
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -317,14 +307,13 @@ func GenerateEnumSchema(typeInfo *model.TypeInfo) *JSONSchema {
 }
 
 // GenerateStructSchema creates a JSON Schema definition for a struct type.
-func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig) *JSONSchema {
+func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *JSONSchema {
 	schema := &JSONSchema{
 		Type:       "object",
 		Properties: make(map[string]*JSONSchema),
 		// Typically, "additionalProperties" is either `false` or another schema
 		AdditionalProperties: false,
 	}
-
 	requiredFields := config.Fields[typeInfo.Name]
 	requiredMap := make(map[string]bool)
 	for _, field := range requiredFields {
@@ -337,9 +326,8 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 		if field.JSONName == "-" || field.JSONName == "" {
 			continue
 		}
-
 		isArray := strings.HasPrefix(field.Type, "[]")
-		baseType := strings.TrimPrefix(field.Type, "[]")
+		baseType := getBaseType(field.Type)
 		var fieldSchema *JSONSchema
 		if isCustomType(baseType) {
 			if isArray {
@@ -350,8 +338,9 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 					},
 				}
 			} else {
+				depQualified := qualifyTypeName(baseType, pkgName)
 				fieldSchema = &JSONSchema{
-					Ref: "#/definitions/" + baseType,
+					Ref: "#/definitions/" + depQualified,
 				}
 			}
 		} else {
@@ -460,13 +449,13 @@ func NewDefaultConfig() *RequiredFieldsConfig {
 	}
 }
 
-func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig) *JSONSchema {
+func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *JSONSchema {
 	switch {
 	case len(typ.Enums) > 0:
 		return GenerateEnumSchema(typ)
 
 	case len(typ.Fields) > 0:
-		return GenerateStructSchema(typ, config)
+		return GenerateStructSchema(typ, config,pkgName)
 
 	case strings.HasPrefix(typ.Type, "map["):
 		return GenerateMapDefinition(typ.Type)
