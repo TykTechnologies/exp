@@ -7,6 +7,34 @@ import (
 )
 
 
+func handleMapField(fieldType string, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
+	// e.g. "map[string]RequestHeadersRewriteConfig"
+	inside := fieldType[len("map["):]
+	parts := strings.SplitN(inside, "]", 2)
+	if len(parts) != 2 {
+		return
+	}
+	valueType := strings.TrimSpace(parts[1])
+	valueType = strings.TrimPrefix(valueType, "*")
+
+	if isCustomType(valueType) {
+		if !dependencies[valueType] {
+			dependencies[valueType] = true
+			if !strings.Contains(valueType, ".") {
+				// find its definition, parse deeper
+				for _, decl := range pkgInfo.Declarations {
+					for _, depType := range decl.Types {
+						if depType.Name == valueType {
+							CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
 func getJSONType(goType string) *model.JSONSchema {
 	if goType == "[]byte" {
 		return &model.JSONSchema{

@@ -124,21 +124,16 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	}
 	pkgAlias := parts[0]
 	typeName := parts[1]
-	// Lookup the import path from our alias map
 	pkgPath, ok := aliasMap[pkgAlias]
 	if !ok {
 		return fmt.Errorf("alias %q not found in alias map", pkgAlias)
 	}
-	// Load the external package
 	extPkgInfo, err := LoadExternalPackage(pkgPath, repoDir)
 	if err != nil {
 		return fmt.Errorf("failed to load external package %q: %w", pkgPath, err)
 	}
-	// Build an alias map for the external package
 	extAliasMap := buildAliasMap(extPkgInfo.Imports)
-	// Also add an entry for the external package’s own name
 	extAliasMap[extPkgInfo.Name] = pkgPath
-	// Find the type in the external package
 	var extType *model.TypeInfo
 	for _, decl := range extPkgInfo.Declarations {
 		for _, t := range decl.Types {
@@ -158,9 +153,6 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	for _, field := range extType.Fields {
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
-
-			// If the field's type is already qualified, use it
-			// otherwise qualify it with pkgAlias
 			depQualified := qualifyTypeName(baseType, pkgAlias)
 			if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited); err != nil {
 				return err
@@ -311,7 +303,6 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 	schema := &model.JSONSchema{
 		Type:       "object",
 		Properties: make(map[string]*model.JSONSchema),
-		// Typically, "additionalProperties" is either `false` or another schema
 		AdditionalProperties: false,
 	}
 	requiredFields := config.Fields[typeInfo.Name]
@@ -367,7 +358,6 @@ func GenerateMapDefinition(goType string) *model.JSONSchema {
 	inside := goType[len("map["):]
 	parts := strings.SplitN(inside, "]", 2)
 	if len(parts) != 2 {
-		// fallback to a generic object
 		return &model.JSONSchema{
 			Type:                 "object",
 			AdditionalProperties: true,
@@ -376,7 +366,6 @@ func GenerateMapDefinition(goType string) *model.JSONSchema {
 	keyType := strings.TrimSpace(parts[0])   // e.g. "string"
 	valueType := strings.TrimSpace(parts[1]) // e.g. "interface{}" or "PortWhiteList"
 
-	// JSON only supports string keys as standard objects.
 	if keyType != "string" {
 		return &model.JSONSchema{
 			Type:                 "object",
@@ -384,7 +373,6 @@ func GenerateMapDefinition(goType string) *model.JSONSchema {
 		}
 	}
 
-	// If the value is interface{} or any => no constraints
 	if valueType == "interface{}" || valueType == "any" {
 		return &model.JSONSchema{
 			Type:                 "object",
@@ -392,7 +380,6 @@ func GenerateMapDefinition(goType string) *model.JSONSchema {
 		}
 	}
 
-	// If it's built-in, produce a simple type
 	if !isCustomType(valueType) {
 		return &model.JSONSchema{
 			Type: "object",
@@ -402,7 +389,6 @@ func GenerateMapDefinition(goType string) *model.JSONSchema {
 		}
 	}
 
-	// Otherwise it's a custom type => reference
 	return &model.JSONSchema{
 		Type: "object",
 		AdditionalProperties: &model.JSONSchema{
@@ -413,7 +399,6 @@ func GenerateMapDefinition(goType string) *model.JSONSchema {
 
 // GenerateSliceDefinition creates a top-level JSON Schema definition for a slice type (e.g. []CertData).
 func GenerateSliceDefinition(goType string) *model.JSONSchema {
-	// e.g. "[]CertData"
 	elemType := strings.TrimPrefix(goType, "[]")
 	elemType = strings.TrimSpace(elemType)
 
@@ -436,7 +421,7 @@ func GenerateSliceDefinition(goType string) *model.JSONSchema {
 
 // RequiredFieldsConfig defines which fields are required for each type.
 type RequiredFieldsConfig struct {
-	Fields map[string][]string // map[TypeName][]FieldName
+	Fields map[string][]string
 }
 
 // NewDefaultConfig just returns a sample required-fields config
@@ -472,29 +457,3 @@ func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig,pkgNam
 	}
 }
 
-func handleMapField(fieldType string, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
-	// e.g. "map[string]RequestHeadersRewriteConfig"
-	inside := fieldType[len("map["):]
-	parts := strings.SplitN(inside, "]", 2)
-	if len(parts) != 2 {
-		return
-	}
-	valueType := strings.TrimSpace(parts[1])
-	valueType = strings.TrimPrefix(valueType, "*")
-
-	if isCustomType(valueType) {
-		if !dependencies[valueType] {
-			dependencies[valueType] = true
-			if !strings.Contains(valueType, ".") {
-				// find its definition, parse deeper
-				for _, decl := range pkgInfo.Declarations {
-					for _, depType := range decl.Types {
-						if depType.Name == valueType {
-							CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
-						}
-					}
-				}
-			}
-		}
-	}
-}
