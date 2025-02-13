@@ -43,7 +43,6 @@ func getJSONType(goType string) *model.JSONSchema {
 		}
 	}
 
-	// handle slices
 	if strings.HasPrefix(goType, "[]") {
 		elementType := strings.TrimPrefix(goType, "[]")
 		if isCustomType(elementType) {
@@ -62,7 +61,6 @@ func getJSONType(goType string) *model.JSONSchema {
 		}
 	}
 
-	// handle maps
 	if strings.HasPrefix(goType, "map[") {
 		inside := goType[len("map["):]
 		parts := strings.SplitN(inside, "]", 2)
@@ -104,7 +102,6 @@ func getJSONType(goType string) *model.JSONSchema {
 		}
 	}
 
-	// fallback for non-array, non-map
 	schema := &model.JSONSchema{
 		Type: getBaseJSONType(goType),
 	}

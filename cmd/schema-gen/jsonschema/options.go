@@ -29,7 +29,7 @@ func NewOptions() *options {
 
 // PrintHelp prints usage information for your CLI.
 func PrintHelp() {
-	fmt.Println("Usage: schema-gen extract [options]")
+	fmt.Println("Usage: schema-gen jsonschema [options]")
 	fmt.Println()
 	pflag.PrintDefaults()
 }
