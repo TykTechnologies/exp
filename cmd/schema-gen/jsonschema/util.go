@@ -6,7 +6,7 @@ import (
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 )
 
-// getJSONType converts a Go type into its JSON Schema representation (for fields).
+
 func getJSONType(goType string) *model.JSONSchema {
 	if goType == "[]byte" {
 		return &model.JSONSchema{
@@ -121,7 +121,6 @@ func getJSONType(goType string) *model.JSONSchema {
 	return schema
 }
 
-// getBaseJSONType maps Go base types to JSON Schema types.
 func getBaseJSONType(goType string) string {
 	switch goType {
 	case "int", "int8", "int16", "int32", "int64",
@@ -143,7 +142,6 @@ func getBaseJSONType(goType string) string {
 	}
 }
 
-// getBaseType removes array and pointer markers from a field type.
 func getBaseType(fieldType string) string {
 	baseType := strings.TrimPrefix(fieldType, "[]")
 	baseType = strings.TrimPrefix(baseType, "*")
@@ -154,7 +152,7 @@ func getBaseType(fieldType string) string {
 	return baseType
 }
 
-// isCustomType determines if a type is not one of the built-in or immediate recognized types.
+
 func isCustomType(typeName string) bool {
 	if strings.HasPrefix(typeName, "map[") || typeName == "[]byte" {
 		return false
@@ -173,7 +171,7 @@ func isCustomType(typeName string) bool {
 	return true
 }
 
-// buildAliasMap creates a mapping from import alias to import path.
+
 func buildAliasMap(imports []string) map[string]string {
 	aliasMap := make(map[string]string)
 	for _, imp := range imports {
