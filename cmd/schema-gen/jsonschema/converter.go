@@ -23,12 +23,12 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 
 	absDir, err := filepath.Abs(repoDir)
 	if err != nil {
-		return fmt.Errorf("failed to get absolute path for %q: %w", repoDir, err)
+		return err
 	}
 
 	pkgInfos, err := extract.Extract(absDir+"/", &extract.ExtractOptions{})
 	if err != nil {
-		return fmt.Errorf("failed to extract types from %q: %w", absDir, err)
+		return err
 	}
 	if len(pkgInfos) == 0 {
 		return fmt.Errorf("no package info extracted from %q", absDir)
@@ -36,15 +36,15 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 
 	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig())
 	if err != nil {
-		return fmt.Errorf("failed to convert to JSON Schema: %w", err)
+		return err
 	}
 
 	jsonBytes, err := json.MarshalIndent(schema, "", "    ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal schema to JSON: %w", err)
+		return err
 	}
 	if err := os.WriteFile(outFile, jsonBytes, 0o644); err != nil {
-		return fmt.Errorf("failed to write %q: %w", outFile, err)
+		return err
 	}
 
 	return nil
