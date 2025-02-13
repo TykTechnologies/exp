@@ -1,4 +1,4 @@
-package jsonschema
+package model
 
 type JSONSchema struct {
 	Schema      string                 `json:"$schema,omitempty"`

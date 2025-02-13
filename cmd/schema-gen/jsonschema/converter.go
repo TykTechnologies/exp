@@ -51,10 +51,10 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 }
 
 // ConvertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
-func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (*JSONSchema, error) {
-	rootSchema := &JSONSchema{
+func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (*model.JSONSchema, error) {
+	rootSchema := &model.JSONSchema{
 		Schema:      "http://json-schema.org/draft-07/schema#",
-		Definitions: make(map[string]*JSONSchema),
+		Definitions: make(map[string]*model.JSONSchema),
 	}
 	definitions := rootSchema.Definitions
 
@@ -112,7 +112,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 
 // ProcessExternalType loads an external package for a qualified type (e.g. "model.Inner"),
 // generates its JSON Schema definition, and then recursively processes its custom fields.
-func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]*JSONSchema, visited map[string]bool) error {
+func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]*model.JSONSchema, visited map[string]bool) error {
 	if visited[qualifiedType] {
 		return nil
 	}
@@ -291,7 +291,7 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 }
 
 // GenerateEnumSchema creates a JSON Schema definition for an enum type.
-func GenerateEnumSchema(typeInfo *model.TypeInfo) *JSONSchema {
+func GenerateEnumSchema(typeInfo *model.TypeInfo) *model.JSONSchema {
 	enumValues := make([]any, 0, len(typeInfo.Enums))
 	for _, enum := range typeInfo.Enums {
 		enumValues = append(enumValues, enum.Value)
@@ -300,17 +300,17 @@ func GenerateEnumSchema(typeInfo *model.TypeInfo) *JSONSchema {
 	if typeInfo.Type == "int" {
 		jsonType = "integer"
 	}
-	return &JSONSchema{
+	return &model.JSONSchema{
 		Type: jsonType,
 		Enum: enumValues,
 	}
 }
 
 // GenerateStructSchema creates a JSON Schema definition for a struct type.
-func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *JSONSchema {
-	schema := &JSONSchema{
+func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *model.JSONSchema {
+	schema := &model.JSONSchema{
 		Type:       "object",
-		Properties: make(map[string]*JSONSchema),
+		Properties: make(map[string]*model.JSONSchema),
 		// Typically, "additionalProperties" is either `false` or another schema
 		AdditionalProperties: false,
 	}
@@ -328,18 +328,18 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 		}
 		isArray := strings.HasPrefix(field.Type, "[]")
 		baseType := getBaseType(field.Type)
-		var fieldSchema *JSONSchema
+		var fieldSchema *model.JSONSchema
 		if isCustomType(baseType) {
 			if isArray {
-				fieldSchema = &JSONSchema{
+				fieldSchema = &model.JSONSchema{
 					Type: "array",
-					Items: &JSONSchema{
+					Items: &model.JSONSchema{
 						Ref: "#/definitions/" + baseType,
 					},
 				}
 			} else {
 				depQualified := qualifyTypeName(baseType, pkgName)
-				fieldSchema = &JSONSchema{
+				fieldSchema = &model.JSONSchema{
 					Ref: "#/definitions/" + depQualified,
 				}
 			}
@@ -362,13 +362,13 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 }
 
 // GenerateMapDefinition creates a top-level JSON Schema definition for a map type (e.g. map[string]Something).
-func GenerateMapDefinition(goType string) *JSONSchema {
+func GenerateMapDefinition(goType string) *model.JSONSchema {
 	// Example: "map[string]interface{}" or "map[string]PortWhiteList"
 	inside := goType[len("map["):]
 	parts := strings.SplitN(inside, "]", 2)
 	if len(parts) != 2 {
 		// fallback to a generic object
-		return &JSONSchema{
+		return &model.JSONSchema{
 			Type:                 "object",
 			AdditionalProperties: true,
 		}
@@ -378,7 +378,7 @@ func GenerateMapDefinition(goType string) *JSONSchema {
 
 	// JSON only supports string keys as standard objects.
 	if keyType != "string" {
-		return &JSONSchema{
+		return &model.JSONSchema{
 			Type:                 "object",
 			AdditionalProperties: true,
 		}
@@ -386,7 +386,7 @@ func GenerateMapDefinition(goType string) *JSONSchema {
 
 	// If the value is interface{} or any => no constraints
 	if valueType == "interface{}" || valueType == "any" {
-		return &JSONSchema{
+		return &model.JSONSchema{
 			Type:                 "object",
 			AdditionalProperties: true,
 		}
@@ -394,41 +394,41 @@ func GenerateMapDefinition(goType string) *JSONSchema {
 
 	// If it's built-in, produce a simple type
 	if !isCustomType(valueType) {
-		return &JSONSchema{
+		return &model.JSONSchema{
 			Type: "object",
-			AdditionalProperties: &JSONSchema{
+			AdditionalProperties: &model.JSONSchema{
 				Type: getBaseJSONType(valueType),
 			},
 		}
 	}
 
 	// Otherwise it's a custom type => reference
-	return &JSONSchema{
+	return &model.JSONSchema{
 		Type: "object",
-		AdditionalProperties: &JSONSchema{
+		AdditionalProperties: &model.JSONSchema{
 			Ref: "#/definitions/" + valueType,
 		},
 	}
 }
 
 // GenerateSliceDefinition creates a top-level JSON Schema definition for a slice type (e.g. []CertData).
-func GenerateSliceDefinition(goType string) *JSONSchema {
+func GenerateSliceDefinition(goType string) *model.JSONSchema {
 	// e.g. "[]CertData"
 	elemType := strings.TrimPrefix(goType, "[]")
 	elemType = strings.TrimSpace(elemType)
 
 	if !isCustomType(elemType) {
-		return &JSONSchema{
+		return &model.JSONSchema{
 			Type: "array",
-			Items: &JSONSchema{
+			Items: &model.JSONSchema{
 				Type: getBaseJSONType(elemType),
 			},
 		}
 	}
 
-	return &JSONSchema{
+	return &model.JSONSchema{
 		Type: "array",
-		Items: &JSONSchema{
+		Items: &model.JSONSchema{
 			Ref: "#/definitions/" + elemType,
 		},
 	}
@@ -449,7 +449,7 @@ func NewDefaultConfig() *RequiredFieldsConfig {
 	}
 }
 
-func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *JSONSchema {
+func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *model.JSONSchema {
 	switch {
 	case len(typ.Enums) > 0:
 		return GenerateEnumSchema(typ)
@@ -464,7 +464,7 @@ func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig,pkgNam
 		return GenerateSliceDefinition(typ.Type)
 
 	case !isCustomType(typ.Type):
-		return &JSONSchema{Type: getBaseJSONType(typ.Type)}
+		return &model.JSONSchema{Type: getBaseJSONType(typ.Type)}
 
 	default:
 		log.Printf("Skipping type %q with underlying type %q\n", typ.Name, typ.Type)
