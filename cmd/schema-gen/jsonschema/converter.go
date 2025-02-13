@@ -248,6 +248,10 @@ func LoadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 // to discover deeper dependencies (like "CertData" inside "CertsData").
 func CollectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
 	for _, field := range typeInfo.Fields {
+		if strings.HasPrefix(field.Type, "map[") {
+			handleMapField(field.Type, pkgInfo, dependencies)
+			continue
+		}
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
 			if !dependencies[baseType] {
@@ -272,7 +276,6 @@ func CollectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 // (e.g. "CertsData" -> "[]CertData") to find further dependencies.
 func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
 	underlying := typeInfo.Type
-
 	// If it's a slice: e.g. "[]CertData"
 	if strings.HasPrefix(underlying, "[]") {
 		elemType := strings.TrimPrefix(underlying, "[]")
@@ -296,32 +299,17 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 
 	// If it's a map: e.g. "map[string]PortWhiteList"
 	if strings.HasPrefix(underlying, "map[") {
-		inside := underlying[len("map["):]
-		parts := strings.SplitN(inside, "]", 2)
-		if len(parts) == 2 {
-			valueType := strings.TrimSpace(parts[1])
-			valueType = strings.TrimPrefix(valueType, "*")
-			if isCustomType(valueType) {
-				if !dependencies[valueType] {
-					dependencies[valueType] = true
-					if !strings.Contains(valueType, ".") {
-						for _, decl := range pkgInfo.Declarations {
-							for _, depType := range decl.Types {
-								if depType.Name == valueType {
-									CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		handleMapField(underlying, pkgInfo, dependencies)
 		return
 	}
 
 	// If it's a struct (fields > 0), we do the usual field-based check.
 	if len(typeInfo.Fields) > 0 {
 		for _, field := range typeInfo.Fields {
+			if strings.HasPrefix(field.Type, "map[") {
+				handleMapField(field.Type, pkgInfo, dependencies)
+				continue
+			}
 			baseType := getBaseType(field.Type)
 			if isCustomType(baseType) {
 				if !dependencies[baseType] {
@@ -336,6 +324,8 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 						}
 					}
 				}
+			} else {
+				fmt.Println(baseType)
 			}
 		}
 		return
@@ -377,6 +367,11 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 	var required []string
 
 	for _, field := range typeInfo.Fields {
+
+		if field.JSONName == "-" {
+			continue
+		}
+
 		isArray := strings.HasPrefix(field.Type, "[]")
 		baseType := strings.TrimPrefix(field.Type, "[]")
 		var fieldSchema *JSONSchema
@@ -496,5 +491,32 @@ func NewDefaultConfig() *RequiredFieldsConfig {
 			"User":  {"ID", "Name"}, // Only ID and Name are required for User
 			"Inner": {"Name"},
 		},
+	}
+}
+
+func handleMapField(fieldType string, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
+	// e.g. "map[string]RequestHeadersRewriteConfig"
+	inside := fieldType[len("map["):]
+	parts := strings.SplitN(inside, "]", 2)
+	if len(parts) != 2 {
+		return
+	}
+	valueType := strings.TrimSpace(parts[1])
+	valueType = strings.TrimPrefix(valueType, "*")
+
+	if isCustomType(valueType) {
+		if !dependencies[valueType] {
+			dependencies[valueType] = true
+			if !strings.Contains(valueType, ".") {
+				// find its definition, parse deeper
+				for _, decl := range pkgInfo.Declarations {
+					for _, depType := range decl.Types {
+						if depType.Name == valueType {
+							CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
+						}
+					}
+				}
+			}
+		}
 	}
 }
