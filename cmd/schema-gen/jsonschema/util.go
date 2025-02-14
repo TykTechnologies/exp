@@ -1,12 +1,32 @@
 package jsonschema
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 )
 
 
+
+func Title(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+func getRefName(baseType, pkgName string, stripPrefix []string) string {
+	pkg,refType:=getPkgAndBaseType(baseType,pkgName)
+	var refName string
+	if slices.Contains(stripPrefix, pkg)||pkg=="" {
+		refName = refType
+	} else {
+
+		refName = Title(pkg) + refType
+	}
+	return refName
+}
 func handleMapField(fieldType string, pkgInfo *model.PackageInfo, dependencies map[string]bool) {
 	// e.g. "map[string]RequestHeadersRewriteConfig"
 	inside := fieldType[len("map["):]
@@ -231,7 +251,23 @@ func parseJSONTag(tagValue string) string {
 	return name
 }
 
+func convertQualifiedType(qType,pkgName string) (string,string) {
+	parts := strings.SplitN(qType, ".", 2)
+	if len(parts) < 2 {
+		// Return the input unchanged if it isn't in the expected format.
+		return pkgName,qType
+	}
+	pkg := parts[0]
+	typ :=parts[1]
+	return pkg, typ
+}
 
+func getPkgAndBaseType(baseType, pkgName string) (string, string) {
+	if strings.Contains(baseType, ".") {
+		return convertQualifiedType(baseType,pkgName)
+	}
+	return pkgName,baseType
+}
 func qualifyTypeName(baseType, pkgAlias string) string {
 	if strings.Contains(baseType, ".") {
 		return baseType
