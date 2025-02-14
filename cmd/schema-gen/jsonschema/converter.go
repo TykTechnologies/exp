@@ -16,6 +16,7 @@ import (
 
 // ParseAndConvertStruct parses the given repo directory for Go structs and
 // converts the specified rootType to JSON Schema, writing the result to "schema.json".
+
 func ParseAndConvertStruct(cfg *options) error {
 	if cfg.outputFile == "" {
 		cfg.outputFile = "schema.json"
@@ -34,7 +35,9 @@ func ParseAndConvertStruct(cfg *options) error {
 		return fmt.Errorf("no package info extracted from %q", absDir)
 	}
 
+
 	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, cfg.rootType, NewDefaultConfig(), cfg.stripPrefix)
+
 	if err != nil {
 		return err
 	}

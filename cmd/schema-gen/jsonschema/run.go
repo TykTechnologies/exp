@@ -15,4 +15,5 @@ func Run() (err error) {
 	}
 
 	return ParseAndConvertStruct(cfg)
+
 }
