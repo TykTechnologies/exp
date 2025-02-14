@@ -16,7 +16,7 @@ import (
 
 // ParseAndConvertStruct parses the given repo directory for Go structs and
 // converts the specified rootType to JSON Schema, writing the result to "schema.json".
-func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
+func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []string) error {
 	if outFile == "" {
 		outFile = "schema.json"
 	}
@@ -34,7 +34,7 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 		return fmt.Errorf("no package info extracted from %q", absDir)
 	}
 
-	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig())
+	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig(), stripPrefix)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string) error {
 }
 
 // ConvertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
-func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig) (*model.JSONSchema, error) {
+func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig, stripPrefix []string) (*model.JSONSchema, error) {
 	rootSchema := &model.JSONSchema{
 		Schema:      "http://json-schema.org/draft-07/schema#",
 		Definitions: make(map[string]*model.JSONSchema),
@@ -86,7 +86,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 			if typ.Name == rootType || dependencies[typ.Name] {
 				// Only handle if it's an internal type (no dot in the name)
 				if !strings.Contains(typ.Name, ".") {
-					schema := generateTypeSchema(typ, config,"")
+					schema := generateTypeSchema(typ, config, "", stripPrefix)
 					if schema != nil {
 						// Store it in the definitions map
 						definitions[typ.Name] = schema
@@ -100,7 +100,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 	visited := make(map[string]bool)
 	for dep := range dependencies {
 		if strings.Contains(dep, ".") {
-			if err := ProcessExternalType(dep, repoDir, aliasMap, definitions, visited); err != nil {
+			if err := ProcessExternalType(dep, repoDir, aliasMap, definitions, visited, stripPrefix); err != nil {
 				fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 			}
 		}
@@ -112,7 +112,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 
 // ProcessExternalType loads an external package for a qualified type (e.g. "model.Inner"),
 // generates its JSON Schema definition, and then recursively processes its custom fields.
-func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]*model.JSONSchema, visited map[string]bool) error {
+func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]*model.JSONSchema, visited map[string]bool, stripPrefix []string) error {
 	if visited[qualifiedType] {
 		return nil
 	}
@@ -146,15 +146,15 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if extType == nil {
 		return fmt.Errorf("type %q not found in external package %q", typeName, pkgPath)
 	}
-	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}},pkgAlias)
+	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}}, pkgAlias, stripPrefix)
 	if extSchema != nil {
-		definitions[qualifiedType] = extSchema
+		definitions[getRefName(qualifiedType,pkgAlias,stripPrefix)] = extSchema
 	}
 	for _, field := range extType.Fields {
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
 			depQualified := qualifyTypeName(baseType, pkgAlias)
-			if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited); err != nil {
+			if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited, stripPrefix); err != nil {
 				return err
 			}
 		}
@@ -299,10 +299,10 @@ func GenerateEnumSchema(typeInfo *model.TypeInfo) *model.JSONSchema {
 }
 
 // GenerateStructSchema creates a JSON Schema definition for a struct type.
-func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *model.JSONSchema {
+func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig, pkgName string, stripPrefix []string) *model.JSONSchema {
 	schema := &model.JSONSchema{
-		Type:       "object",
-		Properties: make(map[string]*model.JSONSchema),
+		Type:                 "object",
+		Properties:           make(map[string]*model.JSONSchema),
 		AdditionalProperties: false,
 	}
 	requiredFields := config.Fields[typeInfo.Name]
@@ -321,17 +321,17 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 		baseType := getBaseType(field.Type)
 		var fieldSchema *model.JSONSchema
 		if isCustomType(baseType) {
+			refName:=getRefName(baseType,pkgName,stripPrefix)
 			if isArray {
 				fieldSchema = &model.JSONSchema{
 					Type: "array",
 					Items: &model.JSONSchema{
-						Ref: "#/definitions/" + baseType,
+						Ref: "#/definitions/" + refName,
 					},
 				}
 			} else {
-				depQualified := qualifyTypeName(baseType, pkgName)
 				fieldSchema = &model.JSONSchema{
-					Ref: "#/definitions/" + depQualified,
+					Ref: "#/definitions/" + refName,
 				}
 			}
 		} else {
@@ -434,13 +434,13 @@ func NewDefaultConfig() *RequiredFieldsConfig {
 	}
 }
 
-func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig,pkgName string) *model.JSONSchema {
+func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig, pkgName string, stripPrefix []string) *model.JSONSchema {
 	switch {
 	case len(typ.Enums) > 0:
 		return GenerateEnumSchema(typ)
 
 	case len(typ.Fields) > 0:
-		return GenerateStructSchema(typ, config,pkgName)
+		return GenerateStructSchema(typ, config, pkgName, stripPrefix)
 
 	case strings.HasPrefix(typ.Type, "map["):
 		return GenerateMapDefinition(typ.Type)
@@ -456,4 +456,3 @@ func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig,pkgNam
 		return nil
 	}
 }
-
