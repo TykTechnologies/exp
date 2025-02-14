@@ -16,17 +16,17 @@ import (
 
 // ParseAndConvertStruct parses the given repo directory for Go structs and
 // converts the specified rootType to JSON Schema, writing the result to "schema.json".
-func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []string) error {
-	if outFile == "" {
-		outFile = "schema.json"
+func ParseAndConvertStruct(cfg *options) error {
+	if cfg.outputFile == "" {
+		cfg.outputFile = "schema.json"
 	}
 
-	absDir, err := filepath.Abs(repoDir)
+	absDir, err := filepath.Abs(cfg.sourcePath)
 	if err != nil {
 		return err
 	}
 
-	pkgInfos, err := extract.Extract(absDir+"/", &extract.ExtractOptions{})
+	pkgInfos, err := extract.Extract(absDir+"/", &extract.ExtractOptions{IncludeInternal: true})
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []stri
 		return fmt.Errorf("no package info extracted from %q", absDir)
 	}
 
-	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig(), stripPrefix)
+	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, cfg.rootType, NewDefaultConfig(), cfg.stripPrefix)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []stri
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(outFile, jsonBytes, 0o644); err != nil {
+	if err := os.WriteFile(cfg.outputFile, jsonBytes, 0o644); err != nil {
 		return err
 	}
 
@@ -60,7 +60,6 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 
 	// We'll store discovered dependencies in this map
 	dependencies := make(map[string]bool)
-
 	// Build an alias mapping from the root package's imports
 	aliasMap := buildAliasMap(pkgInfo.Imports)
 
@@ -132,6 +131,8 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if err != nil {
 		return fmt.Errorf("failed to load external package %q: %w", pkgPath, err)
 	}
+	extPkgInfo.Imports = append(extPkgInfo.Imports, `otelconfig "github.com/TykTechnologies/opentelemetry/config"`)
+	extPkgInfo.Imports=append(extPkgInfo.Imports,"github.com/TykTechnologies/tyk/internal/otel")
 	extAliasMap := buildAliasMap(extPkgInfo.Imports)
 	extAliasMap[extPkgInfo.Name] = pkgPath
 	var extType *model.TypeInfo
@@ -139,6 +140,12 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 		for _, t := range decl.Types {
 			if t.Name == typeName {
 				extType = t
+				if t.Type!=""&&t.Name!=t.Type&&isCustomType(t.Type) {
+					depQualified := qualifyTypeName(t.Type, pkgAlias)
+					if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited, stripPrefix); err != nil {
+						return err
+					}
+				}
 				break
 			}
 		}
@@ -185,7 +192,7 @@ func LoadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 	}
 
 	pkgDir := filepath.Dir(pkgs[0].GoFiles[0])
-	pkgInfos, err := extract.Extract(pkgDir+"/", &extract.ExtractOptions{})
+	pkgInfos, err := extract.Extract(pkgDir+"/", &extract.ExtractOptions{IncludeInternal: true})
 	if err != nil {
 		return nil, err
 	}
@@ -213,6 +220,9 @@ func CollectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 					for _, decl := range pkgInfo.Declarations {
 						for _, depType := range decl.Types {
 							if depType.Name == baseType {
+								if depType.Type!=""&&depType.Name!=depType.Type {
+									dependencies[depType.Type] = true
+								}
 								// This named type might be "[]CertData", "map[string]PortWhiteList", etc.
 								CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 							}
@@ -239,6 +249,9 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 					for _, decl := range pkgInfo.Declarations {
 						for _, depType := range decl.Types {
 							if depType.Name == elemType {
+								if depType.Type!=""&&depType.Name!=depType.Type {
+									dependencies[depType.Type] = true
+								}
 								CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 							}
 						}
@@ -269,6 +282,9 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 						for _, decl := range pkgInfo.Declarations {
 							for _, depType := range decl.Types {
 								if depType.Name == baseType {
+									if depType.Type!=""&&depType.Name!=depType.Type {
+										dependencies[depType.Type] = true
+									}
 									CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 								}
 							}
@@ -450,6 +466,10 @@ func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig, pkgNa
 
 	case !isCustomType(typ.Type):
 		return &model.JSONSchema{Type: getBaseJSONType(typ.Type)}
+
+	case typ.Name != typ.Type && len(typ.Fields) == 0:
+		refName := getRefName(typ.Type, pkgName, stripPrefix)
+		return &model.JSONSchema{Ref: "#/definitions/" + refName}
 
 	default:
 		log.Printf("Skipping type %q with underlying type %q\n", typ.Name, typ.Type)

@@ -25,6 +25,7 @@ type ExtractOptions struct {
 	includeTests      bool
 	includeUnexported bool
 	ignoreFiles       []string
+	IncludeInternal bool
 }
 
 func NewExtractOptions(cfg *options) *ExtractOptions {
@@ -33,6 +34,7 @@ func NewExtractOptions(cfg *options) *ExtractOptions {
 		includeTests:      cfg.includeTests,
 		includeUnexported: cfg.includeUnexported,
 		ignoreFiles:       cfg.ignoreFiles,
+		IncludeInternal: cfg.includeInternal,
 	}
 }
 
@@ -212,7 +214,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				importLiteral = alias + " " + importLiteral
 			}
 
-			if !strings.Contains(importLiteral, "/internal") {
+			if !strings.Contains(importLiteral, "/internal")||options.IncludeInternal {
 				if slices.Contains(result.Imports, importLiteral) {
 					continue
 				}
