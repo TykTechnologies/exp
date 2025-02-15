@@ -284,7 +284,7 @@ func (v *collector) identNames(decl []*ast.Ident) []string {
 }
 
 func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, filename string, stack []ast.Node) *Declaration {
-	args, returns := v.functionBindings(decl)
+	args, returns := v.functionBindings(file, decl)
 
 	declaration := &Declaration{
 		Doc:        strings.TrimSpace(v.getSource(file, decl.Doc)),
@@ -299,7 +299,7 @@ func (v *collector) collectFuncDeclaration(file *ast.File, decl *ast.FuncDecl, f
 	}
 
 	if decl.Recv != nil {
-		declaration.Receiver = v.symbolType(decl.Recv.List[0].Type)
+		declaration.Receiver = v.symbolType(file, decl.Recv.List[0].Type)
 	}
 
 	return declaration
@@ -319,38 +319,41 @@ func (p *collector) getSource(file *ast.File, node any) string {
 	return buf.String()
 }
 
-func (p *collector) symbolType(expr ast.Expr) string {
+func (p *collector) symbolType(file *ast.File, expr ast.Expr) string {
 	switch t := expr.(type) {
 	case *ast.Ident:
 		return t.Name
 	case *ast.StarExpr:
-		return "*" + p.symbolType(t.X)
+		return "*" + p.symbolType(file, t.X)
 	case *ast.ArrayType:
-		return "[]" + p.symbolType(t.Elt)
+		return "[]" + p.symbolType(file, t.Elt)
 	case *ast.Ellipsis:
-		return "..." + p.symbolType(t.Elt)
+		return "..." + p.symbolType(file, t.Elt)
 	case *ast.SelectorExpr:
-		return p.symbolType(t.X) + "." + p.symbolType(t.Sel)
+		return p.symbolType(file, t.X) + "." + p.symbolType(file, t.Sel)
 	case *ast.MapType:
-		k, v := p.symbolType(t.Key), p.symbolType(t.Value)
+		var (
+			k = p.symbolType(file, t.Key)
+			v = p.symbolType(file, t.Value)
+		)
 		return fmt.Sprintf("map[%s]%s", k, v)
 	case *ast.InterfaceType:
 		return "any"
 	}
-	return fmt.Sprintf("%T", expr)
+	return p.getSource(file, expr)
 }
 
-func (p *collector) functionBindings(decl *ast.FuncDecl) (args []string, returns []string) {
+func (p *collector) functionBindings(file *ast.File, decl *ast.FuncDecl) (args []string, returns []string) {
 	// Traverse arguments
 	for _, field := range decl.Type.Params.List {
-		argType := p.symbolType(field.Type)
+		argType := p.symbolType(file, field.Type)
 		args = appendIfNotExists(args, argType)
 	}
 
 	// Traverse return values
 	if decl.Type.Results != nil {
 		for _, field := range decl.Type.Results.List {
-			returnType := p.symbolType(field.Type)
+			returnType := p.symbolType(file, field.Type)
 			returns = appendIfNotExists(returns, returnType)
 		}
 	}

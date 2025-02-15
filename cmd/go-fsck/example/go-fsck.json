@@ -9,9 +9,20 @@
     "Imports": {
       "example.go": [
         "\"net/http\""
+      ],
+      "generic.go": [
+        "\"sync\""
       ]
     },
     "Types": [
+      {
+        "Kind": "type",
+        "File": "generic.go",
+        "SelfContained": false,
+        "Doc": "Allocator holds a sync.Pool of objects of type T.",
+        "Name": "Allocator",
+        "Source": "// Allocator holds a sync.Pool of objects of type T.\ntype Allocator[T Reseter] struct {\n\tpool sync.Pool\n}"
+      },
       {
         "Kind": "type",
         "File": "example.go",
@@ -27,6 +38,14 @@
         "Doc": "File represents a filename",
         "Name": "File",
         "Source": "// File represents a filename\ntype File string"
+      },
+      {
+        "Kind": "type",
+        "File": "generic.go",
+        "SelfContained": true,
+        "Doc": "Reseter is the interface that types must implement to be managed by Allocator.",
+        "Name": "Reseter",
+        "Source": "// Reseter is the interface that types must implement to be managed by Allocator.\ntype Reseter interface {\n\tReset()\n}"
       }
     ],
     "Consts": [
@@ -71,6 +90,52 @@
         ],
         "Signature": "GlobalFunc () error",
         "Source": "// Global func comment\nfunc GlobalFunc() error {\n\t// holds the error\n\tvar err error\t// the err var\n\n\t// inline comment\n\terr = nil\n\n\treturn err\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "generic.go",
+        "SelfContained": false,
+        "References": {
+          "sync": [
+            "Pool"
+          ]
+        },
+        "Doc": "New creates an Allocator for type T using the provided constructor.",
+        "Name": "New",
+        "Arguments": [
+          "func() T"
+        ],
+        "Returns": [
+          "*Allocator[T]"
+        ],
+        "Signature": "New (newFunc func() T) *Allocator[T]",
+        "Source": "// New creates an Allocator for type T using the provided constructor.\nfunc New[T Reseter](newFunc func() T) *Allocator[T] {\n\treturn \u0026Allocator[T]{\n\t\tpool: sync.Pool{\n\t\t\tNew: func() any {\n\t\t\t\treturn newFunc()\n\t\t\t},\n\t\t},\n\t}\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "generic.go",
+        "SelfContained": false,
+        "Doc": "Get retrieves an object from the internal pool.",
+        "Name": "Get",
+        "Receiver": "*Allocator[T]",
+        "Returns": [
+          "T"
+        ],
+        "Signature": "Get () T",
+        "Source": "// Get retrieves an object from the internal pool.\nfunc (a *Allocator[T]) Get() T {\n\treturn a.pool.Get().(T)\t//nolint\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "generic.go",
+        "SelfContained": false,
+        "Doc": "Put returns an object to the pool after resetting it.",
+        "Name": "Put",
+        "Receiver": "*Allocator[T]",
+        "Arguments": [
+          "T"
+        ],
+        "Signature": "Put (t T)",
+        "Source": "// Put returns an object to the pool after resetting it.\nfunc (a *Allocator[T]) Put(t T) {\n\tt.Reset()\n\ta.pool.Put(t)\n}"
       }
     ]
   },
