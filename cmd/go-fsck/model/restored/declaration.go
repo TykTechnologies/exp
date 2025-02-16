@@ -1,6 +1,7 @@
 package model
 
 import (
+	"go/ast"
 	"strings"
 )
 
@@ -32,6 +33,24 @@ func (d *Declaration) Equal(in *Declaration) bool {
 		return true
 	}
 	return false
+}
+
+func (d *Declaration) HasName(find string) bool {
+	for _, name := range d.Names {
+		if name == find {
+			return true
+		}
+	}
+	return d.Name == find
+}
+
+func (d *Declaration) IsExported() bool {
+	for _, name := range d.Names {
+		if ast.IsExported(name) {
+			return true
+		}
+	}
+	return ast.IsExported(d.Name)
 }
 
 func (d *Declaration) Keys() []string {

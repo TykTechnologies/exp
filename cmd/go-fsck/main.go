@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/exp/maps"
 
+	"github.com/TykTechnologies/exp/cmd/go-fsck/docs"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/extract"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/lint"
 	"github.com/TykTechnologies/exp/cmd/go-fsck/query"
@@ -34,6 +35,7 @@ func start() (err error) {
 		"lint":    lint.Run,
 		"search":  search.Run,
 		"query":   query.Run,
+		"docs":    docs.Run,
 		"report":  report.Run,
 	}
 	commandList := maps.Keys(commands)

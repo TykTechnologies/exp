@@ -1,6 +1,7 @@
 package model
 
 import (
+	"go/ast"
 	"strings"
 )
 
@@ -25,6 +26,24 @@ type Declaration struct {
 
 	Signature string `json:",omitempty"`
 	Source    string `json:",omitempty"`
+}
+
+func (d *Declaration) HasName(find string) bool {
+	for _, name := range d.Names {
+		if name == find {
+			return true
+		}
+	}
+	return d.Name == find
+}
+
+func (d *Declaration) IsExported() bool {
+	for _, name := range d.Names {
+		if ast.IsExported(name) {
+			return true
+		}
+	}
+	return ast.IsExported(d.Name)
 }
 
 func (d *Declaration) Equal(in *Declaration) bool {

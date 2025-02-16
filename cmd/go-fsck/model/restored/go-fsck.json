@@ -8,6 +8,7 @@
     "Doc": "",
     "Imports": {
       "declaration.go": [
+        "\"go/ast\"",
         "\"strings\""
       ],
       "declaration_list.go": [
@@ -107,6 +108,38 @@
         ],
         "Signature": "Equal (in *Declaration) bool",
         "Source": "func (d *Declaration) Equal(in *Declaration) bool {\n\tif d.File == in.File \u0026\u0026 d.Kind == in.Kind \u0026\u0026 d.Name == in.Name {\n\t\treturn true\n\t}\n\treturn false\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "declaration.go",
+        "SelfContained": false,
+        "Name": "HasName",
+        "Receiver": "*Declaration",
+        "Arguments": [
+          "string"
+        ],
+        "Returns": [
+          "bool"
+        ],
+        "Signature": "HasName (find string) bool",
+        "Source": "func (d *Declaration) HasName(find string) bool {\n\tfor _, name := range d.Names {\n\t\tif name == find {\n\t\t\treturn true\n\t\t}\n\t}\n\treturn d.Name == find\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "declaration.go",
+        "SelfContained": false,
+        "References": {
+          "ast": [
+            "IsExported"
+          ]
+        },
+        "Name": "IsExported",
+        "Receiver": "*Declaration",
+        "Returns": [
+          "bool"
+        ],
+        "Signature": "IsExported () bool",
+        "Source": "func (d *Declaration) IsExported() bool {\n\tfor _, name := range d.Names {\n\t\tif ast.IsExported(name) {\n\t\t\treturn true\n\t\t}\n\t}\n\treturn ast.IsExported(d.Name)\n}"
       },
       {
         "Kind": "func",
@@ -265,6 +298,18 @@
         ],
         "Signature": "String () string",
         "Source": "func (d DeclarationKind) String() string {\n\treturn string(d)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "declaration_list.go",
+        "SelfContained": false,
+        "Name": "Exported",
+        "Receiver": "DeclarationList",
+        "Returns": [
+          "[]*Declaration"
+        ],
+        "Signature": "Exported () []*Declaration",
+        "Source": "func (p DeclarationList) Exported() (result []*Declaration) {\n\tfor _, decl := range p {\n\t\tif decl.IsExported() {\n\t\t\tresult = append(result, decl)\n\t\t}\n\t}\n\treturn\n}"
       },
       {
         "Kind": "func",
