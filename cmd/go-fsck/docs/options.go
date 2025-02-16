@@ -11,9 +11,6 @@ import (
 type options struct {
 	inputFile string
 
-	// placeholder
-	includeInternal bool
-
 	json    bool
 	verbose bool
 	args    []string

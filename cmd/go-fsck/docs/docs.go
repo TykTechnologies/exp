@@ -30,6 +30,14 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 			return nil, err
 		}
 
+		for _, v := range d {
+			v.Package.ID = pkg.ID
+			v.Package.ImportPath = pkg.ImportPath
+			v.Package.Path = pkg.Path
+			v.Package.Package = pkg.Package
+			v.Package.TestPackage = pkg.TestPackage
+		}
+
 		defs = append(defs, d...)
 	}
 
@@ -46,7 +54,7 @@ func docs(cfg *options) error {
 	// symbols from imported packages. Globals may also reference
 	// imported packages so this is incomplete at the moment.
 	for _, def := range defs {
-		if def.Package.TestPackage {
+		if def.Package.TestPackage || strings.HasSuffix(def.Package.Package, "_test") {
 			continue
 		}
 
@@ -57,8 +65,14 @@ func docs(cfg *options) error {
 			funcs  = def.Funcs.Exported()
 		)
 
-		fmt.Println("# Package", def.Package.Package)
+		var packageName = def.Package.ImportPath
+
+		fmt.Println("# Package", packageName)
 		fmt.Println()
+		if def.Doc != "" {
+			fmt.Println(strings.TrimSpace(def.Doc))
+			fmt.Println()
+		}
 
 		if len(types) > 0 {
 			fmt.Println("## Types\n")

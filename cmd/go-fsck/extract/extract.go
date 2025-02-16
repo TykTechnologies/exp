@@ -49,9 +49,9 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 			v.Package.Path = pkg.Path
 			v.Package.Package = pkg.Package
 			v.Package.TestPackage = pkg.TestPackage
-
-			defs = append(defs, d...)
 		}
+
+		defs = append(defs, d...)
 	}
 
 	defs = unique(defs)
