@@ -99,7 +99,7 @@ func docs(cfg *options) error {
 
 		symbol := func(fn *model.Declaration) string {
 			if fn.Receiver != "" {
-				return "func " + fn.Receiver + "." + fn.Signature
+				return "func (" + fn.Receiver + ") " + fn.Signature
 			}
 			return "func " + fn.Signature
 		}
