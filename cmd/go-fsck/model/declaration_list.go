@@ -29,6 +29,15 @@ func (p *DeclarationList) AppendUnique(in ...*Declaration) {
 	p.Sort()
 }
 
+func (p DeclarationList) Exported() (result []*Declaration) {
+	for _, decl := range p {
+		if decl.IsExported() {
+			result = append(result, decl)
+		}
+	}
+	return
+}
+
 func (p DeclarationList) FindKind(kind DeclarationKind) (result []*Declaration) {
 	for _, decl := range p {
 		if decl.Kind == kind {

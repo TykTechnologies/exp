@@ -57,7 +57,7 @@ func findFieldUsages(root, structName, fieldName string, verbose bool) error {
 								if verbose {
 									fmt.Println(currentName)
 								}
-								if currentName == structName {
+								if structName == "_" || currentName == structName {
 									// Get position and line content
 									pos := fset.Position(sel.Pos())
 									line := strings.TrimSpace(getLineFromFile(src, pos.Line))
