@@ -97,10 +97,41 @@ func docs(cfg *options) error {
 			}
 		}
 
+		symbol := func(fn *model.Declaration) string {
+			if fn.Receiver != "" {
+				return "func " + fn.Receiver + "." + fn.Signature
+			}
+			return "func " + fn.Signature
+		}
+
 		if len(funcs) > 0 {
 			fmt.Println("## Function symbols\n")
+
 			for _, fn := range funcs {
-				fmt.Println("-", "`"+fn.Signature+"`")
+				fmt.Printf("- `%s`\n", symbol(fn))
+			}
+			fmt.Println()
+
+			// Documented functions first.
+			for _, fn := range funcs {
+				if fn.Doc == "" {
+					continue
+				}
+
+				fmt.Printf("### %s\n\n", fn.Name)
+				fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
+				fmt.Println(strings.TrimSpace(fn.Doc))
+				fmt.Println()
+			}
+
+			// List undocumented ones.
+			for _, fn := range funcs {
+				if fn.Doc != "" {
+					continue
+				}
+
+				fmt.Printf("### %s\n\n", fn.Name)
+				fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
 			}
 			fmt.Println()
 		}
