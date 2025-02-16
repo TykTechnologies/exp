@@ -58,26 +58,26 @@ type Reseter interface {
 
 ### New
 
+New creates an Allocator for type T using the provided constructor.
+
 ```go
 func New (newFunc func() T) *Allocator[T]
 ```
 
-New creates an Allocator for type T using the provided constructor.
-
 ### Get
+
+Get retrieves an object from the internal pool.
 
 ```go
 func (*Allocator[T]) Get () T
 ```
 
-Get retrieves an object from the internal pool.
-
 ### Put
+
+Put returns an object to the pool after resetting it.
 
 ```go
 func (*Allocator[T]) Put (t T)
 ```
-
-Put returns an object to the pool after resetting it.
 
 
