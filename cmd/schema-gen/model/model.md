@@ -134,3 +134,56 @@ EnumInfo holds details about an enum definition.
 **Field: `doc` (`string`)**
 
 
+# JSONSchema
+
+**Field: `$schema` (`string`)**
+
+
+**Field: `$ref` (`string`)**
+
+
+**Field: `definitions` (`map[string]JSONSchema`)**
+
+
+**Field: `type` (`string`)**
+
+
+**Field: `format` (`string`)**
+
+
+**Field: `pattern` (`string`)**
+
+
+**Field: `properties` (`map[string]JSONSchema`)**
+
+
+**Field: `items` ([JSONSchema](#jsonschema))**
+
+
+**Field: `enum` (`[]any`)**
+
+
+**Field: `required` (`[]string`)**
+
+
+**Field: `description` (`string`)**
+
+
+**Field: `minimum` (`float64`)**
+
+
+**Field: `maximum` (`float64`)**
+
+
+**Field: `exclusiveMinimum` (`boolean`)**
+
+
+**Field: `exclusiveMaximum` (`boolean`)**
+
+
+**Field: `multipleOf` (`float64`)**
+
+
+**Field: `additionalProperties` (`any`)**
+
+

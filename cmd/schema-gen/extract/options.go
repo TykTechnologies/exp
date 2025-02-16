@@ -13,8 +13,8 @@ type options struct {
 	includeUnexported bool
 	includeFunctions  bool
 	includeTests      bool
-	includeInternal bool
-	ignoreFiles []string
+	includeInternal   bool
+	ignoreFiles       []string
 
 	prettyJSON bool
 }

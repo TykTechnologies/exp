@@ -7,16 +7,16 @@ import (
 )
 
 type options struct {
-	sourcePath string
-	rootType   string
-	outputFile string
+	sourcePath  string
+	rootType    string
+	outputFile  string
 	stripPrefix []string
 }
 
 func NewOptions() *options {
 	cfg := &options{
-		sourcePath: ".",
-		outputFile: "schema.json",
+		sourcePath:  ".",
+		outputFile:  "schema.json",
 		stripPrefix: []string{},
 	}
 

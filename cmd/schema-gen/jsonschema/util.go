@@ -7,8 +7,6 @@ import (
 	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 )
 
-
-
 func Title(s string) string {
 	if s == "" {
 		return s
@@ -17,9 +15,9 @@ func Title(s string) string {
 }
 
 func getRefName(baseType, pkgName string, stripPrefix []string) string {
-	pkg,refType:=getPkgAndBaseType(baseType,pkgName)
+	pkg, refType := getPkgAndBaseType(baseType, pkgName)
 	var refName string
-	if slices.Contains(stripPrefix, pkg)||pkg=="" {
+	if slices.Contains(stripPrefix, pkg) || pkg == "" {
 		refName = refType
 	} else {
 
@@ -53,7 +51,6 @@ func handleMapField(fieldType string, pkgInfo *model.PackageInfo, dependencies m
 		}
 	}
 }
-
 
 func getJSONType(goType string) *model.JSONSchema {
 	if goType == "[]byte" {
@@ -197,7 +194,6 @@ func getBaseType(fieldType string) string {
 	return baseType
 }
 
-
 func isCustomType(typeName string) bool {
 	if strings.HasPrefix(typeName, "map[") || typeName == "[]byte" {
 		return false
@@ -215,7 +211,6 @@ func isCustomType(typeName string) bool {
 	}
 	return true
 }
-
 
 func buildAliasMap(imports []string) map[string]string {
 	aliasMap := make(map[string]string)
@@ -251,22 +246,22 @@ func parseJSONTag(tagValue string) string {
 	return name
 }
 
-func convertQualifiedType(qType,pkgName string) (string,string) {
+func convertQualifiedType(qType, pkgName string) (string, string) {
 	parts := strings.SplitN(qType, ".", 2)
 	if len(parts) < 2 {
 		// Return the input unchanged if it isn't in the expected format.
-		return pkgName,qType
+		return pkgName, qType
 	}
 	pkg := parts[0]
-	typ :=parts[1]
+	typ := parts[1]
 	return pkg, typ
 }
 
 func getPkgAndBaseType(baseType, pkgName string) (string, string) {
 	if strings.Contains(baseType, ".") {
-		return convertQualifiedType(baseType,pkgName)
+		return convertQualifiedType(baseType, pkgName)
 	}
-	return pkgName,baseType
+	return pkgName, baseType
 }
 func qualifyTypeName(baseType, pkgAlias string) string {
 	if strings.Contains(baseType, ".") {

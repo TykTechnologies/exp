@@ -35,7 +35,6 @@ func ParseAndConvertStruct(cfg *options) error {
 		return fmt.Errorf("no package info extracted from %q", absDir)
 	}
 
-
 	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, cfg.rootType, NewDefaultConfig(), cfg.stripPrefix)
 
 	if err != nil {
@@ -134,8 +133,6 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if err != nil {
 		return fmt.Errorf("failed to load external package %q: %w", pkgPath, err)
 	}
-	extPkgInfo.Imports = append(extPkgInfo.Imports, `otelconfig "github.com/TykTechnologies/opentelemetry/config"`)
-	extPkgInfo.Imports=append(extPkgInfo.Imports,"github.com/TykTechnologies/tyk/internal/otel")
 	extAliasMap := buildAliasMap(extPkgInfo.Imports)
 	extAliasMap[extPkgInfo.Name] = pkgPath
 	var extType *model.TypeInfo
@@ -143,7 +140,7 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 		for _, t := range decl.Types {
 			if t.Name == typeName {
 				extType = t
-				if t.Type!=""&&t.Name!=t.Type&&isCustomType(t.Type) {
+				if t.Type != "" && t.Name != t.Type && isCustomType(t.Type) {
 					depQualified := qualifyTypeName(t.Type, pkgAlias)
 					if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited, stripPrefix); err != nil {
 						return err
@@ -158,7 +155,7 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	}
 	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}}, pkgAlias, stripPrefix)
 	if extSchema != nil {
-		definitions[getRefName(qualifiedType,pkgAlias,stripPrefix)] = extSchema
+		definitions[getRefName(qualifiedType, pkgAlias, stripPrefix)] = extSchema
 	}
 	for _, field := range extType.Fields {
 		baseType := getBaseType(field.Type)
@@ -223,7 +220,7 @@ func CollectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 					for _, decl := range pkgInfo.Declarations {
 						for _, depType := range decl.Types {
 							if depType.Name == baseType {
-								if depType.Type!=""&&depType.Name!=depType.Type {
+								if depType.Type != "" && depType.Name != depType.Type {
 									dependencies[depType.Type] = true
 								}
 								// This named type might be "[]CertData", "map[string]PortWhiteList", etc.
@@ -252,7 +249,7 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 					for _, decl := range pkgInfo.Declarations {
 						for _, depType := range decl.Types {
 							if depType.Name == elemType {
-								if depType.Type!=""&&depType.Name!=depType.Type {
+								if depType.Type != "" && depType.Name != depType.Type {
 									dependencies[depType.Type] = true
 								}
 								CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
@@ -285,7 +282,7 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 						for _, decl := range pkgInfo.Declarations {
 							for _, depType := range decl.Types {
 								if depType.Name == baseType {
-									if depType.Type!=""&&depType.Name!=depType.Type {
+									if depType.Type != "" && depType.Name != depType.Type {
 										dependencies[depType.Type] = true
 									}
 									CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
@@ -340,7 +337,7 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 		baseType := getBaseType(field.Type)
 		var fieldSchema *model.JSONSchema
 		if isCustomType(baseType) {
-			refName:=getRefName(baseType,pkgName,stripPrefix)
+			refName := getRefName(baseType, pkgName, stripPrefix)
 			if isArray {
 				fieldSchema = &model.JSONSchema{
 					Type: "array",
