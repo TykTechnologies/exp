@@ -26,7 +26,7 @@
 //	// doing things with value...
 //	repo.Put(value)
 //
-// ~~~
+// ```
 //
 // The type must implement a Reset() function. The reliance
 // on repo.Put could be dropped with a specialized API that
