@@ -1,4 +1,4 @@
-# Package github.com/TykTechnologies/exp/pkg/generics/allocator
+# Package TykTechnologies/exp/pkg/generics/allocator
 
 The allocator package handles two concerns related to allocations:
 

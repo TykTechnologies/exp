@@ -65,7 +65,7 @@ func docs(cfg *options) error {
 			funcs  = def.Funcs.Exported()
 		)
 
-		var packageName = def.Package.ImportPath
+		var packageName = strings.ReplaceAll(def.Package.ImportPath, "github.com/", "")
 
 		fmt.Println("# Package", packageName)
 		fmt.Println()
