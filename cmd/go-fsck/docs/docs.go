@@ -120,8 +120,8 @@ func docs(cfg *options) error {
 
 				fmt.Printf("### %s\n\n", fn.Name)
 				fmt.Println(strings.TrimSpace(fn.Doc))
-				fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
 				fmt.Println()
+				fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
 			}
 
 			// List undocumented ones.
