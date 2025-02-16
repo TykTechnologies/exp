@@ -1,0 +1,11 @@
+---
+issues:
+  safety:
+    - name: "Lack of type safety, issues if unchecked"
+      matches:
+        - match: 'any'
+        - match: '[]any'
+        - match: 'map[*]any'
+        - match: 'atomic.Value'
+        - match: 'sync.Map'
+        - match: 'sync.Pool'
