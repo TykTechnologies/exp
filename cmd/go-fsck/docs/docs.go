@@ -17,8 +17,14 @@ func getDefinitions(cfg *options) ([]*model.Definition, error) {
 		return defs, nil
 	}
 
+	packagePath := "./..."
+	if len(cfg.args) > 1 {
+		// [docs .]
+		packagePath = cfg.args[1]
+	}
+
 	// list current local packages
-	packages, err := internal.ListPackages(".", "./...")
+	packages, err := internal.ListPackages(".", packagePath)
 	if err != nil {
 		return nil, err
 	}
