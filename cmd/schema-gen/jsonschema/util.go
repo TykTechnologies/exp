@@ -1,6 +1,7 @@
 package jsonschema
 
 import (
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -271,4 +272,12 @@ func qualifyTypeName(baseType, pkgAlias string) string {
 		return baseType
 	}
 	return pkgAlias + "." + baseType
+}
+
+func normalizeSourcePath(sourcePath string) (string, error) {
+	absDir, err := filepath.Abs(sourcePath)
+	if err != nil {
+		return "", err
+	}
+	return absDir + "/", nil
 }

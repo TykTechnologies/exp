@@ -21,19 +21,19 @@ import (
 
 // ExtractOptions contains options for extraction
 type ExtractOptions struct {
-	includeFunctions  bool
-	includeTests      bool
-	includeUnexported bool
-	ignoreFiles       []string
+	IncludeFunctions  bool
+	IncludeTests      bool
+	IncludeUnexported bool
+	IgnoreFiles       []string
 	IncludeInternal   bool
 }
 
 func NewExtractOptions(cfg *options) *ExtractOptions {
 	return &ExtractOptions{
-		includeFunctions:  cfg.includeFunctions,
-		includeTests:      cfg.includeTests,
-		includeUnexported: cfg.includeUnexported,
-		ignoreFiles:       cfg.ignoreFiles,
+		IncludeFunctions:  cfg.includeFunctions,
+		IncludeTests:      cfg.includeTests,
+		IncludeUnexported: cfg.includeUnexported,
+		IgnoreFiles:       cfg.ignoreFiles,
 		IncludeInternal:   cfg.includeInternal,
 	}
 }
@@ -41,7 +41,7 @@ func NewExtractOptions(cfg *options) *ExtractOptions {
 // Extract package structs
 func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
 	var (
-		ignoreFiles = options.ignoreFiles
+		ignoreFiles = options.IgnoreFiles
 	)
 
 	ignoreList := make(map[string]bool)
@@ -56,7 +56,7 @@ func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
 		}
 
 		if strings.HasSuffix(fInfo.Name(), "_test.go") {
-			return options.includeTests
+			return options.IncludeTests
 		}
 
 		return true
@@ -162,11 +162,11 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 	for _, fileObj := range p.pkg.Files {
 		// https://pkg.go.dev/go/ast#File
 
-		if options.includeFunctions {
+		if options.IncludeFunctions {
 			ast.Inspect(fileObj, func(n ast.Node) (res bool) {
 				res = true
 				if fun, ok := n.(*ast.FuncDecl); ok {
-					if !fun.Name.IsExported() && !options.includeUnexported {
+					if !fun.Name.IsExported() && !options.IncludeUnexported {
 						return
 					}
 					if fun.Recv == nil || len(fun.Recv.List) == 0 {
@@ -242,7 +242,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 					typeInfo, err := NewTypeSpecInfo(obj)
 					if err != nil {
 						isUnexported := errors.Is(err, ErrUnexported)
-						if isUnexported && !options.includeUnexported {
+						if isUnexported && !options.IncludeUnexported {
 							continue
 						}
 					}
@@ -322,7 +322,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 		}
 	}
 
-	if options.includeFunctions {
+	if options.IncludeFunctions {
 		for _, funcInfo := range funcs {
 			for _, decl := range result.Declarations {
 				for _, typeDecl := range decl.Types {
@@ -423,7 +423,7 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, optio
 		}
 
 		isExported := ast.IsExported(fieldInfo.Name)
-		if !isExported && !options.includeUnexported {
+		if !isExported && !options.IncludeUnexported {
 			continue
 		}
 
