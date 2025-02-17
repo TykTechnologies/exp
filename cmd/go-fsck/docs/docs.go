@@ -2,6 +2,7 @@ package docs
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/TykTechnologies/exp/cmd/go-fsck/internal"
@@ -65,10 +66,17 @@ func docs(cfg *options) error {
 			funcs  = def.Funcs.Exported()
 		)
 
-		var packageName = strings.ReplaceAll(def.Package.ImportPath, "github.com/", "")
+		var packageName = def.Package.Path // strings.ReplaceAll(def.Package.ImportPath, "github.com/", "")
+		if packageName == "." {
+			packageName = path.Base(def.Package.ImportPath)
+		}
 
 		fmt.Println("# Package", packageName)
 		fmt.Println()
+		fmt.Println("```go")
+		fmt.Printf("import (\n\t\"%s\"\n}\n", def.Package.ImportPath)
+		fmt.Println("```\n")
+
 		if def.Doc != "" {
 			fmt.Println(strings.TrimSpace(def.Doc))
 			fmt.Println()
@@ -89,7 +97,7 @@ func docs(cfg *options) error {
 				fmt.Printf("```go\n%s\n```\n\n", src)
 			}
 		}
-		if len(consts) > 0 {
+		if len(vars) > 0 {
 			fmt.Println("## Vars\n")
 			for _, v := range vars {
 				src := strings.TrimSpace(v.Source)
@@ -105,35 +113,38 @@ func docs(cfg *options) error {
 		}
 
 		if len(funcs) > 0 {
-			fmt.Println("## Function symbols\n")
+			for {
+				fmt.Println("## Function symbols\n")
 
-			for _, fn := range funcs {
-				fmt.Printf("- `%s`\n", symbol(fn))
-			}
-			fmt.Println()
-
-			// Documented functions first.
-			for _, fn := range funcs {
-				if fn.Doc == "" {
-					continue
+				for _, fn := range funcs {
+					fmt.Printf("- `%s`\n", symbol(fn))
 				}
-
-				fmt.Printf("### %s\n\n", fn.Name)
-				fmt.Println(strings.TrimSpace(fn.Doc))
 				fmt.Println()
-				fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
-			}
 
-			// List undocumented ones.
-			for _, fn := range funcs {
-				if fn.Doc != "" {
-					continue
+				// Documented functions first.
+				for _, fn := range funcs {
+					if fn.Doc == "" {
+						continue
+					}
+
+					fmt.Printf("### %s\n\n", fn.Name)
+					fmt.Println(strings.TrimSpace(fn.Doc))
+					fmt.Println()
+					fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
 				}
 
-				fmt.Printf("### %s\n\n", fn.Name)
-				fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
+				// List undocumented ones.
+				for _, fn := range funcs {
+					if fn.Doc != "" {
+						continue
+					}
+
+					fmt.Printf("### %s\n\n", fn.Name)
+					fmt.Printf("```go\n%s\n```\n\n", symbol(fn))
+				}
+				fmt.Println()
+				break
 			}
-			fmt.Println()
 		}
 	}
 
