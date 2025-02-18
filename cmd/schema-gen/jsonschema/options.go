@@ -7,16 +7,17 @@ import (
 )
 
 type options struct {
-	sourcePath string
-	rootType   string
-	outputFile string
-	stripPrefix []string
+	sourcePath      string
+	rootType        string
+	outputFile      string
+	stripPrefix     []string
+	includeInternal bool
 }
 
 func NewOptions() *options {
 	cfg := &options{
-		sourcePath: ".",
-		outputFile: "schema.json",
+		sourcePath:  ".",
+		outputFile:  "schema.json",
 		stripPrefix: []string{},
 	}
 
@@ -24,6 +25,7 @@ func NewOptions() *options {
 	pflag.StringVarP(&cfg.rootType, "type", "t", cfg.rootType, "Root type to generate schema for (required)")
 	pflag.StringVarP(&cfg.outputFile, "out", "o", cfg.outputFile, "Output file name (optional)")
 	pflag.StringSliceVarP(&cfg.stripPrefix, "strip-prefix", "s", cfg.stripPrefix, "List of package prefixes to strip from definition names (optional)")
+	pflag.BoolVarP(&cfg.includeInternal, "include-internal", "n", cfg.includeInternal, "include internal packages")
 	pflag.Parse()
 
 	return cfg
