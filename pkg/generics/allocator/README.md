@@ -1,4 +1,4 @@
-# Package allocator
+# Package ./allocator
 
 ```go
 import (
