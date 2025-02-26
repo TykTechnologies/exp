@@ -46,6 +46,13 @@
         "Doc": "Reseter is the interface that types must implement to be managed by Allocator.",
         "Name": "Reseter",
         "Source": "// Reseter is the interface that types must implement to be managed by Allocator.\ntype Reseter interface {\n\tReset()\n}"
+      },
+      {
+        "Kind": "type",
+        "File": "internal.go",
+        "SelfContained": true,
+        "Name": "logger",
+        "Source": "type logger struct {\n\tout []string\n}"
       }
     ],
     "Consts": [
@@ -136,6 +143,18 @@
         ],
         "Signature": "Put (t T)",
         "Source": "// Put returns an object to the pool after resetting it.\nfunc (a *Allocator[T]) Put(t T) {\n\tt.Reset()\n\ta.pool.Put(t)\n}"
+      },
+      {
+        "Kind": "func",
+        "File": "internal.go",
+        "SelfContained": false,
+        "Name": "Log",
+        "Receiver": "*logger",
+        "Arguments": [
+          "string"
+        ],
+        "Signature": "Log (s string)",
+        "Source": "func (l *logger) Log(s string) {\n\tl.out = append(l.out, s)\n}"
       }
     ]
   },

@@ -45,6 +45,10 @@ func (d *Declaration) HasName(find string) bool {
 }
 
 func (d *Declaration) IsExported() bool {
+	if d.Receiver != "" && !ast.IsExported(strings.TrimLeft(d.Receiver, "*")) {
+		return false
+	}
+
 	for _, name := range d.Names {
 		if ast.IsExported(name) {
 			return true
