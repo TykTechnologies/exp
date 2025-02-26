@@ -16,17 +16,18 @@ import (
 
 // ParseAndConvertStruct parses the given repo directory for Go structs and
 // converts the specified rootType to JSON Schema, writing the result to "schema.json".
-func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []string) error {
-	if outFile == "" {
-		outFile = "schema.json"
+
+func ParseAndConvertStruct(cfg *options) error {
+	if cfg.outputFile == "" {
+		cfg.outputFile = "schema.json"
 	}
 
-	absDir, err := filepath.Abs(repoDir)
+	absDir, err := normalizeSourcePath(cfg.sourcePath)
 	if err != nil {
 		return err
 	}
 
-	pkgInfos, err := extract.Extract(absDir+"/", &extract.ExtractOptions{})
+	pkgInfos, err := extract.Extract(absDir, &model.ExtractOptions{IncludeInternal: cfg.includeInternal})
 	if err != nil {
 		return err
 	}
@@ -34,7 +35,8 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []stri
 		return fmt.Errorf("no package info extracted from %q", absDir)
 	}
 
-	schema, err := ConvertToJSONSchema(pkgInfos[0], absDir, rootType, NewDefaultConfig(), stripPrefix)
+	schema, err := ConvertToJSONSchema(pkgInfos[0], NewDefaultConfig(), cfg)
+
 	if err != nil {
 		return err
 	}
@@ -43,7 +45,7 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []stri
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(outFile, jsonBytes, 0o644); err != nil {
+	if err := os.WriteFile(cfg.outputFile, jsonBytes, 0o644); err != nil {
 		return err
 	}
 
@@ -51,7 +53,7 @@ func ParseAndConvertStruct(repoDir, rootType, outFile string, stripPrefix []stri
 }
 
 // ConvertToJSONSchema converts PackageInfo to JSON Schema with only the root type and its (internal and external) dependencies.
-func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, config *RequiredFieldsConfig, stripPrefix []string) (*model.JSONSchema, error) {
+func ConvertToJSONSchema(pkgInfo *model.PackageInfo, config *RequiredFieldsConfig, cfg *options) (*model.JSONSchema, error) {
 	rootSchema := &model.JSONSchema{
 		Schema:      "http://json-schema.org/draft-07/schema#",
 		Definitions: make(map[string]*model.JSONSchema),
@@ -60,7 +62,6 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 
 	// We'll store discovered dependencies in this map
 	dependencies := make(map[string]bool)
-
 	// Build an alias mapping from the root package's imports
 	aliasMap := buildAliasMap(pkgInfo.Imports)
 
@@ -68,7 +69,7 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 	var rootTypeInfo *model.TypeInfo
 	for _, decl := range pkgInfo.Declarations {
 		for _, typ := range decl.Types {
-			if typ.Name == rootType {
+			if typ.Name == cfg.rootType {
 				rootTypeInfo = typ
 				CollectDependencies(typ, pkgInfo, dependencies)
 				break
@@ -76,17 +77,17 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 		}
 	}
 	if rootTypeInfo == nil {
-		return nil, fmt.Errorf("root type %q not found in package", rootType)
+		return nil, fmt.Errorf("root type %q not found in package", cfg.rootType)
 	}
 
 	// Process internal types (no dot in their name) to generate JSON Schema definitions
 	for _, decl := range pkgInfo.Declarations {
 		for _, typ := range decl.Types {
 			// If the type is either the rootType or a discovered dependency
-			if typ.Name == rootType || dependencies[typ.Name] {
+			if typ.Name == cfg.rootType || dependencies[typ.Name] {
 				// Only handle if it's an internal type (no dot in the name)
 				if !strings.Contains(typ.Name, ".") {
-					schema := generateTypeSchema(typ, config, "", stripPrefix)
+					schema := generateTypeSchema(typ, config, "", cfg.stripPrefix)
 					if schema != nil {
 						// Store it in the definitions map
 						definitions[typ.Name] = schema
@@ -100,19 +101,19 @@ func ConvertToJSONSchema(pkgInfo *model.PackageInfo, repoDir, rootType string, c
 	visited := make(map[string]bool)
 	for dep := range dependencies {
 		if strings.Contains(dep, ".") {
-			if err := ProcessExternalType(dep, repoDir, aliasMap, definitions, visited, stripPrefix); err != nil {
+			if err := ProcessExternalType(dep, aliasMap, definitions, visited, cfg); err != nil {
 				fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 			}
 		}
 	}
 
-	rootSchema.Ref = "#/definitions/" + rootType
+	rootSchema.Ref = "#/definitions/" + cfg.rootType
 	return rootSchema, nil
 }
 
 // ProcessExternalType loads an external package for a qualified type (e.g. "model.Inner"),
 // generates its JSON Schema definition, and then recursively processes its custom fields.
-func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]string, definitions map[string]*model.JSONSchema, visited map[string]bool, stripPrefix []string) error {
+func ProcessExternalType(qualifiedType string, aliasMap map[string]string, definitions map[string]*model.JSONSchema, visited map[string]bool, cfg *options) error {
 	if visited[qualifiedType] {
 		return nil
 	}
@@ -128,7 +129,11 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if !ok {
 		return fmt.Errorf("alias %q not found in alias map", pkgAlias)
 	}
-	extPkgInfo, err := LoadExternalPackage(pkgPath, repoDir)
+	absDir, err := normalizeSourcePath(cfg.sourcePath)
+	if err != nil {
+		return err
+	}
+	extPkgInfo, err := LoadExternalPackage(pkgPath, absDir, cfg.includeInternal)
 	if err != nil {
 		return fmt.Errorf("failed to load external package %q: %w", pkgPath, err)
 	}
@@ -139,6 +144,17 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 		for _, t := range decl.Types {
 			if t.Name == typeName {
 				extType = t
+				if t.Type != "" && t.Name != t.Type && isCustomType(t.Type) {
+					depQualified := qualifyTypeName(t.Type, pkgAlias)
+					if shouldAddPreviousImports(t.Type, pkgAlias, extAliasMap) {
+						if value, exists := aliasMap[pkgAlias]; exists {
+							extAliasMap[pkgAlias] = value
+						}
+					}
+					if err := ProcessExternalType(depQualified, extAliasMap, definitions, visited, cfg); err != nil {
+						return err
+					}
+				}
 				break
 			}
 		}
@@ -146,15 +162,20 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 	if extType == nil {
 		return fmt.Errorf("type %q not found in external package %q", typeName, pkgPath)
 	}
-	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}}, pkgAlias, stripPrefix)
+	extSchema := generateTypeSchema(extType, &RequiredFieldsConfig{Fields: map[string][]string{}}, pkgAlias, cfg.stripPrefix)
 	if extSchema != nil {
-		definitions[getRefName(qualifiedType,pkgAlias,stripPrefix)] = extSchema
+		definitions[getRefName(qualifiedType, pkgAlias, cfg.stripPrefix)] = extSchema
 	}
 	for _, field := range extType.Fields {
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
+			if shouldAddPreviousImports(baseType, pkgAlias, extAliasMap) {
+				if value, exists := aliasMap[pkgAlias]; exists {
+					extAliasMap[pkgAlias] = value
+				}
+			}
 			depQualified := qualifyTypeName(baseType, pkgAlias)
-			if err := ProcessExternalType(depQualified, repoDir, extAliasMap, definitions, visited, stripPrefix); err != nil {
+			if err := ProcessExternalType(depQualified, extAliasMap, definitions, visited, cfg); err != nil {
 				return err
 			}
 		}
@@ -164,7 +185,7 @@ func ProcessExternalType(qualifiedType, repoDir string, aliasMap map[string]stri
 
 // LoadExternalPackage uses golang.org/x/tools/go/packages to load a package from its import path
 // and then runs the extraction process on it.
-func LoadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
+func LoadExternalPackage(pkgPath, repoDir string, includeInternal bool) (*model.PackageInfo, error) {
 	absDir, err := filepath.Abs(repoDir)
 	if err != nil {
 		log.Fatalf("Failed to get absolute path: %v", err)
@@ -185,7 +206,7 @@ func LoadExternalPackage(pkgPath, repoDir string) (*model.PackageInfo, error) {
 	}
 
 	pkgDir := filepath.Dir(pkgs[0].GoFiles[0])
-	pkgInfos, err := extract.Extract(pkgDir+"/", &extract.ExtractOptions{})
+	pkgInfos, err := extract.Extract(pkgDir+"/", &model.ExtractOptions{IncludeInternal: includeInternal})
 	if err != nil {
 		return nil, err
 	}
@@ -213,6 +234,9 @@ func CollectDependencies(typeInfo *model.TypeInfo, pkgInfo *model.PackageInfo, d
 					for _, decl := range pkgInfo.Declarations {
 						for _, depType := range decl.Types {
 							if depType.Name == baseType {
+								if depType.Type != "" && depType.Name != depType.Type {
+									dependencies[depType.Type] = true
+								}
 								// This named type might be "[]CertData", "map[string]PortWhiteList", etc.
 								CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 							}
@@ -239,6 +263,9 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 					for _, decl := range pkgInfo.Declarations {
 						for _, depType := range decl.Types {
 							if depType.Name == elemType {
+								if depType.Type != "" && depType.Name != depType.Type {
+									dependencies[depType.Type] = true
+								}
 								CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 							}
 						}
@@ -269,6 +296,9 @@ func CollectTypeDefinitionDeps(typeInfo *model.TypeInfo, pkgInfo *model.PackageI
 						for _, decl := range pkgInfo.Declarations {
 							for _, depType := range decl.Types {
 								if depType.Name == baseType {
+									if depType.Type != "" && depType.Name != depType.Type {
+										dependencies[depType.Type] = true
+									}
 									CollectTypeDefinitionDeps(depType, pkgInfo, dependencies)
 								}
 							}
@@ -321,7 +351,7 @@ func GenerateStructSchema(typeInfo *model.TypeInfo, config *RequiredFieldsConfig
 		baseType := getBaseType(field.Type)
 		var fieldSchema *model.JSONSchema
 		if isCustomType(baseType) {
-			refName:=getRefName(baseType,pkgName,stripPrefix)
+			refName := getRefName(baseType, pkgName, stripPrefix)
 			if isArray {
 				fieldSchema = &model.JSONSchema{
 					Type: "array",
@@ -428,8 +458,8 @@ type RequiredFieldsConfig struct {
 func NewDefaultConfig() *RequiredFieldsConfig {
 	return &RequiredFieldsConfig{
 		Fields: map[string][]string{
-			"User":  {"ID", "Name"}, // Only ID and Name are required for User
-			"Inner": {"Name"},
+			//"User":  {"ID", "Name"}, // Only ID and Name are required for User
+			//"Inner": {"Name"},
 		},
 	}
 }
@@ -450,6 +480,10 @@ func generateTypeSchema(typ *model.TypeInfo, config *RequiredFieldsConfig, pkgNa
 
 	case !isCustomType(typ.Type):
 		return &model.JSONSchema{Type: getBaseJSONType(typ.Type)}
+
+	case typ.Name != typ.Type && len(typ.Fields) == 0:
+		refName := getRefName(typ.Type, pkgName, stripPrefix)
+		return &model.JSONSchema{Ref: "#/definitions/" + refName}
 
 	default:
 		log.Printf("Skipping type %q with underlying type %q\n", typ.Name, typ.Type)

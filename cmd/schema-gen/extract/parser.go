@@ -16,30 +16,23 @@ import (
 
 	"golang.org/x/exp/slices"
 
-	. "github.com/TykTechnologies/exp/cmd/schema-gen/model"
+	"github.com/TykTechnologies/exp/cmd/schema-gen/model"
 )
 
-// ExtractOptions contains options for extraction
-type ExtractOptions struct {
-	includeFunctions  bool
-	includeTests      bool
-	includeUnexported bool
-	ignoreFiles       []string
-}
-
-func NewExtractOptions(cfg *options) *ExtractOptions {
-	return &ExtractOptions{
-		includeFunctions:  cfg.includeFunctions,
-		includeTests:      cfg.includeTests,
-		includeUnexported: cfg.includeUnexported,
-		ignoreFiles:       cfg.ignoreFiles,
+func NewExtractOptions(cfg *options) *model.ExtractOptions {
+	return &model.ExtractOptions{
+		IncludeFunctions:  cfg.includeFunctions,
+		IncludeTests:      cfg.includeTests,
+		IncludeUnexported: cfg.includeUnexported,
+		IgnoreFiles:       cfg.ignoreFiles,
+		IncludeInternal:   cfg.includeInternal,
 	}
 }
 
 // Extract package structs
-func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
+func Extract(filepath string, options *model.ExtractOptions) ([]*model.PackageInfo, error) {
 	var (
-		ignoreFiles = options.ignoreFiles
+		ignoreFiles = options.IgnoreFiles
 	)
 
 	ignoreList := make(map[string]bool)
@@ -54,7 +47,7 @@ func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
 		}
 
 		if strings.HasSuffix(fInfo.Name(), "_test.go") {
-			return options.includeTests
+			return options.IncludeTests
 		}
 
 		return true
@@ -66,7 +59,7 @@ func Extract(filepath string, options *ExtractOptions) ([]*PackageInfo, error) {
 		return nil, err
 	}
 
-	result := make([]*PackageInfo, 0, len(pkgs))
+	result := make([]*model.PackageInfo, 0, len(pkgs))
 	for pkgName, pkg := range pkgs {
 		p := NewParser(fileSet, pkg)
 		pkgInfo, err := p.GetDeclarations(options)
@@ -147,29 +140,29 @@ func (p *objParser) functionDef(fun *ast.FuncDecl) string {
 }
 
 // GetDeclaration returns a filled out PackageInfo{} and an error if any.
-func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, error) {
+func (p *objParser) GetDeclarations(options *model.ExtractOptions) (*model.PackageInfo, error) {
 	var err error
-	result := &PackageInfo{
-		Declarations: DeclarationList{},
+	result := &model.PackageInfo{
+		Declarations: model.DeclarationList{},
 		Imports:      []string{},
 	}
 
-	var funcs []*FuncInfo
-	var globalFuncs []*FuncInfo
+	var funcs []*model.FuncInfo
+	var globalFuncs []*model.FuncInfo
 
 	for _, fileObj := range p.pkg.Files {
 		// https://pkg.go.dev/go/ast#File
 
-		if options.includeFunctions {
+		if options.IncludeFunctions {
 			ast.Inspect(fileObj, func(n ast.Node) (res bool) {
 				res = true
 				if fun, ok := n.(*ast.FuncDecl); ok {
-					if !fun.Name.IsExported() && !options.includeUnexported {
+					if !fun.Name.IsExported() && !options.IncludeUnexported {
 						return
 					}
 					if fun.Recv == nil || len(fun.Recv.List) == 0 {
 						name := getTypeDeclaration(fun.Name)
-						funcinfo := &FuncInfo{
+						funcinfo := &model.FuncInfo{
 							Name:      name,
 							Doc:       TrimSpace(fun.Doc),
 							Path:      name,
@@ -186,7 +179,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 						recvType := getTypeDeclaration(fun.Recv.List[0].Names[0]) + " " + getTypeDeclarationsForPointerType(r)
 						signature := p.functionDef(fun)
 						goPath := r.X.(*ast.Ident).Name
-						funcinfo := &FuncInfo{
+						funcinfo := &model.FuncInfo{
 							Name:      getTypeDeclaration(fun.Name),
 							Doc:       TrimSpace(fun.Doc),
 							Type:      recvType,
@@ -212,7 +205,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				importLiteral = alias + " " + importLiteral
 			}
 
-			if !strings.Contains(importLiteral, "/internal") {
+			if !strings.Contains(importLiteral, "/internal") || options.IncludeInternal {
 				if slices.Contains(result.Imports, importLiteral) {
 					continue
 				}
@@ -227,10 +220,10 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				continue
 			}
 
-			info := &DeclarationInfo{
+			info := &model.DeclarationInfo{
 				Doc:     TrimSpace(genDecl.Doc),
 				FileDoc: TrimSpace(fileObj.Doc),
-				Types:   TypeList{},
+				Types:   model.TypeList{},
 			}
 
 			for _, spec := range genDecl.Specs {
@@ -239,8 +232,8 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 				case *ast.TypeSpec:
 					typeInfo, err := NewTypeSpecInfo(obj)
 					if err != nil {
-						isUnexported := errors.Is(err, ErrUnexported)
-						if isUnexported && !options.includeUnexported {
+						isUnexported := errors.Is(err, model.ErrUnexported)
+						if isUnexported && !options.IncludeUnexported {
 							continue
 						}
 					}
@@ -280,7 +273,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 					}
 
 					for i, name := range obj.Names {
-						enumValue := &EnumInfo{
+						enumValue := &model.EnumInfo{
 							Name:  name.Name,
 							Doc:   TrimSpace(obj.Doc),
 							Value: currentValue,
@@ -320,7 +313,7 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 		}
 	}
 
-	if options.includeFunctions {
+	if options.IncludeFunctions {
 		for _, funcInfo := range funcs {
 			for _, decl := range result.Declarations {
 				for _, typeDecl := range decl.Types {
@@ -344,12 +337,12 @@ func (p *objParser) GetDeclarations(options *ExtractOptions) (*PackageInfo, erro
 // The function returns the struct info and ErrUnexported if
 // the struct is not exported. This error is handled outside
 // to skip documenting unexported types.
-func NewTypeSpecInfo(from *ast.TypeSpec) (*TypeInfo, error) {
-	info := &TypeInfo{
+func NewTypeSpecInfo(from *ast.TypeSpec) (*model.TypeInfo, error) {
+	info := &model.TypeInfo{
 		Name:    getTypeDeclaration(from.Name),
 		Doc:     TrimSpace(from.Doc),
 		Comment: TrimSpace(from.Comment),
-		Enums:   []*EnumInfo{},
+		Enums:   []*model.EnumInfo{},
 	}
 
 	structObj, ok := from.Type.(*ast.StructType)
@@ -360,12 +353,12 @@ func NewTypeSpecInfo(from *ast.TypeSpec) (*TypeInfo, error) {
 	}
 
 	if !ast.IsExported(info.Name) {
-		return info, ErrUnexported
+		return info, model.ErrUnexported
 	}
 	return info, nil
 }
 
-func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, options *ExtractOptions) {
+func (p *objParser) parseStruct(goPath, name string, structInfo *model.TypeInfo, options *model.ExtractOptions) {
 	if structInfo.StructObj == nil {
 		return
 	}
@@ -408,7 +401,7 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, optio
 			}
 		}
 
-		fieldInfo := &FieldInfo{
+		fieldInfo := &model.FieldInfo{
 			Doc:     TrimSpace(field.Doc),
 			Comment: TrimSpace(field.Comment),
 
@@ -421,7 +414,7 @@ func (p *objParser) parseStruct(goPath, name string, structInfo *TypeInfo, optio
 		}
 
 		isExported := ast.IsExported(fieldInfo.Name)
-		if !isExported && !options.includeUnexported {
+		if !isExported && !options.IncludeUnexported {
 			continue
 		}
 
