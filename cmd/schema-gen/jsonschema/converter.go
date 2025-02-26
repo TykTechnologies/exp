@@ -27,7 +27,7 @@ func ParseAndConvertStruct(cfg *options) error {
 		return err
 	}
 
-	pkgInfos, err := extract.Extract(absDir, &extract.ExtractOptions{IncludeInternal: cfg.includeInternal})
+	pkgInfos, err := extract.Extract(absDir, &model.ExtractOptions{IncludeInternal: cfg.includeInternal})
 	if err != nil {
 		return err
 	}
@@ -206,7 +206,7 @@ func LoadExternalPackage(pkgPath, repoDir string, includeInternal bool) (*model.
 	}
 
 	pkgDir := filepath.Dir(pkgs[0].GoFiles[0])
-	pkgInfos, err := extract.Extract(pkgDir+"/", &extract.ExtractOptions{IncludeInternal: includeInternal})
+	pkgInfos, err := extract.Extract(pkgDir+"/", &model.ExtractOptions{IncludeInternal: includeInternal})
 	if err != nil {
 		return nil, err
 	}
@@ -458,8 +458,8 @@ type RequiredFieldsConfig struct {
 func NewDefaultConfig() *RequiredFieldsConfig {
 	return &RequiredFieldsConfig{
 		Fields: map[string][]string{
-			"User":  {"ID", "Name"}, // Only ID and Name are required for User
-			"Inner": {"Name"},
+			//"User":  {"ID", "Name"}, // Only ID and Name are required for User
+			//"Inner": {"Name"},
 		},
 	}
 }
