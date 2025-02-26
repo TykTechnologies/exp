@@ -21,6 +21,7 @@ tasks:
     desc: "Build example"
     cmds:
       - go-fsck extract --verbose --include-tests --include-sources -i example/ -o example/go-fsck.json --pretty-json
+      - cd example && go-fsck docs > README.md && cd ..
 
   restore:
     desc: "Restore from model"

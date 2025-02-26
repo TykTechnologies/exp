@@ -131,6 +131,9 @@
         "References": {
           "ast": [
             "IsExported"
+          ],
+          "strings": [
+            "TrimLeft"
           ]
         },
         "Name": "IsExported",
@@ -139,7 +142,7 @@
           "bool"
         ],
         "Signature": "IsExported () bool",
-        "Source": "func (d *Declaration) IsExported() bool {\n\tfor _, name := range d.Names {\n\t\tif ast.IsExported(name) {\n\t\t\treturn true\n\t\t}\n\t}\n\treturn ast.IsExported(d.Name)\n}"
+        "Source": "func (d *Declaration) IsExported() bool {\n\tif d.Receiver != \"\" \u0026\u0026 !ast.IsExported(strings.TrimLeft(d.Receiver, \"*\")) {\n\t\treturn false\n\t}\n\n\tfor _, name := range d.Names {\n\t\tif ast.IsExported(name) {\n\t\t\treturn true\n\t\t}\n\t}\n\treturn ast.IsExported(d.Name)\n}"
       },
       {
         "Kind": "func",
