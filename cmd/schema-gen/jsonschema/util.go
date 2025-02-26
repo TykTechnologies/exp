@@ -264,6 +264,12 @@ func getPkgAndBaseType(baseType, pkgName string) (string, string) {
 	}
 	return pkgName, baseType
 }
+
+func shouldAddPreviousImports(baseType, pkgAlias string, aliasMap map[string]string) bool {
+	_, exists := aliasMap[pkgAlias]
+	return !strings.Contains(baseType, ".") && !exists
+}
+
 func qualifyTypeName(baseType, pkgAlias string) string {
 	if strings.Contains(baseType, ".") {
 		return baseType
