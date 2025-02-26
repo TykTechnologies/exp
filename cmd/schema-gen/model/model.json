@@ -13,134 +13,6 @@
     ],
     "declarations": [
       {
-        "types": [
-          {
-            "name": "JSONSchema",
-            "fields": [
-              {
-                "name": "Schema",
-                "type": "string",
-                "path": "JSONSchema.Schema",
-                "tag": "json:\"$schema,omitempty\"",
-                "json_name": "$schema,omitempty"
-              },
-              {
-                "name": "Ref",
-                "type": "string",
-                "path": "JSONSchema.Ref",
-                "tag": "json:\"$ref,omitempty\"",
-                "json_name": "$ref,omitempty"
-              },
-              {
-                "name": "Definitions",
-                "type": "map[string]JSONSchema",
-                "path": "JSONSchema.Definitions",
-                "tag": "json:\"definitions,omitempty\"",
-                "json_name": "definitions,omitempty"
-              },
-              {
-                "name": "Type",
-                "type": "string",
-                "path": "JSONSchema.Type",
-                "tag": "json:\"type,omitempty\"",
-                "json_name": "type,omitempty"
-              },
-              {
-                "name": "Format",
-                "type": "string",
-                "path": "JSONSchema.Format",
-                "tag": "json:\"format,omitempty\"",
-                "json_name": "format,omitempty"
-              },
-              {
-                "name": "Pattern",
-                "type": "string",
-                "path": "JSONSchema.Pattern",
-                "tag": "json:\"pattern,omitempty\"",
-                "json_name": "pattern,omitempty"
-              },
-              {
-                "name": "Properties",
-                "type": "map[string]JSONSchema",
-                "path": "JSONSchema.Properties",
-                "tag": "json:\"properties,omitempty\"",
-                "json_name": "properties,omitempty"
-              },
-              {
-                "name": "Items",
-                "type": "JSONSchema",
-                "path": "JSONSchema.Items",
-                "tag": "json:\"items,omitempty\"",
-                "json_name": "items,omitempty"
-              },
-              {
-                "name": "Enum",
-                "type": "[]any",
-                "path": "JSONSchema.Enum",
-                "tag": "json:\"enum,omitempty\"",
-                "json_name": "enum,omitempty"
-              },
-              {
-                "name": "Required",
-                "type": "[]string",
-                "path": "JSONSchema.Required",
-                "tag": "json:\"required,omitempty\"",
-                "json_name": "required,omitempty"
-              },
-              {
-                "name": "Description",
-                "type": "string",
-                "path": "JSONSchema.Description",
-                "tag": "json:\"description,omitempty\"",
-                "json_name": "description,omitempty"
-              },
-              {
-                "name": "Minimum",
-                "type": "float64",
-                "path": "JSONSchema.Minimum",
-                "tag": "json:\"minimum,omitempty\"",
-                "json_name": "minimum,omitempty"
-              },
-              {
-                "name": "Maximum",
-                "type": "float64",
-                "path": "JSONSchema.Maximum",
-                "tag": "json:\"maximum,omitempty\"",
-                "json_name": "maximum,omitempty"
-              },
-              {
-                "name": "ExclusiveMinimum",
-                "type": "bool",
-                "path": "JSONSchema.ExclusiveMinimum",
-                "tag": "json:\"exclusiveMinimum,omitempty\"",
-                "json_name": "exclusiveMinimum,omitempty"
-              },
-              {
-                "name": "ExclusiveMaximum",
-                "type": "bool",
-                "path": "JSONSchema.ExclusiveMaximum",
-                "tag": "json:\"exclusiveMaximum,omitempty\"",
-                "json_name": "exclusiveMaximum,omitempty"
-              },
-              {
-                "name": "MultipleOf",
-                "type": "float64",
-                "path": "JSONSchema.MultipleOf",
-                "tag": "json:\"multipleOf,omitempty\"",
-                "json_name": "multipleOf,omitempty"
-              },
-              {
-                "name": "AdditionalProperties",
-                "type": "any",
-                "path": "JSONSchema.AdditionalProperties",
-                "tag": "json:\"additionalProperties,omitempty\"",
-                "json_name": "additionalProperties,omitempty"
-              }
-            ]
-          }
-        ]
-      },
-      {
         "doc": "DeclarationInfo holds the declarations block for an exposed value or type.",
         "types": [
           {
@@ -227,6 +99,51 @@
                 "path": "EnumInfo.Doc",
                 "tag": "json:\"doc,omitempty\"",
                 "json_name": "doc,omitempty"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "ExtractOptions contains options for extraction",
+        "types": [
+          {
+            "name": "ExtractOptions",
+            "fields": [
+              {
+                "name": "IncludeFunctions",
+                "type": "bool",
+                "path": "ExtractOptions.IncludeFunctions",
+                "tag": "",
+                "json_name": "IncludeFunctions"
+              },
+              {
+                "name": "IncludeTests",
+                "type": "bool",
+                "path": "ExtractOptions.IncludeTests",
+                "tag": "",
+                "json_name": "IncludeTests"
+              },
+              {
+                "name": "IncludeUnexported",
+                "type": "bool",
+                "path": "ExtractOptions.IncludeUnexported",
+                "tag": "",
+                "json_name": "IncludeUnexported"
+              },
+              {
+                "name": "IgnoreFiles",
+                "type": "[]string",
+                "path": "ExtractOptions.IgnoreFiles",
+                "tag": "",
+                "json_name": "IgnoreFiles"
+              },
+              {
+                "name": "IncludeInternal",
+                "type": "bool",
+                "path": "ExtractOptions.IncludeInternal",
+                "tag": "",
+                "json_name": "IncludeInternal"
               }
             ]
           }
@@ -368,6 +285,152 @@
                 "doc": "Source is a 1-1 source code for the function.",
                 "tag": "json:\"source\"",
                 "json_name": "source"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "doc": "JSONSchema represents a JSON Schema document according to the draft-07 specification.\nIt includes standard fields used to define types, formats, validations.",
+        "types": [
+          {
+            "name": "JSONSchema",
+            "fields": [
+              {
+                "name": "Schema",
+                "type": "string",
+                "path": "JSONSchema.Schema",
+                "doc": "Schema specifies the JSON Schema version URL.\nExample: \"http://json-schema.org/draft-07/schema#\"",
+                "tag": "json:\"$schema,omitempty\"",
+                "json_name": "$schema,omitempty"
+              },
+              {
+                "name": "Ref",
+                "type": "string",
+                "path": "JSONSchema.Ref",
+                "doc": "Ref is used to reference another schema definition.\nExample: \"#/definitions/SomeType\"",
+                "tag": "json:\"$ref,omitempty\"",
+                "json_name": "$ref,omitempty"
+              },
+              {
+                "name": "Definitions",
+                "type": "map[string]JSONSchema",
+                "path": "JSONSchema.Definitions",
+                "doc": "Definitions contains subSchema definitions that can be referenced by $ref.",
+                "tag": "json:\"definitions,omitempty\"",
+                "json_name": "definitions,omitempty"
+              },
+              {
+                "name": "Type",
+                "type": "string",
+                "path": "JSONSchema.Type",
+                "doc": "Type indicates the JSON type of the instance (e.g., \"object\", \"array\", \"string\").",
+                "tag": "json:\"type,omitempty\"",
+                "json_name": "type,omitempty"
+              },
+              {
+                "name": "Format",
+                "type": "string",
+                "path": "JSONSchema.Format",
+                "doc": "Format provides additional semantic validation for the instance.\nCommon formats include \"date-time\", \"email\", etc.",
+                "tag": "json:\"format,omitempty\"",
+                "json_name": "format,omitempty"
+              },
+              {
+                "name": "Pattern",
+                "type": "string",
+                "path": "JSONSchema.Pattern",
+                "doc": "Pattern defines a regular expression that a string value must match",
+                "tag": "json:\"pattern,omitempty\"",
+                "json_name": "pattern,omitempty"
+              },
+              {
+                "name": "Properties",
+                "type": "map[string]JSONSchema",
+                "path": "JSONSchema.Properties",
+                "doc": "Properties defines the fields of an object and their corresponding schemas",
+                "tag": "json:\"properties,omitempty\"",
+                "json_name": "properties,omitempty"
+              },
+              {
+                "name": "Items",
+                "type": "JSONSchema",
+                "path": "JSONSchema.Items",
+                "doc": "Items defines the schema for array elements",
+                "tag": "json:\"items,omitempty\"",
+                "json_name": "items,omitempty"
+              },
+              {
+                "name": "Enum",
+                "type": "[]any",
+                "path": "JSONSchema.Enum",
+                "doc": "Enum restricts a value to a fixed set of values",
+                "tag": "json:\"enum,omitempty\"",
+                "json_name": "enum,omitempty"
+              },
+              {
+                "name": "Required",
+                "type": "[]string",
+                "path": "JSONSchema.Required",
+                "doc": "Required lists the properties that must be present in an object",
+                "tag": "json:\"required,omitempty\"",
+                "json_name": "required,omitempty"
+              },
+              {
+                "name": "Description",
+                "type": "string",
+                "path": "JSONSchema.Description",
+                "doc": "Description provides a human-readable explanation of the schema.",
+                "tag": "json:\"description,omitempty\"",
+                "json_name": "description,omitempty"
+              },
+              {
+                "name": "Minimum",
+                "type": "float64",
+                "path": "JSONSchema.Minimum",
+                "doc": "Minimum specifies the minimum numeric value allowed.",
+                "tag": "json:\"minimum,omitempty\"",
+                "json_name": "minimum,omitempty"
+              },
+              {
+                "name": "Maximum",
+                "type": "float64",
+                "path": "JSONSchema.Maximum",
+                "doc": "Maximum specifies the maximum numeric value allowed.",
+                "tag": "json:\"maximum,omitempty\"",
+                "json_name": "maximum,omitempty"
+              },
+              {
+                "name": "ExclusiveMinimum",
+                "type": "bool",
+                "path": "JSONSchema.ExclusiveMinimum",
+                "doc": "ExclusiveMinimum, if true, requires the instance to be greater than (not equal to) Minimum.",
+                "tag": "json:\"exclusiveMinimum,omitempty\"",
+                "json_name": "exclusiveMinimum,omitempty"
+              },
+              {
+                "name": "ExclusiveMaximum",
+                "type": "bool",
+                "path": "JSONSchema.ExclusiveMaximum",
+                "doc": "ExclusiveMaximum, if true, requires the instance to be less than (not equal to) Maximum.",
+                "tag": "json:\"exclusiveMaximum,omitempty\"",
+                "json_name": "exclusiveMaximum,omitempty"
+              },
+              {
+                "name": "MultipleOf",
+                "type": "float64",
+                "path": "JSONSchema.MultipleOf",
+                "doc": "MultipleOf indicates that the numeric instance must be a multiple of this value.",
+                "tag": "json:\"multipleOf,omitempty\"",
+                "json_name": "multipleOf,omitempty"
+              },
+              {
+                "name": "AdditionalProperties",
+                "type": "any",
+                "path": "JSONSchema.AdditionalProperties",
+                "doc": "AdditionalProperties controls whether an object can have properties beyond those defined\nCan be a boolean or a schema that additional properties must conform to",
+                "tag": "json:\"additionalProperties,omitempty\"",
+                "json_name": "additionalProperties,omitempty"
               }
             ]
           }

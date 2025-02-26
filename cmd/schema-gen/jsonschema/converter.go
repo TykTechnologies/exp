@@ -146,7 +146,7 @@ func ProcessExternalType(qualifiedType string, aliasMap map[string]string, defin
 				extType = t
 				if t.Type != "" && t.Name != t.Type && isCustomType(t.Type) {
 					depQualified := qualifyTypeName(t.Type, pkgAlias)
-					if shouldAddPreviousImports(t.Type,pkgAlias,extAliasMap) {
+					if shouldAddPreviousImports(t.Type, pkgAlias, extAliasMap) {
 						if value, exists := aliasMap[pkgAlias]; exists {
 							extAliasMap[pkgAlias] = value
 						}
@@ -169,7 +169,7 @@ func ProcessExternalType(qualifiedType string, aliasMap map[string]string, defin
 	for _, field := range extType.Fields {
 		baseType := getBaseType(field.Type)
 		if isCustomType(baseType) {
-			if shouldAddPreviousImports(baseType,pkgAlias,extAliasMap) {
+			if shouldAddPreviousImports(baseType, pkgAlias, extAliasMap) {
 				if value, exists := aliasMap[pkgAlias]; exists {
 					extAliasMap[pkgAlias] = value
 				}
