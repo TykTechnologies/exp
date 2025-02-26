@@ -1,6 +1,5 @@
 package model
 
-
 // ExtractOptions contains options for extraction
 type ExtractOptions struct {
 	IncludeFunctions  bool

@@ -134,56 +134,82 @@ EnumInfo holds details about an enum definition.
 **Field: `doc` (`string`)**
 
 
+# ExtractOptions
+
+ExtractOptions contains options for extraction
+
+**Field: `IncludeFunctions` (`boolean`)**
+
+
+**Field: `IncludeTests` (`boolean`)**
+
+
+**Field: `IncludeUnexported` (`boolean`)**
+
+
+**Field: `IgnoreFiles` (`[]string`)**
+
+
+**Field: `IncludeInternal` (`boolean`)**
+
+
 # JSONSchema
 
-**Field: `$schema` (`string`)**
+JSONSchema represents a JSON Schema document according to the draft-07 specification.
+It includes standard fields used to define types, formats, validations.
 
+**Field: `$schema` (`string`)**
+Schema specifies the JSON Schema version URL.
+Example: "http://json-schema.org/draft-07/schema#"
 
 **Field: `$ref` (`string`)**
-
+Ref is used to reference another schema definition.
+Example: "#/definitions/SomeType"
 
 **Field: `definitions` (`map[string]JSONSchema`)**
-
+Definitions contains subSchema definitions that can be referenced by $ref.
 
 **Field: `type` (`string`)**
-
+Type indicates the JSON type of the instance (e.g., "object", "array", "string").
 
 **Field: `format` (`string`)**
-
+Format provides additional semantic validation for the instance.
+Common formats include "date-time", "email", etc.
 
 **Field: `pattern` (`string`)**
-
+Pattern defines a regular expression that a string value must match
 
 **Field: `properties` (`map[string]JSONSchema`)**
-
+Properties defines the fields of an object and their corresponding schemas
 
 **Field: `items` ([JSONSchema](#jsonschema))**
-
+Items defines the schema for array elements
 
 **Field: `enum` (`[]any`)**
-
+Enum restricts a value to a fixed set of values
 
 **Field: `required` (`[]string`)**
-
+Required lists the properties that must be present in an object
 
 **Field: `description` (`string`)**
-
+Description provides a human-readable explanation of the schema.
 
 **Field: `minimum` (`float64`)**
-
+Minimum specifies the minimum numeric value allowed.
 
 **Field: `maximum` (`float64`)**
-
+Maximum specifies the maximum numeric value allowed.
 
 **Field: `exclusiveMinimum` (`boolean`)**
-
+ExclusiveMinimum, if true, requires the instance to be greater than (not equal to) Minimum.
 
 **Field: `exclusiveMaximum` (`boolean`)**
-
+ExclusiveMaximum, if true, requires the instance to be less than (not equal to) Maximum.
 
 **Field: `multipleOf` (`float64`)**
-
+MultipleOf indicates that the numeric instance must be a multiple of this value.
 
 **Field: `additionalProperties` (`any`)**
-
+AdditionalProperties controls whether an object can have properties beyond those defined
+Can be a boolean or a schema that additional properties must conform to
 
