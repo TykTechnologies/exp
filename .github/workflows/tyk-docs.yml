@@ -190,6 +190,7 @@ jobs:
           mkdir -p dashboard-docs/
           cp ./tyk-analytics/swagger.yml dashboard-docs/dashboard-swagger.yml
           cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
+          cp ./tyk-analytics/docs/opa/opa-rules.md dashboard-docs/opa-rules.md
 
       - name: Store docs
         uses: actions/upload-artifact@v4.4.3
@@ -319,6 +320,7 @@ jobs:
              [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.md ./tyk-docs/tyk-docs/content/shared/
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
+             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.md ./tyk-docs/content/tyk-dashboard
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
 
