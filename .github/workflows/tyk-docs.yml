@@ -320,7 +320,7 @@ jobs:
              [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.md ./tyk-docs/tyk-docs/content/shared/
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.md ./tyk-docs/content/tyk-dashboard
+             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.md ./tyk-docs/tyk-docs/content/tyk-dashboard/
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
 
