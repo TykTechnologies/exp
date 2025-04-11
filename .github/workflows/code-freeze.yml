@@ -83,13 +83,17 @@ jobs:
       - name: Create summary
         id: summary
         run: |
-          echo "summary=Branch \`${{ github.event.inputs.destination_branch }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
-          echo "- [tyk-analytics](https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }})" >> $GITHUB_OUTPUT
-          echo "- [tyk-analytics-ui](https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }})" >> $GITHUB_OUTPUT
-          echo "- [tyk](https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }})" >> $GITHUB_OUTPUT
+          # Create a properly formatted multiline output
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "Branch \`${{ github.event.inputs.destination_branch }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "- tyk-analytics: https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
+          echo "- tyk-analytics-ui: https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
+          echo "- tyk: https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "Triggered by: ${{ github.actor }}" >> $GITHUB_OUTPUT
           echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
           
           # Create a file for the GitHub issue
           cat > issue_content.md << EOF
