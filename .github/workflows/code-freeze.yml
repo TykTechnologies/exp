@@ -120,4 +120,4 @@ jobs:
             Triggered by: ${{ github.actor }}
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
