@@ -108,14 +108,17 @@ jobs:
       - name: Create summary
         id: summary
         run: |
-          echo "summary=Tag \`${{ github.event.inputs.tag_name }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
-          echo "- [tyk-analytics](https://github.com/TykTechnologies/tyk-analytics/releases/tag/${{ github.event.inputs.tag_name }})" >> $GITHUB_OUTPUT
-          echo "- [tyk-analytics-ui](https://github.com/TykTechnologies/tyk-analytics-ui/releases/tag/${{ github.event.inputs.tag_name }})" >> $GITHUB_OUTPUT
-          echo "- [tyk](https://github.com/TykTechnologies/tyk/releases/tag/${{ github.event.inputs.tag_name }})" >> $GITHUB_OUTPUT
+          # Create a properly formatted multiline output
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "Tag \`${{ github.event.inputs.tag_name }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "- tyk-analytics: https://github.com/TykTechnologies/tyk-analytics/releases/tag/${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          echo "- tyk-analytics-ui: https://github.com/TykTechnologies/tyk-analytics-ui/releases/tag/${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          echo "- tyk: https://github.com/TykTechnologies/tyk/releases/tag/${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "Triggered by: ${{ github.actor }}" >> $GITHUB_OUTPUT
           echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
-          
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
         if: ${{ github.event.inputs.notify_slack == 'true' }}
