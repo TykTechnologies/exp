@@ -1,0 +1,113 @@
+# yamllint disable rule:line-length
+---
+name: Create Tags Across Repositories
+
+run-name: 'Creating tag ${{ inputs.tag_name }} from ${{ inputs.source_branch }} by ${{ github.actor }}'
+
+# This workflow creates tags across multiple repositories.
+# It creates the same tag in all specified repositories from the specified source branch.
+
+on:  # yamllint disable-line rule:truthy
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source Branch (branch to create tag from)'
+        required: true
+        default: 'master'
+      tag_name:
+        description: 'Tag Name (e.g., v5.8.0)'
+        required: true
+        default: 'v5.8.0'
+      tag_message:
+        description: 'Tag Message (optional)'
+        required: false
+        default: 'Release tag'
+      notify_slack:
+        description: 'Send Slack notification when complete'
+        type: boolean
+        default: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
+
+jobs:
+  create-tags:
+    name: Create tags in all repositories
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate inputs
+        run: |
+          if [ -z "${{ github.event.inputs.tag_name }}" ]; then
+            echo "Tag name cannot be empty"
+            exit 1
+          fi
+          
+          echo "Creating tag ${{ github.event.inputs.tag_name }} from ${{ github.event.inputs.source_branch }}"
+          echo "source_branch=${{ github.event.inputs.source_branch }}" >> $GITHUB_ENV
+          echo "tag_name=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
+          echo "tag_message=${{ github.event.inputs.tag_message || 'Release tag' }}" >> $GITHUB_ENV
+
+      - name: Create tag in tyk-analytics
+        run: |
+          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics.git
+          cd tyk-analytics
+          git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
+          git push origin ${{ env.tag_name }}
+          echo "✅ Created tag ${{ env.tag_name }} in tyk-analytics"
+          cd ..
+
+      - name: Create tag in tyk-analytics-ui
+        run: |
+          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics-ui.git
+          cd tyk-analytics-ui
+          git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
+          git push origin ${{ env.tag_name }}
+          echo "✅ Created tag ${{ env.tag_name }} in tyk-analytics-ui"
+          cd ..
+
+      - name: Create tag in tyk
+        run: |
+          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk.git
+          cd tyk
+          git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
+          git push origin ${{ env.tag_name }}
+          echo "✅ Created tag ${{ env.tag_name }} in tyk"
+          cd ..
+
+  notify:
+    name: Send notifications
+    needs: [create-tags]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create summary
+        id: summary
+        run: |
+          echo "summary=Tag \`${{ github.event.inputs.tag_name }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
+          echo "- [tyk-analytics](https://github.com/TykTechnologies/tyk-analytics/releases/tag/${{ github.event.inputs.tag_name }})" >> $GITHUB_OUTPUT
+          echo "- [tyk-analytics-ui](https://github.com/TykTechnologies/tyk-analytics-ui/releases/tag/${{ github.event.inputs.tag_name }})" >> $GITHUB_OUTPUT
+          echo "- [tyk](https://github.com/TykTechnologies/tyk/releases/tag/${{ github.event.inputs.tag_name }})" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "Triggered by: ${{ github.actor }}" >> $GITHUB_OUTPUT
+          echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+          
+
+      - name: Send Slack notification
+        if: ${{ github.event.inputs.notify_slack == 'true' }}
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: '#team-ext-engineering-pr-notifications'
+          slack-message: |
+            *Tags Created*
+            
+            Tag `${{ github.event.inputs.tag_name }}` was created from `${{ github.event.inputs.source_branch }}` in the following repositories:
+            
+            - <https://github.com/TykTechnologies/tyk-analytics/releases/tag/${{ github.event.inputs.tag_name }}|tyk-analytics>
+            - <https://github.com/TykTechnologies/tyk-analytics-ui/releases/tag/${{ github.event.inputs.tag_name }}|tyk-analytics-ui>
+            - <https://github.com/TykTechnologies/tyk/releases/tag/${{ github.event.inputs.tag_name }}|tyk>
+            
+            Tag message: ${{ github.event.inputs.tag_message || 'Release tag' }}
+            
+            Triggered by: ${{ github.actor }}
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
