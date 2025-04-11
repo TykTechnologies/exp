@@ -47,32 +47,58 @@ jobs:
           echo "tag_name=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
           echo "tag_message=${{ github.event.inputs.tag_message || 'Release tag' }}" >> $GITHUB_ENV
 
-      - name: Create tag in tyk-analytics
+      - name: Configure Git
         run: |
-          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics.git
-          cd tyk-analytics
+          git config --global user.email "bot@tyk.io"
+          git config --global user.name "Tyk Bot"
+
+      - name: Create tag in tyk-analytics
+        uses: actions/checkout@v4
+        with:
+          repository: TykTechnologies/tyk-analytics
+          ref: ${{ env.source_branch }}
+          token: ${{ secrets.ORG_GH_TOKEN }}
+          path: tyk-analytics
+          fetch-depth: 1
+      
+      - name: Tag tyk-analytics
+        working-directory: tyk-analytics
+        run: |
           git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
           git push origin ${{ env.tag_name }}
           echo "✅ Created tag ${{ env.tag_name }} in tyk-analytics"
-          cd ..
 
       - name: Create tag in tyk-analytics-ui
+        uses: actions/checkout@v4
+        with:
+          repository: TykTechnologies/tyk-analytics-ui
+          ref: ${{ env.source_branch }}
+          token: ${{ secrets.ORG_GH_TOKEN }}
+          path: tyk-analytics-ui
+          fetch-depth: 1
+      
+      - name: Tag tyk-analytics-ui
+        working-directory: tyk-analytics-ui
         run: |
-          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics-ui.git
-          cd tyk-analytics-ui
           git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
           git push origin ${{ env.tag_name }}
           echo "✅ Created tag ${{ env.tag_name }} in tyk-analytics-ui"
-          cd ..
 
       - name: Create tag in tyk
+        uses: actions/checkout@v4
+        with:
+          repository: TykTechnologies/tyk
+          ref: ${{ env.source_branch }}
+          token: ${{ secrets.ORG_GH_TOKEN }}
+          path: tyk
+          fetch-depth: 1
+      
+      - name: Tag tyk
+        working-directory: tyk
         run: |
-          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk.git
-          cd tyk
           git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
           git push origin ${{ env.tag_name }}
           echo "✅ Created tag ${{ env.tag_name }} in tyk"
-          cd ..
 
   notify:
     name: Send notifications
