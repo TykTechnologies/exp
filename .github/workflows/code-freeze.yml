@@ -12,12 +12,6 @@ on:  # yamllint disable-line rule:truthy
     inputs:
       source_branch:
         description: 'Source Branch (branch to create from)'
-        type: choice
-        options:
-          - 'master'
-          - 'release-5.7'
-          - 'release-5.8'
-          - 'release-5.9'
         required: true
         default: 'master'
       destination_branch:
