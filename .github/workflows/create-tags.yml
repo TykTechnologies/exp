@@ -1,142 +1,222 @@
-# yamllint disable rule:line-length
----
-name: Create Tags Across Repositories
+name: "Create Tags Across Repositories"
 
-run-name: 'Creating tag ${{ inputs.tag_name }} from ${{ inputs.source_branch }} by ${{ github.actor }}'
-
-# This workflow creates tags across multiple repositories.
-# It creates the same tag in all specified repositories from the specified source branch.
-
-on:  # yamllint disable-line rule:truthy
+on:
   workflow_dispatch:
     inputs:
       source_branch:
-        description: 'Source Branch (branch to create tag from)'
+        description: 'Branch to create tag from'
         required: true
         default: 'master'
       tag_name:
-        description: 'Tag Name (e.g., v5.8.0)'
+        description: 'Tag name to create'
         required: true
-        default: 'v5.8.0'
       tag_message:
-        description: 'Tag Message (optional)'
+        description: 'Tag message (optional)'
         required: false
-        default: 'Release tag'
-      notify_slack:
-        description: 'Send Slack notification when complete'
-        type: boolean
+      send_slack_notification:
+        description: 'Send Slack notification'
+        required: true
         default: true
-
-env:
-  GITHUB_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
+        type: boolean
+      # Repository checkboxes
+      tyk:
+        description: 'Create tag for tyk'
+        required: false
+        default: false
+        type: boolean
+      tyk_analytics:
+        description: 'Create tag for tyk-analytics'
+        required: false
+        default: false
+        type: boolean
+      tyk_analytics_ui:
+        description: 'Create tag for tyk-analytics-ui'
+        required: false
+        default: false
+        type: boolean
+      tyk_sink:
+        description: 'Create tag for tyk-sink'
+        required: false
+        default: false
+        type: boolean
+      tyk_sync_internal:
+        description: 'Create tag for tyk-sync-internal'
+        required: false
+        default: false
+        type: boolean
+      tyk_operator_internal:
+        description: 'Create tag for tyk-operator-internal'
+        required: false
+        default: false
+        type: boolean
+      tyk_charts:
+        description: 'Create tag for tyk-charts'
+        required: false
+        default: false
+        type: boolean
+      portal:
+        description: 'Create tag for portal'
+        required: false
+        default: false
+        type: boolean
+      tyk_pump:
+        description: 'Create tag for tyk-pump'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   create-tags:
-    name: Create tags in all repositories
     runs-on: ubuntu-latest
     steps:
-      - name: Validate inputs
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build repository list
+        id: build-repo-list
         run: |
-          if [ -z "${{ github.event.inputs.tag_name }}" ]; then
-            echo "Tag name cannot be empty"
-            exit 1
+          # Initialize empty array
+          REPOS=()
+          
+          # Add repositories based on checkbox selections
+          if [[ "${{ github.event.inputs.tyk }}" == "true" ]]; then
+            REPOS+=("tyk")
+          fi
+          if [[ "${{ github.event.inputs.tyk_analytics }}" == "true" ]]; then
+            REPOS+=("tyk-analytics")
+          fi
+          if [[ "${{ github.event.inputs.tyk_analytics_ui }}" == "true" ]]; then
+            REPOS+=("tyk-analytics-ui")
+          fi
+          if [[ "${{ github.event.inputs.tyk_sink }}" == "true" ]]; then
+            REPOS+=("tyk-sink")
+          fi
+          if [[ "${{ github.event.inputs.tyk_sync_internal }}" == "true" ]]; then
+            REPOS+=("tyk-sync-internal")
+          fi
+          if [[ "${{ github.event.inputs.tyk_operator_internal }}" == "true" ]]; then
+            REPOS+=("tyk-operator-internal")
+          fi
+          if [[ "${{ github.event.inputs.tyk_charts }}" == "true" ]]; then
+            REPOS+=("tyk-charts")
+          fi
+          if [[ "${{ github.event.inputs.portal }}" == "true" ]]; then
+            REPOS+=("portal")
+          fi
+          if [[ "${{ github.event.inputs.tyk_pump }}" == "true" ]]; then
+            REPOS+=("tyk-pump")
           fi
           
-          echo "Creating tag ${{ github.event.inputs.tag_name }} from ${{ github.event.inputs.source_branch }}"
-          echo "source_branch=${{ github.event.inputs.source_branch }}" >> $GITHUB_ENV
-          echo "tag_name=${{ github.event.inputs.tag_name }}" >> $GITHUB_ENV
-          echo "tag_message=${{ github.event.inputs.tag_message || 'Release tag' }}" >> $GITHUB_ENV
+          # Convert array to JSON
+          JSON_ARRAY=$(printf '%s\n' "${REPOS[@]}" | jq -R . | jq -s .)
+          echo "repositories=$JSON_ARRAY" >> $GITHUB_OUTPUT
+          
+          # Create a comma-separated list for display
+          REPOS_CSV=$(IFS=,; echo "${REPOS[*]}")
+          echo "repositories_csv=$REPOS_CSV" >> $GITHUB_OUTPUT
+          
+          # Check if any repositories were selected
+          if [ ${#REPOS[@]} -eq 0 ]; then
+            echo "::error::No repositories selected. Please select at least one repository."
+            exit 1
+          fi
 
-      - name: Configure Git
+      - name: Create tags
+        env:
+          GH_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
+          SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
+          TAG_NAME: ${{ github.event.inputs.tag_name }}
+          TAG_MESSAGE: ${{ github.event.inputs.tag_message }}
         run: |
-          git config --global user.email "bot@tyk.io"
-          git config --global user.name "Tyk Bot"
-
-      - name: Create tag in tyk-analytics
-        uses: actions/checkout@v4
-        with:
-          repository: TykTechnologies/tyk-analytics
-          ref: ${{ env.source_branch }}
-          token: ${{ secrets.ORG_GH_TOKEN }}
-          path: tyk-analytics
-          fetch-depth: 1
-      
-      - name: Tag tyk-analytics
-        working-directory: tyk-analytics
-        run: |
-          git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
-          git push origin ${{ env.tag_name }}
-          echo "✅ Created tag ${{ env.tag_name }} in tyk-analytics"
-
-      - name: Create tag in tyk-analytics-ui
-        uses: actions/checkout@v4
-        with:
-          repository: TykTechnologies/tyk-analytics-ui
-          ref: ${{ env.source_branch }}
-          token: ${{ secrets.ORG_GH_TOKEN }}
-          path: tyk-analytics-ui
-          fetch-depth: 1
-      
-      - name: Tag tyk-analytics-ui
-        working-directory: tyk-analytics-ui
-        run: |
-          git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
-          git push origin ${{ env.tag_name }}
-          echo "✅ Created tag ${{ env.tag_name }} in tyk-analytics-ui"
-
-      - name: Create tag in tyk
-        uses: actions/checkout@v4
-        with:
-          repository: TykTechnologies/tyk
-          ref: ${{ env.source_branch }}
-          token: ${{ secrets.ORG_GH_TOKEN }}
-          path: tyk
-          fetch-depth: 1
-      
-      - name: Tag tyk
-        working-directory: tyk
-        run: |
-          git tag -a ${{ env.tag_name }} -m "${{ env.tag_message }}"
-          git push origin ${{ env.tag_name }}
-          echo "✅ Created tag ${{ env.tag_name }} in tyk"
-
-  notify:
-    name: Send notifications
-    needs: [create-tags]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create summary
-        id: summary
-        run: |
-          # Create a properly formatted multiline output
-          echo "summary<<EOF" >> $GITHUB_OUTPUT
-          echo "Tag \`${{ github.event.inputs.tag_name }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo "- tyk-analytics: https://github.com/TykTechnologies/tyk-analytics/releases/tag/${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
-          echo "- tyk-analytics-ui: https://github.com/TykTechnologies/tyk-analytics-ui/releases/tag/${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
-          echo "- tyk: https://github.com/TykTechnologies/tyk/releases/tag/${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo "Triggered by: ${{ github.actor }}" >> $GITHUB_OUTPUT
-          echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Get repositories as JSON array
+          REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
+          
+          # Loop through each repository
+          echo $REPOSITORIES | jq -c '.[]' | while read -r repo; do
+            # Remove quotes from repo name
+            repo=$(echo $repo | tr -d '"')
+            echo "Creating tag for repository: $repo"
+            
+            # Check if repository exists
+            if gh repo view "TykTechnologies/$repo" &>/dev/null; then
+              # Create tag
+              if [ -z "$TAG_MESSAGE" ]; then
+                # Create lightweight tag
+                gh api \
+                  --method POST \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  /repos/TykTechnologies/$repo/git/refs \
+                  -f ref="refs/tags/$TAG_NAME" \
+                  -f sha=$(gh api /repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH --jq .object.sha)
+              else
+                # Create annotated tag
+                # First create tag object
+                TAG_SHA=$(gh api \
+                  --method POST \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  /repos/TykTechnologies/$repo/git/tags \
+                  -f tag="$TAG_NAME" \
+                  -f message="$TAG_MESSAGE" \
+                  -f object=$(gh api /repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH --jq .object.sha) \
+                  -f type="commit" \
+                  --jq .sha)
+                
+                # Then create reference to the tag
+                gh api \
+                  --method POST \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  /repos/TykTechnologies/$repo/git/refs \
+                  -f ref="refs/tags/$TAG_NAME" \
+                  -f sha="$TAG_SHA"
+              fi
+              
+              echo "✅ Successfully created tag $TAG_NAME for $repo"
+            else
+              echo "❌ Repository $repo does not exist or you don't have access to it"
+            fi
+          done
 
       - name: Send Slack notification
-        if: ${{ github.event.inputs.notify_slack == 'true' }}
-        uses: slackapi/slack-github-action@v1.25.0
+        if: ${{ github.event.inputs.send_slack_notification == 'true' }}
+        uses: slackapi/slack-github-action@v1.23.0
         with:
-          channel-id: '#team-ext-engineering-pr-notifications'
-          slack-message: |
-            *Tags Created*
-            
-            Tag `${{ github.event.inputs.tag_name }}` was created from `${{ github.event.inputs.source_branch }}` in the following repositories:
-            
-            - <https://github.com/TykTechnologies/tyk-analytics/releases/tag/${{ github.event.inputs.tag_name }}|tyk-analytics>
-            - <https://github.com/TykTechnologies/tyk-analytics-ui/releases/tag/${{ github.event.inputs.tag_name }}|tyk-analytics-ui>
-            - <https://github.com/TykTechnologies/tyk/releases/tag/${{ github.event.inputs.tag_name }}|tyk>
-            
-            Tag message: ${{ github.event.inputs.tag_message || 'Release tag' }}
-            
-            Triggered by: ${{ github.actor }}
-            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          payload: |
+            {
+              "text": "🏷️ Tags created for selected repositories",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "🏷️ Tags Created",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Source Branch:*\n${{ github.event.inputs.source_branch }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Tag Name:*\n${{ github.event.inputs.tag_name }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Repositories:*\n${{ steps.build-repo-list.outputs.repositories_csv }}"
+                  }
+                }
+              ]
+            }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
