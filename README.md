@@ -96,25 +96,38 @@ The `code-freeze.yml` workflow creates consistent branches across multiple Tyk r
 
 ### Create Tags Across Repositories
 
-The `create-tags.yml` workflow creates consistent tags across multiple Tyk repositories simultaneously.
+The `create-tags.yml` workflow creates consistent tags across multiple Tyk repositories simultaneously with flexible repository selection.
 
-**Purpose**: Automate the creation of release tags across the Tyk ecosystem.
+**Purpose**: Automate the creation of release tags across selected repositories in the Tyk ecosystem.
 
-**Repositories affected**:
+**Available repositories**:
+- tyk
 - tyk-analytics
 - tyk-analytics-ui
-- tyk
+- tyk-sink
+- tyk-sync-internal
+- tyk-operator-internal
+- tyk-charts
+- portal
+- tyk-pump
 
 **Usage**:
 1. Go to the Actions tab in the repository
 2. Select "Create Tags Across Repositories" workflow
 3. Click "Run workflow"
 4. Fill in the parameters:
-   - Source Branch: The branch to create the tag from (e.g., release-5.8)
+   - Source Branch: The branch to create the tag from (e.g., master, release-5.8)
    - Tag Name: The name of the tag to create (e.g., v5.8.0)
    - Tag Message: Optional message for annotated tags
    - Send Slack notification: Whether to notify the team via Slack
+   - Repository checkboxes: Select which repositories to create tags for
 
-**Example use case**: Creating a v5.8.0 tag from the release-5.8 branch across all repositories at once.
+**Key features**:
+- **Selective repository targeting**: Choose specific repositories via checkboxes instead of tagging all repositories
+- **Validation**: Ensures at least one repository is selected before proceeding
+- **GitHub API integration**: Uses GitHub API for reliable tag creation
+- **Enhanced error handling**: Provides clear feedback for each repository operation
+
+**Example use case**: Creating a v5.8.0 tag from the release-5.8 branch on only tyk, tyk-analytics, and tyk-pump repositories.
 
 **Note**: Both workflows use the `ORG_GH_TOKEN` secret for authentication and the `UI_SLACK_AUTH_TOKEN` secret for Slack notifications. Ensure these secrets are properly configured in the repository settings.
