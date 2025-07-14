@@ -13,24 +13,9 @@ on:
       tag_message:
         description: 'Tag message (optional)'
         required: false
-      send_slack_notification:
-        description: 'Send Slack notification'
-        required: true
-        default: true
-        type: boolean
       # Repository checkboxes
-      tyk:
-        description: 'Create tag for tyk'
-        required: false
-        default: false
-        type: boolean
-      tyk_analytics:
-        description: 'Create tag for tyk-analytics'
-        required: false
-        default: false
-        type: boolean
-      tyk_analytics_ui:
-        description: 'Create tag for tyk-analytics-ui'
+      tyk_core_products:
+        description: 'Create tag for tyk, tyk-analytics, and tyk-analytics-ui'
         required: false
         default: false
         type: boolean
@@ -79,13 +64,9 @@ jobs:
           REPOS=()
           
           # Add repositories based on checkbox selections
-          if [[ "${{ github.event.inputs.tyk }}" == "true" ]]; then
+          if [[ "${{ github.event.inputs.tyk_core_products }}" == "true" ]]; then
             REPOS+=("tyk")
-          fi
-          if [[ "${{ github.event.inputs.tyk_analytics }}" == "true" ]]; then
             REPOS+=("tyk-analytics")
-          fi
-          if [[ "${{ github.event.inputs.tyk_analytics_ui }}" == "true" ]]; then
             REPOS+=("tyk-analytics-ui")
           fi
           if [[ "${{ github.event.inputs.tyk_sink }}" == "true" ]]; then
@@ -180,7 +161,6 @@ jobs:
           done
 
       - name: Send Slack notification
-        if: ${{ github.event.inputs.send_slack_notification == 'true' }}
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
