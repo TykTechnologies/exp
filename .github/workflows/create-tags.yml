@@ -13,42 +13,19 @@ on:
       tag_message:
         description: 'Tag message (optional)'
         required: false
-      # Repository checkboxes
-      tyk_core_products:
-        description: 'Create tag for tyk, tyk-analytics, and tyk-analytics-ui'
-        required: false
-        default: false
-        type: boolean
-      tyk_sink:
-        description: 'Create tag for tyk-sink'
-        required: false
-        default: false
-        type: boolean
-      tyk_sync_internal:
-        description: 'Create tag for tyk-sync-internal'
-        required: false
-        default: false
-        type: boolean
-      tyk_operator_internal:
-        description: 'Create tag for tyk-operator-internal'
-        required: false
-        default: false
-        type: boolean
-      tyk_charts:
-        description: 'Create tag for tyk-charts'
-        required: false
-        default: false
-        type: boolean
-      portal:
-        description: 'Create tag for portal'
-        required: false
-        default: false
-        type: boolean
-      tyk_pump:
-        description: 'Create tag for tyk-pump'
-        required: false
-        default: false
-        type: boolean
+      repository_selection:
+        description: 'Select repositories to create tags for'
+        required: true
+        type: choice
+        options:
+          - 'tyk-core-products'
+          - 'tyk-sink'
+          - 'tyk-sync-internal'
+          - 'tyk-operator-internal'
+          - 'tyk-charts'
+          - 'portal'
+          - 'tyk-pump'
+        default: 'tyk-core-products'
 
 jobs:
   create-tags:
@@ -63,30 +40,36 @@ jobs:
           # Initialize empty array
           REPOS=()
           
-          # Add repositories based on checkbox selections
-          if [[ "${{ github.event.inputs.tyk_core_products }}" == "true" ]]; then
-            REPOS+=("tyk")
-            REPOS+=("tyk-analytics")
-            REPOS+=("tyk-analytics-ui")
-          fi
-          if [[ "${{ github.event.inputs.tyk_sink }}" == "true" ]]; then
-            REPOS+=("tyk-sink")
-          fi
-          if [[ "${{ github.event.inputs.tyk_sync_internal }}" == "true" ]]; then
-            REPOS+=("tyk-sync-internal")
-          fi
-          if [[ "${{ github.event.inputs.tyk_operator_internal }}" == "true" ]]; then
-            REPOS+=("tyk-operator-internal")
-          fi
-          if [[ "${{ github.event.inputs.tyk_charts }}" == "true" ]]; then
-            REPOS+=("tyk-charts")
-          fi
-          if [[ "${{ github.event.inputs.portal }}" == "true" ]]; then
-            REPOS+=("portal")
-          fi
-          if [[ "${{ github.event.inputs.tyk_pump }}" == "true" ]]; then
-            REPOS+=("tyk-pump")
-          fi
+          # Add repositories based on dropdown selection
+          case "${{ github.event.inputs.repository_selection }}" in
+            "tyk-core-products")
+              REPOS+=("tyk")
+              REPOS+=("tyk-analytics")
+              REPOS+=("tyk-analytics-ui")
+              ;;
+            "tyk-sink")
+              REPOS+=("tyk-sink")
+              ;;
+            "tyk-sync-internal")
+              REPOS+=("tyk-sync-internal")
+              ;;
+            "tyk-operator-internal")
+              REPOS+=("tyk-operator-internal")
+              ;;
+            "tyk-charts")
+              REPOS+=("tyk-charts")
+              ;;
+            "portal")
+              REPOS+=("portal")
+              ;;
+            "tyk-pump")
+              REPOS+=("tyk-pump")
+              ;;
+            *)
+              echo "::error::Invalid repository selection: ${{ github.event.inputs.repository_selection }}"
+              exit 1
+              ;;
+          esac
           
           # Convert array to JSON
           JSON_ARRAY=$(printf '%s\n' "${REPOS[@]}" | jq -R . | jq -s .)
@@ -95,12 +78,6 @@ jobs:
           # Create a comma-separated list for display
           REPOS_CSV=$(IFS=,; echo "${REPOS[*]}")
           echo "repositories_csv=$REPOS_CSV" >> $GITHUB_OUTPUT
-          
-          # Check if any repositories were selected
-          if [ ${#REPOS[@]} -eq 0 ]; then
-            echo "::error::No repositories selected. Please select at least one repository."
-            exit 1
-          fi
 
       - name: Create tags
         env:
