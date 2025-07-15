@@ -119,15 +119,23 @@ The `create-tags.yml` workflow creates consistent tags across multiple Tyk repos
    - Source Branch: The branch to create the tag from (e.g., master, release-5.8)
    - Tag Name: The name of the tag to create (e.g., v5.8.0)
    - Tag Message: Optional message for annotated tags
-   - Send Slack notification: Whether to notify the team via Slack
-   - Repository checkboxes: Select which repositories to create tags for
+   - Repository Selection: Choose which repositories to create tags for
+
+**Available repository options**:
+- **tyk-core-products**: Creates tags for tyk, tyk-analytics, and tyk-analytics-ui simultaneously
+- **tyk-sink**: Creates tag for tyk-sink
+- **tyk-sync-internal**: Creates tag for tyk-sync-internal
+- **tyk-operator-internal**: Creates tag for tyk-operator-internal
+- **tyk-charts**: Creates tag for tyk-charts
+- **portal**: Creates tag for portal
+- **tyk-pump**: Creates tag for tyk-pump
 
 **Key features**:
-- **Selective repository targeting**: Choose specific repositories via checkboxes instead of tagging all repositories
-- **Validation**: Ensures at least one repository is selected before proceeding
+- **Repository selection**: Choose specific repository or repository group from dropdown menu
+- **Automatic Slack notifications**: Team notifications are sent automatically after tag creation
 - **GitHub API integration**: Uses GitHub API for reliable tag creation
 - **Enhanced error handling**: Provides clear feedback for each repository operation
 
-**Example use case**: Creating a v5.8.0 tag from the release-5.8 branch on only tyk, tyk-analytics, and tyk-pump repositories.
+**Example use case**: Creating a v5.8.0 tag from the release-5.8 branch on the tyk-core-products repositories.
 
 **Note**: Both workflows use the `ORG_GH_TOKEN` secret for authentication and the `UI_SLACK_AUTH_TOKEN` secret for Slack notifications. Ensure these secrets are properly configured in the repository settings.
