@@ -72,7 +72,7 @@ jobs:
           esac
           
           # Convert array to JSON
-          JSON_ARRAY=$(printf '%s\n' "${REPOS[@]}" | jq -R . | jq -s .)
+          JSON_ARRAY=$(jq -nc '$ARGS.positional' --args -- "${REPOS[@]}")
           echo "repositories=$JSON_ARRAY" >> "$GITHUB_OUTPUT"
           
           # Create a comma-separated list for display
