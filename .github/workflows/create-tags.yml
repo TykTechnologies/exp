@@ -13,64 +13,26 @@ on:
       tag_message:
         description: 'Tag message (optional)'
         required: false
-      send_slack_notification:
-        description: 'Send Slack notification'
+      repository_selection:
+        description: 'Select repositories to create tags for'
         required: true
-        default: true
-        type: boolean
-      # Repository checkboxes
-      tyk:
-        description: 'Create tag for tyk'
-        required: false
-        default: false
-        type: boolean
-      tyk_analytics:
-        description: 'Create tag for tyk-analytics'
-        required: false
-        default: false
-        type: boolean
-      tyk_analytics_ui:
-        description: 'Create tag for tyk-analytics-ui'
-        required: false
-        default: false
-        type: boolean
-      tyk_sink:
-        description: 'Create tag for tyk-sink'
-        required: false
-        default: false
-        type: boolean
-      tyk_sync_internal:
-        description: 'Create tag for tyk-sync-internal'
-        required: false
-        default: false
-        type: boolean
-      tyk_operator_internal:
-        description: 'Create tag for tyk-operator-internal'
-        required: false
-        default: false
-        type: boolean
-      tyk_charts:
-        description: 'Create tag for tyk-charts'
-        required: false
-        default: false
-        type: boolean
-      portal:
-        description: 'Create tag for portal'
-        required: false
-        default: false
-        type: boolean
-      tyk_pump:
-        description: 'Create tag for tyk-pump'
-        required: false
-        default: false
-        type: boolean
+        type: choice
+        options:
+          - 'tyk-core-products'
+          - 'tyk-sink'
+          - 'tyk-sync-internal'
+          - 'tyk-operator-internal'
+          - 'tyk-charts'
+          - 'portal'
+          - 'tyk-pump'
+        default: 'tyk-core-products'
 
 jobs:
   create-tags:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build repository list
         id: build-repo-list
@@ -78,48 +40,44 @@ jobs:
           # Initialize empty array
           REPOS=()
           
-          # Add repositories based on checkbox selections
-          if [[ "${{ github.event.inputs.tyk }}" == "true" ]]; then
-            REPOS+=("tyk")
-          fi
-          if [[ "${{ github.event.inputs.tyk_analytics }}" == "true" ]]; then
-            REPOS+=("tyk-analytics")
-          fi
-          if [[ "${{ github.event.inputs.tyk_analytics_ui }}" == "true" ]]; then
-            REPOS+=("tyk-analytics-ui")
-          fi
-          if [[ "${{ github.event.inputs.tyk_sink }}" == "true" ]]; then
-            REPOS+=("tyk-sink")
-          fi
-          if [[ "${{ github.event.inputs.tyk_sync_internal }}" == "true" ]]; then
-            REPOS+=("tyk-sync-internal")
-          fi
-          if [[ "${{ github.event.inputs.tyk_operator_internal }}" == "true" ]]; then
-            REPOS+=("tyk-operator-internal")
-          fi
-          if [[ "${{ github.event.inputs.tyk_charts }}" == "true" ]]; then
-            REPOS+=("tyk-charts")
-          fi
-          if [[ "${{ github.event.inputs.portal }}" == "true" ]]; then
-            REPOS+=("portal")
-          fi
-          if [[ "${{ github.event.inputs.tyk_pump }}" == "true" ]]; then
-            REPOS+=("tyk-pump")
-          fi
+          # Add repositories based on dropdown selection
+          case "${{ github.event.inputs.repository_selection }}" in
+            "tyk-core-products")
+              REPOS+=("tyk")
+              REPOS+=("tyk-analytics")
+              REPOS+=("tyk-analytics-ui")
+              ;;
+            "tyk-sink")
+              REPOS+=("tyk-sink")
+              ;;
+            "tyk-sync-internal")
+              REPOS+=("tyk-sync-internal")
+              ;;
+            "tyk-operator-internal")
+              REPOS+=("tyk-operator-internal")
+              ;;
+            "tyk-charts")
+              REPOS+=("tyk-charts")
+              ;;
+            "portal")
+              REPOS+=("portal")
+              ;;
+            "tyk-pump")
+              REPOS+=("tyk-pump")
+              ;;
+            *)
+              echo "::error::Invalid repository selection: ${{ github.event.inputs.repository_selection }}"
+              exit 1
+              ;;
+          esac
           
           # Convert array to JSON
           JSON_ARRAY=$(printf '%s\n' "${REPOS[@]}" | jq -R . | jq -s .)
-          echo "repositories=$JSON_ARRAY" >> $GITHUB_OUTPUT
+          echo "repositories=$JSON_ARRAY" >> "$GITHUB_OUTPUT"
           
           # Create a comma-separated list for display
           REPOS_CSV=$(IFS=,; echo "${REPOS[*]}")
-          echo "repositories_csv=$REPOS_CSV" >> $GITHUB_OUTPUT
-          
-          # Check if any repositories were selected
-          if [ ${#REPOS[@]} -eq 0 ]; then
-            echo "::error::No repositories selected. Please select at least one repository."
-            exit 1
-          fi
+          echo "repositories_csv=$REPOS_CSV" >> "$GITHUB_OUTPUT"
 
       - name: Create tags
         env:
@@ -132,9 +90,9 @@ jobs:
           REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
           
           # Loop through each repository
-          echo $REPOSITORIES | jq -c '.[]' | while read -r repo; do
+          echo "$REPOSITORIES" | jq -c '.[]' | while read -r repo; do
             # Remove quotes from repo name
-            repo=$(echo $repo | tr -d '"')
+            repo=$(echo "$repo" | tr -d '"')
             echo "Creating tag for repository: $repo"
             
             # Check if repository exists
@@ -146,9 +104,9 @@ jobs:
                   --method POST \
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
-                  /repos/TykTechnologies/$repo/git/refs \
+                  "/repos/TykTechnologies/$repo/git/refs" \
                   -f ref="refs/tags/$TAG_NAME" \
-                  -f sha=$(gh api /repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH --jq .object.sha)
+                  -f sha="$(gh api "/repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH" --jq .object.sha)"
               else
                 # Create annotated tag
                 # First create tag object
@@ -156,10 +114,10 @@ jobs:
                   --method POST \
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
-                  /repos/TykTechnologies/$repo/git/tags \
+                  "/repos/TykTechnologies/$repo/git/tags" \
                   -f tag="$TAG_NAME" \
                   -f message="$TAG_MESSAGE" \
-                  -f object=$(gh api /repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH --jq .object.sha) \
+                  -f object="$(gh api "/repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH" --jq .object.sha)" \
                   -f type="commit" \
                   --jq .sha)
                 
@@ -168,7 +126,7 @@ jobs:
                   --method POST \
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
-                  /repos/TykTechnologies/$repo/git/refs \
+                  "/repos/TykTechnologies/$repo/git/refs" \
                   -f ref="refs/tags/$TAG_NAME" \
                   -f sha="$TAG_SHA"
               fi
@@ -180,7 +138,6 @@ jobs:
           done
 
       - name: Send Slack notification
-        if: ${{ github.event.inputs.send_slack_notification == 'true' }}
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
