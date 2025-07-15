@@ -78,6 +78,15 @@ jobs:
           # Create a comma-separated list for display
           REPOS_CSV=$(IFS=,; echo "${REPOS[*]}")
           echo "repositories_csv=$REPOS_CSV" >> "$GITHUB_OUTPUT"
+          
+          # Create Slack-formatted repository links
+          REPOS_LINKS=""
+          for repo in "${REPOS[@]}"; do
+            REPOS_LINKS="${REPOS_LINKS}- <https://github.com/TykTechnologies/${repo}/releases/tag/\${{ github.event.inputs.tag_name }}|${repo}>\n"
+          done
+          echo "repositories_links<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$REPOS_LINKS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create tags
         env:
@@ -138,42 +147,19 @@ jobs:
           done
 
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.25.0
         with:
-          payload: |
-            {
-              "text": "🏷️ Tags created for selected repositories",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "🏷️ Tags Created",
-                    "emoji": true
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Source Branch:*\n${{ github.event.inputs.source_branch }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Tag Name:*\n${{ github.event.inputs.tag_name }}"
-                    }
-                  ]
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Repositories:*\n${{ steps.build-repo-list.outputs.repositories_csv }}"
-                  }
-                }
-              ]
-            }
+          channel-id: '#team-ext-engineering-pr-notifications'
+          slack-message: |
+            *Tags Created*
+            
+            Tag `${{ github.event.inputs.tag_name }}` was created from `${{ github.event.inputs.source_branch }}` in the following repositories:
+            
+            ${{ steps.build-repo-list.outputs.repositories_links }}
+            
+            Tag message: ${{ github.event.inputs.tag_message || 'Release tag' }}
+            
+            Triggered by: ${{ github.actor }}
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
