@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build repository list
         id: build-repo-list
@@ -73,11 +73,11 @@ jobs:
           
           # Convert array to JSON
           JSON_ARRAY=$(printf '%s\n' "${REPOS[@]}" | jq -R . | jq -s .)
-          echo "repositories=$JSON_ARRAY" >> $GITHUB_OUTPUT
+          echo "repositories=$JSON_ARRAY" >> "$GITHUB_OUTPUT"
           
           # Create a comma-separated list for display
           REPOS_CSV=$(IFS=,; echo "${REPOS[*]}")
-          echo "repositories_csv=$REPOS_CSV" >> $GITHUB_OUTPUT
+          echo "repositories_csv=$REPOS_CSV" >> "$GITHUB_OUTPUT"
 
       - name: Create tags
         env:
@@ -90,9 +90,9 @@ jobs:
           REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
           
           # Loop through each repository
-          echo $REPOSITORIES | jq -c '.[]' | while read -r repo; do
+          echo "$REPOSITORIES" | jq -c '.[]' | while read -r repo; do
             # Remove quotes from repo name
-            repo=$(echo $repo | tr -d '"')
+            repo=$(echo "$repo" | tr -d '"')
             echo "Creating tag for repository: $repo"
             
             # Check if repository exists
@@ -104,9 +104,9 @@ jobs:
                   --method POST \
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
-                  /repos/TykTechnologies/$repo/git/refs \
+                  "/repos/TykTechnologies/$repo/git/refs" \
                   -f ref="refs/tags/$TAG_NAME" \
-                  -f sha=$(gh api /repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH --jq .object.sha)
+                  -f sha="$(gh api "/repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH" --jq .object.sha)"
               else
                 # Create annotated tag
                 # First create tag object
@@ -114,10 +114,10 @@ jobs:
                   --method POST \
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
-                  /repos/TykTechnologies/$repo/git/tags \
+                  "/repos/TykTechnologies/$repo/git/tags" \
                   -f tag="$TAG_NAME" \
                   -f message="$TAG_MESSAGE" \
-                  -f object=$(gh api /repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH --jq .object.sha) \
+                  -f object="$(gh api "/repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH" --jq .object.sha)" \
                   -f type="commit" \
                   --jq .sha)
                 
@@ -126,7 +126,7 @@ jobs:
                   --method POST \
                   -H "Accept: application/vnd.github+json" \
                   -H "X-GitHub-Api-Version: 2022-11-28" \
-                  /repos/TykTechnologies/$repo/git/refs \
+                  "/repos/TykTechnologies/$repo/git/refs" \
                   -f ref="refs/tags/$TAG_NAME" \
                   -f sha="$TAG_SHA"
               fi
