@@ -25,6 +25,7 @@ on:
           - 'tyk-charts'
           - 'portal'
           - 'tyk-pump'
+          - 'governance'
         default: 'tyk-core-products'
 
 jobs:
@@ -64,6 +65,10 @@ jobs:
               ;;
             "tyk-pump")
               REPOS+=("tyk-pump")
+              ;;
+            "governance")
+              REPOS+=("governance-poc")
+              REPOS+=("nark")
               ;;
             *)
               echo "::error::Invalid repository selection: ${{ github.event.inputs.repository_selection }}"
