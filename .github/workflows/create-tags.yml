@@ -81,8 +81,9 @@ jobs:
           
           # Create Slack-formatted repository links
           REPOS_LINKS=""
+          TAG_NAME_VAR="${{ github.event.inputs.tag_name }}"
           for repo in "${REPOS[@]}"; do
-            REPOS_LINKS="${REPOS_LINKS}- <https://github.com/TykTechnologies/${repo}/releases/tag/\${{ github.event.inputs.tag_name }}|${repo}>\n"
+            REPOS_LINKS="${REPOS_LINKS}- <https://github.com/TykTechnologies/${repo}/releases/tag/${TAG_NAME_VAR} | ${repo}>\n"
           done
           echo "repositories_links<<EOF" >> "$GITHUB_OUTPUT"
           echo -e "$REPOS_LINKS" >> "$GITHUB_OUTPUT"
