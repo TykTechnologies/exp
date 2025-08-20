@@ -124,7 +124,8 @@ jobs:
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
-
+  
+  # Generates Tyk OAS specification & Gateway swagger
   gateway:
     needs: [sanitize]
     name: Gateway docs
@@ -147,7 +148,7 @@ jobs:
           destination: /usr/local/bin
 
       - run: mkdir -p gateway-docs/
-
+      
       - name: Generate x-tyk-gateway docs
         working-directory: ./tyk/apidef/oas
         run: |
@@ -158,7 +159,7 @@ jobs:
                                                         --replace "model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
                                                         --heading-format "### **%s**" \
                                                         --trim "Tyk classic API definition" \
-                                                        -o ../../../gateway-docs/x-tyk-gateway.md
+                                                        -o ../../../gateway-docs/x-tyk-gateway.mdx
 
       - name: Generate docs
         run: |
@@ -170,6 +171,7 @@ jobs:
           name: gateway-docs
           path: gateway-docs
 
+  # Generates dashboard OPA rules & Dashboard swagger
   dashboard:
     needs: [sanitize]
     name: Dashboard docs
@@ -190,7 +192,7 @@ jobs:
           mkdir -p dashboard-docs/
           cp ./tyk-analytics/swagger.yml dashboard-docs/dashboard-swagger.yml
           cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
-          cp ./tyk-analytics/docs/opa/opa-rules.md dashboard-docs/opa-rules.md
+          cp ./tyk-analytics/docs/opa/opa-rules.md dashboard-docs/opa-rules.mdx
 
       - name: Store docs
         uses: actions/upload-artifact@v4.4.3
@@ -198,6 +200,7 @@ jobs:
           name: dashboard-docs
           path: dashboard-docs
 
+  # Generates MDCB swagger
   mdcb:
     needs: [sanitize]
     name: MDCB docs
@@ -224,6 +227,7 @@ jobs:
           name: mdcb-docs
           path: mdcb-docs
 
+  # Generates environment configuration docs for Gateway, Dashboard, Pump, and MDCB
   configs:
     needs: [sanitize]
     name: Configuration docs
@@ -249,7 +253,7 @@ jobs:
         run: |
           repo=gateway
           branch=$repoBranch
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/gateway.md $dest
@@ -260,7 +264,7 @@ jobs:
         run: |
           repo=dashboard
           branch=$repoBranch
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -271,7 +275,7 @@ jobs:
         run: |
           repo=pump
           branch=${{ github.event.inputs.source || 'master' }}
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -282,7 +286,7 @@ jobs:
         run: |
           repo=mdcb
           branch=${{ github.event.inputs.source || 'master' }}
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -318,9 +322,9 @@ jobs:
       - name: Write out docs
         run: |
              [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.md ./tyk-docs/tyk-docs/content/shared/
+             [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.mdx ./tyk-docs/tyk-docs/content/shared/
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.md ./tyk-docs/tyk-docs/content/tyk-dashboard/
+             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/tyk-docs/content/tyk-dashboard/
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
 
