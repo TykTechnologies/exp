@@ -161,9 +161,32 @@ jobs:
                                                         --trim "Tyk classic API definition" \
                                                         -o ../../../gateway-docs/x-tyk-gateway.mdx
 
-      - name: Generate docs
+      - name: Generate Docs
         run: |
-          cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
+          # Make a temp file for modifications
+          cp ./tyk/swagger.yml ./swagger-modified.yml
+
+          # The below modifications are required for Mintlify, because it cannot resolve external $ref links.
+
+          # Replace both with and without single quotes
+          sed -i "s|'https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json'|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+          sed -i "s|https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+
+          # Append the new schema definition under components.schemas
+          # We assume `components:` and `schemas:` already exist in the file
+          awk '
+            {print}
+            /schemas:/ && !done {
+              print "    OpenAPI3Schema:"
+              print "      type: object"
+              print "      additionalProperties: true"
+              done=1
+            }
+          ' ./swagger-modified.yml > ./swagger-final.yml
+
+          # Copy to gateway-docs
+          cp ./swagger-final.yml gateway-docs/gateway-swagger.yml
+
 
       - name: Store docs
         uses: actions/upload-artifact@v4.4.3
@@ -187,10 +210,31 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk-analytics
 
-      - name: Generate docs
+      - name: Generate Docs
         run: |
+          # Make a temp file for modifications
+          cp ./tyk-analytics/swagger.yml ./swagger-modified.yml
+
+          # The below modifications are required for Mintlify, because it cannot resolve external $ref links.
+
+          # Replace both with and without single quotes
+          sed -i "s|'https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json'|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+          sed -i "s|https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+
+          # Append the new schema definition under components.schemas
+          # We assume `components:` and `schemas:` already exist in the file
+          awk '
+            {print}
+            /schemas:/ && !done {
+              print "    OpenAPI3Schema:"
+              print "      type: object"
+              print "      additionalProperties: true"
+              done=1
+            }
+          ' ./swagger-modified.yml > ./swagger-final.yml
+
           mkdir -p dashboard-docs/
-          cp ./tyk-analytics/swagger.yml dashboard-docs/dashboard-swagger.yml
+          cp ./swagger-final.yml dashboard-docs/dashboard-swagger.yml
           cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
           cp ./tyk-analytics/docs/opa/opa-rules.md dashboard-docs/opa-rules.mdx
 
