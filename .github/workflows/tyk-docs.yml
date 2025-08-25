@@ -365,12 +365,12 @@ jobs:
 
       - name: Write out docs
         run: |
-             [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.mdx ./tyk-docs/tyk-docs/content/shared/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/tyk-docs/content/tyk-dashboard/
-             [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
+             [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/swagger/
+             [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.mdx ./tyk-docs/snippets/
+             [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/swagger/
+             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/snippets/
+             [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
+             [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/snippets/
 
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@v7.0.5
