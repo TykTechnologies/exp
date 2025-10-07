@@ -158,10 +158,6 @@ jobs:
                                                         --trim "Tyk classic API definition" \
                                                         -o ../../../gateway-docs/x-tyk-gateway.md
 
-      - run: ls -la
-
-      - run: python3 ../scripts/remove-oas-dublicates/index.py ./gateway-docs/x-tyk-gateway.md
-
       - name: Generate docs
         run: |
           cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
@@ -303,6 +299,13 @@ jobs:
     steps:
       - name: Restore artifacts
         uses: actions/download-artifact@v4.1.8
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - run: ls -la
+      
+      - run: python3 scripts/remove-oas-dublicates/index.py ./gateway-docs/x-tyk-gateway.md
 
       - name: Set up env
         run: |
