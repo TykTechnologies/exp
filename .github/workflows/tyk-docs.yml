@@ -158,7 +158,9 @@ jobs:
                                                         --trim "Tyk classic API definition" \
                                                         -o ../../../gateway-docs/x-tyk-gateway.md
 
-      - run: python3 scripts/remove-oas-dublicates/index.py ./gateway-docs/x-tyk-gateway.md
+      - run: ls -la
+
+      - run: python3 ../scripts/remove-oas-dublicates/index.py ./gateway-docs/x-tyk-gateway.md
 
       - name: Generate docs
         run: |
