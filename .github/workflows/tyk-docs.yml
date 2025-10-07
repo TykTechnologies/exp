@@ -144,10 +144,6 @@ jobs:
           path: /usr/local/bin/.
           destination: /usr/local/bin
 
-      - run: schema-gen extract --help
-
-      - run: exit 1
-      
       - run: mkdir -p gateway-docs/
 
       - name: Generate x-tyk-gateway docs
@@ -161,6 +157,8 @@ jobs:
                                                         --heading-format "### **%s**" \
                                                         --trim "Tyk classic API definition" \
                                                         -o ../../../gateway-docs/x-tyk-gateway.md
+
+      - run: python3 scripts/remove-oas-dublicates/index.py ./gateway-docs/x-tyk-gateway.md
 
       - name: Generate docs
         run: |
