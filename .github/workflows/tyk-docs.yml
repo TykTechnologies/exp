@@ -144,6 +144,10 @@ jobs:
           path: /usr/local/bin/.
           destination: /usr/local/bin
 
+      - run: schema-gen --help
+
+      - run: exit 1
+      
       - run: mkdir -p gateway-docs/
 
       - name: Generate x-tyk-gateway docs
