@@ -144,7 +144,9 @@ jobs:
           path: /usr/local/bin/.
           destination: /usr/local/bin
 
-      - run: schema-gen --help
+      - run: schema-gen help
+
+      - run: schema-gen extract --help
 
       - run: exit 1
       
