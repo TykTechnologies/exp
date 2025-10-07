@@ -300,12 +300,15 @@ jobs:
       - name: Restore artifacts
         uses: actions/download-artifact@v4.1.8
 
-      - name: Checkout repository
+      - name: Checkout exp repo (for cleanup script)
         uses: actions/checkout@v4
+        with:
+          path: ./exp  # this repo where your Python script lives
 
-      - run: ls -la
-      
-      - run: python3 scripts/remove-oas-dublicates/index.py ./gateway-docs/x-tyk-gateway.md
+      - name: Clean duplicate OAS entries
+        run: |
+          cd exp
+          python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.md
 
       - name: Set up env
         run: |
