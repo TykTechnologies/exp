@@ -308,7 +308,13 @@ jobs:
       - name: Clean duplicate OAS entries
         run: |
           cd exp
-          python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.md
+
+          if [ "${{ github.event.inputs.sync-gateway }}" = "true" ]; then
+            echo "🧹 Cleaning duplicate OAS entries for Gateway..."
+            python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.md
+          else
+            echo "Skipping duplicate cleanup — sync-gateway is false."
+          fi
 
       - name: Set up env
         run: |
