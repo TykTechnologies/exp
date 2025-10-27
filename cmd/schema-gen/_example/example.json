@@ -17,6 +17,28 @@
         "doc": "Declaration doc.",
         "types": [
           {
+            "name": "InterfaceArrayType",
+            "doc": "InterfaceArrayType demonstrates array of interface support",
+            "fields": [
+              {
+                "name": "Interfaces",
+                "type": "[]string|int|boolean|array",
+                "path": "InterfaceArrayType.Interfaces",
+                "doc": "Interfaces is an array of interfaces",
+                "tag": "json:\"interfaces\"",
+                "json_name": "interfaces"
+              },
+              {
+                "name": "TypedInterfaces",
+                "type": "[]KeyRequest",
+                "path": "InterfaceArrayType.TypedInterfaces",
+                "doc": "TypedInterfaces is an array of KeyRequest interfaces",
+                "tag": "json:\"typed_interfaces\"",
+                "json_name": "typed_interfaces"
+              }
+            ]
+          },
+          {
             "name": "Key",
             "doc": "Key embeds KeyRequest and KeyResponse.",
             "fields": [
@@ -56,7 +78,7 @@
                 "type": "t *KeyRequest",
                 "path": "KeyRequest",
                 "signature": "Validate () error",
-                "source": "func (t *KeyRequest) Validate() error {\n\tif t.SessionID == \"\" {\n\t\treturn errors.New(\"invalid KeyRequest, empty session\")\n\t}\n}"
+                "source": "func (t *KeyRequest) Validate() error {\n\tif t.SessionID == \"\" {\n\t\treturn errors.New(\"invalid KeyRequest, empty session\")\n\t}\n\treturn nil\n}"
               }
             ]
           },

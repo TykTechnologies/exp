@@ -49,6 +49,14 @@ type (
 	}
 
 	NamedRequests map[string]*KeyRequest
+
+	// InterfaceArrayType demonstrates array of interface support
+	InterfaceArrayType struct {
+		// Interfaces is an array of interfaces
+		Interfaces []interface{} `json:"interfaces"`
+		// TypedInterfaces is an array of KeyRequest interfaces
+		TypedInterfaces []KeyRequest `json:"typed_interfaces"`
+	}
 )
 
 const foo = "bar"
@@ -61,6 +69,7 @@ func (t *KeyRequest) Validate() error {
 	if t.SessionID == "" {
 		return errors.New("invalid KeyRequest, empty session")
 	}
+	return nil
 }
 
 func Validate() error {

@@ -8,39 +8,56 @@ import (
 )
 
 type (
-	File = os.File
 
-	// Key embeds KeyRequest and KeyResponse.
-	Key struct {
-		KeyRequest `json:""`
+File = os.File
 
-		KeyResponse `json:""`
-	}
+// InterfaceArrayType demonstrates array of interface support
+InterfaceArrayType struct {
+// Interfaces is an array of interfaces
+Interfaces []string|int|boolean|array `json:"interfaces"`
 
-	// KeyRequest doc.
-	KeyRequest struct {
-		// SessionID doc
-		SessionID string `json:"session_id"` // SessionID comment
-	}
+// TypedInterfaces is an array of KeyRequest interfaces
+TypedInterfaces []KeyRequest `json:"typed_interfaces"`
+}
 
-	// KeyResponse doc.
-	KeyResponse struct {
-		id string `json:"-"`
 
-		Status string `json:"status"`
+// Key embeds KeyRequest and KeyResponse.
+Key struct {
+ KeyRequest `json:""`
 
-		Message string `json:"message"`
-	}
+ KeyResponse `json:""`
+}
 
-	NamedRequests = map[string]KeyRequest
 
-	// Role is an enum type for user roles.
+// KeyRequest doc.
+KeyRequest struct {
+// SessionID doc
+SessionID string `json:"session_id"` // SessionID comment
+}
 
-	Role = string
 
-	// Status is an enum type.
+// KeyResponse doc.
+KeyResponse struct {
+id string `json:"-"`
 
-	Status = int
+Status string `json:"status"`
 
-	keyRequest struct{}
+Message string `json:"message"`
+}
+
+
+
+NamedRequests = map[string]KeyRequest
+
+// Role is an enum type for user roles.
+
+Role = string
+
+// Status is an enum type.
+
+Status = int
+
+keyRequest struct {}
+
 )
+

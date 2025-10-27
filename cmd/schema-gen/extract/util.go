@@ -43,6 +43,8 @@ func getTypeDeclarationsForArrayType(arrayType *ast.ArrayType) string {
 		declaration = getTypeDeclarationsForPointerType(obj)
 	case *ast.SelectorExpr:
 		declaration = getTypeDeclarationsForExpr(obj.X) + "." + getTypeDeclaration(obj.Sel)
+	case *ast.InterfaceType:
+		declaration = "string|int|boolean|array"
 	default:
 		declaration = fmt.Sprintf("%#v", arrayType.Elt)
 	}
@@ -83,7 +85,7 @@ func getTypeDeclarationsForExpr(expr ast.Expr) string {
 	case *ast.MapType:
 		return getTypeDeclarationsForMapType(expr)
 	case *ast.InterfaceType:
-		return ""
+		return "string|int|boolean|array"
 	case *ast.StructType:
 		return "struct{}"
 	case *ast.StarExpr:
