@@ -137,12 +137,20 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk
 
-      - name: 'Extract tykio/ci-tools:latest'
-        uses: shrink/actions-docker-extract@v3.0.1
+      - name: Checkout exp
+        uses: actions/checkout@v4.2.2
         with:
-          image: tykio/ci-tools:latest
-          path: /usr/local/bin/.
-          destination: /usr/local/bin
+          fetch-depth: 1
+          path: ./exp
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+
+      - name: Install schema-gen
+        run: |
+          cd ./exp/cmd/schema-gen && GOBIN=/usr/local/bin go install .
 
       - run: mkdir -p gateway-docs/
 
