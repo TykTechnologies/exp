@@ -161,7 +161,7 @@ jobs:
                                                         --root XTykAPIGateway \
                                                         --skip "OldOAS,APIDef,OAS,TykExtensionConfigParams" \
                                                         --title "## Tyk vendor extension reference" \
-                                                        --replace "model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
+                                                        --replace "tyktime.ReadableDuration=string,model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
                                                         --heading-format "### **%s**" \
                                                         --trim "Tyk classic API definition" \
                                                         -o ../../../gateway-docs/x-tyk-gateway.md
