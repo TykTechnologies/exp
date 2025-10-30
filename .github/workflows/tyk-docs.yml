@@ -47,10 +47,8 @@ on:  # yamllint disable-line rule:truthy
         type: choice
         options:
           - 'master'
+          - '5.8'
           - '5.3'
-          - '5.2'
-          - '5.1'
-          - '5.0 LTS'
       source:
         description: 'Override source branch'
         default: ''
@@ -140,12 +138,20 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk
 
-      - name: 'Extract tykio/ci-tools:latest'
-        uses: shrink/actions-docker-extract@v3.0.1
+      - name: Checkout exp
+        uses: actions/checkout@v4.2.2
         with:
-          image: tykio/ci-tools:latest
-          path: /usr/local/bin/.
-          destination: /usr/local/bin
+          fetch-depth: 1
+          path: ./exp
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+
+      - name: Install schema-gen
+        run: |
+          cd ./exp/cmd/schema-gen && GOBIN=/usr/local/bin go install .
 
       - run: mkdir -p gateway-docs/
       
@@ -156,7 +162,7 @@ jobs:
                                                         --root XTykAPIGateway \
                                                         --skip "OldOAS,APIDef,OAS,TykExtensionConfigParams" \
                                                         --title "## Tyk vendor extension reference" \
-                                                        --replace "model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
+                                                        --replace "tyktime.ReadableDuration=string,model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
                                                         --heading-format "### **%s**" \
                                                         --trim "Tyk classic API definition" \
                                                         -o ../../../gateway-docs/x-tyk-gateway.mdx
@@ -349,6 +355,22 @@ jobs:
     steps:
       - name: Restore artifacts
         uses: actions/download-artifact@v4.1.8
+
+      - name: Checkout exp repo (for cleanup script)
+        uses: actions/checkout@v4
+        with:
+          path: ./exp  # this repo where your Python script lives
+
+      - name: Clean duplicate OAS entries
+        run: |
+          cd exp
+
+          if [ "${{ github.event.inputs.sync-gateway }}" = "true" ]; then
+            echo "🧹 Cleaning duplicate OAS entries for Gateway..."
+            python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.md
+          else
+            echo "Skipping duplicate cleanup — sync-gateway is false."
+          fi
 
       - name: Set up env
         run: |

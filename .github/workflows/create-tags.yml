@@ -1,0 +1,174 @@
+name: "Create Tags Across Repositories"
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Branch to create tag from'
+        required: true
+        default: 'master'
+      tag_name:
+        description: 'Tag name to create'
+        required: true
+      tag_message:
+        description: 'Tag message (optional)'
+        required: false
+      repository_selection:
+        description: 'Select repositories to create tags for'
+        required: true
+        type: choice
+        options:
+          - 'tyk-core-products'
+          - 'tyk-sink'
+          - 'tyk-sync-internal'
+          - 'tyk-operator-internal'
+          - 'tyk-charts'
+          - 'portal'
+          - 'tyk-pump'
+          - 'governance-dashboard'
+          - 'governance-agent'
+        default: 'tyk-core-products'
+
+jobs:
+  create-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build repository list
+        id: build-repo-list
+        run: |
+          # Initialize empty array
+          REPOS=()
+          
+          # Add repositories based on dropdown selection
+          case "${{ github.event.inputs.repository_selection }}" in
+            "tyk-core-products")
+              REPOS+=("tyk")
+              REPOS+=("tyk-analytics")
+              REPOS+=("tyk-analytics-ui")
+              ;;
+            "tyk-sink")
+              REPOS+=("tyk-sink")
+              ;;
+            "tyk-sync-internal")
+              REPOS+=("tyk-sync-internal")
+              ;;
+            "tyk-operator-internal")
+              REPOS+=("tyk-operator-internal")
+              ;;
+            "tyk-charts")
+              REPOS+=("tyk-charts")
+              ;;
+            "portal")
+              REPOS+=("portal")
+              ;;
+            "tyk-pump")
+              REPOS+=("tyk-pump")
+              ;;
+            "governance-dashboard")
+              REPOS+=("governance-poc")
+              ;;
+            "governance-agent")
+              REPOS+=("nark")
+              ;;
+            *)
+              echo "::error::Invalid repository selection: ${{ github.event.inputs.repository_selection }}"
+              exit 1
+              ;;
+          esac
+          
+          # Convert array to JSON
+          JSON_ARRAY=$(jq -nc '$ARGS.positional' --args -- "${REPOS[@]}")
+          echo "repositories=$JSON_ARRAY" >> "$GITHUB_OUTPUT"
+          
+          # Create a comma-separated list for display
+          REPOS_CSV=$(IFS=,; echo "${REPOS[*]}")
+          echo "repositories_csv=$REPOS_CSV" >> "$GITHUB_OUTPUT"
+          
+          # Create Slack-formatted repository links
+          REPOS_LINKS=""
+          TAG_NAME_VAR="${{ github.event.inputs.tag_name }}"
+          for repo in "${REPOS[@]}"; do
+            REPOS_LINKS="${REPOS_LINKS}- <https://github.com/TykTechnologies/${repo}/releases/tag/${TAG_NAME_VAR} | ${repo}>\n"
+          done
+          echo "repositories_links<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$REPOS_LINKS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create tags
+        env:
+          GH_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
+          SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
+          TAG_NAME: ${{ github.event.inputs.tag_name }}
+          TAG_MESSAGE: ${{ github.event.inputs.tag_message }}
+        run: |
+          # Get repositories as JSON array
+          REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
+          
+          # Loop through each repository
+          echo "$REPOSITORIES" | jq -c '.[]' | while read -r repo; do
+            # Remove quotes from repo name
+            repo=$(echo "$repo" | tr -d '"')
+            echo "Creating tag for repository: $repo"
+            
+            # Check if repository exists
+            if gh repo view "TykTechnologies/$repo" &>/dev/null; then
+              # Create tag
+              if [ -z "$TAG_MESSAGE" ]; then
+                # Create lightweight tag
+                gh api \
+                  --method POST \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  "/repos/TykTechnologies/$repo/git/refs" \
+                  -f ref="refs/tags/$TAG_NAME" \
+                  -f sha="$(gh api "/repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH" --jq .object.sha)"
+              else
+                # Create annotated tag
+                # First create tag object
+                TAG_SHA=$(gh api \
+                  --method POST \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  "/repos/TykTechnologies/$repo/git/tags" \
+                  -f tag="$TAG_NAME" \
+                  -f message="$TAG_MESSAGE" \
+                  -f object="$(gh api "/repos/TykTechnologies/$repo/git/refs/heads/$SOURCE_BRANCH" --jq .object.sha)" \
+                  -f type="commit" \
+                  --jq .sha)
+                
+                # Then create reference to the tag
+                gh api \
+                  --method POST \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  "/repos/TykTechnologies/$repo/git/refs" \
+                  -f ref="refs/tags/$TAG_NAME" \
+                  -f sha="$TAG_SHA"
+              fi
+              
+              echo "✅ Successfully created tag $TAG_NAME for $repo"
+            else
+              echo "❌ Repository $repo does not exist or you don't have access to it"
+            fi
+          done
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: '#team-ext-engineering-pr-notifications'
+          slack-message: |
+            *Tags Created*
+            
+            Tag `${{ github.event.inputs.tag_name }}` was created from `${{ github.event.inputs.source_branch }}` in the following repositories:
+            
+            ${{ steps.build-repo-list.outputs.repositories_links }}
+            
+            Tag message: ${{ github.event.inputs.tag_message || 'Release tag' }}
+            
+            Triggered by: ${{ github.actor }}
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}

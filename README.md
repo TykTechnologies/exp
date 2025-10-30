@@ -67,3 +67,75 @@ you are willing to accept, if any. Nothing wrong with saying no.
 Warning: Packages here are experimental and unreliable. Some may one day
 be promoted to the main repository or other subrepository, or they may be
 modified arbitrarily or even disappear altogether.
+
+## GitHub Actions Workflows
+
+This repository provides several GitHub Actions workflows to automate common tasks across Tyk repositories.
+
+### Code Freeze Branch Creation
+
+The `code-freeze.yml` workflow creates consistent branches across multiple Tyk repositories simultaneously.
+
+**Purpose**: Automate the creation of release branches across the Tyk ecosystem.
+
+**Repositories affected**:
+- tyk-analytics
+- tyk-analytics-ui
+- tyk
+
+**Usage**:
+1. Go to the Actions tab in the repository
+2. Select "Code Freeze Branch Creation" workflow
+3. Click "Run workflow"
+4. Fill in the parameters:
+   - Source Branch: The branch to create from (e.g., master)
+   - Destination Branch: The branch to create (e.g., release-5.8)
+   - Send Slack notification: Whether to notify the team via Slack
+
+**Example use case**: Creating a release-5.8 branch from master across all repositories at once.
+
+### Create Tags Across Repositories
+
+The `create-tags.yml` workflow creates consistent tags across multiple Tyk repositories simultaneously with flexible repository selection.
+
+**Purpose**: Automate the creation of release tags across selected repositories in the Tyk ecosystem.
+
+**Available repositories**:
+- tyk
+- tyk-analytics
+- tyk-analytics-ui
+- tyk-sink
+- tyk-sync-internal
+- tyk-operator-internal
+- tyk-charts
+- portal
+- tyk-pump
+
+**Usage**:
+1. Go to the Actions tab in the repository
+2. Select "Create Tags Across Repositories" workflow
+3. Click "Run workflow"
+4. Fill in the parameters:
+   - Source Branch: The branch to create the tag from (e.g., master, release-5.8)
+   - Tag Name: The name of the tag to create (e.g., v5.8.0)
+   - Tag Message: Optional message for annotated tags
+   - Repository Selection: Choose which repositories to create tags for
+
+**Available repository options**:
+- **tyk-core-products**: Creates tags for tyk, tyk-analytics, and tyk-analytics-ui simultaneously
+- **tyk-sink**: Creates tag for tyk-sink
+- **tyk-sync-internal**: Creates tag for tyk-sync-internal
+- **tyk-operator-internal**: Creates tag for tyk-operator-internal
+- **tyk-charts**: Creates tag for tyk-charts
+- **portal**: Creates tag for portal
+- **tyk-pump**: Creates tag for tyk-pump
+
+**Key features**:
+- **Repository selection**: Choose specific repository or repository group from dropdown menu
+- **Automatic Slack notifications**: Team notifications are sent automatically after tag creation
+- **GitHub API integration**: Uses GitHub API for reliable tag creation
+- **Enhanced error handling**: Provides clear feedback for each repository operation
+
+**Example use case**: Creating a v5.8.0 tag from the release-5.8 branch on the tyk-core-products repositories.
+
+**Note**: Both workflows use the `ORG_GH_TOKEN` secret for authentication and the `UI_SLACK_AUTH_TOKEN` secret for Slack notifications. Ensure these secrets are properly configured in the repository settings.

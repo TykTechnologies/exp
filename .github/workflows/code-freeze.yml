@@ -1,0 +1,121 @@
+# yamllint disable rule:line-length
+---
+name: Code Freeze Branch Creation
+
+run-name: 'Creating ${{ inputs.destination_branch }} from ${{ inputs.source_branch }} by ${{ github.actor }}'
+
+# This workflow creates code freeze branches across multiple repositories.
+# It creates the same branch in all specified repositories from the specified source branch.
+
+on:  # yamllint disable-line rule:truthy
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source Branch (branch to create from)'
+        required: true
+        default: 'master'
+      destination_branch:
+        description: 'Destination Branch (branch to create)'
+        required: true
+        default: 'release-5.8'
+      notify_slack:
+        description: 'Send Slack notification when complete'
+        type: boolean
+        default: false
+
+env:
+  GITHUB_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
+
+jobs:
+  create-branches:
+    name: Create branches in all repositories
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate inputs
+        run: |
+          if [ -z "${{ github.event.inputs.destination_branch }}" ]; then
+            echo "Destination branch cannot be empty"
+            exit 1
+          fi
+          
+          echo "Creating branch ${{ github.event.inputs.destination_branch }} from ${{ github.event.inputs.source_branch }}"
+          echo "source_branch=${{ github.event.inputs.source_branch }}" >> $GITHUB_ENV
+          echo "destination_branch=${{ github.event.inputs.destination_branch }}" >> $GITHUB_ENV
+
+      - name: Create branch in tyk-analytics
+        run: |
+          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics.git
+          cd tyk-analytics
+          git checkout -b ${{ env.destination_branch }}
+          git push origin ${{ env.destination_branch }}
+          echo "✅ Created branch ${{ env.destination_branch }} in tyk-analytics"
+          cd ..
+
+      - name: Create branch in tyk-analytics-ui
+        run: |
+          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics-ui.git
+          cd tyk-analytics-ui
+          git checkout -b ${{ env.destination_branch }}
+          git push origin ${{ env.destination_branch }}
+          echo "✅ Created branch ${{ env.destination_branch }} in tyk-analytics-ui"
+          cd ..
+
+      - name: Create branch in tyk
+        run: |
+          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk.git
+          cd tyk
+          git checkout -b ${{ env.destination_branch }}
+          git push origin ${{ env.destination_branch }}
+          echo "✅ Created branch ${{ env.destination_branch }} in tyk"
+          cd ..
+
+  notify:
+    name: Send notifications
+    needs: [create-branches]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create summary
+        id: summary
+        run: |
+          # Create a properly formatted multiline output
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "Branch \`${{ github.event.inputs.destination_branch }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "- tyk-analytics: https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
+          echo "- tyk-analytics-ui: https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
+          echo "- tyk: https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "Triggered by: ${{ github.actor }}" >> $GITHUB_OUTPUT
+          echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Create a file for the GitHub issue
+          cat > issue_content.md << EOF
+          Branch \`${{ github.event.inputs.destination_branch }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:
+          
+          - [tyk-analytics](https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }})
+          - [tyk-analytics-ui](https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }})
+          - [tyk](https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }})
+          
+          Triggered by: ${{ github.actor }}
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+
+      - name: Send Slack notification
+        if: ${{ github.event.inputs.notify_slack == 'true' }}
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: '#team-ext-engineering-pr-notifications'
+          slack-message: |
+            *Code Freeze Branches Created*
+            
+            Branch `${{ github.event.inputs.destination_branch }}` was created from `${{ github.event.inputs.source_branch }}` in the following repositories:
+            
+            - <https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }}|tyk-analytics>
+            - <https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }}|tyk-analytics-ui>
+            - <https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }}|tyk>
+            
+            Triggered by: ${{ github.actor }}
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
