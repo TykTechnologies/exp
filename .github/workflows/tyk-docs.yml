@@ -368,6 +368,10 @@ jobs:
           if [ "${{ github.event.inputs.sync-gateway }}" = "true" ]; then
             echo "🧹 Cleaning duplicate OAS entries for Gateway..."
             ls -la
+            echo "123"
+            ls ../ -la
+            echo "456"
+            ls ../../ -la
             python3 scripts/remove-oas-dublicates/index.py --input-file ./gateway-docs/x-tyk-gateway.mdx
           else
             echo "Skipping duplicate cleanup — sync-gateway is false."
