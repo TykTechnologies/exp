@@ -356,26 +356,26 @@ jobs:
       - name: Restore artifacts
         uses: actions/download-artifact@v4.1.8
 
-      - name: Checkout exp repo (for cleanup script)
-        uses: actions/checkout@v4
-        with:
-          path: ./exp  # this repo where your Python script lives
+      # - name: Checkout exp repo (for cleanup script)
+      #   uses: actions/checkout@v4
+      #   with:
+      #     path: ./exp  # this repo where your Python script lives
 
-      - name: Clean duplicate OAS entries
-        run: |
-          cd exp
+      # - name: Clean duplicate OAS entries
+      #   run: |
+      #     cd exp
 
-          if [ "${{ github.event.inputs.sync-gateway }}" = "true" ]; then
-            echo "🧹 Cleaning duplicate OAS entries for Gateway..."
-            ls -la
-            echo "123"
-            ls -la ../
-            echo "456"
-            ls -la ../../
-            python3 scripts/remove-oas-dublicates/index.py --input-file ./gateway-docs/x-tyk-gateway.mdx
-          else
-            echo "Skipping duplicate cleanup — sync-gateway is false."
-          fi
+      #     if [ "${{ github.event.inputs.sync-gateway }}" = "true" ]; then
+      #       echo "🧹 Cleaning duplicate OAS entries for Gateway..."
+      #       ls -la
+      #       echo "123"
+      #       ls -la ../
+      #       echo "456"
+      #       ls -la ../../
+      #       python3 scripts/remove-oas-dublicates/index.py --input-file ./gateway-docs/x-tyk-gateway.mdx
+      #     else
+      #       echo "Skipping duplicate cleanup — sync-gateway is false."
+      #     fi
 
       - name: Set up env
         run: |
