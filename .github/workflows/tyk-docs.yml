@@ -372,7 +372,7 @@ jobs:
             ls -la ../
             echo "456"
             ls -la ../../
-            python3 scripts/remove-oas-dublicates/index.py --input-file ./gateway-docs/x-tyk-gateway.mdx
+            python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.mdx
           else
             echo "Skipping duplicate cleanup — sync-gateway is false."
           fi
