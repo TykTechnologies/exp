@@ -88,7 +88,7 @@ jobs:
 
       - if: github.event.inputs.release == 'master'
         run: |
-             echo "docsBranch=master" >> $GITHUB_ENV
+             echo "docsBranch=main" >> $GITHUB_ENV
              echo "repoBranch=master" >> $GITHUB_ENV
 
       - if: github.event.inputs.release == '5.0 LTS'
@@ -122,7 +122,8 @@ jobs:
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
-
+  
+  # Generates Tyk OAS specification & Gateway swagger
   gateway:
     needs: [sanitize]
     name: Gateway docs
@@ -153,7 +154,7 @@ jobs:
           cd ./exp/cmd/schema-gen && GOBIN=/usr/local/bin go install .
 
       - run: mkdir -p gateway-docs/
-
+      
       - name: Generate x-tyk-gateway docs
         working-directory: ./tyk/apidef/oas
         run: |
@@ -164,11 +165,34 @@ jobs:
                                                         --replace "tyktime.ReadableDuration=string,model.ObjectID=string,apidef.MiddlewareDriver=string,apidef.IdExtractorSource=string,apidef.IdExtractorType=string,apidef.RequestInputType=string,apidef.AuthTypeEnum=string,[]osin.AuthorizeRequestType=[]string" \
                                                         --heading-format "### **%s**" \
                                                         --trim "Tyk classic API definition" \
-                                                        -o ../../../gateway-docs/x-tyk-gateway.md
+                                                        -o ../../../gateway-docs/x-tyk-gateway.mdx
 
-      - name: Generate docs
+      - name: Generate Docs
         run: |
-          cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
+          # Make a temp file for modifications
+          cp ./tyk/swagger.yml ./swagger-modified.yml
+
+          # The below modifications are required for Mintlify, because it cannot resolve external $ref links.
+
+          # Replace both with and without single quotes
+          sed -i "s|'https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json'|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+          sed -i "s|https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+
+          # Append the new schema definition under components.schemas
+          # We assume `components:` and `schemas:` already exist in the file
+          awk '
+            {print}
+            /schemas:/ && !done {
+              print "    OpenAPI3Schema:"
+              print "      type: object"
+              print "      additionalProperties: true"
+              done=1
+            }
+          ' ./swagger-modified.yml > ./swagger-final.yml
+
+          # Copy to gateway-docs
+          cp ./swagger-final.yml gateway-docs/gateway-swagger.yml
+
 
       - name: Store docs
         uses: actions/upload-artifact@v4.4.3
@@ -176,6 +200,7 @@ jobs:
           name: gateway-docs
           path: gateway-docs
 
+  # Generates dashboard OPA rules & Dashboard swagger
   dashboard:
     needs: [sanitize]
     name: Dashboard docs
@@ -191,12 +216,33 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk-analytics
 
-      - name: Generate docs
+      - name: Generate Docs
         run: |
+          # Make a temp file for modifications
+          cp ./tyk-analytics/swagger.yml ./swagger-modified.yml
+
+          # The below modifications are required for Mintlify, because it cannot resolve external $ref links.
+
+          # Replace both with and without single quotes
+          sed -i "s|'https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json'|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+          sed -i "s|https://raw.githubusercontent.com/TykTechnologies/tyk/refs/heads/master/apidef/oas/schema/3.0.json|'#/components/schemas/OpenAPI3Schema'|g" ./swagger-modified.yml
+
+          # Append the new schema definition under components.schemas
+          # We assume `components:` and `schemas:` already exist in the file
+          awk '
+            {print}
+            /schemas:/ && !done {
+              print "    OpenAPI3Schema:"
+              print "      type: object"
+              print "      additionalProperties: true"
+              done=1
+            }
+          ' ./swagger-modified.yml > ./swagger-final.yml
+
           mkdir -p dashboard-docs/
-          cp ./tyk-analytics/swagger.yml dashboard-docs/dashboard-swagger.yml
+          cp ./swagger-final.yml dashboard-docs/dashboard-swagger.yml
           cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
-          cp ./tyk-analytics/docs/opa/opa-rules.md dashboard-docs/opa-rules.md
+          cp ./tyk-analytics/docs/opa/opa-rules.md dashboard-docs/opa-rules.mdx
 
       - name: Store docs
         uses: actions/upload-artifact@v4.4.3
@@ -204,6 +250,7 @@ jobs:
           name: dashboard-docs
           path: dashboard-docs
 
+  # Generates MDCB swagger
   mdcb:
     needs: [sanitize]
     name: MDCB docs
@@ -230,6 +277,7 @@ jobs:
           name: mdcb-docs
           path: mdcb-docs
 
+  # Generates environment configuration docs for Gateway, Dashboard, Pump, and MDCB
   configs:
     needs: [sanitize]
     name: Configuration docs
@@ -255,7 +303,7 @@ jobs:
         run: |
           repo=gateway
           branch=$repoBranch
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/gateway.md $dest
@@ -266,7 +314,7 @@ jobs:
         run: |
           repo=dashboard
           branch=$repoBranch
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -277,7 +325,7 @@ jobs:
         run: |
           repo=pump
           branch=${{ github.event.inputs.source || 'master' }}
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -288,7 +336,7 @@ jobs:
         run: |
           repo=mdcb
           branch=${{ github.event.inputs.source || 'master' }}
-          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.md
+          dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
@@ -319,7 +367,7 @@ jobs:
 
           if [ "${{ github.event.inputs.sync-gateway }}" = "true" ]; then
             echo "🧹 Cleaning duplicate OAS entries for Gateway..."
-            python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.md
+            python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.mdx
           else
             echo "Skipping duplicate cleanup — sync-gateway is false."
           fi
@@ -339,12 +387,12 @@ jobs:
 
       - name: Write out docs
         run: |
-             [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.md ./tyk-docs/tyk-docs/content/shared/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.md ./tyk-docs/tyk-docs/content/shared/
-             [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/tyk-docs/assets/others/
-             [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/tyk-docs/content/shared/
+             [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/swagger/
+             [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.mdx ./tyk-docs/snippets/
+             [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/swagger/
+             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/snippets/
+             [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
+             [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/snippets/
 
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@v7.0.5
