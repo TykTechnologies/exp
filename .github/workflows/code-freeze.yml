@@ -10,14 +10,6 @@ run-name: 'Creating ${{ inputs.destination_branch }} from ${{ inputs.source_bran
 on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
     inputs:
-      source_branch:
-        description: 'Source Branch (branch to create from)'
-        required: true
-        default: 'master'
-      destination_branch:
-        description: 'Destination Branch (branch to create)'
-        required: true
-        default: 'release-5.8'
       include_tyk:
         description: 'Include tyk'
         type: boolean
@@ -34,6 +26,14 @@ on:  # yamllint disable-line rule:truthy
         description: 'Include tyk-sink'
         type: boolean
         default: false
+      source_branch:
+        description: 'Source Branch (branch to create from)'
+        required: true
+        default: 'master'
+      destination_branch:
+        description: 'Destination Branch (branch to create)'
+        required: true
+        default: 'release-5.8'
       notify_slack:
         description: 'Send Slack notification when complete'
         type: boolean
