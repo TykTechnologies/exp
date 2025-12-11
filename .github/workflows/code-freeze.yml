@@ -13,15 +13,15 @@ on:  # yamllint disable-line rule:truthy
       include_tyk:
         description: 'Include tyk'
         type: boolean
-        default: true
+        default: false
       include_tyk_analytics:
         description: 'Include tyk-analytics'
         type: boolean
-        default: true
+        default: false
       include_tyk_analytics_ui:
         description: 'Include tyk-analytics-ui'
         type: boolean
-        default: true
+        default: false
       include_tyk_sink:
         description: 'Include tyk-sink'
         type: boolean
@@ -33,11 +33,9 @@ on:  # yamllint disable-line rule:truthy
       source_branch:
         description: 'Source Branch (branch to create from)'
         required: true
-        default: 'master'
       destination_branch:
         description: 'Destination Branch (branch to create)'
         required: true
-        default: 'release-5.8'
       notify_slack:
         description: 'Send Slack notification when complete'
         type: boolean
