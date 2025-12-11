@@ -26,6 +26,10 @@ on:  # yamllint disable-line rule:truthy
         description: 'Include tyk-sink'
         type: boolean
         default: false
+      include_tyk_pump:
+        description: 'Include tyk-pump'
+        type: boolean
+        default: false
       source_branch:
         description: 'Source Branch (branch to create from)'
         required: true
@@ -71,6 +75,10 @@ jobs:
           
           if [ "${{ github.event.inputs.include_tyk_sink }}" = "true" ]; then
             REPOS+=("tyk-sink")
+          fi
+          
+          if [ "${{ github.event.inputs.include_tyk_pump }}" = "true" ]; then
+            REPOS+=("tyk-pump")
           fi
           
           # Check if at least one repository is selected
