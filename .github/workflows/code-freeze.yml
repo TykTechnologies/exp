@@ -18,6 +18,19 @@ on:  # yamllint disable-line rule:truthy
         description: 'Destination Branch (branch to create)'
         required: true
         default: 'release-5.8'
+      repository_selection:
+        description: 'Select repositories to create the branch in'
+        required: true
+        type: choice
+        options:
+          - 'tyk-core-products'
+          - 'tyk-sink'
+          - 'tyk-sync-internal'
+          - 'tyk-operator-internal'
+          - 'tyk-charts'
+          - 'portal'
+          - 'tyk-pump'
+        default: 'tyk-core-products'
       notify_slack:
         description: 'Send Slack notification when complete'
         type: boolean
@@ -30,6 +43,8 @@ jobs:
   create-branches:
     name: Create branches in all repositories
     runs-on: ubuntu-latest
+    outputs:
+      repositories_links: ${{ steps.build-repo-list.outputs.repositories_links }}
     steps:
       - name: Validate inputs
         run: |
@@ -37,70 +52,78 @@ jobs:
             echo "Destination branch cannot be empty"
             exit 1
           fi
-          
+
           echo "Creating branch ${{ github.event.inputs.destination_branch }} from ${{ github.event.inputs.source_branch }}"
           echo "source_branch=${{ github.event.inputs.source_branch }}" >> $GITHUB_ENV
           echo "destination_branch=${{ github.event.inputs.destination_branch }}" >> $GITHUB_ENV
 
-      - name: Create branch in tyk-analytics
+      - name: Build repository list
+        id: build-repo-list
         run: |
-          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics.git
-          cd tyk-analytics
-          git checkout -b ${{ env.destination_branch }}
-          git push origin ${{ env.destination_branch }}
-          echo "✅ Created branch ${{ env.destination_branch }} in tyk-analytics"
-          cd ..
+          REPOS=()
 
-      - name: Create branch in tyk-analytics-ui
-        run: |
-          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk-analytics-ui.git
-          cd tyk-analytics-ui
-          git checkout -b ${{ env.destination_branch }}
-          git push origin ${{ env.destination_branch }}
-          echo "✅ Created branch ${{ env.destination_branch }} in tyk-analytics-ui"
-          cd ..
+          case "${{ github.event.inputs.repository_selection }}" in
+            "tyk-core-products")
+              REPOS+=("tyk")
+              REPOS+=("tyk-analytics")
+              REPOS+=("tyk-analytics-ui")
+              ;;
+            "tyk-sink")
+              REPOS+=("tyk-sink")
+              ;;
+            "tyk-sync-internal")
+              REPOS+=("tyk-sync-internal")
+              ;;
+            "tyk-operator-internal")
+              REPOS+=("tyk-operator-internal")
+              ;;
+            "tyk-charts")
+              REPOS+=("tyk-charts")
+              ;;
+            "portal")
+              REPOS+=("portal")
+              ;;
+            "tyk-pump")
+              REPOS+=("tyk-pump")
+              ;;
+            *)
+              echo "::error::Invalid repository selection: ${{ github.event.inputs.repository_selection }}"
+              exit 1
+              ;;
+          esac
 
-      - name: Create branch in tyk
+          JSON_ARRAY=$(jq -nc '$ARGS.positional' --args -- "${REPOS[@]}")
+          echo "repositories=$JSON_ARRAY" >> "$GITHUB_OUTPUT"
+
+          REPOS_LINKS=""
+          DEST="${{ github.event.inputs.destination_branch }}"
+          for repo in "${REPOS[@]}"; do
+            REPOS_LINKS="${REPOS_LINKS}- <https://github.com/TykTechnologies/${repo}/tree/${DEST}|${repo}>\n"
+          done
+          echo "repositories_links<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$REPOS_LINKS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create branches
         run: |
-          git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/tyk.git
-          cd tyk
-          git checkout -b ${{ env.destination_branch }}
-          git push origin ${{ env.destination_branch }}
-          echo "✅ Created branch ${{ env.destination_branch }} in tyk"
-          cd ..
+          REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
+
+          echo "$REPOSITORIES" | jq -c '.[]' | while read -r repo; do
+            repo=$(echo "$repo" | tr -d '"')
+            echo "Creating branch ${{ env.destination_branch }} in $repo"
+            git clone --depth 1 --branch ${{ env.source_branch }} https://${{ secrets.ORG_GH_TOKEN }}@github.com/TykTechnologies/${repo}.git
+            cd "$repo"
+            git checkout -b ${{ env.destination_branch }}
+            git push origin ${{ env.destination_branch }}
+            echo "✅ Created branch ${{ env.destination_branch }} in $repo"
+            cd ..
+          done
 
   notify:
     name: Send notifications
     needs: [create-branches]
     runs-on: ubuntu-latest
     steps:
-      - name: Create summary
-        id: summary
-        run: |
-          # Create a properly formatted multiline output
-          echo "summary<<EOF" >> $GITHUB_OUTPUT
-          echo "Branch \`${{ github.event.inputs.destination_branch }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo "- tyk-analytics: https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
-          echo "- tyk-analytics-ui: https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
-          echo "- tyk: https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }}" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo "Triggered by: ${{ github.actor }}" >> $GITHUB_OUTPUT
-          echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          # Create a file for the GitHub issue
-          cat > issue_content.md << EOF
-          Branch \`${{ github.event.inputs.destination_branch }}\` was created from \`${{ github.event.inputs.source_branch }}\` in the following repositories:
-          
-          - [tyk-analytics](https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }})
-          - [tyk-analytics-ui](https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }})
-          - [tyk](https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }})
-          
-          Triggered by: ${{ github.actor }}
-          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          EOF
-
       - name: Send Slack notification
         if: ${{ github.event.inputs.notify_slack == 'true' }}
         uses: slackapi/slack-github-action@v1.25.0
@@ -108,13 +131,11 @@ jobs:
           channel-id: '#team-ext-engineering-pr-notifications'
           slack-message: |
             *Code Freeze Branches Created*
-            
+
             Branch `${{ github.event.inputs.destination_branch }}` was created from `${{ github.event.inputs.source_branch }}` in the following repositories:
-            
-            - <https://github.com/TykTechnologies/tyk-analytics/tree/${{ github.event.inputs.destination_branch }}|tyk-analytics>
-            - <https://github.com/TykTechnologies/tyk-analytics-ui/tree/${{ github.event.inputs.destination_branch }}|tyk-analytics-ui>
-            - <https://github.com/TykTechnologies/tyk/tree/${{ github.event.inputs.destination_branch }}|tyk>
-            
+
+            ${{ needs.create-branches.outputs.repositories_links }}
+
             Triggered by: ${{ github.actor }}
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
