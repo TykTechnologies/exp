@@ -10,14 +10,6 @@ run-name: 'Creating ${{ inputs.destination_branch }} from ${{ inputs.source_bran
 on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
     inputs:
-      source_branch:
-        description: 'Source Branch (branch to create from)'
-        required: true
-        default: 'master'
-      destination_branch:
-        description: 'Destination Branch (branch to create)'
-        required: true
-        default: 'release-5.8'
       repository_selection:
         description: 'Select repositories to create the branch in'
         required: true
@@ -31,6 +23,14 @@ on:  # yamllint disable-line rule:truthy
           - 'portal'
           - 'tyk-pump'
         default: 'tyk-core-products'
+      source_branch:
+        description: 'Source Branch (branch to create from)'
+        required: true
+        default: 'master'
+      destination_branch:
+        description: 'Destination Branch (branch to create)'
+        required: true
+        default: 'release-5.8'
       notify_slack:
         description: 'Send Slack notification when complete'
         type: boolean
