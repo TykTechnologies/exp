@@ -15,7 +15,7 @@ on:  # yamllint disable-line rule:truthy
         required: true
         type: choice
         options:
-          - tyk-core-products (tyk, tyk-analytics, tyk-analytics-ui)
+          - tyk-core-products
           - tyk-sink
           - tyk-pump
           - portal
@@ -51,7 +51,7 @@ jobs:
 
           # Add repositories based on dropdown selection
           SELECTION="${{ github.event.inputs.repositories }}"
-          if [[ "$SELECTION" == tyk-core-products* ]]; then
+          if [ "$SELECTION" = "tyk-core-products" ]; then
             REPOS+=("tyk" "tyk-analytics" "tyk-analytics-ui")
           elif [ "$SELECTION" = "tyk-sink" ]; then
             REPOS+=("tyk-sink")
