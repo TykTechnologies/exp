@@ -21,6 +21,7 @@ on:  # yamllint disable-line rule:truthy
           - portal
           - tyk-operator-internal
           - tyk-sync-internal
+          - tyk-charts
       source_branch:
         description: 'Source Branch (branch to create from)'
         required: true
@@ -63,6 +64,8 @@ jobs:
             REPOS+=("tyk-operator-internal")
           elif [ "$SELECTION" = "tyk-sync-internal" ]; then
             REPOS+=("tyk-sync-internal")
+          elif [ "$SELECTION" = "tyk-charts" ]; then
+            REPOS+=("tyk-charts")
           fi
           
           # Convert array to JSON
