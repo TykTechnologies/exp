@@ -10,26 +10,17 @@ run-name: 'Creating ${{ inputs.destination_branch }} from ${{ inputs.source_bran
 on:  # yamllint disable-line rule:truthy
   workflow_dispatch:
     inputs:
-      include_tyk:
-        description: 'Include tyk'
-        type: boolean
-        default: false
-      include_tyk_analytics:
-        description: 'Include tyk-analytics'
-        type: boolean
-        default: false
-      include_tyk_analytics_ui:
-        description: 'Include tyk-analytics-ui'
-        type: boolean
-        default: false
-      include_tyk_sink:
-        description: 'Include tyk-sink'
-        type: boolean
-        default: false
-      include_tyk_pump:
-        description: 'Include tyk-pump'
-        type: boolean
-        default: false
+      repositories:
+        description: 'Repositories to create branch in'
+        required: true
+        type: choice
+        options:
+          - tyk-core-products (tyk, tyk-analytics, tyk-analytics-ui)
+          - tyk-sink
+          - tyk-pump
+          - portal
+          - tyk-operator-internal
+          - tyk-sync-internal
       source_branch:
         description: 'Source Branch (branch to create from)'
         required: true
@@ -57,32 +48,21 @@ jobs:
         run: |
           # Initialize empty array
           REPOS=()
-          
-          # Add repositories based on checkbox selections
-          if [ "${{ github.event.inputs.include_tyk }}" = "true" ]; then
-            REPOS+=("tyk")
-          fi
-          
-          if [ "${{ github.event.inputs.include_tyk_analytics }}" = "true" ]; then
-            REPOS+=("tyk-analytics")
-          fi
-          
-          if [ "${{ github.event.inputs.include_tyk_analytics_ui }}" = "true" ]; then
-            REPOS+=("tyk-analytics-ui")
-          fi
-          
-          if [ "${{ github.event.inputs.include_tyk_sink }}" = "true" ]; then
+
+          # Add repositories based on dropdown selection
+          SELECTION="${{ github.event.inputs.repositories }}"
+          if [[ "$SELECTION" == tyk-core-products* ]]; then
+            REPOS+=("tyk" "tyk-analytics" "tyk-analytics-ui")
+          elif [ "$SELECTION" = "tyk-sink" ]; then
             REPOS+=("tyk-sink")
-          fi
-          
-          if [ "${{ github.event.inputs.include_tyk_pump }}" = "true" ]; then
+          elif [ "$SELECTION" = "tyk-pump" ]; then
             REPOS+=("tyk-pump")
-          fi
-          
-          # Check if at least one repository is selected
-          if [ ${#REPOS[@]} -eq 0 ]; then
-            echo "::error::No repositories selected. Please select at least one repository."
-            exit 1
+          elif [ "$SELECTION" = "portal" ]; then
+            REPOS+=("portal")
+          elif [ "$SELECTION" = "tyk-operator-internal" ]; then
+            REPOS+=("tyk-operator-internal")
+          elif [ "$SELECTION" = "tyk-sync-internal" ]; then
+            REPOS+=("tyk-sync-internal")
           fi
           
           # Convert array to JSON
