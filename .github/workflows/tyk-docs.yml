@@ -437,7 +437,8 @@ jobs:
              [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/snippets/
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
              [ -d "portal-docs" ]    && cp portal-docs/*.yaml ./tyk-docs/swagger/
-             [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/snippets/
+             [ -d "config-docs" ]    && find config-docs -type f -exec cp {} ./tyk-docs/snippets/ \;
+             true
 
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@v7.0.5
