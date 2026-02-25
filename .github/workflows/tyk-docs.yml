@@ -42,6 +42,9 @@ on:  # yamllint disable-line rule:truthy
       sync-mdcb:
         description: Include MDCB
         type: boolean
+      sync-portal:
+        description: Include Portal
+        type: boolean
       release:
         description: 'Release version'
         type: choice
@@ -49,6 +52,10 @@ on:  # yamllint disable-line rule:truthy
           - 'master'
           - '5.8'
           - '5.3'
+      portal-release:
+        description: 'Portal release version'
+        type: string
+        default: 'master'
       source:
         description: 'Override source branch'
         default: ''
@@ -76,6 +83,7 @@ jobs:
       docsBranch: ${{ steps.collect.outputs.docsBranch }}
       repoBranch: ${{ steps.collect.outputs.repoBranch }}
       jira: ${{ steps.collect.outputs.jira }}
+      portalBranch: ${{ steps.collect.outputs.portalBranch }}
     steps:
       - name: Sanitize JIRA input
         run: |
@@ -117,11 +125,20 @@ jobs:
       - if: github.event.inputs.destination != ''
         run: echo "docsBranch=${{ github.event.inputs.destination }}" >> $GITHUB_ENV
 
+      - name: Set Portal branch
+        run: |
+          portalBranch="${{ github.event.inputs.portal-release }}"
+          if [ -z "$portalBranch" ]; then
+            portalBranch="master"
+          fi
+          echo "portalBranch=$portalBranch" >> $GITHUB_ENV
+
       - id: collect
         run: |
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
+             echo "portalBranch=${{ env.portalBranch }}" >> $GITHUB_OUTPUT
   
   # Generates Tyk OAS specification & Gateway swagger
   gateway:
@@ -277,6 +294,33 @@ jobs:
           name: mdcb-docs
           path: mdcb-docs
 
+  # Generates Portal Admin API swagger
+  portal:
+    needs: [sanitize]
+    name: Portal docs
+    if: ${{ github.event.inputs.sync-portal == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Portal
+        uses: actions/checkout@v4.2.2
+        with:
+          token: ${{ secrets.ORG_GH_TOKEN }}
+          fetch-depth: 1
+          repository: TykTechnologies/portal
+          ref: ${{ needs.sanitize.outputs.portalBranch }}
+          path: ./portal
+
+      - name: Generate docs
+        run: |
+          mkdir -p portal-docs/
+          cp ./portal/docs/api/enterprise-developer-portal-swagger.yaml portal-docs/enterprise-developer-portal-swagger.yaml
+
+      - name: Store docs
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: portal-docs
+          path: portal-docs
+
   # Generates environment configuration docs for Gateway, Dashboard, Pump, and MDCB
   configs:
     needs: [sanitize]
@@ -349,7 +393,7 @@ jobs:
 
   finish:
     name: Open PR against tyk-docs
-    needs: [sanitize, configs, dashboard, gateway]
+    needs: [sanitize, configs, dashboard, gateway, portal]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -392,6 +436,7 @@ jobs:
              [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/swagger/
              [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/snippets/
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
+             [ -d "portal-docs" ]    && cp portal-docs/*.yaml ./tyk-docs/swagger/
              [ -d "config-docs" ]    && cp config-docs/* ./tyk-docs/snippets/
 
       - name: Raise tyk-docs PR
@@ -409,8 +454,10 @@ jobs:
             Tyk Dashboard: ${{ github.event.inputs.sync-dashboard }}
             Tyk MDCB ${{ github.event.inputs.sync-mdcb }}
             Tyk Pump ${{ github.event.inputs.sync-pump }}
+            Tyk Portal: ${{ github.event.inputs.sync-portal }}
 
             Intended for: ${{ github.event.inputs.release }}
+            Portal release: ${{ needs.sanitize.outputs.portalBranch }}
             Changes sourced from: ${{ needs.sanitize.outputs.repoBranch }}
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
