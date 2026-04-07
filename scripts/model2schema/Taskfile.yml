@@ -66,7 +66,9 @@ tasks:
   install:
     desc: "Install deps"
     cmds:
-      - go install github.com/homeport/dyff/cmd/dyff@latest
+      - |
+        VERSION=v1.11.3
+        go install github.com/homeport/dyff/cmd/dyff@${VERSION}
 
   update:
     desc: "Update schema-gen dependency"

@@ -65,10 +65,10 @@ jobs:
         run: |
           echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
 
-      - name: 'Extract tykio/ci-tools:latest'
+      - name: 'Extract tykio/ci-tools'
         uses: shrink/actions-docker-extract@f97780187d59e88f06a98b166a7e700c0f400314  # v3.0.1
         with:
-          image: tykio/ci-tools:latest
+          image: tykio/ci-tools@sha256:50ed0ddf4e321c61cbacfd2bfacdd180fb0dbce0ce4da3ec264847354ab83c96
           path: /usr/local/bin/workflow-lint
           destination: /usr/local/bin
 

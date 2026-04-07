@@ -44,4 +44,6 @@ tasks:
     status:
       - type schema-gen
     cmds:
-      - go install github.com/TykTechnologies/exp/cmd/schema-gen@latest
+      - |
+        VERSION=v0.0.0-20260407114521-8eb6424dfe10
+        go install github.com/TykTechnologies/exp/cmd/schema-gen@${VERSION}

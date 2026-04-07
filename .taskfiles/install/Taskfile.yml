@@ -13,11 +13,15 @@ tasks:
     status:
      - type gotestsum
     cmds:
-      - go install github.com/wadey/gocovmerge@latest
+      - |
+        VERSION=v0.0.0-20160331181800-b5bfa59ec0ad
+        go install github.com/wadey/gocovmerge@${VERSION}
 
   gotestsum:
     internal: true
     status:
       - type gotestsum
     cmds:
-      - go install gotest.tools/gotestsum@latest
+      - |
+        VERSION=v1.12.3
+        go install gotest.tools/gotestsum@${VERSION}

@@ -52,6 +52,6 @@ jobs:
         uses: ./.github/actions/github-sync
         if: github.event_name == 'push'
         with:
-          repository: TykTechnologies/github-actions
+          repository: TykTechnologies/github-actions # dispatch-target
           eventType: exp-cmd
           token: ${{ secrets.ORG_GH_TOKEN }}
