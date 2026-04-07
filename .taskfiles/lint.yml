@@ -18,7 +18,9 @@ tasks:
     status:
       - type actionlint
     cmds:
-      - go install github.com/rhysd/actionlint/cmd/actionlint@latest
+      - |
+        VERSION=v1.7.7
+        go install github.com/rhysd/actionlint/cmd/actionlint@${VERSION}
 
   install:shellcheck:
     desc: Install shellcheck

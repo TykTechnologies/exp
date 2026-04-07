@@ -57,7 +57,7 @@ jobs:
 
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
 
@@ -65,15 +65,15 @@ jobs:
         run: |
           echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
 
-      - name: 'Extract tykio/ci-tools:latest'
-        uses: shrink/actions-docker-extract@v3.0.1
+      - name: 'Extract tykio/ci-tools'
+        uses: shrink/actions-docker-extract@f97780187d59e88f06a98b166a7e700c0f400314  # v3.0.1
         with:
-          image: tykio/ci-tools:latest
+          image: tykio/ci-tools@sha256:50ed0ddf4e321c61cbacfd2bfacdd180fb0dbce0ce4da3ec264847354ab83c96
           path: /usr/local/bin/workflow-lint
           destination: /usr/local/bin
 
       - name: Checkout repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           repository: ${{ github.event.inputs.repository }}
           token: ${{ secrets.ORG_GH_TOKEN }}
@@ -97,7 +97,7 @@ jobs:
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Raise PR
-        uses: peter-evans/create-pull-request@v7.0.5
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
           commit-message: Workflow lint autofix

@@ -22,17 +22,23 @@ on:  # yamllint disable-line rule:truthy
       - go.sum
 
 jobs:
+  dependency-guard:
+    if: github.event_name == 'pull_request'
+    uses: TykTechnologies/github-actions/.github/workflows/dependency-guard.yml@d3fa20888fa2878e877e22bb7702141217290e7c  # main
+
   exp-cmd-build:
+    needs: [dependency-guard]
+    if: always() && !failure() && !cancelled()
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout PR
-        uses: TykTechnologies/exp/.github/actions/checkout-pr@main
+        uses: TykTechnologies/exp/.github/actions/checkout-pr@49245597f0620ef8460735bb0ae6e93be5f8ca51  # main
         with:
           token: ${{ secrets.ORG_GH_TOKEN }}
 
       - name: Setup Golang
-        uses: actions/setup-go@v5.1.0
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed  # v5.1.0
         with:
           go-version: '1.21.x'
 
@@ -46,6 +52,6 @@ jobs:
         uses: ./.github/actions/github-sync
         if: github.event_name == 'push'
         with:
-          repository: TykTechnologies/github-actions
+          repository: TykTechnologies/github-actions # dispatch-target
           eventType: exp-cmd
           token: ${{ secrets.ORG_GH_TOKEN }}
