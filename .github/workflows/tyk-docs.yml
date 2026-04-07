@@ -73,7 +73,7 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   GOPRIVATE: github.com/TykTechnologies
-  configInfoGeneratorBranch: main
+  configInfoGeneratorBranch: fix/otel-metrics-config
 
 jobs:
   sanitize:
