@@ -36,6 +36,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
       - name: Build repository list
         id: build-repo-list
         run: |
@@ -99,7 +107,7 @@ jobs:
 
       - name: Create tags
         env:
-          GH_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
           TAG_NAME: ${{ github.event.inputs.tag_name }}
           TAG_MESSAGE: ${{ github.event.inputs.tag_message }}

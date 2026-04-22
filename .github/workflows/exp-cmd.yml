@@ -32,10 +32,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
       - name: Checkout PR
         uses: TykTechnologies/exp/.github/actions/checkout-pr@49245597f0620ef8460735bb0ae6e93be5f8ca51  # main
         with:
-          token: ${{ secrets.ORG_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Golang
         uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed  # v5.1.0
@@ -54,4 +62,4 @@ jobs:
         with:
           repository: TykTechnologies/github-actions # dispatch-target
           eventType: exp-cmd
-          token: ${{ secrets.ORG_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
