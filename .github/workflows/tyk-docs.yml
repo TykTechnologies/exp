@@ -224,10 +224,18 @@ jobs:
     if: ${{ github.event.inputs.sync-dashboard == 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
       - name: Checkout Dashboard
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
-          token: ${{ secrets.ORG_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 1
           repository: TykTechnologies/tyk-analytics
           ref: ${{ needs.sanitize.outputs.repoBranch }}
@@ -274,10 +282,18 @@ jobs:
     if: ${{ github.event.inputs.sync-mdcb == 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
       - name: Checkout MDCB
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
-          token: ${{ secrets.ORG_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 1
           repository: TykTechnologies/tyk-sink
           ref: ${{ needs.sanitize.outputs.repoBranch }}
@@ -301,10 +317,18 @@ jobs:
     if: ${{ github.event.inputs.sync-portal == 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
       - name: Checkout Portal
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
-          token: ${{ secrets.ORG_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 1
           repository: TykTechnologies/portal
           ref: ${{ needs.sanitize.outputs.portalBranch }}
@@ -327,12 +351,20 @@ jobs:
     name: Configuration docs
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
       - name: Install Config Generator
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           repository: TykTechnologies/tyk-config-info-generator
           path: ./tyk-config-info-generator
-          token: ${{ secrets.ORG_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           ref: ${{ env.configInfoGeneratorBranch }}
 
       - name: Set up env
@@ -349,7 +381,7 @@ jobs:
           branch=$repoBranch
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/gateway.md $dest
 
       - name: Sync Dashboard
@@ -360,7 +392,7 @@ jobs:
           branch=$repoBranch
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Sync Pump
@@ -371,7 +403,7 @@ jobs:
           branch=${{ github.event.inputs.source || 'master' }}
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Sync MDCB
@@ -382,7 +414,7 @@ jobs:
           branch=${{ github.event.inputs.source || 'master' }}
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
-          sudo TOKEN=${{ secrets.ORG_GH_TOKEN }} node app.js $repo:$branch
+          sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
           cp /node/home/tyk-config-info-generator/info/$branch/$repo.md $dest
 
       - name: Store docs
@@ -397,6 +429,14 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
       - name: Restore artifacts
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
 
@@ -443,7 +483,7 @@ jobs:
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
         with:
-          token: ${{ secrets.ORG_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           commit-message: Import config/docs
           title: '[${{ env.jira }}] Update documentation for ${{ github.event.inputs.release }}'
           body: |
