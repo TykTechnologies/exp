@@ -34,9 +34,6 @@ on:  # yamllint disable-line rule:truthy
         type: boolean
         default: false
 
-env:
-  GITHUB_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
-
 jobs:
   create-branches:
     name: Create branches in selected repositories
@@ -44,6 +41,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
 
       - name: Build repository list
         id: build-repo-list
@@ -91,7 +96,7 @@ jobs:
 
       - name: Create branches
         env:
-          GH_TOKEN: ${{ secrets.ORG_GH_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
           DEST_BRANCH: ${{ github.event.inputs.destination_branch }}
         run: |
