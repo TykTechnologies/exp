@@ -92,7 +92,7 @@ jobs:
         env:
           TOKEN: '${{ steps.app-token.outputs.token }}'
         run: >
-          git config --global url."https://${TOKEN}@github.com/TykTechnologies".insteadOf "https://github.com/TykTechnologies"
+          git config --global url."https://x-access-token:${TOKEN}@github.com/TykTechnologies".insteadOf "https://github.com/TykTechnologies"
 
       - name: Run workflow-lint --fix
         id: lint_run
