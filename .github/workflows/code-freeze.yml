@@ -100,17 +100,21 @@ jobs:
           SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
           DEST_BRANCH: ${{ github.event.inputs.destination_branch }}
         run: |
+          # Configure git to use the app token for all github.com access
+          # This overrides any credential helpers set by actions/checkout
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+
           # Get repositories as JSON array
           REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
-          
+
           # Loop through each repository
           echo "$REPOSITORIES" | jq -c '.[]' | while read -r repo; do
             # Remove quotes from repo name
             repo=$(echo "$repo" | tr -d '"')
             echo "Creating branch for repository: $repo"
-            
+
             # Clone repository
-            git clone --depth 1 --branch "$SOURCE_BRANCH" "https://$GH_TOKEN@github.com/TykTechnologies/$repo.git"
+            git clone --depth 1 --branch "$SOURCE_BRANCH" "https://github.com/TykTechnologies/$repo.git"
             cd "$repo"
             
             # Create and push new branch
