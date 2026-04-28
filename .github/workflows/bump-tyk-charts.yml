@@ -1,0 +1,142 @@
+# yamllint disable rule:line-length
+---
+name: Bump tyk-charts component versions
+
+on:  # yamllint disable-line rule:truthy
+  workflow_dispatch:
+    inputs:
+      gateway_version:
+        description: 'Gateway (EE) image version — e.g. 5.8.14 (leave blank to skip)'
+        required: false
+        default: ''
+      dashboard_version:
+        description: 'Dashboard image version — e.g. 5.8.14 (leave blank to skip)'
+        required: false
+        default: ''
+      mdcb_version:
+        description: 'MDCB image version — e.g. 2.11.0 (leave blank to skip)'
+        required: false
+        default: ''
+      pump_version:
+        description: 'Pump image version — e.g. 1.15.0 (leave blank to skip)'
+        required: false
+        default: ''
+      portal_version:
+        description: 'Portal image version — e.g. 1.17.1 (leave blank to skip)'
+        required: false
+        default: ''
+      operator_version:
+        description: 'Operator image version — e.g. 1.4.0 (leave blank to skip)'
+        required: false
+        default: ''
+      chart_version:
+        description: 'Helm chart version for all non-operator charts — e.g. 5.2.0 (leave blank to skip Chart.yaml bumps)'
+        required: false
+        default: ''
+      operator_chart_version:
+        description: 'Helm chart version for tyk-operator — e.g. 1.4.0 (leave blank to skip)'
+        required: false
+        default: ''
+      base_branch:
+        description: 'Branch in tyk-charts to base the PR on (default: main)'
+        required: false
+        default: 'main'
+      pr_branch:
+        description: 'New branch name to create in tyk-charts for the PR — e.g. chore/bump-versions-5.2.0'
+        required: true
+
+jobs:
+  bump-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate inputs
+        run: |
+          if [[ -z "${{ github.event.inputs.gateway_version }}" && \
+                -z "${{ github.event.inputs.dashboard_version }}" && \
+                -z "${{ github.event.inputs.mdcb_version }}" && \
+                -z "${{ github.event.inputs.pump_version }}" && \
+                -z "${{ github.event.inputs.portal_version }}" && \
+                -z "${{ github.event.inputs.operator_version }}" && \
+                -z "${{ github.event.inputs.chart_version }}" && \
+                -z "${{ github.event.inputs.operator_chart_version }}" ]]; then
+            echo "::error::At least one version input must be provided."
+            exit 1
+          fi
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Checkout tyk-charts
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          repository: TykTechnologies/tyk-charts
+          ref: ${{ github.event.inputs.base_branch }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Create PR branch
+        run: |
+          git checkout -b "${{ github.event.inputs.pr_branch }}"
+
+      - name: Setup Helm
+        if: ${{ github.event.inputs.chart_version != '' || github.event.inputs.operator_chart_version != '' }}
+        uses: azure/setup-helm@b9e51907a09c216f0569e8e53ec48f0f8571d45a  # v4.3.0
+
+      - name: Build bump-versions arguments
+        id: args
+        run: |
+          ARGS=""
+          [[ -n "${{ github.event.inputs.gateway_version }}" ]]          && ARGS+=" --gateway ${{ github.event.inputs.gateway_version }}"
+          [[ -n "${{ github.event.inputs.dashboard_version }}" ]]         && ARGS+=" --dashboard ${{ github.event.inputs.dashboard_version }}"
+          [[ -n "${{ github.event.inputs.mdcb_version }}" ]]              && ARGS+=" --mdcb ${{ github.event.inputs.mdcb_version }}"
+          [[ -n "${{ github.event.inputs.pump_version }}" ]]              && ARGS+=" --pump ${{ github.event.inputs.pump_version }}"
+          [[ -n "${{ github.event.inputs.portal_version }}" ]]            && ARGS+=" --portal ${{ github.event.inputs.portal_version }}"
+          [[ -n "${{ github.event.inputs.operator_version }}" ]]          && ARGS+=" --operator ${{ github.event.inputs.operator_version }}"
+          [[ -n "${{ github.event.inputs.chart_version }}" ]]             && ARGS+=" --chart-version ${{ github.event.inputs.chart_version }}"
+          [[ -n "${{ github.event.inputs.operator_chart_version }}" ]]    && ARGS+=" --operator-chart ${{ github.event.inputs.operator_chart_version }}"
+          echo "args=${ARGS}" >> "$GITHUB_OUTPUT"
+
+      - name: Run bump-versions script
+        run: bash scripts/bump-versions.sh ${{ steps.args.outputs.args }}
+
+      - name: Build PR description
+        id: pr-body
+        run: |
+          body="## Version Bump\n\n| Component | Version |\n|-----------|---------|"
+          [[ -n "${{ github.event.inputs.gateway_version }}" ]]       && body+="\n| Gateway (EE) | v${{ github.event.inputs.gateway_version }} |"
+          [[ -n "${{ github.event.inputs.dashboard_version }}" ]]      && body+="\n| Dashboard | v${{ github.event.inputs.dashboard_version }} |"
+          [[ -n "${{ github.event.inputs.mdcb_version }}" ]]           && body+="\n| MDCB | v${{ github.event.inputs.mdcb_version }} |"
+          [[ -n "${{ github.event.inputs.pump_version }}" ]]           && body+="\n| Pump | v${{ github.event.inputs.pump_version }} |"
+          [[ -n "${{ github.event.inputs.portal_version }}" ]]         && body+="\n| Portal | v${{ github.event.inputs.portal_version }} |"
+          [[ -n "${{ github.event.inputs.operator_version }}" ]]       && body+="\n| Operator | v${{ github.event.inputs.operator_version }} |"
+          [[ -n "${{ github.event.inputs.chart_version }}" ]]          && body+="\n| Chart version | ${{ github.event.inputs.chart_version }} |"
+          [[ -n "${{ github.event.inputs.operator_chart_version }}" ]] && body+="\n| Operator chart version | ${{ github.event.inputs.operator_chart_version }} |"
+          body+="\n\nTriggered by @${{ github.actor }} via [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$body" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: bump component versions$([ -n '${{ github.event.inputs.chart_version }}' ] && echo ' and chart version to ${{ github.event.inputs.chart_version }}' || true)"
+          git push origin "${{ github.event.inputs.pr_branch }}"
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Open PR against tyk-charts
+        run: |
+          gh pr create \
+            --repo TykTechnologies/tyk-charts \
+            --base "${{ github.event.inputs.base_branch }}" \
+            --head "${{ github.event.inputs.pr_branch }}" \
+            --title "chore: bump component versions$([ -n '${{ github.event.inputs.chart_version }}' ] && echo ' for charts ${{ github.event.inputs.chart_version }}' || true)" \
+            --body "${{ steps.pr-body.outputs.body }}"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
