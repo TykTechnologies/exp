@@ -121,22 +121,30 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Commit and push
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "chore: bump component versions$([ -n '${{ github.event.inputs.chart_version }}' ] && echo ' and chart version to ${{ github.event.inputs.chart_version }}' || true)"
-          git push origin "${{ github.event.inputs.pr_branch }}"
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git commit -m "chore: bump component versions$([ -n '${{ github.event.inputs.chart_version }}' ] && echo ' and chart version to ${{ github.event.inputs.chart_version }}' || true)"
+            git push origin "${{ github.event.inputs.pr_branch }}"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes to commit."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Open PR against tyk-charts
+        if: steps.commit.outputs.has_changes == 'true'
         run: |
           gh pr create \
             --repo TykTechnologies/tyk-charts \
             --base "${{ github.event.inputs.base_branch }}" \
             --head "${{ github.event.inputs.pr_branch }}" \
             --title "chore: bump component versions$([ -n '${{ github.event.inputs.chart_version }}' ] && echo ' for charts ${{ github.event.inputs.chart_version }}' || true)" \
-            --body "${{ steps.pr-body.outputs.body }}"
+            --body "${{ steps.pr-body.outputs.body }}" || echo "PR already exists or could not be created."
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
