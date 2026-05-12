@@ -43,7 +43,7 @@ on:  # yamllint disable-line rule:truthy
         description: Include MDCB
         type: boolean
       sync-portal:
-        description: Include Portal
+        description: Include Portal (only swagger)
         type: boolean
       release:
         description: 'Release version'
