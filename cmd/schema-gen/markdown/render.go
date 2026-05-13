@@ -214,7 +214,7 @@ func renderMarkdownFields(cfg *options, w io.Writer, packageName string, decl *m
 
 		// Render the enum values
 		if len(decl.Enums) > 0 {
-			fmt.Fprintf(w, "Enum values:\n\n")
+			fmt.Fprintf(w, "Valid values:\n\n")
 			for _, enum := range decl.Enums {
 				if enum.Doc != "" {
 					fmt.Fprintf(w, "- `%v`: %s\n", enum.Value, enum.Doc)
