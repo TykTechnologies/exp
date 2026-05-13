@@ -25,6 +25,7 @@ on:
           - 'tyk-charts'
           - 'portal'
           - 'tyk-pump'
+          - 'tyk-identity-broker'
           - 'governance-dashboard'
           - 'governance-agent'
         default: 'tyk-core-products'
@@ -74,6 +75,9 @@ jobs:
               ;;
             "tyk-pump")
               REPOS+=("tyk-pump")
+              ;;
+            "tyk-identity-broker")
+              REPOS+=("tyk-identity-broker")
               ;;
             "governance-dashboard")
               REPOS+=("governance-poc")
