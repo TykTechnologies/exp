@@ -73,7 +73,7 @@ on:  # yamllint disable-line rule:truthy
 
 env:
   GOPRIVATE: github.com/TykTechnologies
-  configInfoGeneratorBranch: main
+  configInfoGeneratorBranch: 3b8667e5fd41b9690197fcafc57110faf99f38c3
 
 jobs:
   sanitize:
