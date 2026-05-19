@@ -207,22 +207,6 @@ func renderMarkdownFields(cfg *options, w io.Writer, packageName string, decl *m
 		if isKnown {
 			anchor := "#" + strings.ToLower(sanitizedType)
 			fmt.Fprintf(w, typeFormat+", see [%s](%s) definition.\n\n", originalType, sanitizedType, anchor)
-		} else if len(decl.Enums) > 0 {
-			// Print the underlying type for enums (e.g., "Type defined as `string`.")
-			fmt.Fprintf(w, typeFormat+".\n\n", originalType)
-		}
-
-		// Render the enum values
-		if len(decl.Enums) > 0 {
-			fmt.Fprintf(w, "Valid values:\n\n")
-			for _, enum := range decl.Enums {
-				if enum.Doc != "" {
-					fmt.Fprintf(w, "- `%v`: %s\n", enum.Value, enum.Doc)
-				} else {
-					fmt.Fprintf(w, "- `%v`\n", enum.Value)
-				}
-			}
-			fmt.Fprintln(w)
 		}
 	}
 }
