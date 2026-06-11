@@ -1,0 +1,232 @@
+name: Promote packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: Packagecloud repository to promote from unstable
+        required: true
+        default: tyk-gateway
+      version:
+        description: Package version to promote
+        required: true
+      debvers:
+        description: Space-separated Debian/Ubuntu distributions
+        required: false
+        default: debian/bookworm debian/bullseye debian/buster ubuntu/jammy ubuntu/focal ubuntu/bionic
+      rpmvers:
+        description: Space-separated RPM distributions
+        required: false
+        default: el/8 el/9 amazon/2023
+      dry_run:
+        description: Print the package promotion commands without changing Packagecloud
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  promote-packages:
+    name: Promote ${{ inputs.repo }} ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    # Buddy ran the promotion action in ubuntu:20.04; using the same container
+    # for package_cloud and system dependency consistency.
+    container: ubuntu:20.04
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      DEBVERS: ${{ inputs.debvers }}
+      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      REPO: ${{ inputs.repo }}
+      RPMVERS: ${{ inputs.rpmvers }}
+      VERSION: ${{ inputs.version }}
+      DRY_RUN: ${{ inputs.dry_run }}
+
+    steps:
+      - name: Validate inputs
+        run: |
+          missing_vars=()
+          for variable in REPO VERSION; do
+            if [[ -z "${!variable}" ]]; then
+              missing_vars+=("$variable")
+            fi
+          done
+
+          if [[ "$DRY_RUN" != "true" && -z "$PACKAGECLOUD_TOKEN" ]]; then
+            missing_vars+=(PACKAGECLOUD_TOKEN)
+          fi
+
+          if [[ -z "$DEBVERS" && -z "$RPMVERS" ]]; then
+            echo "::error::Please define at least debvers or rpmvers."
+            exit 1
+          fi
+
+          if (( ${#missing_vars[@]} > 0 )); then
+            echo "::error::Missing required variables: ${missing_vars[*]}"
+            exit 1
+          fi
+
+      - name: Install package promotion tools
+        if: ${{ !inputs.dry_run }}
+        run: |
+          apt-get update -y -qq
+          apt-get install -y -qq curl jq ruby-dev make build-essential
+          gem install rake package_cloud
+
+      - name: Promote packages
+        run: |
+          set -euo pipefail
+
+          run_cmd() {
+            if [[ "$DRY_RUN" == "true" ]]; then
+              printf 'Dry run:'
+              printf ' %q' "$@"
+              printf '\n'
+              return 0
+            fi
+
+            "$@"
+          }
+
+          curl_promote() {
+            local repo=${1:?}
+            local distro=${2:?}
+            local pkg_name=${3:?}
+
+            if [[ "$DRY_RUN" == "true" ]]; then
+              printf 'Dry run: curl -sf -X POST -F %q %q\n' \
+                "destination=tyk/${repo}" \
+                "https://PACKAGECLOUD_TOKEN:@packagecloud.io/api/v1/repos/tyk/${repo}-unstable/${distro}/${pkg_name}/promote.json" >&2
+              echo "dry-run-download-url/${pkg_name}"
+              return 0
+            fi
+
+            curl -sf -X POST \
+              -F "destination=tyk/${repo}" \
+              "https://${PACKAGECLOUD_TOKEN}:@packagecloud.io/api/v1/repos/tyk/${repo}-unstable/${distro}/${pkg_name}/promote.json" \
+              | jq -r .download_url
+          }
+
+          curl_download() {
+            local url=${1:?}
+            local pkg_name=${2:?}
+
+            if [[ "$DRY_RUN" == "true" ]]; then
+              run_cmd rm -f ./*.deb ./*.rpm
+              run_cmd curl -LOJf "$url"
+              run_cmd ls -lh "$pkg_name"
+              return 0
+            fi
+
+            rm -f ./*.deb ./*.rpm
+            curl -LOJf "$url"
+            ls -lh "$pkg_name"
+
+            if [[ ! -s "$pkg_name" ]]; then
+              echo "::error::File is empty or does not exist: $pkg_name"
+              exit 1
+            fi
+          }
+
+          pkg_promote() {
+            local repo=${1:?}
+            local pkg=${2:?}
+            local distro=${3:?}
+            local version=${4:?}
+            local pkg_type=${5:?}
+
+            if [[ "$pkg_type" == "rpm" ]]; then
+              for arch in x86_64 aarch64; do
+                local pkg_name="${pkg}-${version}-1.${arch}.rpm"
+                run_cmd package_cloud yank "tyk/${repo}/${distro}" "$pkg_name" || true
+
+                if [[ "$repo" == "tyk-mdcb" ]]; then
+                  url=$(curl_promote "$repo" "$distro" "$pkg_name")
+                  curl_download "$url" "$pkg_name"
+                  run_cmd package_cloud yank "tyk/tyk-mdcb-stable/${distro}" "$pkg_name" || true
+                  run_cmd package_cloud push "tyk/tyk-mdcb-stable/${distro}" "$pkg_name"
+                  run_cmd rm -f "$pkg_name"
+                else
+                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}"
+                fi
+              done
+            fi
+
+            if [[ "$pkg_type" == "deb" ]]; then
+              for arch in amd64 arm64; do
+                local pkg_name="${pkg}_${version}_${arch}.deb"
+                run_cmd package_cloud yank "tyk/${repo}/${distro}" "$pkg_name" || true
+
+                if [[ "$repo" == "tyk-mdcb" ]]; then
+                  url=$(curl_promote "$repo" "$distro" "$pkg_name")
+                  curl_download "$url" "$pkg_name"
+                  run_cmd package_cloud yank "tyk/tyk-mdcb-stable/${distro}" "$pkg_name" || true
+                  run_cmd package_cloud push "tyk/tyk-mdcb-stable/${distro}" "$pkg_name"
+                  run_cmd rm -f "$pkg_name"
+                else
+                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}"
+                fi
+              done
+            fi
+          }
+
+          repo=$REPO
+          pkg=$REPO
+          version=$VERSION
+
+          if [[ "$repo" == "tyk-mdcb" ]]; then
+            pkg=tyk-sink
+          fi
+
+          echo "Debian based distros: $DEBVERS"
+          echo "RPM based distros: $RPMVERS"
+          echo "Dry run: $DRY_RUN"
+
+          for distro in $RPMVERS; do
+            echo "Promoting RPM packages to $distro"
+            pkg_promote "$repo" "$pkg" "$distro" "$version" rpm
+          done
+
+          for distro in $DEBVERS; do
+            echo "Promoting DEB packages to $distro"
+            pkg_promote "$repo" "$pkg" "$distro" "$version" deb
+          done
+
+      - name: Send Slack success notification
+        if: ${{ success() }}
+        uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001  # v1.25.0
+        with:
+          channel-id: ${{ secrets.PACKAGE_PROMOTION_SLACK_CHANNEL_ID }}
+          slack-message: |
+            *Package promotion succeeded*
+
+            Repository: `${{ inputs.repo }}`
+            Version: `${{ inputs.version }}`
+            DEB distributions: `${{ inputs.debvers }}`
+            RPM distributions: `${{ inputs.rpmvers }}`
+            Dry run: `${{ inputs.dry_run }}`
+
+            Triggered by: `${{ github.actor }}`
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
+
+      - name: Send Slack failure notification
+        if: ${{ failure() }}
+        uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001  # v1.25.0
+        with:
+          channel-id: ${{ secrets.PACKAGE_PROMOTION_SLACK_CHANNEL_ID }}
+          slack-message: |
+            *Package promotion failed*
+
+            Repository: `${{ inputs.repo }}`
+            Version: `${{ inputs.version }}`
+            DEB distributions: `${{ inputs.debvers }}`
+            RPM distributions: `${{ inputs.rpmvers }}`
+            Dry run: `${{ inputs.dry_run }}`
+
+            Triggered by: `${{ github.actor }}`
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
