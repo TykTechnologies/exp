@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Generate a single dot-notation Mintlify page documenting all Tyk Operator CRDs.
+"""Generate a dot-notation Mintlify SNIPPET documenting all Tyk Operator CRDs.
 
 Reads CRD YAMLs (config/crd/bases/*.yaml) and emits flattened <ParamField> rows
 for every field under each CRD's `spec`. Source of truth: the OpenAPI v3 schema
 embedded in each CRD, so we get description + type + enum + default + required.
+
+Output is a frontmatter-less snippet (snippets/operator-crd-reference.mdx) that is
+imported by product-stack/tyk-operator/crd-reference.mdx, which owns the page
+frontmatter and intro. The sync workflow overwrites only this snippet.
 
 Per-CRD layout (matches the approved dot-notation sample):
   ## <Kind>
@@ -133,19 +137,11 @@ def main(yaml_dir, out_path):
 
     ordered = [k for k in ORDER if k in crds] + sorted(k for k in crds if k not in ORDER)
 
+    # This file is a Mintlify SNIPPET (no frontmatter): the generated body only.
+    # It is imported by product-stack/tyk-operator/crd-reference.mdx, which owns
+    # the frontmatter and intro. The sync workflow overwrites only this snippet.
     out = []
-    out.append("---")
-    out.append('title: "Tyk Operator CRD Reference"')
-    out.append('description: "Field reference for every Tyk Operator Custom Resource Definition (CRD), generated from the operator CRD schemas."')
-    out.append('keywords: "Tyk Operator, CRD, Custom Resource Definition, Kubernetes, Reference, ApiDefinition, SecurityPolicy"')
-    out.append('sidebarTitle: "CRD Reference"')
-    out.append("---")
-    out.append("")
-    out.append("{/* DO NOT EDIT. This page is auto-generated from the Tyk Operator CRD schemas (config/crd/bases) by the exp tyk-docs sync workflow. */}")
-    out.append("")
-    out.append("<Note>")
-    out.append("  This page lists the fields of every Tyk Operator Custom Resource under its `spec`. Field names use dot notation for nested objects (`proxy.target_url`), `[]` for list items (`tags[]`), and `.{key}` for map entries (`auth_configs.{key}`). Within each group, required fields are listed first. Read-only `status` fields are not listed.")
-    out.append("</Note>")
+    out.append("{/* DO NOT EDIT. Auto-generated from the Tyk Operator CRD schemas (config/crd/bases) by the exp tyk-docs sync workflow. To change a field description, edit the Go doc-comments in tyk-operator-internal. */}")
     out.append("")
 
     total = 0

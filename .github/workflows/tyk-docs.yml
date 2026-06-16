@@ -16,7 +16,7 @@ run-name: '[${{ inputs.jira }}] ${{ github.actor }} running tyk-docs sync'
 # Source: https://github.com/TykTechnologies/exp/tree/main/cmd/schema-gen
 #
 # Generator: operator-crd-docs
-# Provides: tyk-docs/product-stack/tyk-operator/crd-reference.mdx
+# Provides: tyk-docs/snippets/operator-crd-reference.mdx (imported by the crd-reference page)
 # Source: https://github.com/TykTechnologies/exp/tree/main/scripts/operator-crd-docs
 #
 # The schema-gen tool is provided using the tykio/ci-tools docker image.
@@ -402,7 +402,7 @@ jobs:
           mkdir -p operator-docs
           python3 ./exp/scripts/operator-crd-docs/gen.py \
             ./tyk-operator-internal/config/crd/bases \
-            ./operator-docs/crd-reference.mdx
+            ./operator-docs/operator-crd-reference.mdx
 
       - name: Store docs
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
@@ -543,7 +543,7 @@ jobs:
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
              [ -d "portal-docs" ]    && cp portal-docs/*.yaml ./tyk-docs/swagger/
              [ -d "config-docs" ]    && find config-docs -type f -exec cp {} ./tyk-docs/snippets/ \;
-             [ -d "operator-docs" ]  && mkdir -p ./tyk-docs/product-stack/tyk-operator && cp operator-docs/crd-reference.mdx ./tyk-docs/product-stack/tyk-operator/crd-reference.mdx
+             [ -d "operator-docs" ]  && cp operator-docs/operator-crd-reference.mdx ./tyk-docs/snippets/operator-crd-reference.mdx
              true
 
       - name: Raise tyk-docs PR
