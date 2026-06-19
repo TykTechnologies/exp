@@ -37,7 +37,7 @@ jobs:
 
     env:
       DEBVERS: ${{ inputs.debvers }}
-      PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+      PACKAGECLOUD_TOKEN: ${{ secrets.ASU_PACKACLOUD_SECRET }}
       REPO: ${{ inputs.repo }}
       RPMVERS: ${{ inputs.rpmvers }}
       VERSION: ${{ inputs.version }}
@@ -96,15 +96,15 @@ jobs:
 
             if [[ "$DRY_RUN" == "true" ]]; then
               printf 'Dry run: curl -sf -X POST -F %q %q\n' \
-                "destination=tyk/${repo}" \
-                "https://PACKAGECLOUD_TOKEN:@packagecloud.io/api/v1/repos/tyk/${repo}-unstable/${distro}/${pkg_name}/promote.json" >&2
+                "destination=asutosh/test-repo-stable" \
+                "https://PACKAGECLOUD_TOKEN:@packagecloud.io/api/v1/repos/asutosh/test-repo/${distro}/${pkg_name}/promote.json" >&2
               echo "dry-run-download-url/${pkg_name}"
               return 0
             fi
 
             curl -sf -X POST \
-              -F "destination=tyk/${repo}" \
-              "https://${PACKAGECLOUD_TOKEN}:@packagecloud.io/api/v1/repos/tyk/${repo}-unstable/${distro}/${pkg_name}/promote.json" \
+              -F "destination=asutosh/test-repo-stable" \
+              "https://${PACKAGECLOUD_TOKEN}:@packagecloud.io/api/v1/repos/asutosh/test-repo/${distro}/${pkg_name}/promote.json" \
               | jq -r .download_url
           }
 
@@ -137,50 +137,52 @@ jobs:
             local pkg_type=${5:?}
 
             if [[ "$pkg_type" == "rpm" ]]; then
-              for arch in x86_64 aarch64; do
+              for arch in aarch64; do
                 local pkg_name="${pkg}-${version}-1.${arch}.rpm"
-                run_cmd package_cloud yank "tyk/${repo}/${distro}" "$pkg_name" || true
+                run_cmd package_cloud yank "asutosh/test-repo-stable/${distro}" "$pkg_name" || true
 
                 if [[ "$repo" == "tyk-mdcb" ]]; then
                   url=$(curl_promote "$repo" "$distro" "$pkg_name")
                   curl_download "$url" "$pkg_name"
-                  run_cmd package_cloud yank "tyk/tyk-mdcb-stable/${distro}" "$pkg_name" || true
-                  run_cmd package_cloud push "tyk/tyk-mdcb-stable/${distro}" "$pkg_name"
+                  run_cmd package_cloud yank "asutosh/test-repo-stable/${distro}" "$pkg_name" || true
+                  run_cmd package_cloud push "asutosh/test-repo-stable/${distro}" "$pkg_name"
                   run_cmd rm -f "$pkg_name"
                 else
-                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}"
+                  run_cmd package_cloud promote "asutosh/test-repo/${distro}" "$pkg_name" "asutosh/test-repo-stable/${distro}"
                 fi
               done
             fi
 
             if [[ "$pkg_type" == "deb" ]]; then
-              for arch in amd64 arm64; do
+              for arch in arm64; do
                 local pkg_name="${pkg}_${version}_${arch}.deb"
-                run_cmd package_cloud yank "tyk/${repo}/${distro}" "$pkg_name" || true
+                run_cmd package_cloud yank "asutosh/test-repo-stable/${distro}" "$pkg_name" || true
 
                 if [[ "$repo" == "tyk-mdcb" ]]; then
                   url=$(curl_promote "$repo" "$distro" "$pkg_name")
                   curl_download "$url" "$pkg_name"
-                  run_cmd package_cloud yank "tyk/tyk-mdcb-stable/${distro}" "$pkg_name" || true
-                  run_cmd package_cloud push "tyk/tyk-mdcb-stable/${distro}" "$pkg_name"
+                  run_cmd package_cloud yank "asutosh/test-repo-stable/${distro}" "$pkg_name" || true
+                  run_cmd package_cloud push "asutosh/test-repo-stable/${distro}" "$pkg_name"
                   run_cmd rm -f "$pkg_name"
                 else
-                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}"
+                  run_cmd package_cloud promote "asutosh/test-repo/${distro}" "$pkg_name" "asutosh/test-repo-stable/${distro}"
                 fi
               done
             fi
           }
 
           repo=$REPO
-          pkg=$REPO
+          pkg=tyk-sync
           version=$VERSION
 
-          if [[ "$repo" == "tyk-mdcb" ]]; then
-            pkg=tyk-sink
-          fi
-
+          echo "Packagecloud owner: asutosh"
+          echo "Source repository: test-repo"
+          echo "Destination repository: test-repo-stable"
+          echo "Package name: $pkg"
           echo "Debian based distros: $DEBVERS"
+          echo "Debian arches: arm64"
           echo "RPM based distros: $RPMVERS"
+          echo "RPM arches: aarch64"
           echo "Dry run: $DRY_RUN"
 
           for distro in $RPMVERS; do
@@ -210,7 +212,7 @@ jobs:
             Triggered by: `${{ github.actor }}`
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}            
 
       - name: Send Slack failure notification
         if: ${{ failure() }}
@@ -229,4 +231,4 @@ jobs:
             Triggered by: `${{ github.actor }}`
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}
+          SLACK_BOT_TOKEN: ${{ secrets.UI_SLACK_AUTH_TOKEN }}            
