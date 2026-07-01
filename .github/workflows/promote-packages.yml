@@ -6,6 +6,17 @@ on:
       repo:
         description: Packagecloud repository to promote from unstable
         required: true
+        type: choice
+        options:
+          - tyk-gateway
+          - tyk-ee
+          - tyk-dashboard
+          - portal
+          - tyk-pump
+          - tyk-mdcb
+          - tyk-identity-broker
+          - tyk-sync
+          - all
         default: tyk-gateway
       version:
         description: Package version to promote
@@ -13,16 +24,24 @@ on:
       debvers:
         description: Space-separated Debian/Ubuntu distributions
         required: false
-        default: debian/bookworm debian/bullseye debian/buster ubuntu/jammy ubuntu/focal ubuntu/bionic
+        default: debian/jessie debian/buster debian/bullseye debian/bookworm debian/trixie ubuntu/xenial ubuntu/bionic ubuntu/focal ubuntu/jammy ubuntu/noble
       rpmvers:
         description: Space-separated RPM distributions
         required: false
-        default: el/8 el/9 amazon/2023
+        default: el/7 el/8 el/9 amazon/2 amazon/2023
       dry_run:
         description: Print the package promotion commands without changing Packagecloud
         required: false
         type: boolean
         default: false
+      deb_arches:
+        description: Space-separated Debian/Ubuntu architectures
+        required: false
+        default: amd64 arm64 s390x
+      rpm_arches:
+        description: Space-separated RPM architectures
+        required: false
+        default: x86_64 aarch64 s390x
 
 jobs:
   promote-packages:
@@ -42,6 +61,8 @@ jobs:
       RPMVERS: ${{ inputs.rpmvers }}
       VERSION: ${{ inputs.version }}
       DRY_RUN: ${{ inputs.dry_run }}
+      DEB_ARCHES: ${{ inputs.deb_arches }}
+      RPM_ARCHES: ${{ inputs.rpm_arches }}
 
     steps:
       - name: Validate inputs
@@ -137,7 +158,7 @@ jobs:
             local pkg_type=${5:?}
 
             if [[ "$pkg_type" == "rpm" ]]; then
-              for arch in x86_64 aarch64; do
+              for arch in $RPM_ARCHES; do
                 local pkg_name="${pkg}-${version}-1.${arch}.rpm"
                 run_cmd package_cloud yank "tyk/${repo}/${distro}" "$pkg_name" || true
 
@@ -154,7 +175,7 @@ jobs:
             fi
 
             if [[ "$pkg_type" == "deb" ]]; then
-              for arch in amd64 arm64; do
+              for arch in $DEB_ARCHES; do
                 local pkg_name="${pkg}_${version}_${arch}.deb"
                 run_cmd package_cloud yank "tyk/${repo}/${distro}" "$pkg_name" || true
 
@@ -172,25 +193,47 @@ jobs:
           }
 
           repo=$REPO
-          pkg=$REPO
           version=$VERSION
 
-          if [[ "$repo" == "tyk-mdcb" ]]; then
-            pkg=tyk-sink
+          repos=()
+          if [[ "$repo" == "all" ]]; then
+            repos=("tyk-gateway" "tyk-ee" "tyk-dashboard" "portal" "tyk-pump" "tyk-mdcb" "tyk-identity-broker" "tyk-sync")
+          else
+            repos=("$repo")
           fi
 
           echo "Debian based distros: $DEBVERS"
           echo "RPM based distros: $RPMVERS"
           echo "Dry run: $DRY_RUN"
 
-          for distro in $RPMVERS; do
-            echo "Promoting RPM packages to $distro"
-            pkg_promote "$repo" "$pkg" "$distro" "$version" rpm
-          done
+          for r in "${repos[@]}"; do
+            echo "Processing repository: $r"
+            pkgs=("$r")
+            if [[ "$r" == "tyk-mdcb" ]]; then
+              pkgs=("tyk-sink" "tyk-sink-fips")
+            elif [[ "$r" == "tyk-ee" ]]; then
+              pkgs=("tyk-gateway-ee" "tyk-gateway-fips")
+            elif [[ "$r" == "tyk-dashboard" ]]; then
+              pkgs=("tyk-dashboard" "tyk-dashboard-fips")
+            elif [[ "$r" == "portal" ]]; then
+              pkgs=("portal" "portal-fips")
+            elif [[ "$r" == "tyk-pump" ]]; then
+              pkgs=("tyk-pump" "tyk-pump-fips")
+            fi
 
-          for distro in $DEBVERS; do
-            echo "Promoting DEB packages to $distro"
-            pkg_promote "$repo" "$pkg" "$distro" "$version" deb
+            for distro in $RPMVERS; do
+              echo "Promoting RPM packages to $distro for repository $r"
+              for pkg in "${pkgs[@]}"; do
+                pkg_promote "$r" "$pkg" "$distro" "$version" rpm
+              done
+            done
+
+            for distro in $DEBVERS; do
+              echo "Promoting DEB packages to $distro for repository $r"
+              for pkg in "${pkgs[@]}"; do
+                pkg_promote "$r" "$pkg" "$distro" "$version" deb
+              done
+            done
           done
 
       - name: Send Slack success notification
