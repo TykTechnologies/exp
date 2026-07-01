@@ -123,10 +123,22 @@ jobs:
               return 0
             fi
 
-            curl -sf -X POST \
+            local tmp_res
+            tmp_res=$(mktemp)
+            local status_code
+            status_code=$(curl -s -S -o "$tmp_res" -w "%{http_code}" -X POST \
               -F "destination=tyk/${repo}" \
-              "https://${PACKAGECLOUD_TOKEN}:@packagecloud.io/api/v1/repos/tyk/${repo}-unstable/${distro}/${pkg_name}/promote.json" \
-              | jq -r .download_url
+              "https://${PACKAGECLOUD_TOKEN}:@packagecloud.io/api/v1/repos/tyk/${repo}-unstable/${distro}/${pkg_name}/promote.json") || true
+
+            if [[ "$status_code" -ne 200 && "$status_code" -ne 201 ]]; then
+              echo "::warning::Package $pkg_name not found in tyk/${repo}-unstable/${distro} (HTTP $status_code), skipping." >&2
+              rm -f "$tmp_res"
+              echo "FAILED"
+              return 0
+            fi
+
+            jq -r .download_url < "$tmp_res"
+            rm -f "$tmp_res"
           }
 
           curl_download() {
@@ -164,12 +176,15 @@ jobs:
 
                 if [[ "$repo" == "tyk-mdcb" ]]; then
                   url=$(curl_promote "$repo" "$distro" "$pkg_name")
+                  if [[ -z "$url" || "$url" == "FAILED" ]]; then
+                    continue
+                  fi
                   curl_download "$url" "$pkg_name"
                   run_cmd package_cloud yank "tyk/tyk-mdcb-stable/${distro}" "$pkg_name" || true
                   run_cmd package_cloud push "tyk/tyk-mdcb-stable/${distro}" "$pkg_name"
                   run_cmd rm -f "$pkg_name"
                 else
-                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}"
+                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}" || echo "::warning::Failed to promote $pkg_name to $distro. Skipping."
                 fi
               done
             fi
@@ -181,12 +196,15 @@ jobs:
 
                 if [[ "$repo" == "tyk-mdcb" ]]; then
                   url=$(curl_promote "$repo" "$distro" "$pkg_name")
+                  if [[ -z "$url" || "$url" == "FAILED" ]]; then
+                    continue
+                  fi
                   curl_download "$url" "$pkg_name"
                   run_cmd package_cloud yank "tyk/tyk-mdcb-stable/${distro}" "$pkg_name" || true
                   run_cmd package_cloud push "tyk/tyk-mdcb-stable/${distro}" "$pkg_name"
                   run_cmd rm -f "$pkg_name"
                 else
-                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}"
+                  run_cmd package_cloud promote "tyk/${repo}-unstable/${distro}" "$pkg_name" "tyk/${repo}/${distro}" || echo "::warning::Failed to promote $pkg_name to $distro. Skipping."
                 fi
               done
             fi
