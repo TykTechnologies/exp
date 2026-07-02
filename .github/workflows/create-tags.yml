@@ -28,6 +28,8 @@ on:
           - 'tyk-identity-broker'
           - 'governance-dashboard'
           - 'governance-agent'
+          - 'ara'
+          - 'ara-ui'
         default: 'tyk-core-products'
 
 jobs:
@@ -84,6 +86,13 @@ jobs:
               ;;
             "governance-agent")
               REPOS+=("nark")
+              ;;
+            "ara")
+              REPOS+=("ara")
+              ;;
+            "ara-ui")
+              REPOS+=("tyk-ara-ui")
+              REPOS+=("tyk-ara-billing-ui")
               ;;
             *)
               echo "::error::Invalid repository selection: ${{ github.event.inputs.repository_selection }}"
