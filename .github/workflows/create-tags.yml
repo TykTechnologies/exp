@@ -29,7 +29,9 @@ on:
           - 'governance-dashboard'
           - 'governance-agent'
           - 'ara'
-          - 'ara-ui'
+          - 'ara-ui-repos'
+          - 'ara-helm-chart'
+
         default: 'tyk-core-products'
 
 jobs:
@@ -90,9 +92,12 @@ jobs:
             "ara")
               REPOS+=("ara")
               ;;
-            "ara-ui")
+            "ara-ui-repos")
               REPOS+=("tyk-ara-ui")
               REPOS+=("tyk-ara-billing-ui")
+              ;;
+            "ara-helm-chart")
+              REPOS+=("ara-helm-chart")
               ;;
             *)
               echo "::error::Invalid repository selection: ${{ github.event.inputs.repository_selection }}"
