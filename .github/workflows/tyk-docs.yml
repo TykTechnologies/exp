@@ -15,6 +15,10 @@ run-name: '[${{ inputs.jira }}] ${{ github.actor }} running tyk-docs sync'
 # Provides: tyk-docs/content/shared/x-tyk-gateway.md
 # Source: https://github.com/TykTechnologies/exp/tree/main/cmd/schema-gen
 #
+# Generator: operator-crd-docs
+# Provides: tyk-docs/snippets/operator-crd-reference.mdx (imported by the crd-reference page)
+# Source: https://github.com/TykTechnologies/exp/tree/main/scripts/operator-crd-docs
+#
 # The schema-gen tool is provided using the tykio/ci-tools docker image.
 # To rebuild that docker image if required, trigger an update via:
 #
@@ -45,6 +49,9 @@ on:  # yamllint disable-line rule:truthy
       sync-portal:
         description: Include Portal (only swagger)
         type: boolean
+      sync-operator:
+        description: Include Tyk Operator CRD reference
+        type: boolean
       release:
         description: 'Release version'
         type: choice
@@ -54,6 +61,10 @@ on:  # yamllint disable-line rule:truthy
           - '5.3'
       portal-release:
         description: 'Portal release version'
+        type: string
+        default: 'master'
+      operator-release:
+        description: 'Tyk Operator source branch (tyk-operator-internal)'
         type: string
         default: 'master'
       source:
@@ -84,6 +95,7 @@ jobs:
       repoBranch: ${{ steps.collect.outputs.repoBranch }}
       jira: ${{ steps.collect.outputs.jira }}
       portalBranch: ${{ steps.collect.outputs.portalBranch }}
+      operatorBranch: ${{ steps.collect.outputs.operatorBranch }}
     steps:
       - name: Sanitize JIRA input
         run: |
@@ -133,12 +145,21 @@ jobs:
           fi
           echo "portalBranch=$portalBranch" >> $GITHUB_ENV
 
+      - name: Set Operator branch
+        run: |
+          operatorBranch="${{ github.event.inputs.operator-release }}"
+          if [ -z "$operatorBranch" ]; then
+            operatorBranch="master"
+          fi
+          echo "operatorBranch=$operatorBranch" >> $GITHUB_ENV
+
       - id: collect
         run: |
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
              echo "portalBranch=${{ env.portalBranch }}" >> $GITHUB_OUTPUT
+             echo "operatorBranch=${{ env.operatorBranch }}" >> $GITHUB_OUTPUT
   
   # Generates Tyk OAS specification & Gateway swagger
   gateway:
@@ -345,6 +366,50 @@ jobs:
           name: portal-docs
           path: portal-docs
 
+  # Generates the Tyk Operator CRD field reference (single dot-notation MDX page)
+  operator:
+    needs: [sanitize]
+    name: Operator CRD docs
+    if: ${{ github.event.inputs.sync-operator == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Checkout Tyk Operator
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-operator-internal
+          ref: ${{ needs.sanitize.outputs.operatorBranch }}
+          path: ./tyk-operator-internal
+
+      - name: Checkout exp
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          path: ./exp
+
+      - name: Generate CRD reference page
+        run: |
+          python3 -m pip install --quiet -r ./exp/scripts/operator-crd-docs/requirements.txt
+          mkdir -p operator-docs
+          python3 ./exp/scripts/operator-crd-docs/gen.py \
+            ./tyk-operator-internal/config/crd/bases \
+            ./operator-docs/operator-crd-reference.mdx
+
+      - name: Store docs
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        with:
+          name: operator-docs
+          path: operator-docs
+
   # Generates environment configuration docs for Gateway, Dashboard, Pump, and MDCB
   configs:
     needs: [sanitize]
@@ -425,7 +490,7 @@ jobs:
 
   finish:
     name: Open PR against tyk-docs
-    needs: [sanitize, configs, dashboard, gateway, portal]
+    needs: [sanitize, configs, dashboard, gateway, portal, operator]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -478,6 +543,7 @@ jobs:
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
              [ -d "portal-docs" ]    && cp portal-docs/*.yaml ./tyk-docs/swagger/
              [ -d "config-docs" ]    && find config-docs -type f -exec cp {} ./tyk-docs/snippets/ \;
+             [ -d "operator-docs" ]  && cp operator-docs/operator-crd-reference.mdx ./tyk-docs/snippets/operator-crd-reference.mdx
              true
 
       - name: Raise tyk-docs PR
@@ -496,6 +562,7 @@ jobs:
             Tyk MDCB ${{ github.event.inputs.sync-mdcb }}
             Tyk Pump ${{ github.event.inputs.sync-pump }}
             Tyk Portal: ${{ github.event.inputs.sync-portal }}
+            Tyk Operator CRD: ${{ github.event.inputs.sync-operator }}
 
             Intended for: ${{ github.event.inputs.release }}
             Portal release: ${{ needs.sanitize.outputs.portalBranch }}
