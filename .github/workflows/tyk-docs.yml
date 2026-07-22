@@ -45,6 +45,9 @@ on:  # yamllint disable-line rule:truthy
       sync-portal:
         description: Include Portal (only swagger)
         type: boolean
+      sync-ai-studio:
+        description: Include AI Studio (only swagger)
+        type: boolean
       release:
         description: 'Release version'
         type: choice
@@ -56,6 +59,10 @@ on:  # yamllint disable-line rule:truthy
         description: 'Portal release version'
         type: string
         default: 'master'
+      ai-studio-release:
+        description: 'AI Studio release version'
+        type: string
+        default: 'main'
       source:
         description: 'Override source branch'
         default: ''
@@ -84,6 +91,7 @@ jobs:
       repoBranch: ${{ steps.collect.outputs.repoBranch }}
       jira: ${{ steps.collect.outputs.jira }}
       portalBranch: ${{ steps.collect.outputs.portalBranch }}
+      aiStudioBranch: ${{ steps.collect.outputs.aiStudioBranch }}
     steps:
       - name: Sanitize JIRA input
         run: |
@@ -133,12 +141,21 @@ jobs:
           fi
           echo "portalBranch=$portalBranch" >> $GITHUB_ENV
 
+      - name: Set AI Studio branch
+        run: |
+          aiStudioBranch="${{ github.event.inputs.ai-studio-release }}"
+          if [ -z "$aiStudioBranch" ]; then
+            aiStudioBranch="main"
+          fi
+          echo "aiStudioBranch=$aiStudioBranch" >> $GITHUB_ENV
+
       - id: collect
         run: |
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
              echo "portalBranch=${{ env.portalBranch }}" >> $GITHUB_OUTPUT
+             echo "aiStudioBranch=${{ env.aiStudioBranch }}" >> $GITHUB_OUTPUT
   
   # Generates Tyk OAS specification & Gateway swagger
   gateway:
@@ -345,6 +362,32 @@ jobs:
           name: portal-docs
           path: portal-docs
 
+  # Generates AI Studio swagger
+  ai-studio:
+    needs: [sanitize]
+    name: AI Studio docs
+    if: ${{ github.event.inputs.sync-ai-studio == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout AI Studio
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          repository: TykTechnologies/ai-studio
+          ref: ${{ needs.sanitize.outputs.aiStudioBranch }}
+          path: ./ai-studio
+
+      - name: Generate docs
+        run: |
+          mkdir -p ai-studio-docs/
+          cp ./ai-studio/docs/swagger/swagger.yaml ai-studio-docs/ai-studio-swagger.yml
+
+      - name: Store docs
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
+        with:
+          name: ai-studio-docs
+          path: ai-studio-docs
+
   # Generates environment configuration docs for Gateway, Dashboard, Pump, and MDCB
   configs:
     needs: [sanitize]
@@ -425,7 +468,7 @@ jobs:
 
   finish:
     name: Open PR against tyk-docs
-    needs: [sanitize, configs, dashboard, gateway, portal]
+    needs: [sanitize, configs, dashboard, gateway, portal, ai-studio]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -477,6 +520,7 @@ jobs:
              [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/snippets/
              [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
              [ -d "portal-docs" ]    && cp portal-docs/*.yaml ./tyk-docs/swagger/
+             [ -d "ai-studio-docs" ] && cp ai-studio-docs/*.yml ./tyk-docs/swagger/
              [ -d "config-docs" ]    && find config-docs -type f -exec cp {} ./tyk-docs/snippets/ \;
              true
 
@@ -496,9 +540,11 @@ jobs:
             Tyk MDCB ${{ github.event.inputs.sync-mdcb }}
             Tyk Pump ${{ github.event.inputs.sync-pump }}
             Tyk Portal: ${{ github.event.inputs.sync-portal }}
+            Tyk AI Studio: ${{ github.event.inputs.sync-ai-studio }}
 
             Intended for: ${{ github.event.inputs.release }}
             Portal release: ${{ needs.sanitize.outputs.portalBranch }}
+            AI Studio release: ${{ needs.sanitize.outputs.aiStudioBranch }}
             Changes sourced from: ${{ needs.sanitize.outputs.repoBranch }}
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
