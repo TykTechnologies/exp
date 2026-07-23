@@ -63,6 +63,14 @@ on:  # yamllint disable-line rule:truthy
         description: 'AI Studio release version'
         type: string
         default: 'main'
+      pump-release:
+        description: 'Pump release version'
+        type: string
+        default: 'master'
+      mdcb-release:
+        description: 'MDCB release version'
+        type: string
+        default: 'master'
       source:
         description: 'Override source branch'
         default: ''
@@ -92,6 +100,8 @@ jobs:
       jira: ${{ steps.collect.outputs.jira }}
       portalBranch: ${{ steps.collect.outputs.portalBranch }}
       aiStudioBranch: ${{ steps.collect.outputs.aiStudioBranch }}
+      pumpBranch: ${{ steps.collect.outputs.pumpBranch }}
+      mdcbBranch: ${{ steps.collect.outputs.mdcbBranch }}
     steps:
       - name: Sanitize JIRA input
         run: |
@@ -149,6 +159,22 @@ jobs:
           fi
           echo "aiStudioBranch=$aiStudioBranch" >> $GITHUB_ENV
 
+      - name: Set Pump branch
+        run: |
+          pumpBranch="${{ github.event.inputs.pump-release }}"
+          if [ -z "$pumpBranch" ]; then
+            pumpBranch="master"
+          fi
+          echo "pumpBranch=$pumpBranch" >> $GITHUB_ENV
+
+      - name: Set MDCB branch
+        run: |
+          mdcbBranch="${{ github.event.inputs.mdcb-release }}"
+          if [ -z "$mdcbBranch" ]; then
+            mdcbBranch="master"
+          fi
+          echo "mdcbBranch=$mdcbBranch" >> $GITHUB_ENV
+
       - id: collect
         run: |
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
@@ -156,6 +182,8 @@ jobs:
              echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
              echo "portalBranch=${{ env.portalBranch }}" >> $GITHUB_OUTPUT
              echo "aiStudioBranch=${{ env.aiStudioBranch }}" >> $GITHUB_OUTPUT
+             echo "pumpBranch=${{ env.pumpBranch }}" >> $GITHUB_OUTPUT
+             echo "mdcbBranch=${{ env.mdcbBranch }}" >> $GITHUB_OUTPUT
   
   # Generates Tyk OAS specification & Gateway swagger
   gateway:
@@ -313,7 +341,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 1
           repository: TykTechnologies/tyk-sink
-          ref: ${{ needs.sanitize.outputs.repoBranch }}
+          ref: ${{ needs.sanitize.outputs.mdcbBranch }}
           path: ./tyk-sink
 
       - name: Generate docs
@@ -466,7 +494,7 @@ jobs:
         if: ${{ github.event.inputs.sync-pump == 'true' }}
         run: |
           repo=pump
-          branch=${{ github.event.inputs.source || 'master' }}
+          branch=${{ needs.sanitize.outputs.pumpBranch }}
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
@@ -477,7 +505,7 @@ jobs:
         if: ${{ github.event.inputs.sync-mdcb == 'true' }}
         run: |
           repo=mdcb
-          branch=${{ github.event.inputs.source || 'master' }}
+          branch=${{ needs.sanitize.outputs.mdcbBranch }}
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
@@ -491,7 +519,7 @@ jobs:
 
   finish:
     name: Open PR against tyk-docs
-    needs: [sanitize, configs, dashboard, gateway, portal, ai-studio]
+    needs: [sanitize, configs, dashboard, gateway, mdcb, portal, ai-studio]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -568,6 +596,8 @@ jobs:
             Intended for: ${{ github.event.inputs.release }}
             Portal release: ${{ needs.sanitize.outputs.portalBranch }}
             AI Studio release: ${{ needs.sanitize.outputs.aiStudioBranch }}
+            Pump release: ${{ needs.sanitize.outputs.pumpBranch }}
+            MDCB release: ${{ needs.sanitize.outputs.mdcbBranch }}
             Changes sourced from: ${{ needs.sanitize.outputs.repoBranch }}
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
