@@ -380,7 +380,30 @@ jobs:
       - name: Generate docs
         run: |
           mkdir -p ai-studio-docs/
-          cp ./ai-studio/docs/swagger/swagger.yaml ai-studio-docs/ai-studio-swagger.yml
+
+          # ai-studio's swagger.yaml is Swagger 2.0 (OpenAPI 2.0). Mintlify does not
+          # support that version (https://www.mintlify.com/docs/api-playground/troubleshooting)
+          # and fails the whole tyk-docs deployment if it's given a 2.0 doc, so convert
+          # to OpenAPI 3.0 via SmartBear's public converter service before handing it off.
+          http_status=$(curl -sS -w "%{http_code}" -o ai-studio-docs/ai-studio-swagger.yml \
+            -X POST https://converter.swagger.io/api/convert \
+            -H "Content-Type: application/yaml" \
+            -H "Accept: application/yaml" \
+            --data-binary @./ai-studio/docs/swagger/swagger.yaml)
+
+          if [ "$http_status" != "200" ]; then
+            echo "❌ Swagger 2.0 -> OpenAPI 3.0 conversion failed (HTTP $http_status):"
+            cat ai-studio-docs/ai-studio-swagger.yml
+            exit 1
+          fi
+
+          if ! grep -q "^openapi: 3\." ai-studio-docs/ai-studio-swagger.yml; then
+            echo "❌ Converted file doesn't declare an OpenAPI 3.x version - conversion likely failed:"
+            cat ai-studio-docs/ai-studio-swagger.yml
+            exit 1
+          fi
+
+          echo "✅ Converted to OpenAPI 3.0"
 
       - name: Store docs
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
