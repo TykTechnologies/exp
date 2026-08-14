@@ -127,8 +127,12 @@ jobs:
             # A push that succeeds reports "new branch" for a branch that was
             # created and "up-to-date" for one that already pointed here, so
             # the exit status alone cannot tell those apart.
-            push_out=$(git push origin "HEAD:refs/heads/$DEST_BRANCH" 2>&1)
-            push_rc=$?
+            #
+            # The "|| push_rc=$?" matters: this step runs under bash -e, where
+            # a bare assignment from a failing command substitution aborts the
+            # whole step before the status can be inspected.
+            push_rc=0
+            push_out=$(git push origin "HEAD:refs/heads/$DEST_BRANCH" 2>&1) || push_rc=$?
             echo "$push_out"
 
             if [ "$push_rc" -eq 0 ]; then
