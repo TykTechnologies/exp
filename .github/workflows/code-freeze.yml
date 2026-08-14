@@ -117,7 +117,16 @@ jobs:
             # Skip if the branch already exists. Ask the remote: the clone
             # below is shallow and single-branch, so it cannot see other refs
             # and the push would fail with "fetch first" instead.
-            if [ -n "$(git ls-remote --heads "$remote" "refs/heads/$DEST_BRANCH")" ]; then
+            #
+            # Check the exit status, not just the output: ls-remote prints
+            # nothing on stdout when it fails, so an unreadable remote would
+            # otherwise look identical to "branch does not exist".
+            if ! refs=$(git ls-remote --heads "$remote" "refs/heads/$DEST_BRANCH"); then
+              echo "Failed to query $repo"
+              failed=$((failed + 1))
+              continue
+            fi
+            if [ -n "$refs" ]; then
               echo "Skipping $repo: $DEST_BRANCH already exists"
               continue
             fi
