@@ -55,38 +55,42 @@ on:  # yamllint disable-line rule:truthy
       sync-ai-studio:
         description: Include AI Studio (only swagger)
         type: boolean
-      release:
-        description: 'Release version'
-        type: choice
-        options:
-          - 'master'
-          - '5.8'
-          - '5.3'
-      portal-release:
-        description: 'Portal release version'
+      docs-branch:
+        description: 'Destination branch in tyk-docs to open the PR against'
         type: string
-        default: 'master'
-      operator-release:
-        description: 'Tyk Operator source branch (tyk-operator-internal)'
-        type: string
-        default: 'master'
-      ai-studio-release:
-        description: 'AI Studio release version'
-        type: string
+        required: true
         default: 'main'
-      pump-release:
-        description: 'Pump release version'
+      default-source-branch:
+        description: 'Branch to pull from every component repo. Leave blank to use each component''s own default branch. Overridden per-component by the fields below.'
         type: string
-        default: 'master'
-      mdcb-release:
-        description: 'MDCB release version'
-        type: string
-        default: 'master'
-      source:
-        description: 'Override source branch'
         default: ''
-      destination:
-        description: 'Override destination branch'
+      gateway-branch:
+        description: 'Override: Gateway (tyk) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      dashboard-branch:
+        description: 'Override: Dashboard (tyk-analytics) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      pump-branch:
+        description: 'Override: Pump source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      mdcb-branch:
+        description: 'Override: MDCB (tyk-sink) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      portal-branch:
+        description: 'Override: Portal source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      operator-branch:
+        description: 'Override: Tyk Operator (tyk-operator-internal) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      ai-studio-branch:
+        description: 'Override: AI Studio source branch. Blank uses the default above, or "main" if no default is set.'
+        type: string
         default: ''
       branch-suffix:
         description: 'Branch suffix to append to PR branch name (to prevent collisions on multiple PRs/ticket)'
@@ -107,8 +111,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docsBranch: ${{ steps.collect.outputs.docsBranch }}
-      repoBranch: ${{ steps.collect.outputs.repoBranch }}
       jira: ${{ steps.collect.outputs.jira }}
+      gatewayBranch: ${{ steps.collect.outputs.gatewayBranch }}
+      dashboardBranch: ${{ steps.collect.outputs.dashboardBranch }}
       portalBranch: ${{ steps.collect.outputs.portalBranch }}
       operatorBranch: ${{ steps.collect.outputs.operatorBranch }}
       aiStudioBranch: ${{ steps.collect.outputs.aiStudioBranch }}
@@ -124,82 +129,38 @@ jobs:
           fi
           echo "jira=$jira" >> $GITHUB_ENV
 
-      - if: github.event.inputs.release == 'master'
+      # Each component resolves to: its own override, else the shared default-source-branch,
+      # else the component repo's own default branch (only AI Studio differs: "main" not "master").
+      - name: Resolve source and destination branches
         run: |
-             echo "docsBranch=main" >> $GITHUB_ENV
-             echo "repoBranch=master" >> $GITHUB_ENV
+          defaultSourceBranch="${{ github.event.inputs.default-source-branch }}"
 
-      - if: github.event.inputs.release == '5.0 LTS'
-        run: |
-             echo "docsBranch=release-5" >> $GITHUB_ENV
-             echo "repoBranch=release-5-lts" >> $GITHUB_ENV
+          resolve() {
+            local override="$1" fallback="$2"
+            if [ -n "$override" ]; then
+              echo "$override"
+            elif [ -n "$defaultSourceBranch" ]; then
+              echo "$defaultSourceBranch"
+            else
+              echo "$fallback"
+            fi
+          }
 
-      - if: github.event.inputs.release == '5.1'
-        run: |
-             echo "docsBranch=release-5.1" >> $GITHUB_ENV
-             echo "repoBranch=release-5.1" >> $GITHUB_ENV
-
-      - if: github.event.inputs.release == '5.2'
-        run: |
-             echo "docsBranch=release-5.2" >> $GITHUB_ENV
-             echo "repoBranch=release-5.2" >> $GITHUB_ENV
-
-      - if: github.event.inputs.release == '5.3'
-        run: |
-             echo "docsBranch=release-5.3" >> $GITHUB_ENV
-             echo "repoBranch=release-5.3" >> $GITHUB_ENV
-
-      - if: github.event.inputs.source != ''
-        run: echo "repoBranch=${{ github.event.inputs.source }}" >> $GITHUB_ENV
-
-      - if: github.event.inputs.destination != ''
-        run: echo "docsBranch=${{ github.event.inputs.destination }}" >> $GITHUB_ENV
-
-      - name: Set Portal branch
-        run: |
-          portalBranch="${{ github.event.inputs.portal-release }}"
-          if [ -z "$portalBranch" ]; then
-            portalBranch="master"
-          fi
-          echo "portalBranch=$portalBranch" >> $GITHUB_ENV
-
-      - name: Set Operator branch
-        run: |
-          operatorBranch="${{ github.event.inputs.operator-release }}"
-          if [ -z "$operatorBranch" ]; then
-            operatorBranch="master"
-          fi
-          echo "operatorBranch=$operatorBranch" >> $GITHUB_ENV
-
-      - name: Set AI Studio branch
-        run: |
-          aiStudioBranch="${{ github.event.inputs.ai-studio-release }}"
-          if [ -z "$aiStudioBranch" ]; then
-            aiStudioBranch="main"
-          fi
-          echo "aiStudioBranch=$aiStudioBranch" >> $GITHUB_ENV
-
-      - name: Set Pump branch
-        run: |
-          pumpBranch="${{ github.event.inputs.pump-release }}"
-          if [ -z "$pumpBranch" ]; then
-            pumpBranch="master"
-          fi
-          echo "pumpBranch=$pumpBranch" >> $GITHUB_ENV
-
-      - name: Set MDCB branch
-        run: |
-          mdcbBranch="${{ github.event.inputs.mdcb-release }}"
-          if [ -z "$mdcbBranch" ]; then
-            mdcbBranch="master"
-          fi
-          echo "mdcbBranch=$mdcbBranch" >> $GITHUB_ENV
+          echo "docsBranch=${{ github.event.inputs.docs-branch }}" >> $GITHUB_ENV
+          echo "gatewayBranch=$(resolve "${{ github.event.inputs.gateway-branch }}" master)" >> $GITHUB_ENV
+          echo "dashboardBranch=$(resolve "${{ github.event.inputs.dashboard-branch }}" master)" >> $GITHUB_ENV
+          echo "pumpBranch=$(resolve "${{ github.event.inputs.pump-branch }}" master)" >> $GITHUB_ENV
+          echo "mdcbBranch=$(resolve "${{ github.event.inputs.mdcb-branch }}" master)" >> $GITHUB_ENV
+          echo "portalBranch=$(resolve "${{ github.event.inputs.portal-branch }}" master)" >> $GITHUB_ENV
+          echo "operatorBranch=$(resolve "${{ github.event.inputs.operator-branch }}" master)" >> $GITHUB_ENV
+          echo "aiStudioBranch=$(resolve "${{ github.event.inputs.ai-studio-branch }}" main)" >> $GITHUB_ENV
 
       - id: collect
         run: |
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
-             echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
+             echo "gatewayBranch=${{ env.gatewayBranch }}" >> $GITHUB_OUTPUT
+             echo "dashboardBranch=${{ env.dashboardBranch }}" >> $GITHUB_OUTPUT
              echo "portalBranch=${{ env.portalBranch }}" >> $GITHUB_OUTPUT
              echo "operatorBranch=${{ env.operatorBranch }}" >> $GITHUB_OUTPUT
              echo "aiStudioBranch=${{ env.aiStudioBranch }}" >> $GITHUB_OUTPUT
@@ -218,7 +179,7 @@ jobs:
         with:
           fetch-depth: 1
           repository: TykTechnologies/tyk
-          ref: ${{ needs.sanitize.outputs.repoBranch }}
+          ref: ${{ needs.sanitize.outputs.gatewayBranch }}
           path: ./tyk
 
       - name: Checkout exp
@@ -304,7 +265,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 1
           repository: TykTechnologies/tyk-analytics
-          ref: ${{ needs.sanitize.outputs.repoBranch }}
+          ref: ${{ needs.sanitize.outputs.dashboardBranch }}
           path: ./tyk-analytics
 
       - name: Generate Docs
@@ -529,7 +490,8 @@ jobs:
       - name: Set up env
         run: |
              mkdir -p $GITHUB_WORKSPACE/config-docs/
-             echo "repoBranch=${{ needs.sanitize.outputs.repoBranch }}" >> $GITHUB_ENV
+             echo "gatewayBranch=${{ needs.sanitize.outputs.gatewayBranch }}" >> $GITHUB_ENV
+             echo "dashboardBranch=${{ needs.sanitize.outputs.dashboardBranch }}" >> $GITHUB_ENV
              echo "docsBranch=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
 
       - name: Sync Gateway
@@ -537,7 +499,7 @@ jobs:
         if: ${{ github.event.inputs.sync-gateway == 'true' }}
         run: |
           repo=gateway
-          branch=$repoBranch
+          branch=$gatewayBranch
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
@@ -548,7 +510,7 @@ jobs:
         if: ${{ github.event.inputs.sync-dashboard == 'true' }}
         run: |
           repo=dashboard
-          branch=$repoBranch
+          branch=$dashboardBranch
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
@@ -646,7 +608,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import config/docs
-          title: '[${{ env.jira }}] Update documentation for ${{ github.event.inputs.release }}'
+          title: '[${{ env.jira }}] Update documentation for ${{ needs.sanitize.outputs.docsBranch }}'
           body: |
             Triggered by: ${{ github.actor }}
 
@@ -660,12 +622,16 @@ jobs:
             Tyk Operator CRD: ${{ github.event.inputs.sync-operator }}
             Tyk AI Studio: ${{ github.event.inputs.sync-ai-studio }}
 
-            Intended for: ${{ github.event.inputs.release }}
-            Portal release: ${{ needs.sanitize.outputs.portalBranch }}
-            AI Studio release: ${{ needs.sanitize.outputs.aiStudioBranch }}
-            Pump release: ${{ needs.sanitize.outputs.pumpBranch }}
-            MDCB release: ${{ needs.sanitize.outputs.mdcbBranch }}
-            Changes sourced from: ${{ needs.sanitize.outputs.repoBranch }}
+            Docs branch (destination): ${{ needs.sanitize.outputs.docsBranch }}
+
+            Source branches:
+            Gateway: ${{ needs.sanitize.outputs.gatewayBranch }}
+            Dashboard: ${{ needs.sanitize.outputs.dashboardBranch }}
+            Pump: ${{ needs.sanitize.outputs.pumpBranch }}
+            MDCB: ${{ needs.sanitize.outputs.mdcbBranch }}
+            Portal: ${{ needs.sanitize.outputs.portalBranch }}
+            Operator: ${{ needs.sanitize.outputs.operatorBranch }}
+            AI Studio: ${{ needs.sanitize.outputs.aiStudioBranch }}
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
