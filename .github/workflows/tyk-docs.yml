@@ -56,7 +56,7 @@ on:  # yamllint disable-line rule:truthy
         description: Include AI Studio (only swagger)
         type: boolean
       docs-branch:
-        description: 'Destination branch in tyk-docs to open the PR against'
+        description: 'Destination branch in tyk-docs to open the PR against. Use main for the latest and release-x.y for LTS'
         type: string
         required: true
         default: 'main'
