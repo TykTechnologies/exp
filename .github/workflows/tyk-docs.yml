@@ -111,6 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docsBranch: ${{ steps.collect.outputs.docsBranch }}
+      docsVersion: ${{ steps.collect.outputs.docsVersion }}
       jira: ${{ steps.collect.outputs.jira }}
       gatewayBranch: ${{ steps.collect.outputs.gatewayBranch }}
       dashboardBranch: ${{ steps.collect.outputs.dashboardBranch }}
@@ -131,6 +132,7 @@ jobs:
 
       # Each component resolves to: its own override, else the shared default-source-branch,
       # else the component repo's own default branch (only AI Studio differs: "main" not "master").
+      # docsVersion is a human-readable label for docs-branch, used in PR titles (main -> Master, release-5.13 -> 5.13).
       - name: Resolve source and destination branches
         run: |
           defaultSourceBranch="${{ github.event.inputs.default-source-branch }}"
@@ -146,7 +148,15 @@ jobs:
             fi
           }
 
-          echo "docsBranch=${{ github.event.inputs.docs-branch }}" >> $GITHUB_ENV
+          docsBranch="${{ github.event.inputs.docs-branch }}"
+          case "$docsBranch" in
+            main) docsVersion="Master" ;;
+            release-*) docsVersion="${docsBranch#release-}" ;;
+            *) docsVersion="$docsBranch" ;;
+          esac
+
+          echo "docsBranch=$docsBranch" >> $GITHUB_ENV
+          echo "docsVersion=$docsVersion" >> $GITHUB_ENV
           echo "gatewayBranch=$(resolve "${{ github.event.inputs.gateway-branch }}" master)" >> $GITHUB_ENV
           echo "dashboardBranch=$(resolve "${{ github.event.inputs.dashboard-branch }}" master)" >> $GITHUB_ENV
           echo "pumpBranch=$(resolve "${{ github.event.inputs.pump-branch }}" master)" >> $GITHUB_ENV
@@ -159,6 +169,7 @@ jobs:
         run: |
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
+             echo "docsVersion=${{ env.docsVersion }}" >> $GITHUB_OUTPUT
              echo "gatewayBranch=${{ env.gatewayBranch }}" >> $GITHUB_OUTPUT
              echo "dashboardBranch=${{ env.dashboardBranch }}" >> $GITHUB_OUTPUT
              echo "portalBranch=${{ env.portalBranch }}" >> $GITHUB_OUTPUT
@@ -607,13 +618,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import Gateway docs
-          title: '[${{ env.jira }}] Update Gateway documentation for ${{ env.target }}'
+          title: '[${{ env.jira }}] Tyk Gateway for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
             Component: Tyk Gateway
             Source branch: ${{ needs.sanitize.outputs.gatewayBranch }}
-            Docs branch (destination): ${{ env.target }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
@@ -674,13 +685,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import Dashboard docs
-          title: '[${{ env.jira }}] Update Dashboard documentation for ${{ env.target }}'
+          title: '[${{ env.jira }}] Tyk Dashboard for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
             Component: Tyk Dashboard
             Source branch: ${{ needs.sanitize.outputs.dashboardBranch }}
-            Docs branch (destination): ${{ env.target }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
@@ -731,13 +742,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import Pump docs
-          title: '[${{ env.jira }}] Update Pump documentation for ${{ env.target }}'
+          title: '[${{ env.jira }}] Tyk Pump for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
             Component: Tyk Pump
             Source branch: ${{ needs.sanitize.outputs.pumpBranch }}
-            Docs branch (destination): ${{ env.target }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
@@ -797,13 +808,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import MDCB docs
-          title: '[${{ env.jira }}] Update MDCB documentation for ${{ env.target }}'
+          title: '[${{ env.jira }}] Tyk MDCB for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
             Component: Tyk MDCB
             Source branch: ${{ needs.sanitize.outputs.mdcbBranch }}
-            Docs branch (destination): ${{ env.target }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
@@ -854,13 +865,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import Portal docs
-          title: '[${{ env.jira }}] Update Portal documentation for ${{ env.target }}'
+          title: '[${{ env.jira }}] Tyk Portal for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
             Component: Tyk Portal
             Source branch: ${{ needs.sanitize.outputs.portalBranch }}
-            Docs branch (destination): ${{ env.target }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
 
@@ -910,13 +921,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import Operator CRD reference
-          title: '[${{ env.jira }}] Update Operator CRD documentation for ${{ env.target }}'
+          title: '[${{ env.jira }}] Tyk Operator CRD for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
             Component: Tyk Operator CRD reference
             Source branch: ${{ needs.sanitize.outputs.operatorBranch }}
-            Docs branch (destination): ${{ env.target }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
 
@@ -966,13 +977,13 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           commit-message: Import AI Studio docs
-          title: '[${{ env.jira }}] Update AI Studio documentation for ${{ env.target }}'
+          title: '[${{ env.jira }}] Tyk AI Studio for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
             Component: Tyk AI Studio
             Source branch: ${{ needs.sanitize.outputs.aiStudioBranch }}
-            Docs branch (destination): ${{ env.target }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
 
