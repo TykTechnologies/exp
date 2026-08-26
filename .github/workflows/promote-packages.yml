@@ -19,7 +19,7 @@ on:
           - all
         default: tyk-gateway
       version:
-        description: Package version to promote
+        description: Package version to promote, e.g. 5.13.2 (a leading v is stripped)
         required: true
       debvers:
         description: Space-separated Debian/Ubuntu distributions
@@ -211,7 +211,9 @@ jobs:
           }
 
           repo=$REPO
-          version=$VERSION
+          # Package filenames carry the bare version (5.13.2, not
+          # v5.13.2); a leading v in the input made every lookup miss.
+          version=${VERSION#v}
 
           repos=()
           if [[ "$repo" == "all" ]]; then
