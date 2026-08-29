@@ -55,38 +55,42 @@ on:  # yamllint disable-line rule:truthy
       sync-ai-studio:
         description: Include AI Studio (only swagger)
         type: boolean
-      release:
-        description: 'Release version'
-        type: choice
-        options:
-          - 'master'
-          - '5.8'
-          - '5.3'
-      portal-release:
-        description: 'Portal release version'
+      docs-branch:
+        description: 'Destination branch in tyk-docs to open the PR against. Use main for the latest and release-x.y for LTS'
         type: string
-        default: 'master'
-      operator-release:
-        description: 'Tyk Operator source branch (tyk-operator-internal)'
-        type: string
-        default: 'master'
-      ai-studio-release:
-        description: 'AI Studio release version'
-        type: string
+        required: true
         default: 'main'
-      pump-release:
-        description: 'Pump release version'
+      default-source-branch:
+        description: 'Branch to pull from every component repo. Leave blank to use each component''s own default branch. Overridden per-component by the fields below.'
         type: string
-        default: 'master'
-      mdcb-release:
-        description: 'MDCB release version'
-        type: string
-        default: 'master'
-      source:
-        description: 'Override source branch'
         default: ''
-      destination:
-        description: 'Override destination branch'
+      gateway-branch:
+        description: 'Override: Gateway (tyk) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      dashboard-branch:
+        description: 'Override: Dashboard (tyk-analytics) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      pump-branch:
+        description: 'Override: Pump source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      mdcb-branch:
+        description: 'Override: MDCB (tyk-sink) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      portal-branch:
+        description: 'Override: Portal source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      operator-branch:
+        description: 'Override: Tyk Operator (tyk-operator-internal) source branch. Blank uses the default above.'
+        type: string
+        default: ''
+      ai-studio-branch:
+        description: 'Override: AI Studio source branch. Blank uses the default above, or "main" if no default is set.'
+        type: string
         default: ''
       branch-suffix:
         description: 'Branch suffix to append to PR branch name (to prevent collisions on multiple PRs/ticket)'
@@ -107,8 +111,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docsBranch: ${{ steps.collect.outputs.docsBranch }}
-      repoBranch: ${{ steps.collect.outputs.repoBranch }}
+      docsVersion: ${{ steps.collect.outputs.docsVersion }}
       jira: ${{ steps.collect.outputs.jira }}
+      gatewayBranch: ${{ steps.collect.outputs.gatewayBranch }}
+      dashboardBranch: ${{ steps.collect.outputs.dashboardBranch }}
       portalBranch: ${{ steps.collect.outputs.portalBranch }}
       operatorBranch: ${{ steps.collect.outputs.operatorBranch }}
       aiStudioBranch: ${{ steps.collect.outputs.aiStudioBranch }}
@@ -124,82 +130,48 @@ jobs:
           fi
           echo "jira=$jira" >> $GITHUB_ENV
 
-      - if: github.event.inputs.release == 'master'
+      # Each component resolves to: its own override, else the shared default-source-branch,
+      # else the component repo's own default branch (only AI Studio differs: "main" not "master").
+      # docsVersion is a human-readable label for docs-branch, used in PR titles (main -> Master, release-5.13 -> 5.13).
+      - name: Resolve source and destination branches
         run: |
-             echo "docsBranch=main" >> $GITHUB_ENV
-             echo "repoBranch=master" >> $GITHUB_ENV
+          defaultSourceBranch="${{ github.event.inputs.default-source-branch }}"
 
-      - if: github.event.inputs.release == '5.0 LTS'
-        run: |
-             echo "docsBranch=release-5" >> $GITHUB_ENV
-             echo "repoBranch=release-5-lts" >> $GITHUB_ENV
+          resolve() {
+            local override="$1" fallback="$2"
+            if [ -n "$override" ]; then
+              echo "$override"
+            elif [ -n "$defaultSourceBranch" ]; then
+              echo "$defaultSourceBranch"
+            else
+              echo "$fallback"
+            fi
+          }
 
-      - if: github.event.inputs.release == '5.1'
-        run: |
-             echo "docsBranch=release-5.1" >> $GITHUB_ENV
-             echo "repoBranch=release-5.1" >> $GITHUB_ENV
+          docsBranch="${{ github.event.inputs.docs-branch }}"
+          case "$docsBranch" in
+            main) docsVersion="Master" ;;
+            release-*) docsVersion="${docsBranch#release-}" ;;
+            *) docsVersion="$docsBranch" ;;
+          esac
 
-      - if: github.event.inputs.release == '5.2'
-        run: |
-             echo "docsBranch=release-5.2" >> $GITHUB_ENV
-             echo "repoBranch=release-5.2" >> $GITHUB_ENV
-
-      - if: github.event.inputs.release == '5.3'
-        run: |
-             echo "docsBranch=release-5.3" >> $GITHUB_ENV
-             echo "repoBranch=release-5.3" >> $GITHUB_ENV
-
-      - if: github.event.inputs.source != ''
-        run: echo "repoBranch=${{ github.event.inputs.source }}" >> $GITHUB_ENV
-
-      - if: github.event.inputs.destination != ''
-        run: echo "docsBranch=${{ github.event.inputs.destination }}" >> $GITHUB_ENV
-
-      - name: Set Portal branch
-        run: |
-          portalBranch="${{ github.event.inputs.portal-release }}"
-          if [ -z "$portalBranch" ]; then
-            portalBranch="master"
-          fi
-          echo "portalBranch=$portalBranch" >> $GITHUB_ENV
-
-      - name: Set Operator branch
-        run: |
-          operatorBranch="${{ github.event.inputs.operator-release }}"
-          if [ -z "$operatorBranch" ]; then
-            operatorBranch="master"
-          fi
-          echo "operatorBranch=$operatorBranch" >> $GITHUB_ENV
-
-      - name: Set AI Studio branch
-        run: |
-          aiStudioBranch="${{ github.event.inputs.ai-studio-release }}"
-          if [ -z "$aiStudioBranch" ]; then
-            aiStudioBranch="main"
-          fi
-          echo "aiStudioBranch=$aiStudioBranch" >> $GITHUB_ENV
-
-      - name: Set Pump branch
-        run: |
-          pumpBranch="${{ github.event.inputs.pump-release }}"
-          if [ -z "$pumpBranch" ]; then
-            pumpBranch="master"
-          fi
-          echo "pumpBranch=$pumpBranch" >> $GITHUB_ENV
-
-      - name: Set MDCB branch
-        run: |
-          mdcbBranch="${{ github.event.inputs.mdcb-release }}"
-          if [ -z "$mdcbBranch" ]; then
-            mdcbBranch="master"
-          fi
-          echo "mdcbBranch=$mdcbBranch" >> $GITHUB_ENV
+          echo "docsBranch=$docsBranch" >> $GITHUB_ENV
+          echo "docsVersion=$docsVersion" >> $GITHUB_ENV
+          echo "gatewayBranch=$(resolve "${{ github.event.inputs.gateway-branch }}" master)" >> $GITHUB_ENV
+          echo "dashboardBranch=$(resolve "${{ github.event.inputs.dashboard-branch }}" master)" >> $GITHUB_ENV
+          echo "pumpBranch=$(resolve "${{ github.event.inputs.pump-branch }}" master)" >> $GITHUB_ENV
+          echo "mdcbBranch=$(resolve "${{ github.event.inputs.mdcb-branch }}" master)" >> $GITHUB_ENV
+          echo "portalBranch=$(resolve "${{ github.event.inputs.portal-branch }}" master)" >> $GITHUB_ENV
+          echo "operatorBranch=$(resolve "${{ github.event.inputs.operator-branch }}" master)" >> $GITHUB_ENV
+          echo "aiStudioBranch=$(resolve "${{ github.event.inputs.ai-studio-branch }}" main)" >> $GITHUB_ENV
 
       - id: collect
         run: |
              echo "jira=${{ env.jira }}" >> $GITHUB_OUTPUT
              echo "docsBranch=${{ env.docsBranch }}" >> $GITHUB_OUTPUT
-             echo "repoBranch=${{ env.repoBranch }}" >> $GITHUB_OUTPUT
+             echo "docsVersion=${{ env.docsVersion }}" >> $GITHUB_OUTPUT
+             echo "gatewayBranch=${{ env.gatewayBranch }}" >> $GITHUB_OUTPUT
+             echo "dashboardBranch=${{ env.dashboardBranch }}" >> $GITHUB_OUTPUT
              echo "portalBranch=${{ env.portalBranch }}" >> $GITHUB_OUTPUT
              echo "operatorBranch=${{ env.operatorBranch }}" >> $GITHUB_OUTPUT
              echo "aiStudioBranch=${{ env.aiStudioBranch }}" >> $GITHUB_OUTPUT
@@ -218,7 +190,7 @@ jobs:
         with:
           fetch-depth: 1
           repository: TykTechnologies/tyk
-          ref: ${{ needs.sanitize.outputs.repoBranch }}
+          ref: ${{ needs.sanitize.outputs.gatewayBranch }}
           path: ./tyk
 
       - name: Checkout exp
@@ -304,7 +276,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 1
           repository: TykTechnologies/tyk-analytics
-          ref: ${{ needs.sanitize.outputs.repoBranch }}
+          ref: ${{ needs.sanitize.outputs.dashboardBranch }}
           path: ./tyk-analytics
 
       - name: Generate Docs
@@ -529,7 +501,8 @@ jobs:
       - name: Set up env
         run: |
              mkdir -p $GITHUB_WORKSPACE/config-docs/
-             echo "repoBranch=${{ needs.sanitize.outputs.repoBranch }}" >> $GITHUB_ENV
+             echo "gatewayBranch=${{ needs.sanitize.outputs.gatewayBranch }}" >> $GITHUB_ENV
+             echo "dashboardBranch=${{ needs.sanitize.outputs.dashboardBranch }}" >> $GITHUB_ENV
              echo "docsBranch=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
 
       - name: Sync Gateway
@@ -537,7 +510,7 @@ jobs:
         if: ${{ github.event.inputs.sync-gateway == 'true' }}
         run: |
           repo=gateway
-          branch=$repoBranch
+          branch=$gatewayBranch
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
@@ -548,7 +521,7 @@ jobs:
         if: ${{ github.event.inputs.sync-dashboard == 'true' }}
         run: |
           repo=dashboard
-          branch=$repoBranch
+          branch=$dashboardBranch
           dest=$GITHUB_WORKSPACE/config-docs/$repo-config.mdx
 
           sudo TOKEN=${{ steps.app-token.outputs.token }} node app.js $repo:$branch
@@ -582,10 +555,12 @@ jobs:
           name: config-docs
           path: config-docs
 
-  finish:
-    name: Open PR against tyk-docs
-    needs: [sanitize, configs, dashboard, gateway, mdcb, portal, operator, ai-studio]
-    if: ${{ always() }}
+  # Each component below opens its own PR against tyk-docs, so a run that
+  # touches several components doesn't land as one oversized review.
+  finish-gateway:
+    name: Open PR — Gateway
+    needs: [sanitize, gateway, configs]
+    if: ${{ always() && github.event.inputs.sync-gateway == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Generate GitHub App token
@@ -596,8 +571,17 @@ jobs:
           private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
           owner: TykTechnologies
 
-      - name: Restore artifacts
+      - name: Download Gateway docs
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: gateway-docs
+          path: gateway-docs
+
+      - name: Download config docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: config-docs
+          path: config-docs
 
       - name: Checkout exp repo (for cleanup script)
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
@@ -607,13 +591,7 @@ jobs:
       - name: Clean duplicate OAS entries
         run: |
           cd exp
-
-          if [ "${{ github.event.inputs.sync-gateway }}" = "true" ]; then
-            echo "🧹 Cleaning duplicate OAS entries for Gateway..."
-            python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.mdx
-          else
-            echo "Skipping duplicate cleanup — sync-gateway is false."
-          fi
+          python3 scripts/remove-oas-dublicates/index.py --input-file ../gateway-docs/x-tyk-gateway.mdx
 
       - name: Set up env
         run: |
@@ -630,47 +608,386 @@ jobs:
 
       - name: Write out docs
         run: |
-             [ -d "gateway-docs" ]   && cp gateway-docs/*.yml ./tyk-docs/swagger/
-             [ -d "gateway-docs" ]   && cp gateway-docs/x-tyk-gateway.mdx ./tyk-docs/snippets/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/*.yml ./tyk-docs/swagger/
-             [ -d "dashboard-docs" ] && cp dashboard-docs/opa-rules.mdx ./tyk-docs/snippets/
-             [ -d "mdcb-docs" ]      && cp mdcb-docs/*.yml ./tyk-docs/swagger/
-             [ -d "portal-docs" ]    && cp portal-docs/*.yaml ./tyk-docs/swagger/
-             [ -d "ai-studio-docs" ] && cp ai-studio-docs/*.yml ./tyk-docs/swagger/
-             [ -d "config-docs" ]    && find config-docs -type f -exec cp {} ./tyk-docs/snippets/ \;
-             [ -d "operator-docs" ]  && cp operator-docs/operator-crd-reference.mdx ./tyk-docs/snippets/operator-crd-reference.mdx
+             cp gateway-docs/*.yml ./tyk-docs/swagger/
+             cp gateway-docs/x-tyk-gateway.mdx ./tyk-docs/snippets/
+             [ -f config-docs/gateway-config.mdx ] && cp config-docs/gateway-config.mdx ./tyk-docs/snippets/
              true
 
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
         with:
           token: ${{ steps.app-token.outputs.token }}
-          commit-message: Import config/docs
-          title: '[${{ env.jira }}] Update documentation for ${{ github.event.inputs.release }}'
+          commit-message: Import Gateway docs
+          title: '[${{ env.jira }}] Tyk Gateway for ${{ needs.sanitize.outputs.docsVersion }}'
           body: |
             Triggered by: ${{ github.actor }}
 
-            Included:
-
-            Tyk Gateway: ${{ github.event.inputs.sync-gateway }}
-            Tyk Dashboard: ${{ github.event.inputs.sync-dashboard }}
-            Tyk MDCB ${{ github.event.inputs.sync-mdcb }}
-            Tyk Pump ${{ github.event.inputs.sync-pump }}
-            Tyk Portal: ${{ github.event.inputs.sync-portal }}
-            Tyk Operator CRD: ${{ github.event.inputs.sync-operator }}
-            Tyk AI Studio: ${{ github.event.inputs.sync-ai-studio }}
-
-            Intended for: ${{ github.event.inputs.release }}
-            Portal release: ${{ needs.sanitize.outputs.portalBranch }}
-            AI Studio release: ${{ needs.sanitize.outputs.aiStudioBranch }}
-            Pump release: ${{ needs.sanitize.outputs.pumpBranch }}
-            MDCB release: ${{ needs.sanitize.outputs.mdcbBranch }}
-            Changes sourced from: ${{ needs.sanitize.outputs.repoBranch }}
+            Component: Tyk Gateway
+            Source branch: ${{ needs.sanitize.outputs.gatewayBranch }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
             Config info generator branch: ${{ env.configInfoGeneratorBranch }}
 
             Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
 
             JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
-          branch: update/${{ env.jira }}/release-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
+          branch: update/${{ env.jira }}/gateway-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
+          path: ./tyk-docs
+          delete-branch: true
+
+  finish-dashboard:
+    name: Open PR — Dashboard
+    needs: [sanitize, dashboard, configs]
+    if: ${{ always() && github.event.inputs.sync-dashboard == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Download Dashboard docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: dashboard-docs
+          path: dashboard-docs
+
+      - name: Download config docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: config-docs
+          path: config-docs
+
+      - name: Set up env
+        run: |
+             echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+             echo "target=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
+
+      - name: Checkout Docs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-docs
+          path: ./tyk-docs
+          ref: ${{ needs.sanitize.outputs.docsBranch }}
+
+      - name: Write out docs
+        run: |
+             cp dashboard-docs/*.yml ./tyk-docs/swagger/
+             cp dashboard-docs/opa-rules.mdx ./tyk-docs/snippets/
+             [ -f config-docs/dashboard-config.mdx ] && cp config-docs/dashboard-config.mdx ./tyk-docs/snippets/
+             true
+
+      - name: Raise tyk-docs PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: Import Dashboard docs
+          title: '[${{ env.jira }}] Tyk Dashboard for ${{ needs.sanitize.outputs.docsVersion }}'
+          body: |
+            Triggered by: ${{ github.actor }}
+
+            Component: Tyk Dashboard
+            Source branch: ${{ needs.sanitize.outputs.dashboardBranch }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
+            Config info generator branch: ${{ env.configInfoGeneratorBranch }}
+
+            Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
+
+            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
+          branch: update/${{ env.jira }}/dashboard-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
+          path: ./tyk-docs
+          delete-branch: true
+
+  finish-pump:
+    name: Open PR — Pump
+    needs: [sanitize, configs]
+    if: ${{ always() && github.event.inputs.sync-pump == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Download config docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: config-docs
+          path: config-docs
+
+      - name: Set up env
+        run: |
+             echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+             echo "target=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
+
+      - name: Checkout Docs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-docs
+          path: ./tyk-docs
+          ref: ${{ needs.sanitize.outputs.docsBranch }}
+
+      - name: Write out docs
+        run: cp config-docs/pump-config.mdx ./tyk-docs/snippets/
+
+      - name: Raise tyk-docs PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: Import Pump docs
+          title: '[${{ env.jira }}] Tyk Pump for ${{ needs.sanitize.outputs.docsVersion }}'
+          body: |
+            Triggered by: ${{ github.actor }}
+
+            Component: Tyk Pump
+            Source branch: ${{ needs.sanitize.outputs.pumpBranch }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
+            Config info generator branch: ${{ env.configInfoGeneratorBranch }}
+
+            Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
+
+            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
+          branch: update/${{ env.jira }}/pump-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
+          path: ./tyk-docs
+          delete-branch: true
+
+  finish-mdcb:
+    name: Open PR — MDCB
+    needs: [sanitize, mdcb, configs]
+    if: ${{ always() && github.event.inputs.sync-mdcb == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Download MDCB docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: mdcb-docs
+          path: mdcb-docs
+
+      - name: Download config docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: config-docs
+          path: config-docs
+
+      - name: Set up env
+        run: |
+             echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+             echo "target=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
+
+      - name: Checkout Docs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-docs
+          path: ./tyk-docs
+          ref: ${{ needs.sanitize.outputs.docsBranch }}
+
+      - name: Write out docs
+        run: |
+             cp mdcb-docs/*.yml ./tyk-docs/swagger/
+             [ -f config-docs/mdcb-config.mdx ] && cp config-docs/mdcb-config.mdx ./tyk-docs/snippets/
+             true
+
+      - name: Raise tyk-docs PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: Import MDCB docs
+          title: '[${{ env.jira }}] Tyk MDCB for ${{ needs.sanitize.outputs.docsVersion }}'
+          body: |
+            Triggered by: ${{ github.actor }}
+
+            Component: Tyk MDCB
+            Source branch: ${{ needs.sanitize.outputs.mdcbBranch }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
+            Config info generator branch: ${{ env.configInfoGeneratorBranch }}
+
+            Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
+
+            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
+          branch: update/${{ env.jira }}/mdcb-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
+          path: ./tyk-docs
+          delete-branch: true
+
+  finish-portal:
+    name: Open PR — Portal
+    needs: [sanitize, portal]
+    if: ${{ always() && github.event.inputs.sync-portal == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Download Portal docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: portal-docs
+          path: portal-docs
+
+      - name: Set up env
+        run: |
+             echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+             echo "target=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
+
+      - name: Checkout Docs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-docs
+          path: ./tyk-docs
+          ref: ${{ needs.sanitize.outputs.docsBranch }}
+
+      - name: Write out docs
+        run: cp portal-docs/*.yaml ./tyk-docs/swagger/
+
+      - name: Raise tyk-docs PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: Import Portal docs
+          title: '[${{ env.jira }}] Tyk Portal for ${{ needs.sanitize.outputs.docsVersion }}'
+          body: |
+            Triggered by: ${{ github.actor }}
+
+            Component: Tyk Portal
+            Source branch: ${{ needs.sanitize.outputs.portalBranch }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
+
+            Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
+
+            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
+          branch: update/${{ env.jira }}/portal-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
+          path: ./tyk-docs
+          delete-branch: true
+
+  finish-operator:
+    name: Open PR — Operator CRD
+    needs: [sanitize, operator]
+    if: ${{ always() && github.event.inputs.sync-operator == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Download Operator CRD docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: operator-docs
+          path: operator-docs
+
+      - name: Set up env
+        run: |
+             echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+             echo "target=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
+
+      - name: Checkout Docs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-docs
+          path: ./tyk-docs
+          ref: ${{ needs.sanitize.outputs.docsBranch }}
+
+      - name: Write out docs
+        run: cp operator-docs/operator-crd-reference.mdx ./tyk-docs/snippets/operator-crd-reference.mdx
+
+      - name: Raise tyk-docs PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: Import Operator CRD reference
+          title: '[${{ env.jira }}] Tyk Operator CRD for ${{ needs.sanitize.outputs.docsVersion }}'
+          body: |
+            Triggered by: ${{ github.actor }}
+
+            Component: Tyk Operator CRD reference
+            Source branch: ${{ needs.sanitize.outputs.operatorBranch }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
+
+            Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
+
+            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
+          branch: update/${{ env.jira }}/operator-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
+          path: ./tyk-docs
+          delete-branch: true
+
+  finish-ai-studio:
+    name: Open PR — AI Studio
+    needs: [sanitize, ai-studio]
+    if: ${{ always() && github.event.inputs.sync-ai-studio == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547  # v1
+        with:
+          app-id: ${{ secrets.PROBE_APP_ID }}
+          private-key: ${{ secrets.PROBE_APP_PRIVATE_KEY }}
+          owner: TykTechnologies
+
+      - name: Download AI Studio docs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16  # v4.1.8
+        with:
+          name: ai-studio-docs
+          path: ai-studio-docs
+
+      - name: Set up env
+        run: |
+             echo "jira=${{ needs.sanitize.outputs.jira }}" >> $GITHUB_ENV
+             echo "target=${{ needs.sanitize.outputs.docsBranch }}" >> $GITHUB_ENV
+
+      - name: Checkout Docs
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 1
+          repository: TykTechnologies/tyk-docs
+          path: ./tyk-docs
+          ref: ${{ needs.sanitize.outputs.docsBranch }}
+
+      - name: Write out docs
+        run: cp ai-studio-docs/*.yml ./tyk-docs/swagger/
+
+      - name: Raise tyk-docs PR
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: Import AI Studio docs
+          title: '[${{ env.jira }}] Tyk AI Studio for ${{ needs.sanitize.outputs.docsVersion }}'
+          body: |
+            Triggered by: ${{ github.actor }}
+
+            Component: Tyk AI Studio
+            Source branch: ${{ needs.sanitize.outputs.aiStudioBranch }}
+            Docs branch (destination): ${{ env.target }} (${{ needs.sanitize.outputs.docsVersion }})
+
+            Note: ${{ github.event.inputs.note }} (branch suffix: ${{ github.event.inputs.branch-suffix }})
+
+            JIRA: https://tyktech.atlassian.net/browse/${{ env.jira }}
+          branch: update/${{ env.jira }}/ai-studio-${{ env.target }}-${{ github.event.inputs.branch-suffix }}
           path: ./tyk-docs
           delete-branch: true
