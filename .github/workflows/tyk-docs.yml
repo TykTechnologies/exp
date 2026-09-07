@@ -470,6 +470,11 @@ jobs:
           ref: ${{ needs.sanitize.outputs.aiStudioBranch }}
           path: ./ai-studio
 
+      - name: Checkout exp repo (for patch script)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          path: ./exp  # this repo where the patch script lives
+
       - name: Generate docs
         run: |
           mkdir -p ai-studio-docs/
@@ -497,6 +502,21 @@ jobs:
           fi
 
           echo "✅ Converted to OpenAPI 3.0"
+
+      - name: Fix BearerAuth security scheme
+        run: |
+          # Swagger 2.0 has no native "http bearer" scheme, so ai-studio's
+          # swaggo-generated spec models bearer auth as type:apiKey (raw header
+          # value, no prefix expected), which the converter above carries
+          # forward unchanged. The AI Studio server actually requires
+          # "Authorization: Bearer <key>", so any spec-driven tool (Mintlify's
+          # API playground, codegen, Postman) that honors apiKey semantics
+          # sends the wrong header and gets a 401. Patch it to type:http/
+          # scheme:bearer, which every consumer of the spec knows how to
+          # prefix correctly. Remove this step once ai-studio's own generated
+          # swagger emits Bearer auth correctly.
+          python3 exp/scripts/fix-ai-studio-bearer-auth/index.py \
+            --input-file ai-studio-docs/ai-studio-swagger.yml
 
       - name: Store docs
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
