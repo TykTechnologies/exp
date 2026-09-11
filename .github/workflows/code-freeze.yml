@@ -107,26 +107,58 @@ jobs:
           # Get repositories as JSON array
           REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
 
+          failed=0
+
           # Loop through each repository
-          echo "$REPOSITORIES" | jq -c '.[]' | while read -r repo; do
-            # Remove quotes from repo name
-            repo=$(echo "$repo" | tr -d '"')
+          for repo in $(echo "$REPOSITORIES" | jq -r '.[]'); do
             echo "Creating branch for repository: $repo"
+            remote="https://github.com/TykTechnologies/$repo.git"
 
             # Clone repository
-            git clone --depth 1 --branch "$SOURCE_BRANCH" "https://github.com/TykTechnologies/$repo.git"
+            git clone --depth 1 --branch "$SOURCE_BRANCH" "$remote"
             cd "$repo"
-            
-            # Create and push new branch
-            git checkout -b "$DEST_BRANCH"
-            git push origin "$DEST_BRANCH"
-            
-            echo "✅ Created branch $DEST_BRANCH in $repo"
+
+            # Push the source commit to the destination branch and let the
+            # result say what happened. Do not pre-check whether the branch
+            # exists: the clone is shallow and single-branch so it cannot see
+            # other refs, and querying the remote separately is one more call
+            # that can fail on its own and be misread.
+            #
+            # A push that succeeds reports "new branch" for a branch that was
+            # created and "up-to-date" for one that already pointed here, so
+            # the exit status alone cannot tell those apart.
+            #
+            # The "|| push_rc=$?" matters: this step runs under bash -e, where
+            # a bare assignment from a failing command substitution aborts the
+            # whole step before the status can be inspected.
+            push_rc=0
+            push_out=$(git push origin "HEAD:refs/heads/$DEST_BRANCH" 2>&1) || push_rc=$?
+            echo "$push_out"
+
+            if [ "$push_rc" -eq 0 ]; then
+              if echo "$push_out" | grep -q "new branch"; then
+                echo "✅ Created branch $DEST_BRANCH in $repo"
+              else
+                echo "Skipping $repo: $DEST_BRANCH already up to date"
+              fi
+            elif echo "$push_out" | grep -qiE "fetch first|non-fast-forward"; then
+              # The branch exists at a different commit. Leave it alone rather
+              # than force pushing, which would discard whatever is on it.
+              echo "Skipping $repo: $DEST_BRANCH already exists"
+            else
+              echo "Failed to create $DEST_BRANCH in $repo"
+              failed=$((failed + 1))
+            fi
             cd ..
-            
+
             # Clean up
             rm -rf "$repo"
           done
+
+          if [ "$failed" -gt 0 ]; then
+            echo "::error::$failed repository/repositories failed"
+            exit 1
+          fi
 
       - name: Send Slack notification
         if: ${{ github.event.inputs.notify_slack == 'true' }}
