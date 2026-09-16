@@ -129,26 +129,12 @@ jobs:
               continue
             }
 
-            # Check upfront whether a ruleset on the destination branch
-            # pattern would block its creation. The git/refs API only ever
-            # returns a generic "Reference update failed (422)" on rejection,
-            # unlike `git push` (which reported the ruleset name and the
-            # specific required check) -- so we query the rules that would
-            # apply to this branch name and give a precise reason instead of
-            # attempting the doomed create.
-            BLOCKING_CHECKS=$(gh api "repos/TykTechnologies/$repo/rules/branches/$DEST_BRANCH" \
-              --jq '[.[] | select(.type == "required_status_checks" and .parameters.do_not_enforce_on_create != true) | .parameters.required_status_checks[].context] | join(", ")' 2>/dev/null)
-
-            if [ -n "$BLOCKING_CHECKS" ]; then
-              echo "❌ $DEST_BRANCH in $repo would be blocked by required status checks: $BLOCKING_CHECKS"
-              FAILED+=("$repo: blocked by branch protection ruleset requiring status checks ($BLOCKING_CHECKS) -- app needs a bypass entry on that ruleset, or the branch must be created via a PR")
-              echo "::endgroup::"
-              continue
-            fi
-
             # Create the branch via the API rather than a local clone + git
-            # push. This removes the stale-ref race; the upfront rules check
-            # above already screens out the required-status-checks case.
+            # push. This removes the stale-ref race. A required-status-checks
+            # ruleset on the destination pattern still applies unless the app
+            # is on that ruleset's bypass list -- bypass is only evaluated by
+            # GitHub at call time, not reflected in a pre-check, so we always
+            # attempt the create and only diagnose the ruleset on failure.
             API_ERROR=$(gh api "repos/TykTechnologies/$repo/git/refs" \
               -f "ref=refs/heads/$DEST_BRANCH" \
               -f "sha=$SOURCE_SHA" 2>&1 1>/dev/null) && {
@@ -157,7 +143,18 @@ jobs:
             } || {
               echo "❌ Failed to create $DEST_BRANCH in $repo"
               echo "$API_ERROR"
-              FAILED+=("$repo: $API_ERROR")
+              # The git/refs API only ever returns a generic
+              # "Reference update failed (422)" on rejection, unlike `git
+              # push` (which reported the ruleset name and the specific
+              # required check) -- so look up what rule would apply to this
+              # branch name to give a precise reason in the summary.
+              BLOCKING_CHECKS=$(gh api "repos/TykTechnologies/$repo/rules/branches/$DEST_BRANCH" \
+                --jq '[.[] | select(.type == "required_status_checks" and .parameters.do_not_enforce_on_create != true) | .parameters.required_status_checks[].context] | join(", ")' 2>/dev/null)
+              if [ -n "$BLOCKING_CHECKS" ]; then
+                FAILED+=("$repo: blocked by branch protection ruleset requiring status checks ($BLOCKING_CHECKS) -- app needs a bypass entry on that ruleset, or the branch must be created via a PR")
+              else
+                FAILED+=("$repo: $API_ERROR")
+              fi
             }
 
             echo "::endgroup::"
