@@ -95,51 +95,113 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create branches
+        id: create-branches
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
           DEST_BRANCH: ${{ github.event.inputs.destination_branch }}
         run: |
-          # Configure git to use the app token for all github.com access
-          # This overrides any credential helpers set by actions/checkout
-          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
-
           # Get repositories as JSON array
           REPOSITORIES='${{ steps.build-repo-list.outputs.repositories }}'
 
-          # Loop through each repository
-          echo "$REPOSITORIES" | jq -c '.[]' | while read -r repo; do
-            # Remove quotes from repo name
-            repo=$(echo "$repo" | tr -d '"')
-            echo "Creating branch for repository: $repo"
+          CREATED=()
+          SKIPPED=()
+          FAILED=()
 
-            # Clone repository
-            git clone --depth 1 --branch "$SOURCE_BRANCH" "https://github.com/TykTechnologies/$repo.git"
-            cd "$repo"
-            
-            # Create and push new branch
-            git checkout -b "$DEST_BRANCH"
-            git push origin "$DEST_BRANCH"
-            
-            echo "✅ Created branch $DEST_BRANCH in $repo"
-            cd ..
-            
-            # Clean up
-            rm -rf "$repo"
+          # Loop through each repository, isolating failures so one repo
+          # can't abort the run for the rest of the selection.
+          for repo in $(echo "$REPOSITORIES" | jq -r '.[]'); do
+            echo "::group::$repo"
+
+            # Skip cleanly if the destination branch already exists remotely,
+            # instead of letting a push collide with it (stale-ref rejection).
+            if gh api "repos/TykTechnologies/$repo/branches/$DEST_BRANCH" >/dev/null 2>&1; then
+              echo "Branch $DEST_BRANCH already exists in $repo, skipping"
+              SKIPPED+=("$repo")
+              echo "::endgroup::"
+              continue
+            fi
+
+            SOURCE_SHA=$(gh api "repos/TykTechnologies/$repo/commits/$SOURCE_BRANCH" --jq '.sha' 2>&1) || {
+              echo "❌ Failed to resolve $SOURCE_BRANCH in $repo: $SOURCE_SHA"
+              FAILED+=("$repo: could not resolve source branch")
+              echo "::endgroup::"
+              continue
+            }
+
+            # Create the branch via the API rather than a local clone + git
+            # push. This removes the stale-ref race. A required-status-checks
+            # ruleset on the destination pattern still applies unless the app
+            # is on that ruleset's bypass list -- bypass is only evaluated by
+            # GitHub at call time, not reflected in a pre-check, so we always
+            # attempt the create and only diagnose the ruleset on failure.
+            API_ERROR=$(gh api "repos/TykTechnologies/$repo/git/refs" \
+              -f "ref=refs/heads/$DEST_BRANCH" \
+              -f "sha=$SOURCE_SHA" 2>&1 1>/dev/null) && {
+              echo "✅ Created branch $DEST_BRANCH in $repo"
+              CREATED+=("$repo")
+            } || {
+              echo "❌ Failed to create $DEST_BRANCH in $repo"
+              echo "$API_ERROR"
+              # The git/refs API only ever returns a generic
+              # "Reference update failed (422)" on rejection, unlike `git
+              # push` (which reported the ruleset name and the specific
+              # required check) -- so look up what rule would apply to this
+              # branch name to give a precise reason in the summary.
+              BLOCKING_CHECKS=$(gh api "repos/TykTechnologies/$repo/rules/branches/$DEST_BRANCH" \
+                --jq '[.[] | select(.type == "required_status_checks" and .parameters.do_not_enforce_on_create != true) | .parameters.required_status_checks[].context] | join(", ")' 2>/dev/null)
+              if [ -n "$BLOCKING_CHECKS" ]; then
+                FAILED+=("$repo: blocked by branch protection ruleset requiring status checks ($BLOCKING_CHECKS) -- app needs a bypass entry on that ruleset, or the branch must be created via a PR")
+              else
+                FAILED+=("$repo: $API_ERROR")
+              fi
+            }
+
+            echo "::endgroup::"
           done
 
+          {
+            echo "## Code freeze branch creation summary"
+            echo ""
+            echo "Destination branch: \`$DEST_BRANCH\` from \`$SOURCE_BRANCH\`"
+            echo ""
+            echo "### Created (${#CREATED[@]})"
+            printf -- '- %s\n' "${CREATED[@]}"
+            echo ""
+            echo "### Skipped, already existed (${#SKIPPED[@]})"
+            printf -- '- %s\n' "${SKIPPED[@]}"
+            echo ""
+            echo "### Failed (${#FAILED[@]})"
+            printf -- '- %s\n' "${FAILED[@]}"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+          # Persist results for the Slack notification step.
+          {
+            printf 'created=%s\n' "$(IFS=,; echo "${CREATED[*]}")"
+            printf 'skipped=%s\n' "$(IFS=,; echo "${SKIPPED[*]}")"
+            printf 'failed_count=%s\n' "${#FAILED[@]}"
+          } >> "$GITHUB_OUTPUT"
+
+          # Fail the job only after every repo has been attempted, so the
+          # summary above always reflects the full selection.
+          if [ "${#FAILED[@]}" -gt 0 ]; then
+            exit 1
+          fi
+
       - name: Send Slack notification
-        if: ${{ github.event.inputs.notify_slack == 'true' }}
+        if: ${{ always() && github.event.inputs.notify_slack == 'true' }}
         uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001  # v1.25.0
         with:
           channel-id: '#team-ext-engineering-pr-notifications'
           slack-message: |
-            *Code Freeze Branches Created*
-            
-            Branch `${{ github.event.inputs.destination_branch }}` was created from `${{ github.event.inputs.source_branch }}` in the following repositories:
-            
-            ${{ steps.build-repo-list.outputs.repositories_links }}
-            
+            *Code Freeze Branch Creation: ${{ steps.create-branches.outputs.failed_count == '0' && 'Success' || 'Partial failure' }}*
+
+            Branch `${{ github.event.inputs.destination_branch }}` from `${{ github.event.inputs.source_branch }}`
+
+            Created: ${{ steps.create-branches.outputs.created }}
+            Already existed (skipped): ${{ steps.create-branches.outputs.skipped }}
+            Failed: ${{ steps.create-branches.outputs.failed_count }} (see run summary for details)
+
             Triggered by: ${{ github.actor }}
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:

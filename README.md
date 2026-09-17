@@ -78,21 +78,33 @@ The `code-freeze.yml` workflow creates consistent branches across multiple Tyk r
 
 **Purpose**: Automate the creation of release branches across the Tyk ecosystem.
 
-**Repositories affected**:
-- tyk-analytics
-- tyk-analytics-ui
-- tyk
+**Available repository options**:
+- **tyk-core-products**: Creates the branch in tyk, tyk-analytics, and tyk-analytics-ui simultaneously
+- **tyk-sink**: Creates the branch in tyk-sink
+- **tyk-pump**: Creates the branch in tyk-pump
+- **portal**: Creates the branch in portal
+- **tyk-operator-internal**: Creates the branch in tyk-operator-internal
+- **tyk-sync-internal**: Creates the branch in tyk-sync-internal
+- **tyk-charts**: Creates the branch in tyk-charts
+- **tyk-identity-broker**: Creates the branch in tyk-identity-broker
 
 **Usage**:
 1. Go to the Actions tab in the repository
 2. Select "Code Freeze Branch Creation" workflow
 3. Click "Run workflow"
 4. Fill in the parameters:
+   - Repositories: Which repository group to create the branch in (see options above)
    - Source Branch: The branch to create from (e.g., master)
    - Destination Branch: The branch to create (e.g., release-5.8)
    - Send Slack notification: Whether to notify the team via Slack
 
-**Example use case**: Creating a release-5.8 branch from master across all repositories at once.
+**Example use case**: Creating a release-5.8 branch from master across all tyk-core-products repositories at once.
+
+**Behavior**:
+- The destination branch is created via the GitHub API (not a local `git push`), using a GitHub App installation token (`PROBE_APP_ID` / `PROBE_APP_PRIVATE_KEY` secrets).
+- If the destination branch already exists in a repository, that repository is skipped (not treated as a failure).
+- Each repository is attempted independently — a failure in one repository does not stop the others from being processed. A per-repository summary (created / skipped / failed) is written to the job summary and, if enabled, posted to Slack.
+- A repository with a branch protection ruleset on the destination branch pattern (e.g. requiring status checks) will fail unless the GitHub App is listed as a bypass actor on that ruleset — required status checks cannot be satisfied by a newly created branch with no commits run through CI/a PR yet.
 
 ### Create Tags Across Repositories
 
@@ -138,4 +150,4 @@ The `create-tags.yml` workflow creates consistent tags across multiple Tyk repos
 
 **Example use case**: Creating a v5.8.0 tag from the release-5.8 branch on the tyk-core-products repositories.
 
-**Note**: Both workflows use the `ORG_GH_TOKEN` secret for authentication and the `UI_SLACK_AUTH_TOKEN` secret for Slack notifications. Ensure these secrets are properly configured in the repository settings.
+**Note**: `create-tags.yml` uses the `ORG_GH_TOKEN` secret for authentication. `code-freeze.yml` authenticates via a GitHub App installation token (`PROBE_APP_ID` / `PROBE_APP_PRIVATE_KEY` secrets). Both workflows use the `UI_SLACK_AUTH_TOKEN` secret for Slack notifications. Ensure these secrets are properly configured in the repository settings.
