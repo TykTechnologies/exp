@@ -2,17 +2,18 @@
 """
 Fails if a Tyk OAS API body schema in a swagger lost its OpenAPI fields.
 
-Every allOf that includes TykVendorExtension must have a member that defines
-`openapi`. An empty
-placeholder (type: object, additionalProperties: true) passes spec validation
-but makes generated clients drop openapi/info/paths, so catch it here.
+Every allOf that includes the Tyk vendor extension must have a member that
+defines `openapi`. An empty placeholder (type: object, additionalProperties:
+true) passes spec validation but makes generated clients drop
+openapi/info/paths, so catch it here.
 """
 import argparse
 import sys
 
 import yaml
 
-VENDOR_REF = "#/components/schemas/TykVendorExtension"
+# Older swaggers use XTykApiGateway directly instead of TykVendorExtension.
+VENDOR_REFS = {"#/components/schemas/" + n for n in ("TykVendorExtension", "XTykApiGateway", "XTykAPIGateway")}
 
 
 def walk(node, path=""):
@@ -43,13 +44,16 @@ def main():
     checked, failures = 0, []
     for path, node in walk(spec):
         all_of = node.get("allOf")
-        if not isinstance(all_of, list) or not any(isinstance(m, dict) and m.get("$ref") == VENDOR_REF for m in all_of):
+        if not isinstance(all_of, list) or not any(isinstance(m, dict) and m.get("$ref") in VENDOR_REFS for m in all_of):
             continue
         checked += 1
         refs = [m.get("$ref", "") for m in all_of if isinstance(m, dict)]
         if not any("openapi" in resolve(schemas, r).get("properties", {}) for r in refs):
             failures.append(f"{path}: none of {refs} defines `openapi`")
 
+    if checked == 0:
+        print(f"❌ No Tyk OAS API schemas found in {args.input_file}, update VENDOR_REFS in this script")
+        sys.exit(1)
     if failures:
         print(f"❌ {len(failures)} Tyk OAS API schemas lost their OpenAPI fields in {args.input_file}:")
         print("\n".join(failures))
