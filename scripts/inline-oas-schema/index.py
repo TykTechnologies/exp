@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""
-Inlines Tyk's OpenAPI 3.0 document schema (tyk/apidef/oas/schema/3.0.json)
-into a Gateway or Dashboard swagger (see tyk-docs.yml, the "gateway" and
-"dashboard" jobs).
+r"""
+Inlines Tyk's OpenAPI 3.0 document schema (tyk/apidef/oas/schema/3.0.json),
+fetched from the URL the swagger references, into a Gateway or Dashboard
+swagger (see tyk-docs.yml, the "gateway" and "dashboard" jobs).
 
 The source swaggers reference that schema by an external raw.githubusercontent
 URL. Mintlify cannot resolve external $refs, and client generators cannot
@@ -12,7 +12,8 @@ makes generated clients drop openapi/info/paths from Tyk OAS API models.
 3.0.json is JSON Schema draft-04, so its definitions are converted to OAS 3.0
 schema objects and added as components.schemas.OAS3*:
   - $schema, id and definitions are dropped
-  - patternProperties becomes additionalProperties
+  - patternProperties for fixed keys (^(get|put|...)$, ^\$ref$) become properties,
+    other patterns become additionalProperties
   - the ExampleXORExamples / SchemaXORContent helpers are dropped (they only
     constrain, they carry no data shape and break some generators)
 
@@ -23,6 +24,7 @@ import argparse
 import json
 import re
 import sys
+import urllib.request
 
 import yaml
 
@@ -32,6 +34,8 @@ EXTERNAL_REF = re.compile(
 PREFIX = "OAS3"
 ROOT = PREFIX + "Document"
 HELPERS = ("ExampleXORExamples", "SchemaXORContent")
+# Patterns that only match fixed keys, e.g. ^(get|put|post)$ or ^\$ref$, become real properties.
+EXACT_KEYS = re.compile(r"\^\(?((?:\w|\\\$)+(?:\|(?:\w|\\\$)+)*)\)?\$")
 
 
 def is_helper_ref(node):
@@ -57,7 +61,14 @@ def convert(node):
 
     pattern_props = out.pop("patternProperties", None)
     if pattern_props:
-        named = [v for k, v in pattern_props.items() if k != "^x-"]
+        named = []
+        for pattern, value in pattern_props.items():
+            literal = EXACT_KEYS.fullmatch(pattern)
+            if literal:
+                for key in literal.group(1).replace("\\$", "$").split("|"):
+                    out.setdefault("properties", {}).setdefault(key, value)
+            elif pattern != "^x-":
+                named.append(value)
         if named:
             out["additionalProperties"] = named[0]
         elif out.get("additionalProperties") is False:
@@ -79,16 +90,20 @@ def build_schemas(schema):
 def main():
     parser = argparse.ArgumentParser(description="Inline tyk/apidef/oas/schema/3.0.json into a swagger file")
     parser.add_argument("--input-file", required=True, help="Swagger YAML to patch in place")
-    parser.add_argument("--schema-file", required=True, help="Path to tyk/apidef/oas/schema/3.0.json")
     args = parser.parse_args()
 
     with open(args.input_file, "r", encoding="utf-8") as f:
         content = f.read()
 
-    content, count = EXTERNAL_REF.subn(f"'#/components/schemas/{ROOT}'", content)
-    if count == 0:
+    urls = {m.group(0).strip("'\"") for m in EXTERNAL_REF.finditer(content)}
+    if not urls:
         print(f"ℹ️ No external 3.0.json $ref in {args.input_file}, nothing to inline")
         return
+    if len(urls) > 1:
+        print(f"❌ {args.input_file} references more than one 3.0.json: {sorted(urls)}")
+        sys.exit(1)
+    url = urls.pop()
+    content, count = EXTERNAL_REF.subn(f"'#/components/schemas/{ROOT}'", content)
 
     existing = yaml.safe_load(content)["components"]["schemas"]
     collisions = sorted(k for k in existing if k.startswith(PREFIX))
@@ -96,8 +111,8 @@ def main():
         print(f"❌ {args.input_file} already defines {collisions}, update PREFIX in this script")
         sys.exit(1)
 
-    with open(args.schema_file, "r", encoding="utf-8") as f:
-        schemas = build_schemas(json.load(f))
+    with urllib.request.urlopen(url, timeout=30) as resp:
+        schemas = build_schemas(json.load(resp))
 
     block = yaml.safe_dump(schemas, sort_keys=False, allow_unicode=True, width=1000)
     block = "".join("    " + line if line.strip() else line for line in block.splitlines(keepends=True))

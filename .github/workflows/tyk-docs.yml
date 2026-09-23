@@ -253,12 +253,11 @@ jobs:
       - name: Generate Docs
         run: |
           # Mintlify cannot resolve external $refs and codegen cannot resolve them offline,
-          # so inline the OAS 3.0 schema from the same Gateway branch.
+          # so inline the OAS 3.0 schema the swagger references.
           python3 -m pip install --quiet -r ./exp/scripts/inline-oas-schema/requirements.txt
           cp ./tyk/swagger.yml gateway-docs/gateway-swagger.yml
           python3 ./exp/scripts/inline-oas-schema/index.py \
-            --input-file gateway-docs/gateway-swagger.yml \
-            --schema-file ./tyk/apidef/oas/schema/3.0.json
+            --input-file gateway-docs/gateway-swagger.yml
 
       - name: Validate swagger
         run: |
@@ -298,15 +297,6 @@ jobs:
           ref: ${{ needs.sanitize.outputs.repoBranch }}
           path: ./tyk-analytics
 
-      - name: Checkout Gateway (OAS schema)
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
-        with:
-          fetch-depth: 1
-          repository: TykTechnologies/tyk
-          ref: ${{ needs.sanitize.outputs.repoBranch }}
-          path: ./tyk
-          sparse-checkout: apidef/oas/schema
-
       - name: Checkout exp
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
@@ -316,13 +306,12 @@ jobs:
       - name: Generate Docs
         run: |
           # Mintlify cannot resolve external $refs and codegen cannot resolve them offline,
-          # so inline the OAS 3.0 schema from the matching Gateway branch.
+          # so inline the OAS 3.0 schema the swagger references.
           python3 -m pip install --quiet -r ./exp/scripts/inline-oas-schema/requirements.txt
           mkdir -p dashboard-docs/
           cp ./tyk-analytics/swagger.yml dashboard-docs/dashboard-swagger.yml
           python3 ./exp/scripts/inline-oas-schema/index.py \
-            --input-file dashboard-docs/dashboard-swagger.yml \
-            --schema-file ./tyk/apidef/oas/schema/3.0.json
+            --input-file dashboard-docs/dashboard-swagger.yml
           cp ./tyk-analytics/swagger-admin.yml dashboard-docs/dashboard-admin-swagger.yml
           cp ./tyk-analytics/docs/opa/opa-rules.md dashboard-docs/opa-rules.mdx
 
