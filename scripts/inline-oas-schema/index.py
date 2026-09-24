@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""
+"""
 Inlines Tyk's OpenAPI 3.0 document schema (tyk/apidef/oas/schema/3.0.json),
 fetched from the URL the swagger references, into a Gateway or Dashboard
 swagger (see tyk-docs.yml, the "gateway" and "dashboard" jobs).
@@ -12,10 +12,11 @@ makes generated clients drop openapi/info/paths from Tyk OAS API models.
 3.0.json is JSON Schema draft-04, so its definitions are converted to OAS 3.0
 schema objects and added as components.schemas.OAS3*:
   - $schema, id and definitions are dropped
-  - patternProperties for fixed keys (^(get|put|...)$, ^\$ref$) become properties,
-    other patterns become additionalProperties
-  - the ExampleXORExamples / SchemaXORContent helpers are dropped (they only
-    constrain, they carry no data shape and break some generators)
+  - patternProperties are dropped, as openapi-generator does when it resolves
+    the external file, so paths and components stay free-form objects
+  - only definitions reachable from OAS3Document are kept; the deeper ones
+    (Schema, Parameter, Reference, ...) use oneOf, which Java and Go
+    generators cannot build
 
 Only the $ref lines change and the new schemas are inserted as a block under
 components.schemas, so the rest of the swagger stays byte-identical.
@@ -33,13 +34,7 @@ EXTERNAL_REF = re.compile(
 )
 PREFIX = "OAS3"
 ROOT = PREFIX + "Document"
-HELPERS = ("ExampleXORExamples", "SchemaXORContent")
-# Patterns that only match fixed keys, e.g. ^(get|put|post)$ or ^\$ref$, become real properties.
-EXACT_KEYS = re.compile(r"\^\(?((?:\w|\\\$)+(?:\|(?:\w|\\\$)+)*)\)?\$")
 
-
-def is_helper_ref(node):
-    return isinstance(node, dict) and str(node.get("$ref", "")).endswith(HELPERS)
 
 
 def convert(node):
@@ -54,37 +49,25 @@ def convert(node):
     if isinstance(ref, str) and ref.startswith("#/definitions/"):
         return {"$ref": "#/components/schemas/" + PREFIX + ref.rsplit("/", 1)[-1]}
 
-    if isinstance(out.get("allOf"), list):
-        out["allOf"] = [v for v in out["allOf"] if not is_helper_ref(v)]
-        if not out["allOf"]:
-            del out["allOf"]
-
-    pattern_props = out.pop("patternProperties", None)
-    if pattern_props:
-        named = []
-        for pattern, value in pattern_props.items():
-            literal = EXACT_KEYS.fullmatch(pattern)
-            if literal:
-                for key in literal.group(1).replace("\\$", "$").split("|"):
-                    out.setdefault("properties", {}).setdefault(key, value)
-            elif pattern != "^x-":
-                named.append(value)
-        if named:
-            out["additionalProperties"] = named[0]
-        elif out.get("additionalProperties") is False:
-            out["additionalProperties"] = True  # allow x- extensions
-
+    # Like openapi-generator resolving the external file: patternProperties are ignored,
+    # so pattern-keyed maps (paths, components.*, responses) stay free-form objects.
+    if out.pop("patternProperties", None) is not None and out.get("additionalProperties") is False:
+        out["additionalProperties"] = True
     return out
 
 
 def build_schemas(schema):
-    schemas = {
-        PREFIX + name: convert(definition)
-        for name, definition in schema["definitions"].items()
-        if not name.endswith(HELPERS)
-    }
-    schemas[ROOT] = convert(schema)
-    return schemas
+    converted = {PREFIX + name: convert(d) for name, d in schema["definitions"].items()}
+    converted[ROOT] = convert(schema)
+    # Keep only what OAS3Document reaches, so unused draft-04 helpers are not generated as models.
+    keep, todo = set(), [ROOT]
+    while todo:
+        name = todo.pop()
+        if name in keep:
+            continue
+        keep.add(name)
+        todo += re.findall(r"#/components/schemas/(" + PREFIX + r"\w+)", json.dumps(converted[name]))
+    return {name: converted[name] for name in converted if name in keep}
 
 
 def main():
