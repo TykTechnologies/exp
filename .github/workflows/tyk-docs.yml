@@ -266,6 +266,10 @@ jobs:
           docker run --rm --network none -v "$PWD/gateway-docs:/specs" openapitools/openapi-generator-cli:v7.10.0 \
             validate -i /specs/gateway-swagger.yml
 
+      - name: Codegen check
+        # Python/TypeScript clients must build and keep openapi/info/paths; Java/Go must not fail in OAS3* models.
+        run: ./exp/scripts/inline-oas-schema/codegen_check.sh gateway-docs/gateway-swagger.yml
+
 
       - name: Store docs
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
@@ -321,6 +325,10 @@ jobs:
           python3 ./exp/scripts/inline-oas-schema/check.py --input-file dashboard-docs/dashboard-swagger.yml
           docker run --rm --network none -v "$PWD/dashboard-docs:/specs" openapitools/openapi-generator-cli:v7.10.0 \
             validate -i /specs/dashboard-swagger.yml
+
+      - name: Codegen check
+        # Python/TypeScript clients must build and keep openapi/info/paths; Java/Go must not fail in OAS3* models.
+        run: ./exp/scripts/inline-oas-schema/codegen_check.sh dashboard-docs/dashboard-swagger.yml
 
       - name: Store docs
         uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882  # v4.4.3
