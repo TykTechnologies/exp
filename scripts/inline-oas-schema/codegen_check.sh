@@ -30,6 +30,7 @@ split_errors() {
   local ours upstream
   ours=$(grep -E "$line" "$log" | grep -cE "$ours_file")
   upstream=$(grep -E "$line" "$log" | grep -cvE "$ours_file")
+  [ "$ours" -eq 0 ] && [ "$upstream" -eq 0 ] && { fail "$lang: build failed without compiler errors"; tail -20 "$log"; }
   [ "$ours" -gt 0 ] && { fail "$lang: $ours compile errors in inlined OAS3* models"; grep -E "$line" "$log" | grep -E "$ours_file" | head -20; }
   [ "$upstream" -gt 0 ] && warn "$lang: $upstream compile errors from the source swagger (TT-18474)"
   return 0
