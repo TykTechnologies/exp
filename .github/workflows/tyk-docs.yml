@@ -656,6 +656,15 @@ jobs:
              [ -d "operator-docs" ]  && cp operator-docs/operator-crd-reference.mdx ./tyk-docs/snippets/operator-crd-reference.mdx
              true
 
+      - name: Set swagger info.version from release notes
+        run: |
+             cd tyk-docs
+             if [ -f scripts/check_swagger_versions.py ]; then
+               python3 scripts/check_swagger_versions.py . --branch "${{ env.target }}" --fix
+             else
+               echo "scripts/check_swagger_versions.py not on ${{ env.target }}, skipping."
+             fi
+
       - name: Raise tyk-docs PR
         uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f  # v7.0.5
         with:
